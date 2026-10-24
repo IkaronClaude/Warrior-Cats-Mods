@@ -22,7 +22,16 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
-- (nothing yet)
+- [ ] **ModKit 0.1 release (2026-10-24).** Built and committed: `dist/WaCaModKit-0.1.0.zip` (`tools/package.ps1`).
+      - [x] Native key rebinding: a detour of the game's default-binding apply step (WaCaNative) + `keybinds.ini`
+            (Pause = Escape). Verified headless: the signatures are found, the defaults are logged (the whole keyboard
+            table), the overrides are applied on every rebuild.
+      - [x] Installer: Install.bat finds the game via Steam, keeps the user's keybinds on update; Uninstall.bat.
+            Tested on the Z: copy.
+      - [ ] **Operator test on a real PC:** Escape pauses, P no longer does; the install works through the real Steam
+            launch (SteamStub exe + dwmapi proxy).
+      - [ ] **GitHub repo + first release** (needs the operator: there's no `gh` here; the repo name / owner is theirs
+            to pick).
 
 ## P0: Foundation (nothing else can start until this works)
 - [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
@@ -50,8 +59,9 @@ game data in this repo.
       installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
-- [ ] **19a. PC controls: bindings.** Pause on Esc (not P). Hint that quests are on K. Audit every default binding.
-      (A quick win, and a good first real mod.)
+- [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
+      that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
+      our bindings), mouse bindings for the camera.
 - [ ] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
 - [ ] **3. Free-form name input.** The player types any name. Keep an auto-generated fallback name for online content
       (minor relevance); find what the online side reads.
