@@ -26,6 +26,17 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [ ] **Per-save sidecar (goal 2026-10-25).** DONE (data layer): SaveGames/WrcGame.<slot>.WaCaModKit.ini ([Name]
+      Prefix / Suffix, [Appearance] = appearance.ini keys) loads when the active slot (SwtSaveManager.SaveGame
+      .saveSlots[CurrentSaveSlotIndex], a GUID) changes and wins over the global inis; in-game changes are written on
+      the game's own Save (hook). Verified headless: slot detection + sidecar load. OPEN: the write path end to end
+      (needs the UI to change a value, then a game save).
+- [ ] **Creator UI injection (goal 2026-10-25).** The creator: UGuiCustomizationColorPanel (UGuiOptionColorListControl
+      buttons for fur / pattern / markings / iris L / R -> UGuiColorPickerGrid of UGuiColorPickerSlotGrid swatches),
+      UGuiCustomizationPatternPanel / MarkingsPanel (UGuiCustomizationGrid / UGuiMarkingsGrid of grid items),
+      AGuiCatCustomActor = the preview. Plan: extra swatches / entries in those grids (CreateWidget of the grid's
+      GridItemClass, added to Items + the canvas + GridNavigation), a choice -> the slot's [Appearance] + a vanilla
+      fallback index in the game's data. Needs live observation of the creator (open it headless via Lua).
 - [ ] **Escape as "back" in menus** (operator test: menus use BackSpace, the pause menu shows a BackSpace close
       button). Source: UXD/Buttons/DT_GamepadButtonsKeyboard rows Button_B / Button_Back = BackSpace (key + hint
       icon). Fix at the data: those rows -> Escape (+ the Esc icon). 0.3.1: DONE - [UIKeys] rewrites the rows natively

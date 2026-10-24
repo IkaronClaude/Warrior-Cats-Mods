@@ -93,6 +93,59 @@ function WaCa.ReadIni(path)
     return out
 end
 
+-- write { [section] = { key = value, __order = {...} } } as an ini (sections and keys in their __order when present)
+function WaCa.WriteIni(path, data, header)
+    local f = io.open(path, "w")
+    if not f then return false end
+    if header then f:write(header, "\n\n") end
+    local sections = data.__order or {}
+    if #sections == 0 then for k in pairs(data) do if k ~= "__order" then table.insert(sections, k) end end end
+    for _, section in ipairs(sections) do
+        local t = data[section]
+        if t then
+            f:write("[", section, "]\n")
+            local keys = t.__order or {}
+            if #keys == 0 then for k in pairs(t) do if k ~= "__order" then table.insert(keys, k) end end end
+            for _, k in ipairs(keys) do
+                if t[k] ~= nil then f:write(k, " = ", tostring(t[k]), "\n") end
+            end
+            f:write("\n")
+        end
+    end
+    f:close()
+    return true
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Per-save data. The game keeps every save slot in Saved/SaveGames/WrcGame.sav (a slot = a GUID, the active one
+-- USwtSaveManager.SaveGame.saveSlots[CurrentSaveSlotIndex]). Mods keep their own data per slot in a sidecar file
+-- next to it - WrcGame.<slot>.<ModName>.ini - so the game's save stays exactly as the game wrote it.
+
+-- the active save slot's id, or nil (main menu before a save is chosen, a new game before its first save)
+function WaCa.CurrentSlot()
+    local sm = FindFirstOf("SwtSaveManager")
+    if not sm or not sm:IsValid() then return nil end
+    local sg = sm.SaveGame
+    if not sg or not sg:IsValid() then return nil end
+    local idx = sg.CurrentSaveSlotIndex
+    local slots = sg.saveSlots
+    if not idx or idx < 0 or not slots or idx >= #slots then return nil end
+    local name = slots[idx + 1]:ToString()
+    return name ~= "" and name or nil
+end
+
+-- the game's save folder (%LOCALAPPDATA%/Wrc/Saved/SaveGames)
+function WaCa.SaveDir()
+    return (os.getenv("LOCALAPPDATA") or ".") .. "/Wrc/Saved/SaveGames"
+end
+
+-- a mod's sidecar file for a slot (the active one when slot is nil)
+function WaCa.SlotFile(modName, slot)
+    slot = slot or WaCa.CurrentSlot()
+    if not slot then return nil end
+    return string.format("%s/WrcGame.%s.%s.ini", WaCa.SaveDir(), slot, modName)
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- Cat appearance. A cat's look is one USwtAdventureCustomizableMeshComponent (on the player's pawn, on every NPC, on
 -- the creation screen's preview); its mesh parts (body, tail, ears, fur cards) all use the material M_Characters_Base,

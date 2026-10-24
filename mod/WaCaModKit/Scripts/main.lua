@@ -20,6 +20,65 @@ local function applyTextOverrides()
     log("%d text overrides applied", n)
 end
 
+-- Per-save data: the active save slot's own name / look, in a sidecar next to the game's save
+-- (SaveGames/WrcGame.<slot>.WaCaModKit.ini: [Name] Prefix / Suffix, [Appearance] the appearance.ini keys). A slot's
+-- values win over config/names.ini and config/appearance.ini (the defaults for saves without their own). Changes made
+-- in-game are written when the GAME saves - quitting without saving drops them, like the game's own changes.
+local SLOT_HEADER = "; WaCa ModKit - this save slot's extra character data (written by the mod; the game's save is untouched)"
+local slot = { id = nil, data = {}, dirty = false }
+local onSlotChanged = {}          -- callbacks(newSlotId): the name / look state of the previous slot is reset
+
+local function loadSlot(id)
+    slot.id, slot.dirty = id, false
+    slot.data = (id and WaCa.ReadIni(WaCa.SlotFile("WaCaModKit", id))) or {}
+    slot.data[""] = nil
+    for _, fn in ipairs(onSlotChanged) do fn(id) end
+    if id then
+        local n = 0
+        for _, section in pairs(slot.data) do n = n + #(section.__order or {}) end
+        log("save slot %s: %d values from its sidecar", id, n)
+    end
+end
+
+local function saveSlot()
+    if not slot.id or not slot.dirty then return end
+    if WaCa.WriteIni(WaCa.SlotFile("WaCaModKit", slot.id), slot.data, SLOT_HEADER) then
+        slot.dirty = false
+        log("save slot %s: sidecar written", slot.id)
+    end
+end
+
+-- a value of the active slot (nil when it has none)
+local function slotValue(section, key)
+    local t = slot.data[section]
+    local v = t and t[key]
+    if v == "" then return nil end
+    return v
+end
+
+-- set / clear (nil) a value of the active slot; written with the game's next save
+local function setSlotValue(section, key, value)
+    if not slot.id then return false end
+    local t = slot.data[section]
+    if not t then
+        t = { __order = {} }
+        slot.data[section] = t
+    end
+    if t[key] == nil and value ~= nil then table.insert(t.__order, key) end
+    t[key] = value
+    slot.dirty = true
+    return true
+end
+
+local function checkSlot()
+    local id = WaCa.CurrentSlot()
+    if id ~= slot.id then loadSlot(id) end
+end
+
+pcall(RegisterHook, "/Script/SwtEngine.SwtSaveManager:Save", function() end, function()
+    ExecuteInGameThread(function() checkSlot(); saveSlot() end)
+end)
+
 -- Free-form name (config/names.ini [Player] Prefix = ..., optional Suffix = ...). The game names a cat
 -- <prefix><suffix>, both picked from its tables and stored as ids (PrefixNameId "STR_CAT_NAME12", SuffixNameId
 -- "_PAW"); each combination is its own text entry ("STR_CAT_NAME12_PAW" = "Mosspaw"). We rewrite the entry of the
@@ -51,10 +110,18 @@ local function generatedPrefix(prefixId)
     return generatedPrefixes[prefixId]
 end
 
+-- another save loaded: the previous cat's rewritten entry goes back to the game's text
+table.insert(onSlotChanged, function()
+    if appliedKey then WaCa.SetText(appliedKey, originalText) end
+    appliedKey, appliedText, originalText = nil, nil, nil
+end)
+
 local function applyName()
     local ini = WaCa.ReadIni(modDir .. "/config/names.ini")
     local cfg = ini and ini["Player"] or {}
-    local custom, ownSuffix = cfg.Prefix or "", cfg.Suffix or ""
+    -- the save slot's own name wins over names.ini
+    local custom = slotValue("Name", "Prefix") or cfg.Prefix or ""
+    local ownSuffix = slotValue("Name", "Suffix") or cfg.Suffix or ""
     local data = playerCustomData()
     if not data then return end
     local prefixId, suffixId = data.PrefixNameId:ToString(), data.SuffixNameId:ToString()
@@ -90,8 +157,12 @@ local appearanceStamp = nil
 -- config/appearance.ini [Player], on top of an optional look preset (Look = Colourpoint -> looks/Colourpoint.ini,
 -- or "<Mod>/<path>.ini" in another mod's folder): your own values win over the look's
 local function readAppearance()
-    local ini = WaCa.ReadIni(modDir .. "/config/appearance.ini")
-    local own = ini and ini["Player"] or {}
+    -- the save slot's own look (its [Appearance] section) replaces appearance.ini as a whole
+    local own = slot.data["Appearance"]
+    if not own or #(own.__order or {}) == 0 then
+        local ini = WaCa.ReadIni(modDir .. "/config/appearance.ini")
+        own = ini and ini["Player"] or {}
+    end
     local cfg, order = {}, {}
     local look = own.Look or ""
     if look ~= "" then
@@ -160,6 +231,7 @@ local function showsAppearance(cat, cfg)
 end
 
 local appliedCats = {}
+table.insert(onSlotChanged, function() appearanceStamp, appliedCats = nil, {} end)
 local function applyAppearance(force)
     local cfg, stamp = readAppearance()
     if stamp == "" then return end
@@ -239,6 +311,7 @@ LoopAsync(2000, function()
             applyTextOverrides()
             applyUIKeys()
         end
+        checkSlot()
         applyName()
         applyAppearance(false)
     end)
