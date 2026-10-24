@@ -5,7 +5,7 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.2
+## What's in 0.3
 - Pause on **Escape** instead of P.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`. Every command and its default
@@ -16,7 +16,11 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
   uninstalling are safe.
 - **Text overrides:** replace any text the game shows in `config/text.ini` (fixes, renames).
 
-Coming next: more customisation (a colour wheel, colourpoint "Ragdoll" layouts), with APIs other mods can build on.
+- **Customisation** (`config/appearance.ini`): any colour for every part of the coat (fur, pattern, markings, paw
+  pads, inner ears, nose, whiskers), per-part colours (`Tail.Fur = #3E2B22`), any of the game's 23 patterns and 20
+  markings in either mask slot (`MarkingsMask = game:M12_Mask`, so two markings can be combined), PNG pattern packs,
+  and looks: presets like the included **Colourpoint** (`Look = Colourpoint`). Display only - the save keeps the
+  game's look.
 
 ## For modders
 Other UE4SS Lua mods can use the shared API:
@@ -25,6 +29,16 @@ local WaCa = require("WaCa")
 WaCa.SetText("STR_MAINMENU_PROPHECY_MODE", "Story Mode")   -- any game text, by its key
 print(WaCa.GetText("STR_CAT_NAME1_PAW"))                    -- "Woodpaw"
 ```
+Appearance from code (any cat's `SwtAdventureCustomizableMeshComponent`):
+```lua
+WaCa.SetCatColor(cat, "Fur", WaCa.ParseColor("#EFE6D6"))
+WaCa.SetPartColor(cat, "Tail", "Fur", WaCa.ParseColor("#3E2B22"))
+WaCa.SetCatMask(cat, "Markings", "game:M12_Mask")        -- or a folder of PNG masks
+for _, cat in ipairs(WaCa.PlayerCats()) do ... end       -- the player's cat + the creation preview
+```
+Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`); a pattern
+pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
+
 All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset/Strings_<LANG>.csv`). Cat names are
 entries in it too: `STR_CAT_NAME<n><suffix id>`.
 

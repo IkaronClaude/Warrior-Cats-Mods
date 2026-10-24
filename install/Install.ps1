@@ -57,12 +57,29 @@ if ($Uninstall) {
     exit 0
 }
 
-# keep the user's own keybinds.ini (and any other config) on an update
+# keep the user's own config (keybinds, names, ...) and their other mods' entries in mods.txt on an update
 $cfg = Join-Path $Win64 "ue4ss\Mods\WaCaModKit\config"
+$modsTxt = Join-Path $Win64 "ue4ss\Mods\mods.txt"
 $keep = $null
 if (Test-Path $cfg) { $keep = Join-Path $env:TEMP "WaCaModKit-config-$(Get-Random)"; Copy-Item $cfg $keep -Recurse }
+$oldMods = if (Test-Path $modsTxt) { Get-Content $modsTxt } else { @() }
 Copy-Item (Join-Path $Payload "Wrc\Binaries\Win64\*") $Win64 -Recurse -Force
 if ($keep) { Copy-Item (Join-Path $keep "*") $cfg -Recurse -Force; Remove-Item $keep -Recurse -Force }
+if ($oldMods.Count -gt 0) {
+    # the user's list stays as it was; only mods it doesn't mention yet are added (before the Keybinds line)
+    $known = @{}
+    foreach ($l in $oldMods) { if ($l -match '^\s*([^;:]+?)\s*:') { $known[$Matches[1]] = $true } }
+    $add = foreach ($l in (Get-Content $modsTxt)) { if ($l -match '^\s*([^;:]+?)\s*:' -and -not $known[$Matches[1]]) { $l } }
+    $add = @($add) + @("WaCaModKit : 1") | Where-Object { $_ -notmatch '^\s*WaCaModKit\s*:' -or -not $known['WaCaModKit'] } | Select-Object -Unique
+    $merged = New-Object System.Collections.Generic.List[string]
+    foreach ($l in $oldMods) {
+        if ($l -match '^\s*Keybinds\s*:' -and $add) { $merged.AddRange([string[]]$add); $add = $null }
+        if ($l -match '^\s*WaCaModKit\s*:') { $l = "WaCaModKit : 1" }
+        $merged.Add($l)
+    }
+    if ($add) { $merged.AddRange([string[]]$add) }
+    Set-Content $modsTxt $merged -Encoding ascii
+}
 New-Item -ItemType File -Force (Join-Path $Win64 $Marker) | Out-Null
 Write-Host "WaCa ModKit installed. Start the game from Steam as usual." -ForegroundColor Green
 Write-Host "Key bindings: $cfg\keybinds.ini"

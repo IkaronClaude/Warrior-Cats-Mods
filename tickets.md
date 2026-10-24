@@ -103,6 +103,14 @@ game data in this repo.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
+      0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
+      "Markings Mask Color", "Paws Color" = pads, "Ears Color" = inner ears, "Nose Color", "Whiskers Color"; textures
+      "Pattern Mask" / "Markings Mask"; Custom Zones = pads + nose only). config/appearance.ini: colours (hex,
+      sRGB -> linear), per-part colours, the game's patterns / markings by name in either slot, PNG packs, looks
+      (looks/Colourpoint.ini). Verified headless (colour read-back, PNG import, game mask load).
+      OPEN: the operator's visual check of the Colourpoint look (tune its ini); eye colour (atlas-based, M_Characters_Eyes);
+      an in-game colour wheel UI (needs the editor - now installing 5.7.4); a real colourpoint mask pack (generated
+      from the meshes on the player's PC - no game-derived art in the repo).
 - [ ] **18. More graphics options.** The current ones are very lackluster; expose the engine's scalability groups +
       extras.
 

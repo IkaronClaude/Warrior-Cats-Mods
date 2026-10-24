@@ -37,6 +37,17 @@ switch (args[2])
         var pkg = provider.LoadPackage(args[3]);
         File.WriteAllText(args[4], JsonConvert.SerializeObject(pkg.GetExports(), Formatting.Indented));
         break;
+    case "png":         // AssetDump <paks> <EGame> png <texture package> <out.png> [usmap]: a texture decoded to PNG
+        if (args.Length > 5)
+            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(args[5]);
+        var texPkg = provider.LoadPackage(args[3]);
+        var tex = texPkg.GetExports().OfType<CUE4Parse.UE4.Assets.Exports.Texture.UTexture2D>().First();
+        var bmp = CUE4Parse_Conversion.Textures.TextureDecoder.Decode(tex);
+        using (var sk = CUE4Parse_Conversion.Textures.TextureEncoder.ToSkBitmap(bmp!))
+        using (var fs = File.Create(args[4]))
+            sk.Encode(fs, SkiaSharp.SKEncodedImageFormat.Png, 100);
+        Console.Error.WriteLine($"[dump] {tex.Name}: {bmp.Width} x {bmp.Height} {bmp.PixelFormat}");
+        break;
     case "raw":         // AssetDump <paks> <EGame> raw <file path> <out file>: the file's bytes (ini, txt, ...)
         File.WriteAllBytes(args[4], provider.SaveAsset(args[3]));
         break;
