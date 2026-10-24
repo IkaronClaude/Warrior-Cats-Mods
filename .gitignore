@@ -38,3 +38,5 @@ tools/AssetDump/bin/
 tools/AssetDump/obj/
 native/build/
 native/out/
+dist/
+tools/__pycache__/
