@@ -79,6 +79,17 @@ game data in this repo.
       installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
+- [ ] **Procedural names: no doubled prefix / suffix** (operator 2026-10-25: "Blazeblaze"). The NPC name generator
+      (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
+      the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
+      into the procedural generation.
+- [ ] **Framework: fixed cats for specific roles** (operator 2026-10-25, the next step after the doubled names; the
+      base for "1. Canon clan roster"). Data-driven overrides of the procedural generation: for a clan + role (leader,
+      deputy, medicine cat, mentor, specific warriors / apprentices ...), a fixed cat - name (any text, via the string
+      table), look (FCatCustomData fields + WaCa colours / masks), size, traits. Content packs as ini files so the canon
+      roster (and other mods) are just data. Hook points: UWrcNPCGenerationManager (NPCClansData TMap<EGiverRole,
+      FCatCustomDataList>, NarrativeCustomDataMap TMap<ENarrativeRole, FCatCustomData>), the generator's
+      CSVs (NpcGenerator, CatSize, Scars, ForcedAppearance ...).
 - [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
       that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
       our bindings), mouse bindings for the camera.
