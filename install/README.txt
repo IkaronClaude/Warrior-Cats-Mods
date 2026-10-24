@@ -10,8 +10,8 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.3.0)
-  - Pause on Escape instead of P.
+WHAT IT DOES (0.3.1)
+  - Escape instead of P to pause, and Escape instead of BackSpace for back / close in menus.
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: edit
       <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\keybinds.ini

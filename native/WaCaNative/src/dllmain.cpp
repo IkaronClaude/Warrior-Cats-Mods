@@ -8,6 +8,7 @@
 #include "MinHook.h"
 #include "input.h"
 #include "text.h"
+#include "ui.h"
 #include "log.h"
 
 namespace {
@@ -38,6 +39,7 @@ void Start() {
     }
     input::Install(dir);
     text::Install(input::FNameCtor());
+    ui::Init(input::FNameCtor());
 }
 
 }  // namespace

@@ -38,6 +38,34 @@ function WaCa.SetText(key, text)
     return WaCa.GetText(key) == text
 end
 
+-- send a command to WaCa ModKit's native part (through the string-table lookup channel, on the game thread)
+function WaCa.Command(cmd)
+    local l = lib()
+    if not l or not l:IsValid() then return false end
+    l:GetTableEntrySourceString(FName(TABLE), "WACA:" .. cmd)
+    return true
+end
+
+-- the menus' keyboard keys + hint icons: rows of UXD/Buttons/DT_GamepadButtonsKeyboard, keyed by command name
+-- (Button_A = Enter, Button_B / Button_Back = BackSpace, Button_X = E, ...). Rebinds a row; the icon is the game's
+-- own for that key (T_UI_Controller_Pc_<Key>_D) unless one is given, and kept as is when there's none.
+WaCa.UI_KEYS_TABLE = "/Game/Gameplay/DataTables/UXD/Buttons/DT_GamepadButtonsKeyboard.DT_GamepadButtonsKeyboard"
+function WaCa.SetUIKey(row, key, icon)
+    local tbl = StaticFindObject(WaCa.UI_KEYS_TABLE)
+    if not tbl or not tbl:IsValid() then
+        local ok, loaded = pcall(LoadAsset, WaCa.UI_KEYS_TABLE)
+        tbl = ok and loaded or nil
+    end
+    if not tbl or not tbl:IsValid() then return false end
+    if not icon then
+        local name = string.format("T_UI_Controller_Pc_%s_D", key)
+        local path = string.format("/Game/Platforms/Windows/UXD/Textures/Controllers/Gameplay/%s.%s", name, name)
+        local ok, tex = pcall(LoadAsset, path)
+        icon = ok and tex and tex:IsValid() and path or ""
+    end
+    return WaCa.Command(string.format("SetUIKey|%X|%s|%s|%s", tbl:GetAddress(), row, key, icon))
+end
+
 -- a simple ini reader: { [section] = { key = value } }, keys in file order in section.__order
 function WaCa.ReadIni(path)
     local f = io.open(path, "r")

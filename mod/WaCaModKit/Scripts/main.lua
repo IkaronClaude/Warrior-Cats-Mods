@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.3.0"
+local VERSION = "0.3.1"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -181,6 +181,54 @@ for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponen
     pcall(RegisterHook, fn, function() end, function() ExecuteInGameThread(function() applyAppearance(true) end) end)
 end
 
+-- Key aliases (config/keybinds.ini [KeyAliases] Key = OtherKey[, ...]): pressing Key also presses OtherKey. The game's
+-- menus read raw keys (SwtPlayerController.OnKeyPressed / OnKeyReleased) rather than bindings - many use BackSpace as
+-- "back" - so "Escape = BackSpace" makes Escape work as back in menus too.
+local aliases = {}
+local function loadAliases()
+    local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
+    aliases = {}
+    for _, k in ipairs(ini and ini["KeyAliases"] and ini["KeyAliases"].__order or {}) do
+        local targets = {}
+        for t in ini["KeyAliases"][k]:gmatch("[^,%s]+") do table.insert(targets, t) end
+        aliases[k] = targets
+    end
+end
+loadAliases()
+
+local inAlias = false
+local function aliasHook(fnName)
+    return function(self, key)
+        if inAlias then return end
+        local ok, name = pcall(function() return key:get().KeyName:ToString() end)
+        if not ok or not aliases[name] then return end
+        local controller = self:get()
+        inAlias = true
+        for _, target in ipairs(aliases[name]) do
+            pcall(function() controller[fnName](controller, { KeyName = FName(target) }) end)
+        end
+        inAlias = false
+    end
+end
+for _, fn in ipairs({ "OnKeyPressed", "OnKeyReleased", "OnKeyRepeat" }) do
+    local ok, err = pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:" .. fn, aliasHook(fn))
+    if not ok then log("key aliases: could not hook %s (%s)", fn, tostring(err)) end
+end
+local n = 0
+for _ in pairs(aliases) do n = n + 1 end
+log("%d key aliases", n)
+
+-- Menu keys (config/keybinds.ini [UIKeys] Row = Key): the menus' own keyboard keys and hint icons
+local function applyUIKeys()
+    local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
+    local section = ini and ini["UIKeys"]
+    if not section then return end
+    for _, row in ipairs(section.__order) do
+        if not WaCa.SetUIKey(row, section[row]) then log("menu key %s: the key table is not loaded", row) end
+    end
+    log("%d menu keys set", #section.__order)
+end
+
 -- wait for the game's text, then apply; the name is checked every few seconds (it changes with your rank)
 local textApplied = false
 LoopAsync(2000, function()
@@ -189,6 +237,7 @@ LoopAsync(2000, function()
         if not textApplied then
             textApplied = true
             applyTextOverrides()
+            applyUIKeys()
         end
         applyName()
         applyAppearance(false)

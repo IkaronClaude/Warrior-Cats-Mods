@@ -6,6 +6,7 @@
 // (KismetStringTableLibrary.GetTableEntrySourceString). Every lookup by an FString key builds an FTextKey first; the
 // detour on that constructor sees the command on the game thread, runs it, and lets the (missing) lookup carry on.
 //   WACA:SetText|<key>|<text>
+//   WACA:SetUIKey|<DataTable address hex>|<row>|<key>[|<icon texture object path>]   (ui.cpp)
 #include "text.h"
 
 #include <windows.h>
@@ -17,6 +18,7 @@
 #include "log.h"
 #include "scan.h"
 #include "ue.h"
+#include "ui.h"
 
 namespace {
 
@@ -114,6 +116,7 @@ void* __fastcall TextKeyCtorDetour(uint32_t* outKey, const ue::FString* str) {
         std::wstring cmd(str->Data + 5);
         auto verb = Arg(cmd, 0);
         if (verb == L"SetText") SetText(Arg(cmd, 1), Arg(cmd, 2));
+        else if (verb == L"SetUIKey") ui::SetUIKey(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3), Arg(cmd, 4));
         else logx::Line(L"[text] unknown command %s", cmd.c_str());
     }
     return g_textKeyOrig(outKey, str);

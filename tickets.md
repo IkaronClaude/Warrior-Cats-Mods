@@ -9,6 +9,10 @@ story is thin ("go hunt", "go patrol", "go to your den", then sometimes some dia
 systems once they exist. So build the systems, then pour story into them.
 
 ## Goal
+**NOW (operator, 2026-10-25): the proof of concept is done - work independently and put the custom patterns /
+markings / colours INTO THE GAME'S UI (the creator), and store this extra character data in a sidecar file next to
+the normal save (the save itself stays compatible), applied automatically when that save is loaded.**
+
 **NOW (operator, 2026-10-24): a simple modding FRAMEWORK, open source, ASAP, so people can start fixing this mess.**
 - Max priority hooks, as the community's biggest gripes: **customisation, name choice, PC controls**.
 - Clean, extensible interfaces: other mods must be able to build on them and quickly add their own customisation
@@ -22,6 +26,11 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [ ] **Escape as "back" in menus** (operator test: menus use BackSpace, the pause menu shows a BackSpace close
+      button). Source: UXD/Buttons/DT_GamepadButtonsKeyboard rows Button_B / Button_Back = BackSpace (key + hint
+      icon). Fix at the data: those rows -> Escape (+ the Esc icon). 0.3.1: DONE - [UIKeys] rewrites the rows natively
+      (ui.cpp, UDataTable::RowMap in place, verified headless). OPEN: the operator's test (does the pause menu close
+      cleanly on Escape, with Escape also bound to Player_Pause?).
 - [ ] **ModKit 0.1 release (2026-10-24).** Built and committed: `dist/WaCaModKit-0.1.0.zip` (`tools/package.ps1`).
       - [x] Native key rebinding: a detour of the game's default-binding apply step (WaCaNative) + `keybinds.ini`
             (Pause = Escape). Verified headless: the signatures are found, the defaults are logged (the whole keyboard

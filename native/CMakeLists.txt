@@ -14,7 +14,8 @@ target_include_directories(minhook PUBLIC third_party/minhook/include)
 add_library(WaCaNative SHARED
     WaCaNative/src/dllmain.cpp
     WaCaNative/src/input.cpp
-    WaCaNative/src/text.cpp)
+    WaCaNative/src/text.cpp
+    WaCaNative/src/ui.cpp)
 target_link_libraries(WaCaNative PRIVATE minhook)
 target_compile_definitions(WaCaNative PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
 set_target_properties(WaCaNative PROPERTIES OUTPUT_NAME main)
