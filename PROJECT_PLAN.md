@@ -103,6 +103,16 @@ plan:
   - Use EGame `GAME_UE5_7`.
 - `tools/bin/` (gitignored): UE4SS experimental, Steamless.
 
+## Unreal Editor (5.7)
+Parked 2026-10-24. The Epic launcher is installed on this VM (C:\Program Files\Epic Games) and logged in, but the
+Unreal Engine library never offers an engine version: the + / Install Engine buttons do nothing. Still the same after
+a re-login, clearing the web cache and running as admin. The log showed "SetNamedSecurityInfo failed with 5" on its
+install folder.
+
+The editor couldn't run here anyway (no GPU; even the game dies on WARP), so editor work (UMG widgets, Blueprint mod
+paks) belongs on the operator's main PC. Headless cooking (UnrealEditor-Cmd -run=cook -nullrhi) is the only reason to
+retry the install on this VM.
+
 ## Log
 - 2026-10-24: repo created; the operator's 19 baseline ideas filed in tickets.md (P0 foundation added first).
 - 2026-10-24: the operator set the goal: an open-source modding framework ASAP. The first hooks are customisation, name
