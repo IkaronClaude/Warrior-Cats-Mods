@@ -7,6 +7,7 @@
 
 #include "MinHook.h"
 #include "input.h"
+#include "text.h"
 #include "log.h"
 
 namespace {
@@ -36,6 +37,7 @@ void Start() {
         return;
     }
     input::Install(dir);
+    text::Install(input::FNameCtor());
 }
 
 }  // namespace

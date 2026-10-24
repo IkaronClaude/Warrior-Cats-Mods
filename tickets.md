@@ -65,6 +65,11 @@ game data in this repo.
 - [ ] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
 - [ ] **3. Free-form name input.** The player types any name. Keep an auto-generated fallback name for online content
       (minor relevance); find what the online side reads.
+      0.2 (2026-10-24): `config/names.ini` (Prefix / optional warrior Suffix) rewrites the string-table entry of the
+      player's CURRENT name (STR_CAT_NAME<n><suffix>); the save keeps the game's ids. Text overrides (WaCaNative
+      text.cpp + shared Lua API `require("WaCa")`) are verified headless.
+      OPEN: the operator's real-game test (does the shown name update? HUD / party / dialogue / ceremony). Then an
+      in-game text box at cat creation (UMG, or a runtime-built EditableTextBox from Lua).
 - [ ] **1. Canon clan roster.** Remove the procedural generation of the clan cats. Lock the roster to a specific point
       in the books' timeline (pick the book / moment with the operator).
 - [ ] **15. Clan-sim day.** Each day you get assignments based on the clan's needs: hunt, patrol, night watch, train

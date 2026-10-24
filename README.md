@@ -5,14 +5,28 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.1
+## What's in 0.2
 - Pause on **Escape** instead of P.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`. Every command and its default
   is listed inside. Gamepad bindings are untouched.
 
-Coming next: free-form cat names, more customisation (colour wheel, colourpoint "Ragdoll" layouts), mouse-driven
-controls, with APIs other mods can build on.
+- **Free-form name** for your cat: `config/names.ini` (`Prefix = Moss` gives Mosskit, Mosspaw, Moss<warrior suffix>;
+  optional own warrior `Suffix`). Only what you see changes: your save keeps the game's name, so online features and
+  uninstalling are safe.
+- **Text overrides:** replace any text the game shows in `config/text.ini` (fixes, renames).
+
+Coming next: more customisation (a colour wheel, colourpoint "Ragdoll" layouts), with APIs other mods can build on.
+
+## For modders
+Other UE4SS Lua mods can use the shared API:
+```lua
+local WaCa = require("WaCa")
+WaCa.SetText("STR_MAINMENU_PROPHECY_MODE", "Story Mode")   -- any game text, by its key
+print(WaCa.GetText("STR_CAT_NAME1_PAW"))                    -- "Woodpaw"
+```
+All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset/Strings_<LANG>.csv`). Cat names are
+entries in it too: `STR_CAT_NAME<n><suffix id>`.
 
 ## How it works
 - [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) loads the mod: Lua scripts plus a small native DLL.

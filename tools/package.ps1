@@ -1,6 +1,6 @@
 # Builds the release: dist\WaCaModKit-<version>\ + .zip (UE4SS + WaCaModKit, ready to install).
 # Needs: native\out\main.dll (native\build.bat) and UE4SS extracted in tools\bin\ue4ss (see PROJECT_PLAN.md).
-param([string]$Version = "0.1.0")
+param([string]$Version = "0.2.0")
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $name = "WaCaModKit-$Version"
@@ -23,6 +23,7 @@ ConvertTo-Json @($json) | Set-Content (Join-Path $mods "mods.json") -Encoding as
 
 # WaCaModKit: the Lua scripts + config, and the native DLL
 Copy-Item (Join-Path $root "mod\WaCaModKit") $mods -Recurse
+Copy-Item (Join-Path $root "mod\shared\WaCa") (Join-Path $mods "shared") -Recurse      # the API other mods require
 New-Item -ItemType Directory -Force (Join-Path $mods "WaCaModKit\dlls") | Out-Null
 Copy-Item (Join-Path $root "native\out\main.dll") (Join-Path $mods "WaCaModKit\dlls\main.dll")
 Copy-Item (Join-Path $root "LICENSE") (Join-Path $mods "WaCaModKit\LICENSE.txt") -ErrorAction SilentlyContinue

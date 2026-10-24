@@ -167,6 +167,8 @@ void __fastcall ApplyDetour(void* playerInput, ue::TArray<game::CommandMapping>*
 
 namespace input {
 
+void* FNameCtor() { return reinterpret_cast<void*>(g_fnameCtor); }
+
 bool Install(const std::wstring& modDir) {
     g_configPath = modDir + L"\\config\\keybinds.ini";
     auto apply = scan::Find(kApplySig);

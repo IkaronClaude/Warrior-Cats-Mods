@@ -10,12 +10,16 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.1.0)
+WHAT IT DOES (0.2.0)
   - Pause on Escape instead of P.
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: edit
       <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\keybinds.ini
     (all commands and the game's defaults are listed inside).
+  - Your own cat name: edit config
+ames.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
+    Your save keeps the game's name, so online features and uninstalling are safe.
+  - Change any game text: config	ext.ini.
 
 ADDING YOUR OWN MODS
   WaCa ModKit runs on UE4SS (https://github.com/UE4SS-RE/RE-UE4SS). Lua mods go in
