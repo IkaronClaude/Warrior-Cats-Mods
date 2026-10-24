@@ -36,3 +36,5 @@ tools/bin/
 CLAUDE.md
 tools/AssetDump/bin/
 tools/AssetDump/obj/
+native/build/
+native/out/
