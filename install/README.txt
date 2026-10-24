@@ -12,6 +12,7 @@ UNINSTALL
 
 WHAT IT DOES (0.1.0)
   - Pause on Escape instead of P.
+  - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: edit
       <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\keybinds.ini
     (all commands and the game's defaults are listed inside).

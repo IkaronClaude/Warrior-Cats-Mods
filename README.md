@@ -7,6 +7,7 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
 ## What's in 0.1
 - Pause on **Escape** instead of P.
+- **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`. Every command and its default
   is listed inside. Gamepad bindings are untouched.
 
