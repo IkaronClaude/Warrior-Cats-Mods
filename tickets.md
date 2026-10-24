@@ -9,6 +9,14 @@ story is thin ("go hunt", "go patrol", "go to your den", then sometimes some dia
 systems once they exist. So build the systems, then pour story into them.
 
 ## Goal
+**NOW (operator, 2026-10-24): a simple modding FRAMEWORK, open source, ASAP, so people can start fixing this mess.**
+- Max priority hooks, as the community's biggest gripes: **customisation, name choice, PC controls**.
+- Clean, extensible interfaces: other mods must be able to build on them and quickly add their own customisation
+  (registries / APIs, not one-off patches).
+- **EASE OF INSTALL / USE IS FRONT AND CENTER**: one download, one step, works; mods are folders you drop in.
+- The Z: install is ours to modify freely (the operator's real install is on their main PC).
+
+Long-term:
 A Clans of the Forest that plays like a day in a Clan. You get real daily duties, and the clan's life is shown on screen
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
