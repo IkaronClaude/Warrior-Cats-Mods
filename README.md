@@ -57,4 +57,4 @@ entries in it too: `STR_CAT_NAME<n><suffix id>`.
 No game files or game data are in this repository.
 
 ## License
-MIT. Third party: UE4SS (MIT, shipped in releases), MinHook (BSD-2, `native/third_party/minhook`).
+Apache License 2.0 (see LICENSE). Third party: UE4SS (MIT, shipped in releases), MinHook (BSD-2, `native/third_party/minhook`).
