@@ -5,11 +5,12 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.3
-- Pause on **Escape** instead of P.
+## What's in 0.3.1
+- **Escape** pauses (instead of P), and goes back / closes in menus (instead of BackSpace), with the Esc icon shown.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
-- **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`. Every command and its default
-  is listed inside. Gamepad bindings are untouched.
+- **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
+  (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), and key aliases (`[KeyAliases]`). Every
+  command and its default is listed inside. Gamepad bindings are untouched.
 
 - **Free-form name** for your cat: `config/names.ini` (`Prefix = Moss` gives Mosskit, Mosspaw, Moss<warrior suffix>;
   optional own warrior `Suffix`). Only what you see changes: your save keeps the game's name, so online features and
@@ -21,6 +22,10 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
   markings in either mask slot (`MarkingsMask = game:M12_Mask`, so two markings can be combined), PNG pattern packs,
   and looks: presets like the included **Colourpoint** (`Look = Colourpoint`). Display only - the save keeps the
   game's look.
+- **Per-save data** (in development): each save slot can carry its own name and look in a sidecar file next to the
+  game's save (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`). It is
+  loaded automatically with that save and wins over the global `names.ini` / `appearance.ini`; the game's save file is
+  never modified. Choosing custom options inside the game's own creator is next.
 
 ## For modders
 Other UE4SS Lua mods can use the shared API:
@@ -36,6 +41,14 @@ WaCa.SetPartColor(cat, "Tail", "Fur", WaCa.ParseColor("#3E2B22"))
 WaCa.SetCatMask(cat, "Markings", "game:M12_Mask")        -- or a folder of PNG masks
 for _, cat in ipairs(WaCa.PlayerCats()) do ... end       -- the player's cat + the creation preview
 ```
+Per-save data for your own mod (one sidecar file per mod and save slot):
+```lua
+local file = WaCa.SlotFile("MyMod")                       -- nil until a save slot is active
+local data = WaCa.ReadIni(file) or {}
+WaCa.WriteIni(file, data)
+```
+Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")`.
+
 Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
 
