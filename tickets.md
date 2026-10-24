@@ -79,6 +79,12 @@ game data in this repo.
 - [ ] **14. Pacing.** Progression must come from time + duties + training, not "3 hunts until deputy". No old deputy
       getting canned for "not doing enough" at your own ceremony. Ceremonies need proper preconditions.
 
+- [ ] **Dialogue text bugs (operator, 2026-10-24).** Some lines show unfilled format arguments, e.g. "It seems that 1's
+      Prophecy is true": a name placeholder left as an argument index or default. Find the dialogue tables
+      (`Quests/NpcDialogues`, `Quests/StoryDialogues`, `Sequencer/DT_QuestSequenceDialogues`) and the FText format
+      call that fills them. List every line whose placeholders the game doesn't fill, then fix it: either supply the
+      argument at the format call (hook) or patch the text.
+
 ## P2: Depth, presentation
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
