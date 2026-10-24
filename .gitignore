@@ -1,0 +1,36 @@
+# BYO: never commit game data. The game lives at Z:/Warrior Cats Clans of the Forest/ (read-only reference).
+*.pak
+*.ucas
+*.utoc
+*.uasset
+*.uexp
+*.ubulk
+*.uptnl
+*.umap
+*.locres
+*.usmap
+*.bnk
+*.wem
+*.exe
+*.dll
+*.pdb
+
+# extracted / exported game content and generated dumps
+extracted/
+export/
+dumps/
+cxx-headers/
+saves/
+
+# tool downloads (FModel, UE4SS, retoc, ...): fetched per machine, see PROJECT_PLAN.md
+tools/bin/
+
+# Unreal project build output (the mod / skeleton project)
+**/Binaries/
+**/Intermediate/
+**/Saved/
+**/DerivedDataCache/
+**/.vs/
+
+# local notes
+CLAUDE.md
