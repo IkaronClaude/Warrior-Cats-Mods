@@ -224,6 +224,14 @@ function WaCa.PlayerCats()
         local comp = preview:IsValid() and preview.CustomizableMeshComponent
         if comp and comp:IsValid() then table.insert(out, comp) end
     end
+    -- the player's cat as the creator and cutscenes show it (BP_WrcSK_Customization_Player and friends: a skeletal
+    -- mesh actor flagged bIsPlayer)
+    for _, actor in ipairs(FindAllOf("WrcCatSkeletalMeshWithCustomization") or {}) do
+        if actor:IsValid() and actor.bIsPlayer then
+            local comp = actor.MeshCustomizationComponent
+            if comp and comp:IsValid() then table.insert(out, comp) end
+        end
+    end
     return out
 end
 
