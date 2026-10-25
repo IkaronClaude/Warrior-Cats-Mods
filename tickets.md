@@ -83,6 +83,10 @@ game data in this repo.
       (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
       the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
       into the procedural generation.
+      0.4.0: DONE (roster.lua) - the only doubled combination in the tables is Blaze + blaze; the fix is general
+      (suffix text == prefix text) and replaces the suffix with one its rank uses, deterministically per prefix; runs
+      after UQuestManager.OnNPCGenerationCompleted, on load and on slot change, and syncs spawned NPCs. OPEN: the
+      operator's in-game check (log line "renamed ... (doubled name)").
 - [ ] **Framework: fixed cats for specific roles** (operator 2026-10-25, the next step after the doubled names; the
       base for "1. Canon clan roster"). Data-driven overrides of the procedural generation: for a clan + role (leader,
       deputy, medicine cat, mentor, specific warriors / apprentices ...), a fixed cat - name (any text, via the string

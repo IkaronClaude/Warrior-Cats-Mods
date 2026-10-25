@@ -1,6 +1,6 @@
 # Builds the release: dist\WaCaModKit-<version>\ + .zip (UE4SS + WaCaModKit, ready to install).
 # Needs: native\out\main.dll (native\build.bat) and UE4SS extracted in tools\bin\ue4ss (see PROJECT_PLAN.md).
-param([string]$Version = "0.2.0")
+param([string]$Version = "0.4.0")
 $ErrorActionPreference = "Stop"
 $root = Split-Path $PSScriptRoot -Parent
 $name = "WaCaModKit-$Version"

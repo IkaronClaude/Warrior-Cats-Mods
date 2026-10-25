@@ -38,6 +38,38 @@ function WaCa.SetText(key, text)
     return WaCa.GetText(key) == text
 end
 
+-- Cat names: a cat stores a prefix id (PrefixNameId "STR_CAT_NAME12") and a suffix id (SuffixNameId "_PAW"); each
+-- combination is one text entry (STR_CAT_NAME12_PAW = "Mosspaw"; all combinations exist).
+-- The prefix's own text: what "<prefix>kit" and "<prefix>paw" have in common ("Woodkit", "Woodpaw" -> "Wood").
+-- Remembered per prefix the first time, before any entry of it is rewritten.
+local prefixTexts = {}
+function WaCa.NamePrefixText(prefixId)
+    if prefixTexts[prefixId] then return prefixTexts[prefixId] end
+    local a, b = WaCa.GetText(prefixId .. "_KIT"), WaCa.GetText(prefixId .. "_PAW")
+    local n = 0
+    while n < #a and n < #b and a:sub(n + 1, n + 1) == b:sub(n + 1, n + 1) do n = n + 1 end
+    if n > 0 then prefixTexts[prefixId] = a:sub(1, n) end
+    return a:sub(1, n)
+end
+
+-- the suffix's own text for a combination ("STR_CAT_NAME3", "_BLAZE" -> "blaze"), or "" when unknown
+function WaCa.NameSuffixText(prefixId, suffixId)
+    local prefix = WaCa.NamePrefixText(prefixId)
+    local full = WaCa.GetText(prefixId .. suffixId)
+    if prefix == "" or full:sub(1, #prefix) ~= prefix then return "" end
+    return full:sub(#prefix + 1)
+end
+
+-- the FCatCustomData fields a roster / mod may set (everything but the combat stats tag)
+WaCa.CAT_DATA_FIELDS = {
+    "ClanType", "Role", "BodyOffset", "FaceOffset", "FurOffset", "TailOffset", "EarOffset", "EyeOffset",
+    "WhiskerOffset", "BodyValue", "FaceValue", "FurValue", "EyeValue", "WhiskerValue", "TailIdx", "EarIdx", "FurIdx",
+    "FurColorIdx", "Pattern01ColorIdx", "Pattern02ColorIdx", "PatternIdx", "MarkingIdx", "EyeLeftColorIdx",
+    "EyeRightColorIdx", "bOverrideColors", "Design", "PrefixNameId", "SuffixNameId", "Gender", "CatSize",
+    "AccesoryNeckId", "AccesoryPawId", "AccesoryHeadId", "AccesoryBodyId", "AccesoryNeckVar", "AccesoryPawVar",
+    "AccesoryHeadVar", "AccesoryBodyVar", "ScarEyeId", "ScarEarId", "ScarBodyId", "ScarChestId",
+}
+
 -- send a command to WaCa ModKit's native part (through the string-table lookup channel, on the game thread)
 function WaCa.Command(cmd)
     local l = lib()

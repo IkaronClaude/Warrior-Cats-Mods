@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.3.1"
+local VERSION = "0.4.0"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -98,17 +98,7 @@ local function playerCustomData()
     return nil
 end
 
--- the generated prefix's text: what "<prefix>kit" and "<prefix>paw" have in common ("Woodkit", "Woodpaw" -> "Wood");
--- remembered per prefix the first time, before any entry of it is rewritten
-local generatedPrefixes = {}
-local function generatedPrefix(prefixId)
-    if generatedPrefixes[prefixId] then return generatedPrefixes[prefixId] end
-    local a, b = WaCa.GetText(prefixId .. "_KIT"), WaCa.GetText(prefixId .. "_PAW")
-    local n = 0
-    while n < #a and n < #b and a:sub(n + 1, n + 1) == b:sub(n + 1, n + 1) do n = n + 1 end
-    generatedPrefixes[prefixId] = a:sub(1, n)
-    return generatedPrefixes[prefixId]
-end
+local generatedPrefix = WaCa.NamePrefixText
 
 -- another save loaded: the previous cat's rewritten entry goes back to the game's text
 table.insert(onSlotChanged, function()
@@ -156,13 +146,7 @@ local appearanceStamp = nil
 
 -- config/appearance.ini [Player], on top of an optional look preset (Look = Colourpoint -> looks/Colourpoint.ini,
 -- or "<Mod>/<path>.ini" in another mod's folder): your own values win over the look's
-local function readAppearance()
-    -- the save slot's own look (its [Appearance] section) replaces appearance.ini as a whole
-    local own = slot.data["Appearance"]
-    if not own or #(own.__order or {}) == 0 then
-        local ini = WaCa.ReadIni(modDir .. "/config/appearance.ini")
-        own = ini and ini["Player"] or {}
-    end
+local function mergeLook(own)
     local cfg, order = {}, {}
     local look = own.Look or ""
     if look ~= "" then
@@ -184,6 +168,16 @@ local function readAppearance()
     local stamp = {}
     for _, k in ipairs(order) do table.insert(stamp, k .. "=" .. cfg[k]) end
     return cfg, table.concat(stamp, ";")
+end
+
+local function readAppearance()
+    -- the save slot's own look (its [Appearance] section) replaces appearance.ini as a whole
+    local own = slot.data["Appearance"]
+    if not own or #(own.__order or {}) == 0 then
+        local ini = WaCa.ReadIni(modDir .. "/config/appearance.ini")
+        own = ini and ini["Player"] or {}
+    end
+    return mergeLook(own)
 end
 
 -- a mask source: "game:<name>" as is; a folder in WaCaModKit/patterns; or "<Mod>/<path>" inside another mod's folder
@@ -245,6 +239,14 @@ local function applyAppearance(force)
         end
     end
 end
+
+-- The game's procedural cats: doubled names fixed, pinned cats from config/roster.ini (roster.lua)
+local Roster = require("roster")
+Roster.Init({
+    WaCa = WaCa, log = log, modDir = modDir, modsDir = modsDir,
+    applyLook = function(cat, section) applyAppearanceTo(cat, (mergeLook(section))) end,
+})
+table.insert(onSlotChanged, function() Roster.Run(true) end)
 
 -- straight after the game refreshes a cat's look
 for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponent:RefreshShape",
@@ -314,6 +316,7 @@ LoopAsync(2000, function()
         checkSlot()
         applyName()
         applyAppearance(false)
+        Roster.Run(false)
     end)
     return false
 end)

@@ -5,7 +5,15 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.3.1
+## What's in 0.4
+- **No more doubled names** from the game's generator ("Blazeblaze" gets another suffix its rank already uses; the
+  same cat always gets the same name).
+- **Fixed cats for specific roles** (`config/roster.ini` + roster files, see `rosters/Example.ini`): pin a story cat
+  (`[Narrative.ThunderClanDeputy]`) or a clan's generated cat by rank (`[ThunderClan.Leader]`, `[RiverClan.Warrior.3]`)
+  to a name, the game's own look values (body, fur, colours, pattern, markings, eyes, accessories, size, scars) and
+  extra colours / masks. Only valid game values go into the save, so it stays loadable without the mod.
+
+## Also in 0.3.1
 - **Escape** pauses (instead of P), and goes back / closes in menus (instead of BackSpace), with the Esc icon shown.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands

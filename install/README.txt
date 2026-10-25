@@ -10,7 +10,7 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.3.1)
+WHAT IT DOES (0.4.0)
   - Escape instead of P to pause, and Escape instead of BackSpace for back / close in menus.
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: edit
@@ -22,6 +22,10 @@ ames.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
   - Change any game text: config	ext.ini.
   - Your cat's look: configppearance.ini - any colour for every part of the coat, the game's patterns and markings
     combined freely, and looks like "Colourpoint" (Look = Colourpoint).
+
+  - No more doubled cat names from the game's generator ("Blazeblaze").
+  - Fixed cats for specific roles: configoster.ini + roster files (see rosters\Example.ini) pin a story cat or a
+    clan's leader / deputy / warriors ... to a name and look.
 
 ADDING YOUR OWN MODS
   WaCa ModKit runs on UE4SS (https://github.com/UE4SS-RE/RE-UE4SS). Lua mods go in
