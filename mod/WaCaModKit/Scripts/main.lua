@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.0"
+local VERSION = "0.5.1"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -253,7 +253,7 @@ table.insert(onSlotChanged, function() Roster.Run(true) end)
 
 -- The character creator: extra palette colours + the name field (creator.lua)
 Creator.Init({
-    WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue,
+    WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue, slotValue = slotValue,
     refreshLook = function() applyAppearance(true) end,
 })
 table.insert(onSlotChanged, Creator.OnSlotChanged)

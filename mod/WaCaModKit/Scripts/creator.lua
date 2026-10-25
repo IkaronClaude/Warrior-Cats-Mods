@@ -172,7 +172,9 @@ local function updateNameScreen()
         return
     end
     local typed = nameBox:GetText():ToString():gsub("^%s+", ""):gsub("%s+$", "")
-    local now = pending and pending.Name and pending.Name.Prefix or ""
+    local now
+    if pending then now = pending.Name and pending.Name.Prefix or ""
+    else now = ctx.slotValue("Name", "Prefix") or "" end
     if typed ~= now then
         store("Name", "Prefix", typed ~= "" and typed or nil)
         log("name typed: %s", typed ~= "" and typed or "(the online name)")

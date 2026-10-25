@@ -48,7 +48,12 @@ game data in this repo.
         is a CanvasPanel like the name screen's)
       - pending creation -> the NEW save slot's sidecar (verified: K2_CreateSaveSlot + Save -> sidecar with Prefix +
         Fur); an existing save loaded instead drops it
-      OPEN: the operator's real-creator test (layout / font of the injected widgets, the pairing assumption, clicks).
+      0.5.1: save -> fresh restart round trip verified headless (run 1: creation + K2_CreateSaveSlot + Save writes
+      the sidecar; run 2: the slot's sidecar loads and the look is applied to the player cats); name-box re-store spam
+      after the commit fixed.
+      OPEN (needs a GPU - the VM has none; headless stops at the splash, which reads real input): the operator's
+      real-creator test - position / font of the name box and the WaCa panel, clicking the panel arrows, the panel on
+      the real customisation screen.
       Headless navigation is blocked at the splash ("press any key" needs real input).
 - [ ] **Escape as "back" in menus** (operator test: menus use BackSpace, the pause menu shows a BackSpace close
       button). Source: UXD/Buttons/DT_GamepadButtonsKeyboard rows Button_B / Button_Back = BackSpace (key + hint
