@@ -26,6 +26,17 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] 0.6.0 (2026-10-25, operator goal "port the mod to the proper event/hook based system"): no polling anywhere.
+      Native event bus on UE4SS's ProcessEvent callbacks (WaCaNative = UE4SS C++ mod built against the SDK), Lua
+      WaCa.On / WaCa.Watch / WaCa.Ready, built-in ScreenShown / ScreenHidden / ScreenFocusIn / ScreenFocusOut /
+      CatSpawned / SteamTextInput / Started; both Lua loops removed; WaCaNative_Command replaces the string-table
+      channel. Headless-proven (PROJECT_PLAN.md "Event-driven foundation"). Not released yet (see the two P1s below).
+- [ ] P1 CI secret UE4SS_SOURCE_TOKEN (operator): a GitHub token of an Epic-linked account that can read
+  Re-UE4SS/UEPseudo, as a repository secret - the release workflow now builds the DLL from UE4SS source and fails
+  without it. Then tag v0.6.0.
+- [ ] P1 verify 0.6.0 on a GPU (operator's PC): CatSpawned in real gameplay (name / look / roster on spawn), the
+  menu cursor staying visible without the old per-tick re-assert, the name box flow with a real keyboard and the
+  Steam keyboard, the creator panel re-attaching after menu commands.
 - [x] 0.5.5 (2026-10-25, operator): name box top right, no auto focus, part of the flow (the game's confirm rows are
       held while the name screen shows: confirm on the list = into the box, confirm in the box = on, via
       OnListenCommand(Button_A); Tab / L3 leave); Steam on-screen keyboard on a controller (floating first, then the
