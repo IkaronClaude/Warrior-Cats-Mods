@@ -1,0 +1,59 @@
+# Builds WaCa ModKit and publishes a GitHub release when a version tag (v1.2.3) is pushed.
+# Runs on GitHub's Windows runner with the workflow's own token - no personal credentials anywhere.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version to build (e.g. 0.5.2) - builds the zip as an artifact, no release"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        id: v
+        shell: pwsh
+        run: |
+          $v = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}".TrimStart("v") } else { "${{ inputs.version }}" }
+          "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: UE4SS (the release the mod is tested with)
+        shell: pwsh
+        run: |
+          $url = "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-1181-g83330635.zip"
+          New-Item -ItemType Directory -Force tools/bin/ue4ss | Out-Null
+          Invoke-WebRequest $url -OutFile ue4ss.zip
+          Expand-Archive ue4ss.zip -DestinationPath tools/bin/ue4ss -Force
+
+      - name: Native DLL
+        shell: cmd
+        run: native\build.bat
+
+      - name: Package
+        shell: pwsh
+        run: ./tools/package.ps1 -Version ${{ steps.v.outputs.version }}
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: WaCaModKit-${{ steps.v.outputs.version }}
+          path: dist/WaCaModKit-${{ steps.v.outputs.version }}.zip
+
+      - name: Release
+        if: github.ref_type == 'tag'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ github.ref_name }}" "dist/WaCaModKit-${{ steps.v.outputs.version }}.zip" `
+            --title "WaCa ModKit ${{ steps.v.outputs.version }}" `
+            --notes "Download WaCaModKit-${{ steps.v.outputs.version }}.zip, extract it, double-click Install.bat and start the game from Steam. See README.md for what's included."
