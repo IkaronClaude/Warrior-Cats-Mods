@@ -13,6 +13,7 @@
 #include "MinHook.h"
 #include "appearance.h"
 #include "camera.h"
+#include "saves.h"
 #include "bridge.h"
 #include "input.h"
 #include "keys.h"
@@ -61,7 +62,10 @@ public:
         camera::Install();
     }
 
-    auto on_unreal_init() -> void override { bridge::Install(); }
+    auto on_unreal_init() -> void override {
+        bridge::Install();
+        saves::Install();
+    }
 
     auto on_lua_start(StringViewType modName, LuaMadeSimple::Lua& lua, LuaMadeSimple::Lua&, LuaMadeSimple::Lua&,
                       LuaMadeSimple::Lua*) -> void override {

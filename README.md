@@ -83,7 +83,7 @@ Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")` (replaces the key) or
 
 Events: react to the game instead of polling it. Handlers run on the game thread.
 ```lua
-WaCa.On("ScreenShown", function(screen) ... end)     -- also ScreenHidden, ScreenFocusIn / ScreenFocusOut, CatSpawned
+WaCa.On("ScreenShown", function(screen) ... end)     -- also ScreenHidden, ScreenFocusIn / ScreenFocusOut, CatSpawned, GameSaved
 WaCa.Watch("ReceiveBeginPlay", "/Script/Engine.Pawn", "PawnSpawned")   -- any UFunction by name, Blueprint events too
 WaCa.On("PawnSpawned", function(pawn) ... end)
 WaCa.Ready()                                          -- the LAST line of your main.lua

@@ -84,8 +84,13 @@ local function checkSlot()
     if id ~= slot.id then loadSlot(id) end
 end
 
-pcall(RegisterHook, "/Script/SwtEngine.SwtSaveManager:Save", function() end, function()
-    ExecuteInGameThread(function() checkSlot(); saveSlot() end)
+-- the game saves from native code (a RegisterHook on SwtSaveManager:Save never saw those): WaCaNative raises
+-- GameSaved after every save, whoever called it
+WaCa.On("GameSaved", function(_, context)
+    log("game saved (%s, slot %s)%s", tostring(context), tostring(WaCa.CurrentSlot()),
+        slot.dirty and " - writing the sidecar" or "")
+    checkSlot()
+    saveSlot()
 end)
 -- the save manager's slot calls, logged (the character-slot flow is otherwise invisible in a player's log)
 for _, fn in ipairs({ "SetSaveSlot", "K2_CreateSaveSlot", "Load", "ResetSave" }) do

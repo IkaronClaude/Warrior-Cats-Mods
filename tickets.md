@@ -91,8 +91,12 @@ game data in this repo.
 - [~] P2 a click skips the splash: menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
   with the game's own WBP_GuiScreenSplash put on screen: the click logged "click on the splash - pressing Enter".
   Left: the operator sees the real splash continue.
-- [ ] Per-save sidecar: the write path end to end (a value changed in game -> the game's Save -> the sidecar file).
-  Testable on the VM now (PROJECT_PLAN.md "Testing on the GPU-less VM").
+- [x] Per-save sidecar: the write path end to end. FOUND + FIXED a real bug: the game saves through the native
+  USwtSaveManager::Save (static; 111 C++ call sites), never through ProcessEvent - the Lua RegisterHook on
+  SwtSaveManager:Save never fired, so in-game changes never reached the sidecar. saves.cpp hooks the native method
+  (anchors: the Save UFunction's thunk -> its call after setne r8b) and raises GameSaved(nil, context) for every
+  save; main.lua writes the sidecar on it. VM: GameSaved fired for SelectYourCat_OnFinishScreen /
+  SavePlayerExperience / SavePlayerLevel / SaveStringData, game alive.
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
   - mouse look / camera with a real mouse; the menu cursor with a real mouse
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow

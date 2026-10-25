@@ -90,6 +90,8 @@ end
 --     KeyDown(nil, keyName)                         a key / mouse button pressed ("Escape", "A", "LeftMouseButton"),
 --                                                   as it reaches the game window - before the game routes it, so
 --                                                   also while paused or when nothing is bound to it
+--     GameSaved(nil, context)                       right after every game save (the save manager's native save,
+--                                                   whoever called it) - write per-save data (WaCa.SlotFile) here
 --     Started(nil)                                  the first event after WaCa.Ready(), on the game thread; the
 --                                                   screens already up arrive as ScreenShown just before it
 -- Don't run Lua off the game thread in a mod that uses events (LoopAsync / ExecuteAsync): two OS threads in one Lua
