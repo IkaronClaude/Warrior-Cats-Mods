@@ -19,6 +19,7 @@
 #include "scan.h"
 #include "ue.h"
 #include "ui.h"
+#include "dev.h"
 
 namespace {
 
@@ -117,6 +118,10 @@ void* __fastcall TextKeyCtorDetour(uint32_t* outKey, const ue::FString* str) {
         auto verb = Arg(cmd, 0);
         if (verb == L"SetText") SetText(Arg(cmd, 1), Arg(cmd, 2));
         else if (verb == L"SetUIKey") ui::SetUIKey(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3), Arg(cmd, 4));
+        else if (verb == L"DevWatch") dev::Watch(Arg(cmd, 1), Arg(cmd, 2));
+        else if (verb == L"DevWatchRow") dev::Watch(ui::RowAddressHex(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3)), Arg(cmd, 4));
+        else if (verb == L"DevUnwatch") dev::Unwatch();
+        else if (verb == L"DevPressKey") dev::PressKey(Arg(cmd, 1));
         else logx::Line(L"[text] unknown command %s", cmd.c_str());
     }
     return g_textKeyOrig(outKey, str);

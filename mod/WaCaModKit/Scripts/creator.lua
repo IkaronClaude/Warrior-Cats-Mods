@@ -27,7 +27,7 @@ local PALETTES = {
 local vanillaCount = {}          -- palette -> the game's own colour count (before ours)
 local extended = false
 
-local pending = nil              -- { Name = {...}, Appearance = {...}, knownSlots = {id = true} } while creating
+local pending = nil              -- { Name = {...}, Appearance = {...}, print, closedAt } while creating
 local CREATOR_SCREENS = { "GuiScreenSelectClan", "GuiScreenCustomization", "GuiScreenSelectTraits", "GuiScreenSelectName" }
 
 local function hex(c) return string.format("#%02X%02X%02X", c.R, c.G, c.B) end
@@ -217,43 +217,70 @@ local function updateNameScreen()
     end
 end
 
--- creating starts when a creator screen shows; its choices go to the save slot the game creates next
-local justCommitted = false      -- a creation was saved: the next one starts only after the creator closed
+-- Creating starts when a creator screen shows. Its choices are kept as "pending" until the created cat shows up in
+-- the game: while the creator is open we fingerprint the preview cat's appearance values; the first player cat seen
+-- after it closed with the SAME fingerprint is the new cat (its save slot gets the choices, written at once), any
+-- other cat means the creation was abandoned (the choices are dropped). The save manager's slot calls are not used:
+-- a new character does not add a slot id, and the creation flow need not go through hookable functions.
+local FINGERPRINT = { "ClanType", "Gender", "BodyValue", "FaceValue", "FurValue", "EyeValue", "WhiskerValue", "TailIdx",
+                      "EarIdx", "FurIdx", "FurColorIdx", "Pattern01ColorIdx", "Pattern02ColorIdx", "PatternIdx",
+                      "MarkingIdx", "EyeLeftColorIdx", "EyeRightColorIdx" }
+local function fingerprint(d)
+    local parts = {}
+    for _, f in ipairs(FINGERPRINT) do
+        local ok, v = pcall(function() return d[f] end)
+        table.insert(parts, ok and tostring(v) or "?")
+    end
+    return table.concat(parts, ",")
+end
+
+local function previewFingerprint()
+    for _, a in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
+        local comp = a:IsValid() and a.CustomizableMeshComponent
+        if comp and comp:IsValid() then return fingerprint(comp.CustomData) end
+    end
+    return nil
+end
+
 local function trackCreation()
     local open = creatorOpen()
-    if not open then justCommitted = false end
-    if open and not justCommitted then
-        if not pending then
-            pending = { knownSlots = {} }
-            local sm = FindFirstOf("SwtSaveManager")
-            local sg = sm and sm:IsValid() and sm.SaveGame
-            if sg and sg:IsValid() then
-                for i = 1, #sg.saveSlots do pending.knownSlots[sg.saveSlots[i]:ToString()] = true end
-            end
+    if open then
+        if not pending or pending.closedAt and os.time() - pending.closedAt > 10 then
+            -- a fresh creation (one abandoned before it would have been dropped at the next player cat anyway)
+            pending = {}
             log("character creation started")
         end
+        pending.closedAt = nil
+        pending.print = previewFingerprint() or pending.print
+    elseif pending and not pending.closedAt then
+        pending.closedAt = os.time()
+        log("character creator closed (creation pending until the new cat shows up)")
     end
 end
 
--- the active slot changed: a NEW slot is the created cat's (pending goes there), an existing one drops pending
-function Creator.OnSlotChanged(id)
-    if not pending or not id then return end
-    if pending.knownSlots[id] then
-        if not creatorOpen() then
-            pending = nil
-            log("character creation dropped (an existing save was loaded)")
+-- called with the player's cat (its CustomData) whenever there is one: settles a pending creation
+function Creator.OnPlayerCat(customData)
+    if not pending or not pending.closedAt then return end
+    local print = fingerprint(customData)
+    if pending.print and print == pending.print then
+        local n = 0
+        for _, section in ipairs({ "Name", "Appearance" }) do
+            for _, k in ipairs(pending[section] and pending[section].__order or {}) do
+                ctx.setSlotValue(section, k, pending[section][k])
+                n = n + 1
+            end
         end
-        return
+        ctx.writeSlot()
+        log("character creation saved with the new cat's save slot %s (%d values)", tostring(ctx.slotId()), n)
+    else
+        log("character creation dropped (the cat in the game is not the one created: %s vs %s)", print, tostring(pending.print))
     end
-    for _, section in ipairs({ "Name", "Appearance" }) do
-        for _, k in ipairs(pending[section] and pending[section].__order or {}) do
-            ctx.setSlotValue(section, k, pending[section][k])
-        end
-    end
-    log("character creation saved with the new save slot %s", id)
     pending = nil
-    justCommitted = creatorOpen()
+    ctx.refreshLook()
 end
+
+-- the active slot changed: nothing to do for a pending creation (settled by OnPlayerCat)
+function Creator.OnSlotChanged(id) end
 
 -- is one of the character creator's screens showing?
 function Creator.IsOpen()

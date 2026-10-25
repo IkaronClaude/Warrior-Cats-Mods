@@ -167,19 +167,23 @@ end
 ---------------------------------------------------------------------------------------------------------------------
 -- Per-save data. The game keeps every save slot in Saved/SaveGames/WrcGame.sav (a slot = a GUID, the active one
 -- USwtSaveManager.SaveGame.saveSlots[CurrentSaveSlotIndex]). Mods keep their own data per slot in a sidecar file
--- next to it - WrcGame.<slot>.<ModName>.ini - so the game's save stays exactly as the game wrote it.
+-- next to it - WrcGame.<save>-<character slot>.<ModName>.ini - so the game's save stays exactly as the game wrote it.
 
 -- the active save slot's id, or nil (main menu before a save is chosen, a new game before its first save)
+-- The active character's save slot: "<save GUID>-<character slot>". The game keeps ONE save (saveSlots holds its
+-- GUID, the same for every character on the account) with up to MaxSlots characters in it; CurrentSaveSlotIndex is the
+-- character. (Before 0.5.4 the index was taken as an index into saveSlots - only character slot 0 ever had a sidecar.)
 function WaCa.CurrentSlot()
     local sm = FindFirstOf("SwtSaveManager")
     if not sm or not sm:IsValid() then return nil end
     local sg = sm.SaveGame
     if not sg or not sg:IsValid() then return nil end
     local idx = sg.CurrentSaveSlotIndex
-    local slots = sg.saveSlots
-    if not idx or idx < 0 or not slots or idx >= #slots then return nil end
-    local name = slots[idx + 1]:ToString()
-    return name ~= "" and name or nil
+    if not idx or idx < 0 then return nil end
+    local guid = #sg.saveSlots > 0 and sg.saveSlots[1]:ToString() or ""
+    if guid == "" then guid = sg.GamerId:ToString() end
+    if guid == "" then return nil end
+    return string.format("%s-%d", guid, idx)
 end
 
 -- the game's save folder (%LOCALAPPDATA%/Wrc/Saved/SaveGames)

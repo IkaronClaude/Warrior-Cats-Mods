@@ -19,7 +19,7 @@ asks whether to keep your settings or reset them to the new defaults (the old on
     picker), or a PNG pack - so two markings can be combined. Click the arrows, or press F6 / F7 ("No override" = the
     game's own). Backing out of the screen (BackSpace / Escape) drops that screen's WaCa choices, like the game's.
 - **Saved with your save, applied when you load it:** everything chosen goes into a small file next to the game's
-  save (`WrcGame.<slot>.WaCaModKit.ini`), written when the game saves. The game's own save only ever gets the game's
+  save (`WrcGame.<save>-<character slot>.WaCaModKit.ini`), written when the game saves. The game's own save only ever gets the game's
   own values (a custom colour is saved as the nearest game colour), so it stays loadable without the mod.
 
 ## Also in 0.4
@@ -51,7 +51,7 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   like the included **Colourpoint** (`PatternMask = look:Colourpoint`). Display only - the save keeps the
   game's look.
 - **Per-save data:** each save slot carries its own name and look in a sidecar file next to the game's save
-  (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`), loaded
+  (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<save>-<character slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`), loaded
   automatically with that save; it wins over the global `names.ini` / `appearance.ini` (the defaults for saves without
   their own). The game's save file is never modified by the mod.
 

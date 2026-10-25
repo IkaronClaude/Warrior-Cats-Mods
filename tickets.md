@@ -26,12 +26,37 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] 0.5.4 fix, tag moved (2026-10-25): reloading a save never applied WaCa overrides - NO sidecar was ever written
+      for the operator. Root cause: the game keeps ONE save (saveSlots = [its GUID]) with MaxSlots=3 characters;
+      CurrentSaveSlotIndex is the CHARACTER, but WaCa.CurrentSlot indexed saveSlots with it (only character 0 had a
+      slot - my VM always ran character 0), and creation waited for a new saveSlots GUID that never comes. Now: slot
+      id = "<GUID>-<character>" (old "<GUID>" file read for character 0); a creation is settled by fingerprint - the
+      first player cat whose appearance values equal the creator preview's gets the choices (written at once), any
+      other cat drops them. Save-manager slot calls are logged. Untested in a real creation (needs the GPU PC).
+- [ ] P1 Escape AND BackSpace as menu back, natively: menus map raw keys to ECommands through DT_GamepadButtonsKeyboard
+  rows (one FKey per row; DT_Keys is only key icons; no Button_B action mapping exists). Find the native lookup with a
+  hardware watchpoint on the Button_B row's Key (dev.cpp) and detour it so Escape also yields Button_B / Button_Back.
+- [ ] P1 mouse look has a max turn speed + stick-like acceleration (operator): the camera clamps the axis to the stick
+  range and runs it through the stick curve. Find the camera's axis consumer and feed mouse deltas unclamped.
+- [ ] P1 Spacebar also advances dialogue (operator 2026-10-25).
+- [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent
+  means (signature + fallback anchors: a string / UFunction native pointer / call-site chain), validated (prologue /
+  call layout checks), logged, and a tools/ check that runs every signature against a new exe before a release.
 - [x] 0.5.4 (2026-10-25, operator): the name box takes keyboard focus when the name screen opens (no mouse was
       visible to click it) and lost its blurry hint text; the mouse cursor shows in every menu (menus.lua: any shown
       screen that isn't GuiScreenGame / a Hud, or a popup on the game screen), hidden in gameplay; the installer asks
       keep / reset settings on an update (old ones to config-backup-<date>; -KeepConfig / -ResetConfig). The pause
       menu not closing on Escape was the operator's OLD keybinds.ini - re-test after a reset. Untested on a GPU: the
       cursor actually appearing, mouse clicks on the game's own buttons (P1 mouse ticket stays open).
+- [ ] P0 creator redesign, refined (operator 2026-10-25, replaces the online/local mode toggle below):
+  - Custom looks (patterns / markings / colours) are REGISTERED by mods - many mods at once without interfering
+    (namespaced ids, no shared-slot collisions) - and each declares a BASE-GAME FALLBACK (the modder's closest vanilla
+    pattern / marking / colour indices).
+  - One checkbox in the creator: "Customise online cat". UNCHECKED (default): the online cat = each chosen custom
+    look's fallback values, automatically. CHECKED: the online cat is customised separately with the native UI, and
+    a preview switch shows either the local or the online cat.
+  - The online customisation is remembered: check > customise > uncheck > re-check restores those online edits.
+    Creating the cat with the box unchecked uses the fallbacks.
 - [ ] P0 creator redesign (operator 2026-10-25): use the NATIVE customisation UI, not a side panel.
   - Hook the native pattern / marking scroll grid (with its preview) so mods add entries there; the game ships DLC
     patterns, so find how DLC rows join the grid (DT_Patterns / DLC data) and ride that.

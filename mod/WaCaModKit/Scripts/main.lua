@@ -21,7 +21,7 @@ local function applyTextOverrides()
 end
 
 -- Per-save data: the active save slot's own name / look, in a sidecar next to the game's save
--- (SaveGames/WrcGame.<slot>.WaCaModKit.ini: [Name] Prefix / Suffix, [Appearance] the appearance.ini keys). A slot's
+-- (SaveGames/WrcGame.<save>-<character slot>.WaCaModKit.ini: [Name] Prefix / Suffix, [Appearance] the appearance.ini keys). A slot's
 -- values win over config/names.ini and config/appearance.ini (the defaults for saves without their own). Changes made
 -- in-game are written when the GAME saves - quitting without saving drops them, like the game's own changes.
 local SLOT_HEADER = "; WaCa ModKit - this save slot's extra character data (written by the mod; the game's save is untouched)"
@@ -30,7 +30,14 @@ local onSlotChanged = {}          -- callbacks(newSlotId): the name / look state
 
 local function loadSlot(id)
     slot.id, slot.dirty = id, false
-    slot.data = (id and WaCa.ReadIni(WaCa.SlotFile("WaCaModKit", id))) or {}
+    slot.data = (id and WaCa.ReadIni(WaCa.SlotFile("WaCaModKit", id))) or nil
+    -- 0.5.0 - 0.5.3 named character slot 0's sidecar after the save GUID alone: read it (written under the new name)
+    local legacy = id and id:match("^(.+)%-0$")
+    if not slot.data and legacy then
+        slot.data = WaCa.ReadIni(WaCa.SlotFile("WaCaModKit", legacy))
+        if slot.data then slot.dirty = true; log("save slot %s: read the old-style sidecar %s", id, legacy) end
+    end
+    slot.data = slot.data or {}
     slot.data[""] = nil
     for _, fn in ipairs(onSlotChanged) do fn(id) end
     if id then
@@ -78,6 +85,15 @@ end
 pcall(RegisterHook, "/Script/SwtEngine.SwtSaveManager:Save", function() end, function()
     ExecuteInGameThread(function() checkSlot(); saveSlot() end)
 end)
+-- the save manager's slot calls, logged (the character-slot flow is otherwise invisible in a player's log)
+for _, fn in ipairs({ "SetSaveSlot", "K2_CreateSaveSlot", "Load", "ResetSave" }) do
+    pcall(RegisterHook, "/Script/SwtEngine.SwtSaveManager:" .. fn, function() end, function()
+        ExecuteInGameThread(function()
+            log("save manager: %s (now %s)", fn, tostring(WaCa.CurrentSlot()))
+            checkSlot()
+        end)
+    end)
+end
 
 -- Free-form name (config/names.ini [Player] Prefix = ..., optional Suffix = ...). The game names a cat
 -- <prefix><suffix>, both picked from its tables and stored as ids (PrefixNameId "STR_CAT_NAME12", SuffixNameId
@@ -310,6 +326,8 @@ table.insert(onSlotChanged, function() Roster.Run(true) end)
 Creator.Init({
     WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue, slotValue = slotValue,
     refreshLook = function() applyAppearance(true) end,
+    writeSlot = function() slot.dirty = true; saveSlot() end,
+    slotId = function() return slot.id end,
 })
 table.insert(onSlotChanged, Creator.OnSlotChanged)
 
@@ -394,6 +412,8 @@ local function slowTick()
     end
     checkSlot()
     Creator.Tick()
+    local cat = playerCustomData()
+    if cat then Creator.OnPlayerCat(cat) end
     applyName()
     applyAppearance(false)
     Roster.Run(false)

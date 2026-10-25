@@ -94,4 +94,16 @@ void SetUIKey(const std::wstring& tableHex, const std::wstring& row, const std::
     logx::Line(L"[ui] %s -> %s%s%s", row.c_str(), key.c_str(), icon.empty() ? L"" : L", icon ", icon.c_str());
 }
 
+// the address of a row's field (row data + offset hex) as hex, for dev::Watch; empty when not found
+std::wstring RowAddressHex(const std::wstring& tableHex, const std::wstring& row, const std::wstring& offsetHex) {
+    if (!g_fnameCtor) return L"";
+    auto* table = reinterpret_cast<uint8_t*>(std::wcstoull(tableHex.c_str(), nullptr, 16));
+    if (!table || IsBadReadPtr(table, kRowMapOffset + 0x40)) return L"";
+    uint8_t* r = FindRow(table, Name(row));
+    if (!r) return L"";
+    wchar_t buf[32];
+    swprintf_s(buf, L"%llX", reinterpret_cast<unsigned long long>(r + std::wcstoull(offsetHex.c_str(), nullptr, 16)));
+    return buf;
+}
+
 }  // namespace ui
