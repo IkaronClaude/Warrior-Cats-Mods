@@ -42,7 +42,7 @@ game data in this repo.
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent
   means (signature + fallback anchors: a string / UFunction native pointer / call-site chain), validated (prologue /
   call layout checks), logged, and a tools/ check that runs every signature against a new exe before a release.
-- [x] 0.5.4 (2026-10-25, operator): the name box takes keyboard focus when the name screen opens (no mouse was
+- [x] 0.5.4 (2026-10-25, operator; cursor fix: game-and-UI input mode + Default cursor, bShowMouseCursor alone showed nothing): the name box takes keyboard focus when the name screen opens (no mouse was
       visible to click it) and lost its blurry hint text; the mouse cursor shows in every menu (menus.lua: any shown
       screen that isn't GuiScreenGame / a Hud, or a popup on the game screen), hidden in gameplay; the installer asks
       keep / reset settings on an update (old ones to config-backup-<date>; -KeepConfig / -ResetConfig). The pause

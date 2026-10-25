@@ -26,17 +26,35 @@ end
 
 local enabled = true
 local shown = nil
+
+-- bShowMouseCursor alone shows nothing (operator 2026-10-25): the game viewport keeps the mouse captured with the
+-- cursor hidden during capture, and the cursor type may be None. A menu gets "game and UI" input with the cursor kept
+-- visible and the Default cursor; gameplay gets the game's "game only" mode back (mouse look captures the mouse).
+local function applyCursor(c, want, transition)
+    if c.bShowMouseCursor ~= want then c.bShowMouseCursor = want end
+    if c.bEnableClickEvents ~= want then c.bEnableClickEvents = want end
+    if c.bEnableMouseOverEvents ~= want then c.bEnableMouseOverEvents = want end
+    if want and c.CurrentMouseCursor ~= 1 then c.CurrentMouseCursor = 1 end      -- EMouseCursor::Default
+    if not transition then return end
+    local lib = StaticFindObject("/Script/UMG.Default__WidgetBlueprintLibrary")
+    local ok, err
+    if want then
+        -- (player controller, widget to focus, mouse lock: DoNotLock, hide the cursor during capture: no, flush input)
+        ok, err = pcall(function() lib:SetInputMode_GameAndUIEx(c, nil, 0, false, false) end)
+    else
+        ok, err = pcall(function() lib:SetInputMode_GameOnly(c, false) end)
+    end
+    if not ok then log("mouse cursor: input mode: %s", tostring(err)) end
+end
+
 function Menus.Tick()
     if not enabled then return end
     local want = menuShowing()
-    if want == shown then return end
+    local transition = want ~= shown
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
-        if c:IsValid() and c.Player and c.Player:IsValid() then
-            c.bShowMouseCursor = want
-            c.bEnableClickEvents = want
-            c.bEnableMouseOverEvents = want
-        end
+        if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition) end
     end
+    if not transition then return end
     -- the first decision is only logged when it shows the cursor (at start-up the game's own state is "hidden")
     if shown ~= nil or want then log("mouse cursor %s", want and "shown (menu)" or "hidden (gameplay)") end
     shown = want
