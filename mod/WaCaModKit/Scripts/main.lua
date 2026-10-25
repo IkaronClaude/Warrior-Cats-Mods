@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.4"
+local VERSION = "0.5.5"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -19,6 +19,8 @@ local function applyTextOverrides()
     end
     log("%d text overrides applied", n)
 end
+
+local Creator = require("creator")
 
 -- Per-save data: the active save slot's own name / look, in a sidecar next to the game's save
 -- (SaveGames/WrcGame.<save>-<character slot>.WaCaModKit.ini: [Name] Prefix / Suffix, [Appearance] the appearance.ini keys). A slot's
@@ -129,6 +131,12 @@ local function applyName()
     local custom = slotValue("Name", "Prefix") or cfg.Prefix or ""
     local ownSuffix = slotValue("Name", "Suffix") or cfg.Suffix or ""
     local data = playerCustomData()
+    -- while creating: the name typed in the creator, on the preview cat (the screens after the name screen show it)
+    local creating = Creator.PendingName()
+    if creating then
+        custom = creating
+        data = data or Creator.PreviewData()
+    end
     if not data then return end
     local prefixId, suffixId = data.PrefixNameId:ToString(), data.SuffixNameId:ToString()
     if prefixId == "" then return end
@@ -192,7 +200,6 @@ local function mergeLook(own)
     return cfg, table.concat(stamp, ";")
 end
 
-local Creator = require("creator")
 
 local function readAppearance()
     -- while creating a cat, the look chosen in the creator; else the save slot's own look (its [Appearance] section),

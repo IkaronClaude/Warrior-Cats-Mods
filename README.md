@@ -6,12 +6,14 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files. Updating over an older version
 asks whether to keep your settings or reset them to the new defaults (the old ones are backed up).
 
-## What's in 0.5.4
+## What's in 0.5.5
 
 - **In the game's character creator:**
   - **Your own name:** a text box on the name screen. The game's name list stays as your *online* name (what the
-    save and online features keep); the typed name is what you see in the game. The box has the keyboard as soon as
-    the screen opens - type, Enter, then Enter again to confirm.
+    save and online features keep); the typed name is what you see in the game. The box (top right) is part of the
+    screen's flow: confirm (Enter / the gamepad's confirm button) on the name list moves into the box - Steam's
+    on-screen keyboard opens on a controller - and confirming in the box goes on. Tab / the left stick click leave the
+    box (`creator.ini NameBoxKeys`). The warrior ceremony gets the same box for your own warrior **suffix**.
   - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
     from `config/palette.ini`.
   - **A WaCa panel** on the customisation screen: the *shape* of the pattern and of the markings from any of the
@@ -31,8 +33,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   extra colours / masks. Only valid game values go into the save, so it stays loadable without the mod.
 
 ## Also in 0.3.1
-- **The mouse cursor shows in menus** (the game hides it everywhere); hidden again in gameplay for mouse look
-  (`keybinds.ini [Mouse] MenuCursor = 0` for the game's behaviour). Clicking the game's own menu buttons: not yet.
+- **The mouse cursor shows in menus** (the game hides it everywhere) and is not captured on a click there; hidden and
+  captured again in gameplay for mouse look (`keybinds.ini [Mouse] MenuCursor = 0` for the game's behaviour).
+- **Your look on your cat's portraits** (headshots, inventory view) too - any view showing your cat's appearance.
 - **Escape** pauses (instead of P), and goes back / closes in every menu (the character creator included) - BackSpace keeps working too; the menus show the Esc icon.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands

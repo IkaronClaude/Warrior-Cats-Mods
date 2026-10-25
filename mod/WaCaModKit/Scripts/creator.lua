@@ -151,7 +151,6 @@ local function child(tree, name)
 end
 
 -- the name screen: our text box + label, and the game's list noted as the online name
-local nameScreen, nameTree = nil, nil
 local function newWidget(className, outer, name)
     local cls = StaticFindObject("/Script/UMG." .. className)
     return StaticConstructObject(cls, outer, FName(name))
@@ -165,55 +164,204 @@ local function place(canvas, widget, x, y, w, h)
     slot:SetSize({ X = w, Y = h })
 end
 
-local function setupNameScreen(screen)
+local creatorCfg, creatorCfgTime = {}, -1
+local function cfgValue(key)
+    if os.time() - creatorCfgTime >= 5 then          -- the panel polls often: re-read creator.ini every few seconds
+        local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
+        creatorCfg, creatorCfgTime = ini["Creator"] or {}, os.time()
+    end
+    return creatorCfg[key] or ""
+end
+
+-- The name screen flow (operator 2026-10-25): the box sits top right and is part of the flow - the game's "confirm"
+-- (Enter / the gamepad's confirm button) on the name list moves INTO the box (Steam's on-screen keyboard on a
+-- controller), and confirming in the box goes on to the next screen. The game's own confirm is held back meanwhile
+-- (its Button_A / Button_Confirm rows get no key), so Enter on the list can no longer skip the custom name. The
+-- creator.ini NameBoxKeys (Tab, the left stick click by default) leave the box without going on.
+local CONFIRM_ROWS = { "Button_A", "Button_Confirm" }
+-- the screens with a name box: the creator's name screen (your own name = the prefix) and the warrior ceremony's
+-- suffix choice (your own warrior suffix)
+local NAME_SCREENS = {
+    { cls = "GuiScreenSelectName", key = "Prefix", hint = "Your cat's name",
+      label = "Your cat's own name (optional) - confirm to type it, confirm again to go on" },
+    { cls = "GuiPopupWarriorName", key = "Suffix", hint = "Your warrior suffix",
+      label = "Your own warrior suffix (optional, e.g. heart) - confirm to type it, confirm again to go on" },
+}
+local name = nil   -- { screen, tree, held = { {table, row, key} }, confirmKeys = {key = true}, focused, leaving, steamWait }
+
+local function nameBox() return name and child(name.tree, "WaCaNameBox") or nil end
+
+local function boxKeys()
+    local keys = {}
+    for k in (cfgValue("NameBoxKeys") ~= "" and cfgValue("NameBoxKeys") or "Tab, Gamepad_LeftThumbstick"):gmatch("[^,%s]+") do
+        keys[k] = true
+    end
+    return keys
+end
+
+-- hold back the game's confirm on every menu-key table (keyboard + each gamepad type); the keys are remembered
+local function holdConfirm()
+    if name.held then return end
+    name.held, name.confirmKeys = {}, {}
+    for _, t in ipairs(WaCa.MenuKeyTables()) do
+        for _, row in ipairs(CONFIRM_ROWS) do
+            local key = WaCa.UIRowKey(t, row)
+            if key and key ~= "None" then
+                table.insert(name.held, { t = t:GetFullName():gsub("^%S+ ", ""), row = row, key = key })
+                name.confirmKeys[key] = true
+                WaCa.SetUIKeyIn(t, row, "None")
+            end
+        end
+    end
+    log("name screen: the game's confirm goes into the name box first (%d menu rows held)", #name.held)
+end
+
+local function releaseConfirm()
+    if not name or not name.held then return end
+    for _, h in ipairs(name.held) do
+        local t = StaticFindObject(h.t)
+        if t and t:IsValid() then WaCa.SetUIKeyIn(t, h.row, h.key) end
+    end
+    name.held = nil
+end
+
+local function focusBox(withController)
+    local box = nameBox()
+    if not box then return end
+    pcall(function() box:SetKeyboardFocus() end)
+    name.focused = true
+    if withController then
+        name.steamWait = ctx.modDir .. "/steamtext.result"
+        local existing = box:GetText():ToString():gsub("|", "")
+        WaCa.Command("SteamKeyboard|" .. name.spec.hint .. "|" .. existing .. "|" .. name.steamWait)
+    end
+    log("name screen: typing in the name box%s", withController and " (Steam keyboard)" or "")
+end
+
+local function leaveBox()
+    name.leaving = true
+    pcall(function() StaticFindObject("/Script/UMG.Default__WidgetBlueprintLibrary"):SetFocusToGameViewport() end)
+end
+
+-- on to the next screen: the game's confirm comes back, and the screen gets the confirm command it would have had
+local function goOn(screen)
+    releaseConfirm()
+    local pc
+    for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
+        if c:IsValid() and c.Player and c.Player:IsValid() then pc = c end
+    end
+    local ok, err = pcall(function() screen:OnListenCommand(5, 0, pc) end)     -- Button_A, IE_Pressed
+    log("name screen: name done - on to the next screen%s", ok and "" or (" (" .. tostring(err) .. ")"))
+end
+
+local function currentValue(key)
+    if pending then return pending.Name and pending.Name[key] or "" end
+    return ctx.slotValue("Name", key) or ""
+end
+
+local function setupNameScreen(screen, spec)
     local canvas = screen.WidgetTree.RootWidget
     if not canvas or not canvas:IsValid() or not canvas.AddChildToCanvas then
         log("name screen: no root canvas")
         return
     end
-    local info = screen.mcGuiTextInfo
-    -- the game's list: the online name
+    local info
+    pcall(function() info = screen.mcGuiTextInfo end)
     if info and info:IsValid() then
         local text = info:GetText():ToString()
         if not text:find("online name", 1, true) then
-            info:SetText(FText(text .. "  (your online name - type your own name in the box)"))
+            info:SetText(FText(text .. "  (your online name)"))
         end
     end
-    local nameLabel = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
-    nameLabel:SetText(FText("Type your cat's name (Enter when done; empty = the name chosen below)"))
-    local nameBox = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
+    local label = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
+    label:SetText(FText(spec.label))
+    local box = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
     -- no hint text: the box draws it in the engine's default style (blurry and barely legible - operator 2026-10-25)
     if info and info:IsValid() then
-        pcall(function() nameLabel:SetFont(info.Font) end)
-        pcall(function() nameBox.WidgetStyle.TextStyle.Font = info.Font end)
+        pcall(function() label:SetFont(info.Font) end)
+        pcall(function() box.WidgetStyle.TextStyle.Font = info.Font end)
     end
-    local current = pending and pending.Name and pending.Name.Prefix or ""
-    nameBox:SetText(FText(current))
-    place(canvas, nameLabel, 1250, -150, 1100, 90)
-    place(canvas, nameBox, 1250, -40, 1100, 110)
-    nameScreen, nameTree = screenId(screen), treePath(screen)
-    -- typing works without a mouse: the box takes the keyboard as the screen opens (Enter commits and hands the keys
-    -- back to the game - a second Enter confirms the screen)
-    pcall(function() nameBox:SetKeyboardFocus() end)
-    log("name screen: name box added (keyboard focus on it)")
+    box:SetText(FText(currentValue(spec.key)))
+    -- top right
+    local function corner(widget, y, w, h)
+        local slot = canvas:AddChildToCanvas(widget)
+        slot:SetAnchors({ Minimum = { X = 1, Y = 0 }, Maximum = { X = 1, Y = 0 } })
+        slot:SetAlignment({ X = 1, Y = 0 })
+        slot:SetPosition({ X = -80, Y = y })
+        slot:SetSize({ X = w, Y = h })
+    end
+    corner(label, 60, 1100, 80)
+    corner(box, 150, 900, 100)
+    releaseConfirm()
+    name = { spec = spec, screen = screenId(screen), tree = treePath(screen) }
+    holdConfirm()
+    log("name screen: name box added (top right)")
+end
+
+local function storeTyped(box)
+    local key = name.spec.key
+    local typed = box:GetText():ToString():gsub("^%s+", ""):gsub("%s+$", "")
+    if typed ~= currentValue(key) then
+        store("Name", key, typed ~= "" and typed or nil)
+        log("name %s typed: %s", key:lower(), typed ~= "" and typed or "(the game's)")
+    end
 end
 
 local function updateNameScreen()
-    local screen = shownScreen("GuiScreenSelectName")
-    if not screen then return end
-    local box = nameScreen == screenId(screen) and child(nameTree, "WaCaNameBox") or nil
+    local screen, spec
+    for _, sp in ipairs(NAME_SCREENS) do
+        screen = shownScreen(sp.cls)
+        if screen then spec = sp break end
+    end
+    if not screen then
+        if name then releaseConfirm(); name = nil end      -- left the screen (back, or on): the game's confirm back
+        return
+    end
+    local box = name and name.screen == screenId(screen) and nameBox() or nil
     if not box then
-        local ok, err = pcall(setupNameScreen, screen)
+        local ok, err = pcall(setupNameScreen, screen, spec)
         if not ok then log("name screen: %s", tostring(err)) end
         return
     end
-    local typed = box:GetText():ToString():gsub("^%s+", ""):gsub("%s+$", "")
-    local now
-    if pending then now = pending.Name and pending.Name.Prefix or ""
-    else now = ctx.slotValue("Name", "Prefix") or "" end
-    if typed ~= now then
-        store("Name", "Prefix", typed ~= "" and typed or nil)
-        log("name typed: %s", typed ~= "" and typed or "(the online name)")
+    storeTyped(box)
+    -- Steam's full-screen keyboard answered
+    if name.steamWait then
+        local f = io.open(name.steamWait, "rb")
+        if f then
+            local submitted = f:read("l")
+            local text = f:read("a") or ""
+            f:close()
+            os.remove(name.steamWait)
+            name.steamWait = nil
+            if submitted == "1" then
+                box:SetText(FText(text))
+                storeTyped(box)
+                goOn(screen)
+                return
+            end
+        end
+    end
+    -- the box let go of the keyboard: confirmed in it (Enter) = on to the next screen; our leave keys = back to the list
+    local focused = box:HasKeyboardFocus()
+    if name.focused and not focused then
+        name.focused = false
+        if name.leaving then name.leaving = false else goOn(screen) end
+    end
+end
+
+-- a key on the name screen (the raw key hook): the game's confirm on the list = into the box; a leave key = out
+function Creator.NameKey(key)
+    if not name or not shownScreen(name.spec.cls) then return end
+    local box = nameBox()
+    if not box then return end
+    local inBox = box:HasKeyboardFocus()
+    local gamepad = key:find("^Gamepad") ~= nil
+    if not inBox and name.confirmKeys and name.confirmKeys[key] then
+        focusBox(gamepad)
+    elseif inBox and boxKeys()[key] then
+        leaveBox()
+    elseif not inBox and boxKeys()[key] then
+        focusBox(gamepad)
     end
 end
 
@@ -222,24 +370,30 @@ end
 -- after it closed with the SAME fingerprint is the new cat (its save slot gets the choices, written at once), any
 -- other cat means the creation was abandoned (the choices are dropped). The save manager's slot calls are not used:
 -- a new character does not add a slot id, and the creation flow need not go through hookable functions.
-local FINGERPRINT = { "ClanType", "Gender", "BodyValue", "FaceValue", "FurValue", "EyeValue", "WhiskerValue", "TailIdx",
-                      "EarIdx", "FurIdx", "FurColorIdx", "Pattern01ColorIdx", "Pattern02ColorIdx", "PatternIdx",
-                      "MarkingIdx", "EyeLeftColorIdx", "EyeRightColorIdx" }
-local function fingerprint(d)
-    local parts = {}
-    for _, f in ipairs(FINGERPRINT) do
-        local ok, v = pcall(function() return d[f] end)
-        table.insert(parts, ok and tostring(v) or "?")
+-- every non-empty preview fingerprint seen while the creator is open (there are several preview actors - the creator
+-- preview, portrait and inventory views; the first one found was an empty record and nothing ever matched)
+local function previewFingerprints(into)
+    for _, comp in ipairs(WaCa.PreviewCats()) do
+        local p = WaCa.CatFingerprint(comp.CustomData)
+        if p then into[p] = true end
     end
-    return table.concat(parts, ",")
 end
 
-local function previewFingerprint()
-    for _, a in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-        local comp = a:IsValid() and a.CustomizableMeshComponent
-        if comp and comp:IsValid() then return fingerprint(comp.CustomData) end
+-- the creator preview's appearance record (the first non-empty one), for showing the pending name during creation
+function Creator.PreviewData()
+    local s = shownScreen("GuiScreenSelectName")
+    local ref = s and s.CatRef
+    local comp = ref and ref:IsValid() and ref.CustomizableMeshComponent
+    if comp and comp:IsValid() then return comp.CustomData end
+    for _, comp in ipairs(WaCa.PreviewCats()) do
+        if WaCa.CatFingerprint(comp.CustomData) then return comp.CustomData end
     end
     return nil
+end
+
+-- the name typed in the creator while creating, or nil
+function Creator.PendingName()
+    return pending and pending.Name and pending.Name.Prefix or nil
 end
 
 local function trackCreation()
@@ -251,7 +405,8 @@ local function trackCreation()
             log("character creation started")
         end
         pending.closedAt = nil
-        pending.print = previewFingerprint() or pending.print
+        pending.prints = {}                  -- the CURRENT look only: an earlier choice must not match later
+        previewFingerprints(pending.prints)
     elseif pending and not pending.closedAt then
         pending.closedAt = os.time()
         log("character creator closed (creation pending until the new cat shows up)")
@@ -261,8 +416,8 @@ end
 -- called with the player's cat (its CustomData) whenever there is one: settles a pending creation
 function Creator.OnPlayerCat(customData)
     if not pending or not pending.closedAt then return end
-    local print = fingerprint(customData)
-    if pending.print and print == pending.print then
+    local print = WaCa.CatFingerprint(customData)
+    if print and pending.prints and pending.prints[print] then
         local n = 0
         for _, section in ipairs({ "Name", "Appearance" }) do
             for _, k in ipairs(pending[section] and pending[section].__order or {}) do
@@ -273,7 +428,10 @@ function Creator.OnPlayerCat(customData)
         ctx.writeSlot()
         log("character creation saved with the new cat's save slot %s (%d values)", tostring(ctx.slotId()), n)
     else
-        log("character creation dropped (the cat in the game is not the one created: %s vs %s)", print, tostring(pending.print))
+        local seen = {}
+        for p in pairs(pending.prints or {}) do table.insert(seen, p) end
+        log("character creation dropped (the cat in the game is not the one created: %s vs %s)", tostring(print),
+            #seen > 0 and table.concat(seen, " / ") or "none")
     end
     pending = nil
     ctx.refreshLook()
@@ -344,14 +502,6 @@ local function choicesFor(key)
 end
 
 -- the screen that hosts the panel (creator.ini PanelScreen; the customisation screen - other values are for tests)
-local creatorCfg, creatorCfgTime = {}, -1
-local function cfgValue(key)
-    if os.time() - creatorCfgTime >= 5 then          -- the panel polls often: re-read creator.ini every few seconds
-        local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
-        creatorCfg, creatorCfgTime = ini["Creator"] or {}, os.time()
-    end
-    return creatorCfg[key] or ""
-end
 local function panelScreen()
     local s = cfgValue("PanelScreen")
     return s ~= "" and s or "GuiScreenCustomization"
@@ -494,7 +644,7 @@ end
 
 -- the name screen, polled often (typing then confirming quickly must not lose the last letters)
 function Creator.FastTick()
-    if pending then updateNameScreen() end
+    updateNameScreen()
     if pending or attachHidden() then updatePanel() end
 end
 
@@ -513,6 +663,10 @@ function Creator.Init(c)
     end)
     pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:OnKeyPressed", function(_, key)
         local ok, name = pcall(function() return key:get().KeyName:ToString() end)
+        if ok then
+            local k = name
+            ExecuteInGameThread(function() Creator.NameKey(k) end)
+        end
         if ok and (name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7" or name == "BackSpace" or name == "Escape") then
             ExecuteInGameThread(function() onKey(name) end)
         end

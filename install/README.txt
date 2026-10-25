@@ -11,13 +11,14 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.5.4)
+WHAT IT DOES (0.5.5)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
 
   In the character creator:
   - Type your own name on the name screen. The game's name list is your ONLINE name (what the save and online
-    features keep); your typed name is what you see in the game. Just start typing when
-    the screen opens, press Enter, then Enter again to confirm.
+    features keep); your typed name is what you see in the game. Confirm on the name list
+    to type in the box (top right; Steam's keyboard on a controller), confirm again to go on. The warrior ceremony
+    has the same box for your own warrior suffix.
   - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
   - A WaCa panel on the customisation screen: the shape of the pattern / markings from any of the game's patterns
     and markings, or "Colourpoint" (coloured with the game's pattern colour) - combine two markings. Click the arrows

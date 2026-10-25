@@ -26,6 +26,7 @@ end
 
 local enabled = true
 local shown = nil
+local gameCaptureMode = nil      -- the viewport's mouse capture mode as the game set it
 
 -- bShowMouseCursor alone shows nothing (operator 2026-10-25): the game viewport keeps the mouse captured with the
 -- cursor hidden during capture, and the cursor type may be None. A menu gets "game and UI" input with the cursor kept
@@ -36,6 +37,11 @@ local function applyCursor(c, want, transition)
     if c.bEnableMouseOverEvents ~= want then c.bEnableMouseOverEvents = want end
     if want and c.CurrentMouseCursor ~= 1 then c.CurrentMouseCursor = 1 end      -- EMouseCursor::Default
     if not transition then return end
+    if gameCaptureMode == nil then
+        pcall(function()
+            gameCaptureMode = StaticFindObject("/Script/Engine.Default__GameplayStatics"):GetViewportMouseCaptureMode(c)
+        end)
+    end
     local lib = StaticFindObject("/Script/UMG.Default__WidgetBlueprintLibrary")
     local ok, err
     if want then
@@ -45,6 +51,13 @@ local function applyCursor(c, want, transition)
         ok, err = pcall(function() lib:SetInputMode_GameOnly(c, false) end)
     end
     if not ok then log("mouse cursor: input mode: %s", tostring(err)) end
+    -- the viewport captures the mouse on a click (cursor hidden + locked: operator 2026-10-25) - no capture in menus,
+    -- the game's own mode (read before the first change) back in gameplay. Set AFTER the input mode, which resets it
+    local statics = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+    local ok0, err0 = pcall(function()
+        statics:SetViewportMouseCaptureMode(c, want and 0 or gameCaptureMode)
+    end)
+    if not ok0 then log("mouse cursor: capture mode: %s", tostring(err0)) end
 end
 
 function Menus.Tick()

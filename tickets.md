@@ -26,6 +26,16 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] 0.5.5 (2026-10-25, operator): name box top right, no auto focus, part of the flow (the game's confirm rows are
+      held while the name screen shows: confirm on the list = into the box, confirm in the box = on, via
+      OnListenCommand(Button_A); Tab / L3 leave); Steam on-screen keyboard on a controller (floating first, then the
+      full-screen one via GamepadTextInputDismissed_t -> steamtext.result); the warrior ceremony popup
+      (GuiPopupWarriorName) gets the same box for the suffix. The typed name was IGNORED: the creation fingerprint
+      read an empty preview actor (several GuiCatCustomActor exist: creator, portrait, inventory) - now every
+      non-empty one, and the pending name shows during creation (name screen CatRef). Headshots: preview actors whose
+      fingerprint equals the player's cat get the look. Menu clicks: no viewport mouse capture in menus (capture mode
+      0, set after the input mode, which resets it). UNTESTED on a GPU: the whole name flow, OnListenCommand going
+      on, Steam keyboards (refused on the VM: Steam logged out), clicks on the game's buttons.
 - [x] 0.5.4 fix, tag moved (2026-10-25): reloading a save never applied WaCa overrides - NO sidecar was ever written
       for the operator. Root cause: the game keeps ONE save (saveSlots = [its GUID]) with MaxSlots=3 characters;
       CurrentSaveSlotIndex is the CHARACTER, but WaCa.CurrentSlot indexed saveSlots with it (only character 0 had a
@@ -65,7 +75,7 @@ game data in this repo.
   - Apply our look in the same refresh as the game's (no flash of the vanilla pattern after a colour change): hook the
     material build, not a re-apply after it.
   - Custom colours have no UI: a colour wheel / hex entry in local mode.
-- [ ] P1 cat headshots / portraits show the ONLINE look (operator 2026-10-25): the in-game places that render a
+- [x] (0.5.5) P1 cat headshots / portraits show the ONLINE look (operator 2026-10-25): the in-game places that render a
   "headshot" of the player's cat ignore the WaCa override - find the portrait capture actor / render target and give
   it the local look too (WaCa.PlayerCats only covers the pawn, cutscene cats and the creator preview).
 - [ ] creator redesign finding (2026-10-25): DT_Patterns = 23 rows NewRow..NewRow_21 (PatternType 0-22), DT_Markings

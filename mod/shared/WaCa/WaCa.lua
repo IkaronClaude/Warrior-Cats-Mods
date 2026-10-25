@@ -98,6 +98,37 @@ function WaCa.SetUIKey(row, key, icon)
     return WaCa.Command(string.format("SetUIKey|%X|%s|%s|%s", tbl:GetAddress(), row, key, icon))
 end
 
+-- every menu-key table: the keyboard one and one per gamepad type (USwtGuiManager.GamepadButtonsMap)
+function WaCa.MenuKeyTables()
+    local out, seen = {}, {}
+    local function add(t)
+        if t and t:IsValid() and not seen[t:GetAddress()] then
+            seen[t:GetAddress()] = true
+            table.insert(out, t)
+        end
+    end
+    add(StaticFindObject(WaCa.UI_KEYS_TABLE))
+    local gm = FindFirstOf("SwtGuiManager")
+    local map = gm and gm:IsValid() and gm.GamepadButtonsMap
+    if map and map:IsValid() then
+        pcall(function()
+            map.DataGamepadButtonsMap:ForEach(function(_, v) add(v:get()) end)
+        end)
+    end
+    return out
+end
+
+-- a menu row's key name in a table ("Enter", "Gamepad_FaceButton_Bottom"), or nil
+function WaCa.UIRowKey(tbl, row)
+    local ok, key = pcall(function() return tbl:FindRow(row).Key.KeyName:ToString() end)
+    return ok and key or nil
+end
+
+-- a menu row's key in a given table, its icon untouched ("None" = no key)
+function WaCa.SetUIKeyIn(tbl, row, key)
+    return WaCa.Command(string.format("SetUIKey|%X|%s|%s|", tbl:GetAddress(), row, key))
+end
+
 -- only the hint icon of a menu row (its key stays): e.g. SetUIIcon("Button_B", "Escape") shows Esc for "back" while
 -- BackSpace still works (pair it with a key alias Escape -> BackSpace so Esc works too)
 function WaCa.SetUIIcon(row, iconKey)
@@ -348,20 +379,52 @@ end
 -- the player's cat: the customizable mesh on the player's pawn, the player's cat in cutscenes (bIsPlayer), and - only
 -- when withPreview is true (pass true while the character creator is open) - the creator's preview cat. The game
 -- reuses that preview actor on other screens ("Select Your Cat" shows other cats, e.g. Dapplepatch, with it).
+-- a cat's appearance values as one string (FCatCustomData's look fields): two cats with the same fingerprint look
+-- the same - the player's cat and its portraits / inventory views; nil for an empty (all-zero) record
+WaCa.FINGERPRINT_FIELDS = { "ClanType", "Gender", "BodyValue", "FaceValue", "FurValue", "EyeValue", "WhiskerValue",
+    "TailIdx", "EarIdx", "FurIdx", "FurColorIdx", "Pattern01ColorIdx", "Pattern02ColorIdx", "PatternIdx", "MarkingIdx",
+    "EyeLeftColorIdx", "EyeRightColorIdx" }
+function WaCa.CatFingerprint(d)
+    local parts, any = {}, false
+    for _, f in ipairs(WaCa.FINGERPRINT_FIELDS) do
+        local ok, v = pcall(function() return d[f] end)
+        v = ok and v or "?"
+        if v ~= 0 and v ~= false and v ~= "?" then any = true end
+        table.insert(parts, tostring(v))
+    end
+    return any and table.concat(parts, ",") or nil
+end
+
+-- the GuiCatCustomActor instances (the creator preview, the portrait / headshot and inventory views) with their
+-- mesh components
+function WaCa.PreviewCats()
+    local out = {}
+    for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
+        local comp = preview:IsValid() and preview.CustomizableMeshComponent
+        if comp and comp:IsValid() then table.insert(out, comp) end
+    end
+    return out
+end
+
 function WaCa.PlayerCats(withPreview)
     local out = {}
     local pc = FindFirstOf("PlayerController")
     local pawn = pc and pc:IsValid() and pc.Pawn
     local pawnName = pawn and pawn:IsValid() and pawn:GetFullName()
+    local playerPrint
     if pawnName then
         for _, comp in ipairs(FindAllOf("SwtAdventureCustomizableMeshComponent") or {}) do
-            if comp:IsValid() and comp:GetOwner():GetFullName() == pawnName then table.insert(out, comp) end
+            if comp:IsValid() and comp:GetOwner():GetFullName() == pawnName then
+                table.insert(out, comp)
+                playerPrint = playerPrint or WaCa.CatFingerprint(comp.CustomData)
+            end
         end
     end
-    if withPreview then
-        for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-            local comp = preview:IsValid() and preview.CustomizableMeshComponent
-            if comp and comp:IsValid() then table.insert(out, comp) end
+    -- preview actors: all of them in the creator; elsewhere only those showing the player's cat (its headshots and
+    -- inventory view - "Select Your Cat" reuses one for other cats, which have other values)
+    for _, comp in ipairs(WaCa.PreviewCats()) do
+        if withPreview or (playerPrint and WaCa.CatFingerprint(comp.CustomData) == playerPrint) then
+            table.insert(out, comp)
         end
     end
     -- the player's cat as the creator and cutscenes show it (BP_WrcSK_Customization_Player and friends: a skeletal

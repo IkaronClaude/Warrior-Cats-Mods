@@ -20,6 +20,7 @@
 #include "ue.h"
 #include "ui.h"
 #include "dev.h"
+#include "steam.h"
 
 namespace {
 
@@ -123,6 +124,7 @@ void* __fastcall TextKeyCtorDetour(uint32_t* outKey, const ue::FString* str) {
         else if (verb == L"DevUnwatch") dev::Unwatch();
         else if (verb == L"DevPressKey") dev::PressKey(Arg(cmd, 1));
         else if (verb == L"DevStack") dev::Stack(Arg(cmd, 1));
+        else if (verb == L"SteamKeyboard") steam::ShowKeyboard(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3));
         else logx::Line(L"[text] unknown command %s", cmd.c_str());
     }
     return g_textKeyOrig(outKey, str);

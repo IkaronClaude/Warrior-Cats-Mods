@@ -16,7 +16,8 @@ add_library(WaCaNative SHARED
     WaCaNative/src/input.cpp
     WaCaNative/src/text.cpp
     WaCaNative/src/ui.cpp
-    WaCaNative/src/dev.cpp)
+    WaCaNative/src/dev.cpp
+    WaCaNative/src/steam.cpp)
 target_link_libraries(WaCaNative PRIVATE minhook)
 target_compile_definitions(WaCaNative PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
 set_target_properties(WaCaNative PROPERTIES OUTPUT_NAME main)
