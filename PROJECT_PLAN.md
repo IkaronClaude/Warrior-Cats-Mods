@@ -198,9 +198,9 @@ The game now runs on the VM, slowly but fully: menus, loading a save, the world,
   place; WaCaNative's event bus survives it and `Started` replays the screens up. `native\build.bat` configures only a
   new build tree: 3 s with no change, ~11 s for bridge.cpp. `-nullrhi` stops at the main menu (the harness's
   scheduled menu press never runs), so it doesn't help.
-- The creator's customisation screen crashes on the VM even with no mod code (WACA_NOLOOK=1, Lua stubbed):
-  UGuiScreenBasePreview.CatRef is null - the preview cat actor never exists here. Customisation tests need the
-  operator.
+- **Creator tests need the game's real flow** (logos -> splash -> Enter -> the L_MainMenu_P main menu). The test
+  harness's old shortcut (a main menu built by hand on M_LogosMap) left the customisation screen without its
+  preview cat: a null CatRef crash that looked like a VM problem. Through the real flow the creator works here.
 - Input: `tools/vm_input.py key <vk hex>` / `click <x> <y>` (moves the real cursor: Slate reads it). The test mod
   (Mods/WaCaTest, not shipped) drives flows: main menu -> story -> Select Your Cat; a real Enter there loads the save.
 - Verified this way: menu mouse clicks (main menu -> Defender Mode), KeyDown, Escape -> BackSpace alias in menus
