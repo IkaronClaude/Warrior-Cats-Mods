@@ -11,8 +11,9 @@ call "%VCVARS%" >nul 2>&1 || (echo Visual Studio C++ tools not found & exit /b 1
 set PATH=%USERPROFILE%\.cargo\bin;%PATH%
 set UE4SS_ARG=
 if defined WACA_UE4SS_DIR set UE4SS_ARG=-DWACA_UE4SS_DIR=%WACA_UE4SS_DIR%
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64 %UE4SS_ARG% || exit /b 1
+rem configure only for a new build tree (~18 s): after that Ninja re-runs it itself when a CMakeLists.txt changes
+if not exist build\build.ninja cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64 %UE4SS_ARG% || exit /b 1
 cmake --build build --target WaCaNative || exit /b 1
 if not exist out mkdir out
-for /r build %%f in (main.dll) do if exist "%%f" copy /y "%%f" out\main.dll >nul
+if exist build\main.dll (copy /y build\main.dll out\main.dll >nul) else for /r build %%f in (main.dll) do if exist "%%f" copy /y "%%f" out\main.dll >nul
 echo built %~dp0out\main.dll
