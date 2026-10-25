@@ -11,21 +11,19 @@ UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
 WHAT IT DOES (0.4.0)
+  The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
+
   - Escape instead of P to pause, and Escape instead of BackSpace for back / close in menus.
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
-  - Rebind any keyboard/mouse key: edit
-      <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\keybinds.ini
-    (all commands and the game's defaults are listed inside).
-  - Your own cat name: edit config
-ames.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
+  - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).
+  - Your own cat name: names.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
     Your save keeps the game's name, so online features and uninstalling are safe.
-  - Change any game text: config	ext.ini.
-  - Your cat's look: configppearance.ini - any colour for every part of the coat, the game's patterns and markings
+  - Change any game text: text.ini.
+  - Your cat's look: appearance.ini - any colour for every part of the coat, the game's patterns and markings
     combined freely, and looks like "Colourpoint" (Look = Colourpoint).
-
   - No more doubled cat names from the game's generator ("Blazeblaze").
-  - Fixed cats for specific roles: configoster.ini + roster files (see rostersExample.ini) pin a story cat or a
-    clan's leader / deputy / warriors ... to a name and look.
+  - Fixed cats for specific roles: roster.ini + roster files (see the rosters folder's Example.ini) pin a story cat
+    or a clan's leader / deputy / warriors ... to a name and look.
 
 ADDING YOUR OWN MODS
   WaCa ModKit runs on UE4SS (https://github.com/UE4SS-RE/RE-UE4SS). Lua mods go in
