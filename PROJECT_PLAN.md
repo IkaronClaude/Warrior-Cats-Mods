@@ -143,7 +143,7 @@ UE4SS builds from source on this VM and a C++ mod built against it loads in the 
 - Build: `tools/bin/src/build.bat` = vcvars64 + `cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64` over
   a root CMakeLists that adds `RE-UE4SS` and the mod (`HelloMod`: a CppUserModBase with `start_mod` /
   `uninstall_mod` exports, `target_link_libraries(... UE4SS)`).
-- A full build takes about 13 GB in `build/` (PDBs and the cargo target). A disk-full stop mid-link leaves a corrupt
+- A full build takes 2.2 GB in `build/` (measured). A disk-full stop mid-link leaves a corrupt
   UE4SS.pdb (LNK1318): delete it and re-run, and ninja resumes.
 - Install: `ue4ss/Mods/<Name>/dlls/main.dll` + `enabled.txt`. Headless test: the log showed
   "[HelloMod] unreal init" 4 s after the mod started.
