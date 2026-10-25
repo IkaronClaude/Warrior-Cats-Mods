@@ -209,6 +209,10 @@ game data in this repo.
 - [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
       that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
       our bindings), mouse bindings for the camera.
+      Keybind menu (operator 2026-10-25): keep everything mouse / key related standard-UE compatible so the menu can
+      just read and write the engine's own input mappings (UPlayerInput action / axis mappings, the menus'
+      DT_GamepadButtons* rows, the viewport capture mode) - the menu saves them to keybinds.ini, the one source. The
+      raw KeyDown event only observes (aliases press real keys), so it stays compatible.
 - [ ] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
 - [ ] **3. Free-form name input.** The player types any name. Keep an auto-generated fallback name for online content
       (minor relevance); find what the online side reads.
