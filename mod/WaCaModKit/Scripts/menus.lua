@@ -72,14 +72,17 @@ local function applyCursor(c, want, transition)
     if not ok0 then log("mouse cursor: capture mode: %s", tostring(err0)) end
 end
 
--- the cursor for the screens up now (a screen's own Construct may have changed the input mode: re-asserted each time)
-local function update(leaving)
+-- the cursor for the screens up now. full: also the input mode + mouse capture, not only on a menu <-> gameplay change
+-- - a screen's own Construct can set them back (a click in a menu then captured the mouse and hid the cursor instead
+-- of reaching the button: operator 2026-10-25). Never on focus changes: setting the input mode moves the keyboard
+-- focus (it would pull the keyboard out of the name box).
+local function update(leaving, full)
     if not enabled then return end
     local want = menuShowing(leaving)
     if want == nil then return end          -- between two screens: keep what we have
     local transition = want ~= shown
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
-        if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition) end
+        if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition or (full and want)) end
     end
     if not transition then return end
     -- the first decision is only logged when it shows the cursor (at start-up the game's own state is "hidden")
@@ -93,8 +96,8 @@ function Menus.Init(c)
     local mouse = ini and ini["Mouse"] or {}
     enabled = (mouse.MenuCursor or "1") ~= "0"
     if not enabled then return end
-    WaCa.On("ScreenShown", function() update(nil) end)
-    WaCa.On("ScreenHidden", function(screen) update(screen) end)
+    WaCa.On("ScreenShown", function() update(nil, true) end)
+    WaCa.On("ScreenHidden", function(screen) update(screen, true) end)
     WaCa.On("ScreenFocusIn", function() update(nil) end)
     WaCa.On("ScreenFocusOut", function() update(nil) end)
 end
