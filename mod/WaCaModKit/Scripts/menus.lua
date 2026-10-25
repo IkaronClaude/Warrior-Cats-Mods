@@ -76,10 +76,31 @@ end
 -- - a screen's own Construct can set them back (a click in a menu then captured the mouse and hid the cursor instead
 -- of reaching the button: operator 2026-10-25). Never on focus changes: setting the input mode moves the keyboard
 -- focus (it would pull the keyboard out of the name box).
-local function update(leaving, full)
+-- No screen up is either the gap between two screens (a frame or two) or gameplay (the game shows no screen there at
+-- all - the cursor stayed in menu mode for a whole session, no mouse look: operator 2026-10-25). It is settled once,
+-- shortly after: a screen by then = it was a gap, still none = gameplay.
+local SETTLE_MS = 150
+local settling = false
+local update
+
+local function settle()
+    settling = false
+    local want = menuShowing(nil)
+    if want == nil then want = false end
+    update(nil, true, want)
+end
+
+update = function(leaving, full, decided)
     if not enabled then return end
-    local want = menuShowing(leaving)
-    if want == nil then return end          -- between two screens: keep what we have
+    local want = decided
+    if want == nil then want = menuShowing(leaving) end
+    if want == nil then
+        if not settling then
+            settling = true
+            ExecuteInGameThreadWithDelay(SETTLE_MS, settle)
+        end
+        return
+    end
     local transition = want ~= shown
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
         if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition or (full and want)) end
