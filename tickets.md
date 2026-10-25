@@ -26,144 +26,35 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
-- [x] 0.6.0 (2026-10-25, operator goal "port the mod to the proper event/hook based system"): no polling anywhere.
-      Native event bus on UE4SS's ProcessEvent callbacks (WaCaNative = UE4SS C++ mod built against the SDK), Lua
-      WaCa.On / WaCa.Watch / WaCa.Ready, built-in ScreenShown / ScreenHidden / ScreenFocusIn / ScreenFocusOut /
-      CatSpawned / SteamTextInput / Started; both Lua loops removed; WaCaNative_Command replaces the string-table
-      channel. Headless-proven (PROJECT_PLAN.md "Event-driven foundation"). Not released yet (see the two P1s below).
-- [x] CI secret UE4SS_SOURCE_TOKEN (2026-10-25): set by the operator; v0.6.0 released by CI (full UE4SS build 12m22s
-      on the runner). Build-output cache added after (first used by the next tag).
-- [ ] P1 verify 0.6.0 on a GPU (operator's PC): CatSpawned in real gameplay (name / look / roster on spawn), the
-  menu cursor staying visible without the old per-tick re-assert, the name box flow with a real keyboard and the
-  Steam keyboard, the creator panel re-attaching after menu commands.
-- [x] 0.5.5 (2026-10-25, operator): name box top right, no auto focus, part of the flow (the game's confirm rows are
-      held while the name screen shows: confirm on the list = into the box, confirm in the box = on, via
-      OnListenCommand(Button_A); Tab / L3 leave); Steam on-screen keyboard on a controller (floating first, then the
-      full-screen one via GamepadTextInputDismissed_t -> steamtext.result); the warrior ceremony popup
-      (GuiPopupWarriorName) gets the same box for the suffix. The typed name was IGNORED: the creation fingerprint
-      read an empty preview actor (several GuiCatCustomActor exist: creator, portrait, inventory) - now every
-      non-empty one, and the pending name shows during creation (name screen CatRef). Headshots: preview actors whose
-      fingerprint equals the player's cat get the look. Menu clicks: no viewport mouse capture in menus (capture mode
-      0, set after the input mode, which resets it). UNTESTED on a GPU: the whole name flow, OnListenCommand going
-      on, Steam keyboards (refused on the VM: Steam logged out), clicks on the game's buttons.
-- [x] 0.5.4 fix, tag moved (2026-10-25): reloading a save never applied WaCa overrides - NO sidecar was ever written
-      for the operator. Root cause: the game keeps ONE save (saveSlots = [its GUID]) with MaxSlots=3 characters;
-      CurrentSaveSlotIndex is the CHARACTER, but WaCa.CurrentSlot indexed saveSlots with it (only character 0 had a
-      slot - my VM always ran character 0), and creation waited for a new saveSlots GUID that never comes. Now: slot
-      id = "<GUID>-<character>" (old "<GUID>" file read for character 0); a creation is settled by fingerprint - the
-      first player cat whose appearance values equal the creator preview's gets the choices (written at once), any
-      other cat drops them. Save-manager slot calls are logged. Untested in a real creation (needs the GPU PC).
-- [ ] P1 Escape AND BackSpace as menu back, natively: menus map raw keys to ECommands through DT_GamepadButtonsKeyboard
-  rows (one FKey per row; DT_Keys is only key icons; no Button_B action mapping exists). Find the native lookup with a
-  hardware watchpoint on the Button_B row's Key (dev.cpp) and detour it so Escape also yields Button_B / Button_Back.
-- [ ] P1 mouse look has a max turn speed + stick-like acceleration (operator): the camera clamps the axis to the stick
-  range and runs it through the stick curve. Find the camera's axis consumer and feed mouse deltas unclamped.
+- [ ] **P0 creator redesign: custom looks in the game's own creator UI** (operator 2026-10-25; merges the two creator
+  redesign tickets, the "creator finding" note and the old "Creator UI injection").
+  - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
+        CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
+  - [ ] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK (pattern /
+        marking / colour indices). Started: looks/*.ini `Fallback =` (Colourpoint: P13_Tabby), creator.ini PackFallback.
+  - [ ] Entries in the native pattern / marking grids (mcGuiPatternPanel.mcGuiGrid, WBP_GuiCustomizationPatternItem_C
+        items; DT_Patterns 23 rows NewRow..NewRow_21 = PatternType 0-22, DT_Markings 20 rows, on
+        USwtAdventureGameInstance PatternsDataTable / MarkingsDataTable / DeluxeDataTable). Find how DLC rows join the
+        grid and ride that. UE4SS UDataTable:AddRow fails ("ICppStructOps::Copy unavailable"): rows need native code.
+  - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
+        the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
+  - [ ] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
+  - [ ] Then: drop the WaCa side panel.
+- [ ] P1 mouse look feel (operator): the camera clamps the mouse axis to the stick range and runs it through the stick
+  curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
 - [ ] P1 Spacebar also advances dialogue (operator 2026-10-25).
-- [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent
-  means (signature + fallback anchors: a string / UFunction native pointer / call-site chain), validated (prologue /
-  call layout checks), logged, and a tools/ check that runs every signature against a new exe before a release.
-- [x] 0.5.4 (2026-10-25, operator; cursor fix: game-and-UI input mode + Default cursor, bShowMouseCursor alone showed nothing): the name box takes keyboard focus when the name screen opens (no mouse was
-      visible to click it) and lost its blurry hint text; the mouse cursor shows in every menu (menus.lua: any shown
-      screen that isn't GuiScreenGame / a Hud, or a popup on the game screen), hidden in gameplay; the installer asks
-      keep / reset settings on an update (old ones to config-backup-<date>; -KeepConfig / -ResetConfig). The pause
-      menu not closing on Escape was the operator's OLD keybinds.ini - re-test after a reset. Untested on a GPU: the
-      cursor actually appearing, mouse clicks on the game's own buttons (P1 mouse ticket stays open).
-- [ ] P0 creator redesign, refined (operator 2026-10-25, replaces the online/local mode toggle below):
-  - Custom looks (patterns / markings / colours) are REGISTERED by mods - many mods at once without interfering
-    (namespaced ids, no shared-slot collisions) - and each declares a BASE-GAME FALLBACK (the modder's closest vanilla
-    pattern / marking / colour indices).
-  - One checkbox in the creator: "Customise online cat". UNCHECKED (default): the online cat = each chosen custom
-    look's fallback values, automatically. CHECKED: the online cat is customised separately with the native UI, and
-    a preview switch shows either the local or the online cat.
-  - The online customisation is remembered: check > customise > uncheck > re-check restores those online edits.
-    Creating the cat with the box unchecked uses the fallbacks.
-- [ ] P0 creator redesign (operator 2026-10-25): use the NATIVE customisation UI, not a side panel.
-  - Hook the native pattern / marking scroll grid (with its preview) so mods add entries there; the game ships DLC
-    patterns, so find how DLC rows join the grid (DT_Patterns / DLC data) and ride that.
-  - A mode switch in the editor: "online cat" (vanilla data, what others see) vs "local cat" (WaCa look); extra grid
-    entries / colours only in local mode; a "copy online look to local" button. Drop the per-row "pattern override" UI.
-  - Apply our look in the same refresh as the game's (no flash of the vanilla pattern after a colour change): hook the
-    material build, not a re-apply after it.
-  - Custom colours have no UI: a colour wheel / hex entry in local mode.
-- [x] (0.5.5) P1 cat headshots / portraits show the ONLINE look (operator 2026-10-25): the in-game places that render a
-  "headshot" of the player's cat ignore the WaCa override - find the portrait capture actor / render target and give
-  it the local look too (WaCa.PlayerCats only covers the pawn, cutscene cats and the creator preview).
-- [ ] creator redesign finding (2026-10-25): DT_Patterns = 23 rows NewRow..NewRow_21 (PatternType 0-22), DT_Markings
-  20 rows, on USwtAdventureGameInstance (PatternsDataTable / MarkingsDataTable / DeluxeDataTable). The native grid
-  (mcGuiPatternPanel.mcGuiGrid, WBP_GuiCustomizationPatternItem_C items) is only filled in the real flow (0 items
-  headless). UE4SS UDataTable:AddRow fails here ("ICppStructOps::Copy unavailable") - adding a row needs native code.
-- [ ] P1 mouse in menus (operator 2026-10-25): the splash can't be skipped with a click; menus can't be used with the
-  mouse. Found: controller bShowMouseCursor = false; screens navigate a USwtNavigation (CurrentControl) of GuiControls
-  that each have a UMG mcGuiButtonCollision; USwtScreen has OnUIPress / OnUIRelease(Control). Next: cursor on in
-  menus, hover -> selection, click -> confirm; splash: click = a key press.
-- [x] 0.5.3 fix, tag moved (2026-10-25): the creator crash ROOT CAUSE - LoopAsync ran our Lua on a worker thread
-      while game-thread hooks used the same Lua state (VM table corruption; reproduced headless with F6 x 75, gone
-      after moving every loop to LoopInGameThreadWithDelay). Also: F6 never wrapped to "No override" (a nil value
-      kept in the key order broke the look merge); the panel vanished for ~1 min after backing out and returning
-      (FindFirstOf found the old hidden screen until GC); backing out (BackSpace / Escape) reverts that screen's WaCa
-      choices; Colourpoint is a pattern shape (looks with Row = Pattern), tail / ears = the pattern colour.
-- [ ] 0.5.3 fix, tag moved (2026-10-25, operator: a crash in the creator after a long time cycling custom patterns; the custom
-      patterns did not render on the cat). Crash: inside UE4SS during a hook (PCallStack all UE4SS -> game 0x4A1BDD2),
-      read of 0xFFFFFFFFFFFFFFFF = a stale object. Fixed the likely cause: the creator held widget wrappers (name box,
-      panel buttons / values) and texture objects across ticks and identified screens by ADDRESS (a rebuilt screen
-      can reuse it) - now screens by full name, widgets / textures found again by name every time. Patterns not
-      rendering: the re-apply check only compared one colour, so when the game loaded its own pattern texture after a
-      refresh we never put ours back - the check now covers every colour and every mask. OPEN: the operator's
-      re-test; the UE4SS.log of a crash if it happens again (it is overwritten by the next launch).
-- [x] 0.5.3 (2026-10-25, operator): the creator preview actor (GuiCatCustomActor) is reused by "Select Your Cat"
-      (Dapplepatch got the player's look) - the preview counts as the player's cat only while a creator screen is
-      open, and gets the game's look back (RefreshPattern) when the creator closes. Menus: Escape AND BackSpace go
-      back everywhere ([KeyAliases] Escape = BackSpace, [UIIcons] Esc icon; [UIKeys] empty by default), the installer
-      migrates the old default keybinds.ini.
-- [ ] **Per-save sidecar (goal 2026-10-25).** DONE (data layer): SaveGames/WrcGame.<slot>.WaCaModKit.ini ([Name]
-      Prefix / Suffix, [Appearance] = appearance.ini keys) loads when the active slot (SwtSaveManager.SaveGame
-      .saveSlots[CurrentSaveSlotIndex], a GUID) changes and wins over the global inis; in-game changes are written on
-      the game's own Save (hook). Verified headless: slot detection + sidecar load. OPEN: the write path end to end
-      (needs the UI to change a value, then a game save).
-- [ ] **Creator UI injection (goal 2026-10-25).** The creator: UGuiCustomizationColorPanel (UGuiOptionColorListControl
-      buttons for fur / pattern / markings / iris L / R -> UGuiColorPickerGrid of UGuiColorPickerSlotGrid swatches),
-      UGuiCustomizationPatternPanel / MarkingsPanel (UGuiCustomizationGrid / UGuiMarkingsGrid of grid items),
-      AGuiCatCustomActor = the preview. Plan: extra swatches / entries in those grids (CreateWidget of the grid's
-      GridItemClass, added to Items + the canvas + GridNavigation), a choice -> the slot's [Appearance] + a vanilla
-      fallback index in the game's data. Needs live observation of the creator (open it headless via Lua).
-      0.5.0 (2026-10-25): DONE, verified headless as far as possible (creator.lua):
-      - palettes extended from config/palette.ini (FurColors / PatternMaskColors / MarkingMaskColors 25 + ours);
-        a custom index on any player cat -> its exact colour into the look + the nearest game index (verified: idx 30
-        -> #A8989F recorded, idx 11 kept); pairing VERIFIED in the game code (0x1417B2155: Pattern01ColorIdx -> PatternMaskColors, Pattern02ColorIdx -> MarkingMaskColors; index bounds-checked against the current palette length)
-      - name screen: EditableTextBox "your name" + the game's list noted as the online name (verified on the real
-        WBP_GuiScreenSelectName shown headless; typed text captured)
-      - WaCa panel on the customisation screen (look / pattern shape / markings shape; arrows via LMB + IsHovered, F5-F7)
-        (verified hosted on the name screen - the customisation screen can't be built outside the creator; its root
-        is a CanvasPanel like the name screen's)
-      - pending creation -> the NEW save slot's sidecar (verified: K2_CreateSaveSlot + Save -> sidecar with Prefix +
-        Fur); an existing save loaded instead drops it
-      0.5.1: save -> fresh restart round trip verified headless (run 1: creation + K2_CreateSaveSlot + Save writes
-      the sidecar; run 2: the slot's sidecar loads and the look is applied to the player cats); name-box re-store spam
-      after the commit fixed.
-      0.5.2: the module's own panel ATTACHED TO THE REAL CUSTOMISATION SCREEN headless (WBP_GuiScreenCustomization
-      created, not shown - showing it outside the creator flow crashes - with creator.ini AttachHidden = 1): all 7
-      panel widgets in its CanvasRoot, F7 / F5 change the choices and the panel's value text. The real screen has the
-      colour panel + its fur option. Palette sizes: of the 33 game functions that touch all four palettes, none uses a
-      fixed 25 - the code works from the arrays' length (the colour apply code bounds-checks against it).
-      OPEN (needs a GPU - the VM has none; headless stops at the splash, which reads real input): the operator's
-      real-creator test - position / font of the name box and the WaCa panel, clicking the panel arrows, the panel on
-      the real customisation screen.
-      Headless navigation is blocked at the splash ("press any key" needs real input).
-- [ ] **Escape as "back" in menus** (operator test: menus use BackSpace, the pause menu shows a BackSpace close
-      button). Source: UXD/Buttons/DT_GamepadButtonsKeyboard rows Button_B / Button_Back = BackSpace (key + hint
-      icon). Fix at the data: those rows -> Escape (+ the Esc icon). 0.3.1: DONE - [UIKeys] rewrites the rows natively
-      (ui.cpp, UDataTable::RowMap in place, verified headless). OPEN: the operator's test (does the pause menu close
-      cleanly on Escape, with Escape also bound to Player_Pause?).
-- [ ] **ModKit 0.1 release (2026-10-24).** Built and committed: `dist/WaCaModKit-0.1.0.zip` (`tools/package.ps1`).
-      - [x] Native key rebinding: a detour of the game's default-binding apply step (WaCaNative) + `keybinds.ini`
-            (Pause = Escape). Verified headless: the signatures are found, the defaults are logged (the whole keyboard
-            table), the overrides are applied on every rebuild.
-      - [x] Installer: Install.bat finds the game via Steam, keeps the user's keybinds on update; Uninstall.bat.
-            Tested on the Z: copy.
-      - [ ] **Operator test on a real PC:** Escape pauses, P no longer does; the install works through the real Steam
-            launch (SteamStub exe + dwmapi proxy).
-      - [ ] **GitHub repo + first release** (needs the operator: there's no `gh` here; the repo name / owner is theirs
-            to pick).
+- [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
+  (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
+  logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
+  (string -> referencing code -> unwind-table function start -> prologue check) for the look hooks.
+- [ ] P2 a click skips the splash ("press any key" ignores mouse buttons).
+- [ ] Per-save sidecar: the write path end to end (a value changed in game -> the game's Save -> the sidecar file).
+  Testable on the VM now (PROJECT_PLAN.md "Testing on the GPU-less VM").
+- [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
+  - mouse look / camera with a real mouse; the menu cursor with a real mouse
+  - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
+  - Escape: pause menu open / close, back in every menu (VM-verified, feel)
+  - the look on your own saves (VM-verified with a test look)
 
 ## P0: Foundation (nothing else can start until this works)
 - [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
@@ -332,4 +223,17 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
 
 ## Archive
-- (none yet)
+- [x] 2026-10-25 Escape as menu back + pause close: raw KeyDown events (DispatchMessageW) + the Escape = BackSpace alias
+      as a real key press, menus only. VM-verified: Escape opens the pause menu in gameplay and closes it; back in
+      menus. (Replaces the Button_B watchpoint plan and the 0.3.1 / 0.5.3 [UIKeys] attempts.)
+- [x] 2026-10-25 Mouse clicks in the game's menus: the hovered control pressed through its host (OnUIPress /
+      OnUIRelease) - the game binds nothing to its buttons' click events on PC. VM-verified (main menu -> Defender).
+- [x] 2026-10-25 Cursor in the world: overlay screens (GuiScreenOnlineOver ...) are not menus; decisions on the next
+      tick (changing the input mode inside the game's input handling crashed). VM-verified menu <-> gameplay.
+- [x] 2026-10-25 0.6.0 event-driven foundation (native event bus on UE4SS's ProcessEvent callbacks, WaCa.On /
+      Watch / Ready, no Lua loops); CI builds the DLL from UE4SS source (secret UE4SS_SOURCE_TOKEN), build cache.
+- [x] 2026-10-25 The overlay look (repaint after the game's refresh, "still shows our look" checks) - replaced by the
+      look build hook; with it the 0.5.3 stale-object crash fix and the 0.6.0 repaint loop (frozen cutscene).
+- [x] 2026-10-25 0.5.x creator work: name box flow (Enter rows incl. Button_Skip held), Steam keyboard, palettes,
+      side panel, per-character save sidecars (slot = GUID + character), headshots get the look.
+- [x] 2026-10-24 ModKit 0.1: native key rebinding (keybinds.ini), installer / uninstaller, GitHub repo + releases.
