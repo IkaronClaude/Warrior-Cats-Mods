@@ -45,8 +45,10 @@
 #include <vector>
 
 #include <windows.h>
+#include <intrin.h>
 #include <tlhelp32.h>
 
+#include "MinHook.h"
 #include "appearance.h"
 #include "commands.h"
 #include "tables.h"
@@ -418,6 +420,46 @@ int LuaDevWatchAxis(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// dev: who asks for a command's axis, and what they get - WaCaNative_DevTraceCommandAxis(exe offset of the command
+// axis getter, calls to log). The getter (2026-10-25 build: 0x141828B30, float (this, const ECommands*, dead zone)) is
+// the game's per-command axis read with the player's invert settings; this logs each distinct caller (return address)
+// with the command, dead zone and result, for the next N calls. Dev only: the address is passed in, not scanned
+using CommandAxisFn = float(__fastcall*)(void* self, const uint8_t* command, float deadZone);
+CommandAxisFn g_commandAxis = nullptr;
+std::atomic<int> g_commandAxisLeft{0};
+
+float __fastcall CommandAxisDetour(void* self, const uint8_t* command, float deadZone) {
+    float v = g_commandAxis(self, command, deadZone);
+    if (g_commandAxisLeft > 0 && --g_commandAxisLeft >= 0) {
+        auto ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
+        static std::vector<std::pair<uintptr_t, int>> seen;
+        static std::mutex m;
+        std::lock_guard<std::mutex> lock(m);
+        int cmd = command ? *command : -1;
+        if (std::find(seen.begin(), seen.end(), std::make_pair(ret, cmd)) == seen.end()) {
+            seen.emplace_back(ret, cmd);
+            logx::Line(L"[dev] command axis %d (dead zone %.3f) = %.3f, asked from %s, this %p", cmd, deadZone, v,
+                       CodeOwner(ret).c_str(), self);
+        }
+    }
+    return v;
+}
+
+int LuaDevTraceCommandAxis(const LuaMadeSimple::Lua& lua) {
+    auto offset = static_cast<uintptr_t>(lua.get_integer());
+    int calls = static_cast<int>(lua.get_integer());
+    auto* target = reinterpret_cast<uint8_t*>(GetModuleHandleW(nullptr)) + offset;
+    if (!g_commandAxis) {
+        bool ok = MH_CreateHook(target, reinterpret_cast<void*>(&CommandAxisDetour), reinterpret_cast<void**>(&g_commandAxis)) == MH_OK &&
+                  MH_EnableHook(target) == MH_OK;
+        logx::Line(L"[dev] command axis trace at %p: %s", target, ok ? L"hooked" : L"could not hook");
+        if (!ok) { g_commandAxis = nullptr; lua.set_bool(false); return 1; }
+    }
+    g_commandAxisLeft = calls;
+    lua.set_bool(true);
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -490,6 +532,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_CloneTableRow", &LuaCloneTableRow);
     lua.register_function("WaCaNative_DevAxisBindings", &LuaDevAxisBindings);
     lua.register_function("WaCaNative_DevWatchAxis", &LuaDevWatchAxis);
+    lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));
 }

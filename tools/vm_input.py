@@ -1,6 +1,7 @@
 """Send input to the running game on the VM (offscreen test runs: -dx12 -warp -wacaoffscreen).
 
   vm_input.py key <vk hex> [count]       a key press + release posted to the game window (e.g. 0D = Enter)
+  vm_input.py keydown|keyup <vk hex>     hold / release a key (a held arrow key = a full stick axis)
   vm_input.py click <x> <y>              a left click at client coordinates
   vm_input.py move <x> <y>               a mouse move to client coordinates
 
@@ -76,6 +77,13 @@ def main():
     cmd = sys.argv[1]
     if cmd == "key":
         key(hwnd, int(sys.argv[2], 16), int(sys.argv[3]) if len(sys.argv) > 3 else 1)
+    elif cmd in ("keydown", "keyup"):
+        vk = int(sys.argv[2], 16)
+        down = 1 | (user32.MapVirtualKeyW(vk, 0) << 16)
+        if cmd == "keydown":
+            user32.PostMessageW(hwnd, WM_KEYDOWN, vk, down)
+        else:
+            user32.PostMessageW(hwnd, WM_KEYUP, vk, down | (1 << 30) | (1 << 31))
     elif cmd == "move":
         place_cursor(hwnd, int(sys.argv[2]), int(sys.argv[3]))
         user32.PostMessageW(hwnd, WM_MOUSEMOVE, 0, lparam(int(sys.argv[2]), int(sys.argv[3])))
