@@ -26,6 +26,12 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] 0.5.4 (2026-10-25, operator): the name box takes keyboard focus when the name screen opens (no mouse was
+      visible to click it) and lost its blurry hint text; the mouse cursor shows in every menu (menus.lua: any shown
+      screen that isn't GuiScreenGame / a Hud, or a popup on the game screen), hidden in gameplay; the installer asks
+      keep / reset settings on an update (old ones to config-backup-<date>; -KeepConfig / -ResetConfig). The pause
+      menu not closing on Escape was the operator's OLD keybinds.ini - re-test after a reset. Untested on a GPU: the
+      cursor actually appearing, mouse clicks on the game's own buttons (P1 mouse ticket stays open).
 - [ ] P0 creator redesign (operator 2026-10-25): use the NATIVE customisation UI, not a side panel.
   - Hook the native pattern / marking scroll grid (with its preview) so mods add entries there; the game ships DLC
     patterns, so find how DLC rows join the grid (DT_Patterns / DLC data) and ride that.
@@ -34,6 +40,13 @@ game data in this repo.
   - Apply our look in the same refresh as the game's (no flash of the vanilla pattern after a colour change): hook the
     material build, not a re-apply after it.
   - Custom colours have no UI: a colour wheel / hex entry in local mode.
+- [ ] P1 cat headshots / portraits show the ONLINE look (operator 2026-10-25): the in-game places that render a
+  "headshot" of the player's cat ignore the WaCa override - find the portrait capture actor / render target and give
+  it the local look too (WaCa.PlayerCats only covers the pawn, cutscene cats and the creator preview).
+- [ ] creator redesign finding (2026-10-25): DT_Patterns = 23 rows NewRow..NewRow_21 (PatternType 0-22), DT_Markings
+  20 rows, on USwtAdventureGameInstance (PatternsDataTable / MarkingsDataTable / DeluxeDataTable). The native grid
+  (mcGuiPatternPanel.mcGuiGrid, WBP_GuiCustomizationPatternItem_C items) is only filled in the real flow (0 items
+  headless). UE4SS UDataTable:AddRow fails here ("ICppStructOps::Copy unavailable") - adding a row needs native code.
 - [ ] P1 mouse in menus (operator 2026-10-25): the splash can't be skipped with a click; menus can't be used with the
   mouse. Found: controller bShowMouseCursor = false; screens navigate a USwtNavigation (CurrentControl) of GuiControls
   that each have a UMG mcGuiButtonCollision; USwtScreen has OnUIPress / OnUIRelease(Control). Next: cursor on in

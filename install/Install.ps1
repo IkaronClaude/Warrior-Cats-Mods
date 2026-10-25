@@ -1,6 +1,6 @@
 # WaCa ModKit installer: finds Warrior Cats: Clans of the Forest through Steam and copies the mod files in.
 # Usage: double-click Install.bat (or: powershell -ExecutionPolicy Bypass -File Install.ps1 [-GameDir "<folder>"])
-param([string]$GameDir = "", [switch]$Uninstall)
+param([string]$GameDir = "", [switch]$Uninstall, [switch]$KeepConfig, [switch]$ResetConfig)
 
 $ErrorActionPreference = "Stop"
 $AppId = "3960600"
@@ -64,6 +64,21 @@ $keep = $null
 if (Test-Path $cfg) { $keep = Join-Path $env:TEMP "WaCaModKit-config-$(Get-Random)"; Copy-Item $cfg $keep -Recurse }
 $oldMods = if (Test-Path $modsTxt) { Get-Content $modsTxt } else { @() }
 Copy-Item (Join-Path $Payload "Wrc\Binaries\Win64\*") $Win64 -Recurse -Force
+if ($keep) {
+    # an update: keep the player's settings, or start over from the new defaults (the old ones kept as a backup)
+    $choice = if ($ResetConfig) { "r" } elseif ($KeepConfig) { "k" } else {
+        Write-Host ""
+        Write-Host "You already have WaCa ModKit settings (key bindings, names, looks, ...)."
+        Read-Host "Keep them [K] or reset everything to this version's defaults [R]? (Enter = keep)"
+    }
+    if ("$choice".Trim().ToLower().StartsWith("r")) {
+        $backup = Join-Path (Split-Path $cfg) ("config-backup-" + (Get-Date -Format "yyyyMMdd-HHmmss"))
+        Copy-Item $keep $backup -Recurse
+        Remove-Item $keep -Recurse -Force
+        Write-Host "Settings reset to the defaults. Your old ones: $backup"
+        $keep = $null
+    }
+}
 if ($keep) {
     # keybinds.ini from 0.3.1 - 0.5.2 with its untouched default "Escape REPLACES BackSpace in menus" block: since 0.5.3
     # both keys work (an alias), so that file is replaced by the new defaults (the old one kept as keybinds.ini.bak)

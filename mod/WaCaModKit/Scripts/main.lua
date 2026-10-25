@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.3"
+local VERSION = "0.5.4"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -373,9 +373,14 @@ end
 -- Every loop runs ON THE GAME THREAD (LoopInGameThreadWithDelay). LoopAsync runs its callback on a worker thread with
 -- the same Lua state the game-thread hooks use; the two at once corrupted Lua's tables and crashed the game inside
 -- the Lua VM (operator 2026-10-25: after a while cycling patterns in the creator; reproduced headless with F6 x 75).
+local Menus = require("menus")
+Menus.Init({ WaCa = WaCa, log = log, modDir = modDir })
+
 LoopInGameThreadWithDelay(300, function()
     local ok, err = pcall(Creator.FastTick)
     if not ok then log("creator tick: %s", tostring(err)) end
+    ok, err = pcall(Menus.Tick)
+    if not ok then log("menu tick: %s", tostring(err)) end
 end)
 
 -- wait for the game's text, then apply; the name is checked every few seconds (it changes with your rank)

@@ -3,12 +3,15 @@
 An open-source modding framework and fix pack for **Warrior Cats: Clans of the Forest** (Unreal Engine 5.7).
 
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
-as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
+as usual. `Uninstall.bat` removes everything; the mod never modifies game files. Updating over an older version
+asks whether to keep your settings or reset them to the new defaults (the old ones are backed up).
 
-## What's in 0.5.3
+## What's in 0.5.4
+
 - **In the game's character creator:**
   - **Your own name:** a text box on the name screen. The game's name list stays as your *online* name (what the
-    save and online features keep); the typed name is what you see in the game.
+    save and online features keep); the typed name is what you see in the game. The box has the keyboard as soon as
+    the screen opens - type, Enter, then Enter again to confirm.
   - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
     from `config/palette.ini`.
   - **A WaCa panel** on the customisation screen: the *shape* of the pattern and of the markings from any of the
@@ -28,6 +31,8 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
   extra colours / masks. Only valid game values go into the save, so it stays loadable without the mod.
 
 ## Also in 0.3.1
+- **The mouse cursor shows in menus** (the game hides it everywhere); hidden again in gameplay for mouse look
+  (`keybinds.ini [Mouse] MenuCursor = 0` for the game's behaviour). Clicking the game's own menu buttons: not yet.
 - **Escape** pauses (instead of P), and goes back / closes in every menu (the character creator included) - BackSpace keeps working too; the menus show the Esc icon.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands

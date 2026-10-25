@@ -180,9 +180,9 @@ local function setupNameScreen(screen)
         end
     end
     local nameLabel = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
-    nameLabel:SetText(FText("Your name (any text - empty = the online name)"))
+    nameLabel:SetText(FText("Type your cat's name (Enter when done; empty = the name chosen below)"))
     local nameBox = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
-    nameBox:SetHintText(FText("Type your cat's name"))
+    -- no hint text: the box draws it in the engine's default style (blurry and barely legible - operator 2026-10-25)
     if info and info:IsValid() then
         pcall(function() nameLabel:SetFont(info.Font) end)
         pcall(function() nameBox.WidgetStyle.TextStyle.Font = info.Font end)
@@ -192,7 +192,10 @@ local function setupNameScreen(screen)
     place(canvas, nameLabel, 1250, -150, 1100, 90)
     place(canvas, nameBox, 1250, -40, 1100, 110)
     nameScreen, nameTree = screenId(screen), treePath(screen)
-    log("name screen: name box added")
+    -- typing works without a mouse: the box takes the keyboard as the screen opens (Enter commits and hands the keys
+    -- back to the game - a second Enter confirms the screen)
+    pcall(function() nameBox:SetKeyboardFocus() end)
+    log("name screen: name box added (keyboard focus on it)")
 end
 
 local function updateNameScreen()

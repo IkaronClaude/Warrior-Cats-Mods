@@ -6,16 +6,18 @@ INSTALL
   (Or by hand: copy the "Wrc" folder from "files" into the game's folder -
    Steam > right-click the game > Manage > Browse local files.)
   Then start the game from Steam as usual.
+  Updating: it asks whether to keep your settings or reset them to the new defaults (old ones backed up).
 
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.5.3)
+WHAT IT DOES (0.5.4)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
 
   In the character creator:
   - Type your own name on the name screen. The game's name list is your ONLINE name (what the save and online
-    features keep); your typed name is what you see in the game.
+    features keep); your typed name is what you see in the game. Just start typing when
+    the screen opens, press Enter, then Enter again to confirm.
   - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
   - A WaCa panel on the customisation screen: the shape of the pattern / markings from any of the game's patterns
     and markings, or "Colourpoint" (coloured with the game's pattern colour) - combine two markings. Click the arrows
@@ -25,6 +27,7 @@ WHAT IT DOES (0.5.3)
 
   Everywhere:
 
+  - The mouse cursor shows in menus.
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).
