@@ -206,6 +206,15 @@ function WaCa.MenuKeyTables()
     return out
 end
 
+-- every row name of a menu-key table ("Button_A", "Button_Skip", ...)
+function WaCa.UIRows(tbl)
+    local rows = {}
+    pcall(function()
+        tbl:ForEachRow(function(name) table.insert(rows, tostring(name)) end)
+    end)
+    return rows
+end
+
 -- a menu row's key name in a table ("Enter", "Gamepad_FaceButton_Bottom"), or nil
 function WaCa.UIRowKey(tbl, row)
     local ok, key = pcall(function() return tbl:FindRow(row).Key.KeyName:ToString() end)

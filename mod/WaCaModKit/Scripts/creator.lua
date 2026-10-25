@@ -220,20 +220,36 @@ local function boxKeys()
 end
 
 -- hold back the game's confirm on every menu-key table (keyboard + each gamepad type); the keys are remembered
+-- Every row bound to a confirm key is held, not just the confirm rows: a key fires every row it is bound to, and the
+-- keyboard table also binds Enter to Button_Skip - with only Button_A / Button_Confirm held, Enter still went on to the
+-- next screen through Skip (operator 2026-10-25).
 local function holdConfirm()
     if name.held then return end
     name.held, name.confirmKeys = {}, {}
     for _, t in ipairs(WaCa.MenuKeyTables()) do
+        local keys = {}
         for _, row in ipairs(CONFIRM_ROWS) do
             local key = WaCa.UIRowKey(t, row)
-            if key and key ~= "None" then
-                table.insert(name.held, { t = t:GetFullName():gsub("^%S+ ", ""), row = row, key = key })
-                name.confirmKeys[key] = true
+            if key and key ~= "None" then keys[key] = true; name.confirmKeys[key] = true end
+        end
+        local tpath = t:GetFullName():gsub("^%S+ ", "")
+        local rows = WaCa.UIRows(t)
+        if #rows == 0 then rows = CONFIRM_ROWS end
+        for _, row in ipairs(rows) do
+            local key = WaCa.UIRowKey(t, row)
+            if key and keys[key] then
+                table.insert(name.held, { t = tpath, row = row, key = key })
                 WaCa.SetUIKeyIn(t, row, "None")
             end
         end
     end
-    log("name screen: the game's confirm goes into the name box first (%d menu rows held)", #name.held)
+    local rowNames = {}
+    for _, h in ipairs(name.held) do rowNames[h.row] = true end
+    local list = {}
+    for r in pairs(rowNames) do table.insert(list, r) end
+    table.sort(list)
+    log("name screen: the game's confirm goes into the name box first (%d menu rows held: %s)", #name.held,
+        table.concat(list, ", "))
 end
 
 local function releaseConfirm()
