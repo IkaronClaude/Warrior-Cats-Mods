@@ -64,17 +64,27 @@ def lparam(x, y):
     return (y << 16) | (x & 0xFFFF)
 
 
+def place_cursor(hwnd, x, y):
+    """Slate reads the real cursor position (not the message's): the cursor itself goes to the client point."""
+    pt = wt.POINT(x, y)
+    user32.ClientToScreen(hwnd, ctypes.byref(pt))
+    user32.SetCursorPos(pt.x, pt.y)
+
+
 def main():
     hwnd = game_window()
     cmd = sys.argv[1]
     if cmd == "key":
         key(hwnd, int(sys.argv[2], 16), int(sys.argv[3]) if len(sys.argv) > 3 else 1)
     elif cmd == "move":
+        place_cursor(hwnd, int(sys.argv[2]), int(sys.argv[3]))
         user32.PostMessageW(hwnd, WM_MOUSEMOVE, 0, lparam(int(sys.argv[2]), int(sys.argv[3])))
     elif cmd == "click":
-        lp = lparam(int(sys.argv[2]), int(sys.argv[3]))
+        x, y = int(sys.argv[2]), int(sys.argv[3])
+        lp = lparam(x, y)
+        place_cursor(hwnd, x, y)
         user32.PostMessageW(hwnd, WM_MOUSEMOVE, 0, lp)
-        time.sleep(0.05)
+        time.sleep(float(sys.argv[4]) if len(sys.argv) > 4 else 0.05)     # slow renderer: give it time to hover
         user32.PostMessageW(hwnd, WM_LBUTTONDOWN, MK_LBUTTON, lp)
         time.sleep(0.08)
         user32.PostMessageW(hwnd, WM_LBUTTONUP, 0, lp)

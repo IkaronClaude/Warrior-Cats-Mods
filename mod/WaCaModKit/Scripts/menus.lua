@@ -34,11 +34,12 @@ end
 
 local enabled = true
 local shown = nil
--- gameplay's mouse capture mode, read each time we leave gameplay for a menu (never at start-up: the splash screen's
--- mode is not gameplay's - restoring that one left the mouse uncaptured in gameplay, click-drag spinning the camera,
--- operator 2026-10-25). Until gameplay has been seen: the engine default, capture permanently incl. the first click.
-local CAPTURE_PERMANENT_WITH_CLICK = 2
-local gameCaptureMode = nil
+-- Gameplay's mouse capture: PC-style mouse look, the mouse captured as soon as the game viewport has focus (EMouseCapture
+-- CapturePermanently = 1). Not the game's own mode: that is "capture while a button is held" - drag to look, which the
+-- operator called a regression (2026-10-25); and "capture on the first click" (2) left no mouse control at all.
+-- keybinds.ini [Mouse] GameplayCapture overrides it (0 none, 1 permanent, 2 permanent from the first click, 3 while a
+-- button is held, 4 while the right button is held).
+local gameplayCapture = 1
 
 -- bShowMouseCursor alone shows nothing (operator 2026-10-25): the game viewport keeps the mouse captured with the
 -- cursor hidden during capture, and the cursor type may be None. A menu gets "game and UI" input with the cursor kept
@@ -49,11 +50,6 @@ local function applyCursor(c, want, transition)
     if c.bEnableMouseOverEvents ~= want then c.bEnableMouseOverEvents = want end
     if want and c.CurrentMouseCursor ~= 1 then c.CurrentMouseCursor = 1 end      -- EMouseCursor::Default
     if not transition then return end
-    if want and shown == false then
-        pcall(function()
-            gameCaptureMode = StaticFindObject("/Script/Engine.Default__GameplayStatics"):GetViewportMouseCaptureMode(c)
-        end)
-    end
     local lib = StaticFindObject("/Script/UMG.Default__WidgetBlueprintLibrary")
     local ok, err
     if want then
@@ -63,11 +59,12 @@ local function applyCursor(c, want, transition)
         ok, err = pcall(function() lib:SetInputMode_GameOnly(c, false) end)
     end
     if not ok then log("mouse cursor: input mode: %s", tostring(err)) end
-    -- the viewport captures the mouse on a click (cursor hidden + locked: operator 2026-10-25) - no capture in menus,
-    -- the game's own mode (read before the first change) back in gameplay. Set AFTER the input mode, which resets it
+    -- no capture in menus (a click would capture the mouse and hide the cursor); gameplay's capture back in gameplay,
+    -- with the viewport focused so it takes the mouse at once. Set AFTER the input mode, which resets it
     local statics = StaticFindObject("/Script/Engine.Default__GameplayStatics")
     local ok0, err0 = pcall(function()
-        statics:SetViewportMouseCaptureMode(c, want and 0 or (gameCaptureMode or CAPTURE_PERMANENT_WITH_CLICK))
+        statics:SetViewportMouseCaptureMode(c, want and 0 or gameplayCapture)
+        if not want then lib:SetFocusToGameViewport() end
     end)
     if not ok0 then log("mouse cursor: capture mode: %s", tostring(err0)) end
 end
@@ -111,16 +108,61 @@ update = function(leaving, full, decided)
     shown = want
 end
 
+-- Mouse clicks on the game's own menu buttons. Every button control carries a UMG collision button (Slate hit-tests
+-- it, so it knows when it is hovered), but on PC the game binds nothing to its click events - the click went
+-- nowhere (operator 2026-10-25; read on the live main menu: OnClicked / OnPressed / OnReleased all empty). Its own
+-- pointer path does work: the host's OnUIPress + OnUIRelease with the control activates it (VM test: the main menu's
+-- story button opened "Select Your Cat"). So a left click in a menu presses the hovered control through its host - the
+-- nearest panel or screen around it that handles UI presses.
+local panelClass, screenClass
+
+local function hostOf(control)
+    panelClass = panelClass or StaticFindObject("/Script/SwtEngine.GuiPanel")
+    screenClass = screenClass or StaticFindObject("/Script/SwtEngine.SwtScreen")
+    local o = control:GetOuter()
+    for _ = 1, 12 do
+        if not o or not o:IsValid() then return nil end
+        if (panelClass and o:IsA(panelClass)) or (screenClass and o:IsA(screenClass)) then return o end
+        o = o:GetOuter()
+    end
+    return nil
+end
+
+local function clickHovered()
+    if shown ~= true then return end
+    for _, b in ipairs(FindAllOf("Button") or {}) do
+        if b:IsValid() and b:GetFName():ToString() == "mcGuiButtonCollision" and b:IsHovered() then
+            local tree = b:GetOuter()
+            local control = tree and tree:IsValid() and tree:GetOuter()
+            local host = control and control:IsValid() and hostOf(control)
+            if host then
+                local ok, err = pcall(function()
+                    host:OnUIPress(control)
+                    host:OnUIRelease(control)
+                end)
+                log("mouse click: %s on %s%s", control:GetFName():ToString(), host:GetClass():GetFName():ToString(),
+                    ok and "" or (" (" .. tostring(err) .. ")"))
+                return
+            end
+        end
+    end
+end
+
 function Menus.Init(c)
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
     local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
     local mouse = ini and ini["Mouse"] or {}
     enabled = (mouse.MenuCursor or "1") ~= "0"
+    gameplayCapture = tonumber(mouse.GameplayCapture or "") or gameplayCapture
     if not enabled then return end
     WaCa.On("ScreenShown", function() update(nil, true) end)
     WaCa.On("ScreenHidden", function(screen) update(screen, true) end)
     WaCa.On("ScreenFocusIn", function() update(nil) end)
     WaCa.On("ScreenFocusOut", function() update(nil) end)
+    -- after the game has seen the click (Slate's hover state is current then)
+    WaCa.On("KeyDown", function(_, key)
+        if key == "LeftMouseButton" then ExecuteInGameThread(clickHovered) end
+    end)
 end
 
 return Menus
