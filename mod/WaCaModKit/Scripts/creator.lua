@@ -435,22 +435,27 @@ function Creator.PendingName()
     return pending and pending.Name and pending.Name.Prefix or nil
 end
 
--- a creator screen came or went (ScreenShown / ScreenHidden, the screen list already updated): the creation starts,
--- its fingerprints follow the look, and it closes with the look the preview has at that moment
+-- the preview's CURRENT look (an earlier choice must not match later); kept as it was when no preview is left
+local function refreshPrints()
+    local prints = {}
+    previewFingerprints(prints)
+    if next(prints) then pending.prints = prints end
+end
+
+-- a screen came (ScreenShown, the screen list already updated): a creator screen starts / continues the creation, any
+-- other screen closes it. Never decided on ScreenHidden: the game tears a screen down a frame before it builds the
+-- next, so between two creator screens none is up (that gap logged "creator closed" on every step - operator
+-- 2026-10-25).
 local function trackCreation()
-    local open = creatorOpen()
-    if open then
+    if creatorOpen() then
         if not pending or pending.closedAt and os.time() - pending.closedAt > 10 then
             -- a fresh creation (one abandoned before it would have been dropped at the next player cat anyway)
             pending = {}
             log("character creation started")
         end
         pending.closedAt = nil
-        pending.prints = {}                  -- the CURRENT look only: an earlier choice must not match later
-        previewFingerprints(pending.prints)
+        refreshPrints()
     elseif pending and not pending.closedAt then
-        pending.prints = {}
-        previewFingerprints(pending.prints)  -- the last screen is still being torn down: the preview holds the final look
         pending.closedAt = os.time()
         log("character creator closed (creation pending until the new cat shows up)")
     end
@@ -483,9 +488,10 @@ end
 -- the active slot changed: nothing to do for a pending creation (settled by OnPlayerCat)
 function Creator.OnSlotChanged(id) end
 
--- is one of the character creator's screens showing?
+-- is the character creator open? (one of its screens is up, or the creation hasn't closed yet: between two of its
+-- screens none is up for a frame or two)
 function Creator.IsOpen()
-    return creatorOpen()
+    return creatorOpen() or (pending ~= nil and not pending.closedAt)
 end
 
 -- the look to show on the creator preview while creating (pending), or nil
@@ -723,11 +729,18 @@ local function onScreenHidden(screen)
     local id = screenId(screen)
     nameScreenHidden(screen)
     panelHidden(screen)
-    for n in pairs(trackedAs(screen)) do
+    local tracked = trackedAs(screen)
+    for n in pairs(tracked) do
         local list = shown[n] or {}
         for i = #list, 1, -1 do if list[i] == id then table.remove(list, i) end end
     end
-    trackCreation()
+    -- a creator screen going: the preview still shows the look chosen on it (whether the creator closes is decided
+    -- by the next screen to show)
+    if pending and not pending.closedAt then
+        for _, n in ipairs(CREATOR_SCREENS) do
+            if tracked[n] then refreshPrints() break end
+        end
+    end
 end
 
 function Creator.Init(c)

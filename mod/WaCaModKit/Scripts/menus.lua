@@ -13,23 +13,32 @@ local function isGameplay(screen)
     return screen:GetClass():GetFName():ToString():find("Hud", 1, true) ~= nil
 end
 
--- true while a menu is showing; leaving = a screen being torn down (ScreenHidden: it still counts as in the viewport)
+-- true while a menu is showing, false in gameplay, nil while NO screen is up: the game tears one screen down a frame
+-- or two before it builds the next (operator's log 2026-10-25: hidden -> shown 40 ms apart on every creator step),
+-- and that gap is not gameplay. leaving = a screen being torn down (ScreenHidden: it still counts as in the viewport)
 local function menuShowing(leaving)
     gameScreenClass = gameScreenClass or StaticFindObject("/Script/SwtEngine.GuiScreenGame")
     local leavingName = leaving and leaving:GetFullName()
+    local any = false
     for _, s in ipairs(FindAllOf("SwtScreen") or {}) do
         if s:IsValid() and s:IsInViewport() and s:GetFullName() ~= leavingName then
+            any = true
             if not isGameplay(s) then return true end
             local popup = s.CurrentPopup
             if popup and popup:IsValid() and popup:GetFullName() ~= leavingName then return true end
         end
     end
+    if not any then return nil end
     return false
 end
 
 local enabled = true
 local shown = nil
-local gameCaptureMode = nil      -- the viewport's mouse capture mode as the game set it
+-- gameplay's mouse capture mode, read each time we leave gameplay for a menu (never at start-up: the splash screen's
+-- mode is not gameplay's - restoring that one left the mouse uncaptured in gameplay, click-drag spinning the camera,
+-- operator 2026-10-25). Until gameplay has been seen: the engine default, capture permanently incl. the first click.
+local CAPTURE_PERMANENT_WITH_CLICK = 2
+local gameCaptureMode = nil
 
 -- bShowMouseCursor alone shows nothing (operator 2026-10-25): the game viewport keeps the mouse captured with the
 -- cursor hidden during capture, and the cursor type may be None. A menu gets "game and UI" input with the cursor kept
@@ -40,7 +49,7 @@ local function applyCursor(c, want, transition)
     if c.bEnableMouseOverEvents ~= want then c.bEnableMouseOverEvents = want end
     if want and c.CurrentMouseCursor ~= 1 then c.CurrentMouseCursor = 1 end      -- EMouseCursor::Default
     if not transition then return end
-    if gameCaptureMode == nil then
+    if want and shown == false then
         pcall(function()
             gameCaptureMode = StaticFindObject("/Script/Engine.Default__GameplayStatics"):GetViewportMouseCaptureMode(c)
         end)
@@ -58,7 +67,7 @@ local function applyCursor(c, want, transition)
     -- the game's own mode (read before the first change) back in gameplay. Set AFTER the input mode, which resets it
     local statics = StaticFindObject("/Script/Engine.Default__GameplayStatics")
     local ok0, err0 = pcall(function()
-        statics:SetViewportMouseCaptureMode(c, want and 0 or gameCaptureMode)
+        statics:SetViewportMouseCaptureMode(c, want and 0 or (gameCaptureMode or CAPTURE_PERMANENT_WITH_CLICK))
     end)
     if not ok0 then log("mouse cursor: capture mode: %s", tostring(err0)) end
 end
@@ -67,6 +76,7 @@ end
 local function update(leaving)
     if not enabled then return end
     local want = menuShowing(leaving)
+    if want == nil then return end          -- between two screens: keep what we have
     local transition = want ~= shown
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
         if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition) end
