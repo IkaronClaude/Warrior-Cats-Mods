@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.3"
+local VERSION = "0.5.4"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -212,19 +212,43 @@ local function applyAppearanceTo(cat, cfg)
 end
 
 -- true when the cat already shows our first configured colour (the game rebuilds materials on some refreshes)
+-- the body's material (dynamic), or nil
+local function bodyMaterial(cat)
+    local body = cat.SkelMeshComp
+    if not body or not body:IsValid() then return nil end
+    local m = body:GetMaterial(0)
+    if not m or not m:IsValid() or m:GetClass():GetFName():ToString() ~= "MaterialInstanceDynamic" then return nil end
+    return m
+end
+
+-- true when the cat still shows the configured look: every configured colour and every configured mask on its body
+-- (the game rebuilds materials on refreshes, and loads a newly chosen pattern texture a moment later - after which
+-- our mask has to go on again)
 local function showsAppearance(cat, cfg)
+    local m = bodyMaterial(cat)
+    if not m then return false end
+    local checked = false
     for slot, param in pairs(WaCa.COAT_COLORS) do
         local want = WaCa.ParseColor(cfg[slot])
         if want then
-            for _, part in ipairs(WaCa.CatParts(cat)) do
-                local m = part:GetMaterial(0)
-                if not m or not m:IsValid() or m:GetClass():GetFName():ToString() ~= "MaterialInstanceDynamic" then return false end
-                local v = m:K2_GetVectorParameterValue(FName(param))
-                return math.abs(v.R - want.X) < 0.002 and math.abs(v.G - want.Y) < 0.002 and math.abs(v.B - want.Z) < 0.002
-            end
+            local v = m:K2_GetVectorParameterValue(FName(param))
+            if math.abs(v.R - want.X) > 0.002 or math.abs(v.G - want.Y) > 0.002 or math.abs(v.B - want.Z) > 0.002 then return false end
+            checked = true
         end
     end
-    return false
+    for slot, param in pairs(WaCa.COAT_MASKS) do
+        local source = cfg[slot .. "Mask"]
+        local game = source and source:match("^game:(.+)$")
+        if game then
+            local t = m:K2_GetTextureParameterValue(FName(param))
+            local want = string.format("T_Cat_Body_%s_M", game)
+            if not t or not t:IsValid() or t:GetFName():ToString() ~= want then return false end
+            checked = true
+        elseif source and source ~= "" then
+            return false          -- a PNG pack: no cheap check - applied every pass
+        end
+    end
+    return checked
 end
 
 local appliedCats = {}

@@ -118,8 +118,18 @@ local function sanitize()
     end
 end
 
+-- Widgets are never held across ticks: the game destroys and rebuilds screens (a new one can land at the same address),
+-- and a call on a stale Lua wrapper of a freed object crashed the game (operator 2026-10-25, after a long time in the
+-- creator). A screen is known by its full name (unique per instance), our widgets are found again by name in its tree.
+local function screenId(screen) return screen:GetFullName() end
+local function treePath(screen) return (screen.WidgetTree:GetFullName():gsub("^%S+ ", "")) end
+local function child(tree, name)
+    local o = StaticFindObject(tree .. "." .. name)
+    return o and o:IsValid() and o or nil
+end
+
 -- the name screen: our text box + label, and the game's list noted as the online name
-local nameBox, nameLabel, nameScreen = nil, nil, nil
+local nameScreen, nameTree = nil, nil
 local function newWidget(className, outer, name)
     local cls = StaticFindObject("/Script/UMG." .. className)
     return StaticConstructObject(cls, outer, FName(name))
@@ -147,9 +157,9 @@ local function setupNameScreen(screen)
             info:SetText(FText(text .. "  (your online name - type your own name in the box)"))
         end
     end
-    nameLabel = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
+    local nameLabel = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
     nameLabel:SetText(FText("Your name (any text - empty = the online name)"))
-    nameBox = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
+    local nameBox = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
     nameBox:SetHintText(FText("Type your cat's name"))
     if info and info:IsValid() then
         pcall(function() nameLabel:SetFont(info.Font) end)
@@ -159,19 +169,20 @@ local function setupNameScreen(screen)
     nameBox:SetText(FText(current))
     place(canvas, nameLabel, 1250, -150, 1100, 90)
     place(canvas, nameBox, 1250, -40, 1100, 110)
-    nameScreen = screen:GetAddress()      -- by address: every FindFirstOf hands out a new Lua wrapper
+    nameScreen, nameTree = screenId(screen), treePath(screen)
     log("name screen: name box added")
 end
 
 local function updateNameScreen()
     local screen = FindFirstOf("GuiScreenSelectName")
     if not screen or not screen:IsValid() or not screen:IsInViewport() then return end
-    if nameScreen ~= screen:GetAddress() or not nameBox or not nameBox:IsValid() then
+    local box = nameScreen == screenId(screen) and child(nameTree, "WaCaNameBox") or nil
+    if not box then
         local ok, err = pcall(setupNameScreen, screen)
         if not ok then log("name screen: %s", tostring(err)) end
         return
     end
-    local typed = nameBox:GetText():ToString():gsub("^%s+", ""):gsub("%s+$", "")
+    local typed = box:GetText():ToString():gsub("^%s+", ""):gsub("%s+$", "")
     local now
     if pending then now = pending.Name and pending.Name.Prefix or ""
     else now = ctx.slotValue("Name", "Prefix") or "" end
@@ -296,7 +307,8 @@ local function setChoice(row, index)
     row.index = (index - 1) % #row.choices + 1
     local value = row.choices[row.index].value
     store("Appearance", row.key, value)
-    if row.valueText and row.valueText:IsValid() then row.valueText:SetText(FText(rowText(row))) end
+    local value = panel and child(panel.tree, "WaCaPanelValue" .. row.n)
+    if value then value:SetText(FText(rowText(row))) end
     log("creator: %s = %s", row.key, rowText(row))
     -- back to the game's own look first (a mask set earlier stays otherwise), then ours on top
     for _, actor in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
@@ -327,29 +339,33 @@ local function setupPanel(screen)
         slot:SetPosition({ X = x, Y = y })
         slot:SetSize({ X = w, Y = h })
     end
-    panel = { screen = screen:GetAddress(), rows = {} }
+    panel = { screen = screenId(screen), tree = treePath(screen), rows = {} }
     at(text("WaCaPanelTitle", "WaCa ModKit"), -1150, 200, 1000, 80)
     local look = pending and pending.Appearance or {}
     for i, r in ipairs(ROWS) do
-        local row = { key = r.key, choices = choicesFor(r.key), index = 1 }
+        local row = { n = i, key = r.key, choices = choicesFor(r.key), index = 1 }
         for j, c in ipairs(row.choices) do if c.value == look[r.key] then row.index = j end end
         local y = 200 + i * 110
         at(text("WaCaPanelLabel" .. i, r.label), -1150, y, 520, 90)
-        row.prev = button("WaCaPanelPrev" .. i, "<")
-        at(row.prev, -620, y, 90, 90)
-        row.valueText = text("WaCaPanelValue" .. i, rowText(row))
-        at(row.valueText, -510, y, 380, 90)
-        row.next = button("WaCaPanelNext" .. i, ">")
-        at(row.next, -120, y, 90, 90)
+        at(button("WaCaPanelPrev" .. i, "<"), -620, y, 90, 90)
+        at(text("WaCaPanelValue" .. i, rowText(row)), -510, y, 380, 90)
+        at(button("WaCaPanelNext" .. i, ">"), -120, y, 90, 90)
         panel.rows[i] = row
     end
     log("customisation screen: WaCa panel added")
 end
 
-local function updatePanel()
+-- the panel's screen when it is the one showing (by its unique name - never a stale object), else nil
+local function panelHost()
     local screen = FindFirstOf(panelScreen())
-    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) then return end
-    if not panel or panel.screen ~= screen:GetAddress() then
+    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) then return nil end
+    return screen
+end
+
+local function updatePanel()
+    local screen = panelHost()
+    if not screen then return end
+    if not panel or panel.screen ~= screenId(screen) or not child(panel.tree, "WaCaPanelTitle") then
         local ok, err = pcall(setupPanel, screen)
         if not ok then log("customisation screen: %s", tostring(err)) panel = nil end
     end
@@ -358,12 +374,13 @@ end
 -- clicks (a left click while one of our arrows is hovered) and F5 / F6 / F7
 local function onKey(name)
     if not panel then return end
-    local screen = FindFirstOf(panelScreen())
-    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) or screen:GetAddress() ~= panel.screen then return end
+    local screen = panelHost()
+    if not screen or screenId(screen) ~= panel.screen then return end
     if name == "LeftMouseButton" then
         for _, row in ipairs(panel.rows) do
-            if row.prev:IsValid() and row.prev:IsHovered() then setChoice(row, row.index - 1) return end
-            if row.next:IsValid() and row.next:IsHovered() then setChoice(row, row.index + 1) return end
+            local prev, next = child(panel.tree, "WaCaPanelPrev" .. row.n), child(panel.tree, "WaCaPanelNext" .. row.n)
+            if prev and prev:IsHovered() then setChoice(row, row.index - 1) return end
+            if next and next:IsHovered() then setChoice(row, row.index + 1) return end
         end
     else
         local n = ({ F5 = 1, F6 = 2, F7 = 3 })[name]

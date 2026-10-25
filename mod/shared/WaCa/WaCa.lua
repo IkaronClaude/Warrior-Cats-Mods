@@ -273,16 +273,19 @@ function WaCa.SetPartTexture(part, param, texture)
 end
 
 -- load a PNG / JPG / TGA from disk as a texture (cached by path; nil when it can't be read)
+-- (cached by the texture's object path, found again each time: a held object can be garbage-collected and a call on
+-- its stale wrapper crashes the game)
 local textures = {}
 function WaCa.LoadTexture(path)
-    if textures[path] and textures[path]:IsValid() then return textures[path] end
+    local known = textures[path] and StaticFindObject(textures[path])
+    if known and known:IsValid() then return known end
     local f = io.open(path, "rb")
     if not f then return nil end
     f:close()
     local lib = StaticFindObject("/Script/Engine.Default__KismetRenderingLibrary")
     local tex = lib:ImportFileAsTexture2D(FindFirstOf("World"), path)
     if tex and tex:IsValid() then
-        textures[path] = tex
+        textures[path] = (tex:GetFullName():gsub("^%S+ ", ""))
         return tex
     end
     return nil

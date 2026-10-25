@@ -26,6 +26,14 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [ ] 0.5.4 (2026-10-25, operator: a crash in the creator after a long time cycling custom patterns; the custom
+      patterns did not render on the cat). Crash: inside UE4SS during a hook (PCallStack all UE4SS -> game 0x4A1BDD2),
+      read of 0xFFFFFFFFFFFFFFFF = a stale object. Fixed the likely cause: the creator held widget wrappers (name box,
+      panel buttons / values) and texture objects across ticks and identified screens by ADDRESS (a rebuilt screen
+      can reuse it) - now screens by full name, widgets / textures found again by name every time. Patterns not
+      rendering: the re-apply check only compared one colour, so when the game loaded its own pattern texture after a
+      refresh we never put ours back - the check now covers every colour and every mask. OPEN: the operator's
+      re-test; the UE4SS.log of a crash if it happens again (it is overwritten by the next launch).
 - [x] 0.5.3 (2026-10-25, operator): the creator preview actor (GuiCatCustomActor) is reused by "Select Your Cat"
       (Dapplepatch got the player's look) - the preview counts as the player's cat only while a creator screen is
       open, and gets the game's look back (RefreshPattern) when the creator closes. Menus: Escape AND BackSpace go
