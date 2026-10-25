@@ -48,7 +48,11 @@ game data in this repo.
 - [ ] P1 mouse look feel (operator): the camera clamps the mouse axis to the stick range and runs it through the stick
   curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
   Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
-  controller's WrcInputComponent has 4 at +0xE0; the camera axes not on it).
+  controller's WrcInputComponent has 4 at +0xE0 incl. Player_Camera_Up / _Right, value-only - nothing bound).
+  FOUND the consumer (WaCaNative_DevWatchAxis, a hardware watchpoint on the AxisValue): written by PlayerInput at
+  0x1448DC259, read via UInputComponent::GetAxisValue (leaf 0x14408E6xx) from 0x14126C0E0 (returns to 0x14126C16B):
+  abs + dead-zone compare + scale multiply (a sibling at 0x14126C1E0 reads a threshold at [rcx+0x748]). Next: name
+  those constants / the caller chain, then detour 0x14126C0E0 for mouse input (raw delta, no dead zone / clamp).
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). Needs the operator check (below).
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
@@ -58,7 +62,10 @@ game data in this repo.
   DONE: tools/check_hooks.py <exe> - reads the targets from the native sources, resolves them offline the same way
   (4 of 4 unique on the current exe, same addresses as the runtime). Left: a second independent anchor per target
   (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
-- [ ] P2 a click skips the splash ("press any key" ignores mouse buttons).
+  DONE too: scan::Reaches - each look primitive must be reachable from the full build within 2 calls (chained
+  unwind bodies included) or it is NOT hooked; same check in the tool. VM: 3 of 3 "confirmed" at runtime.
+- [~] P2 a click skips the splash: menus.lua - a left click while GuiScreenSplash is up presses Enter. The VM never
+  shows the splash (IntroLogos -> MainMenu): operator check.
 - [ ] Per-save sidecar: the write path end to end (a value changed in game -> the game's Save -> the sidecar file).
   Testable on the VM now (PROJECT_PLAN.md "Testing on the GPU-less VM").
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
@@ -69,6 +76,7 @@ game data in this repo.
   - the creator: Colourpoint listed in the pattern grid (after the game's 23); choosing it shows Colourpoint, the
     game's patterns still work after it (the VM can't open that screen)
   - Space advances a conversation
+  - a click on the splash ("press any key") continues
 
 ## P0: Foundation (nothing else can start until this works)
 - [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-

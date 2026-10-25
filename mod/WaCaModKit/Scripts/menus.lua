@@ -193,8 +193,22 @@ function Menus.Init(c)
     WaCa.On("ScreenFocusIn", function() later(false) end)
     WaCa.On("ScreenFocusOut", function() later(false) end)
     -- after the game has seen the click (Slate's hover state is current then)
+    -- the splash ("press any key") takes keys only: a click there presses Enter (a real key press, native PressKey)
+    local splashClass, splash = StaticFindObject("/Script/Wrc.GuiScreenSplash"), nil
+    local function isSplash(s)
+        local ok, yes = pcall(function() return splashClass and splashClass:IsValid() and s:IsA(splashClass) end)
+        return ok and yes
+    end
+    WaCa.On("ScreenShown", function(s) if isSplash(s) then splash = s:GetFullName() end end)
+    WaCa.On("ScreenHidden", function(s) if isSplash(s) then splash = nil end end)
     WaCa.On("KeyDown", function(_, key)
-        if key == "LeftMouseButton" then ExecuteInGameThread(clickHovered) end
+        if key ~= "LeftMouseButton" then return end
+        if splash then
+            log("menus: click on the splash - pressing Enter")
+            WaCa.Command("PressKey|Enter")
+        else
+            ExecuteInGameThread(clickHovered)
+        end
     end)
 end
 

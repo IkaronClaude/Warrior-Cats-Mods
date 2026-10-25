@@ -49,14 +49,27 @@ void __fastcall MarkingsMaskDetour(void* component, void* part) {
     if (component && part) bridge::EmitLook(component, part, "MarkingsMask");
 }
 
+// Each primitive is found twice, independently: by the string it uses (+ its prologue), and by the call graph - the
+// full build (SetDefaultCustomData, anchored on its own string) reaches it within two calls. Anchors that disagree =
+// the game changed under us: that part stays OFF rather than detouring the wrong function. Without the full build
+// there is nothing to cross-check against: hooked on the string anchor alone, logged as unconfirmed.
 bool Hook(const wchar_t* what, const char* anchor, const char* prologue, void* detour, void** original) {
     uint8_t* fn = scan::FunctionUsing(anchor, prologue);
     if (!fn) {
         logx::Line(L"[look] %s: not found (anchor \"%S\") - that part of the look hook is OFF", what, anchor);
         return false;
     }
+    const wchar_t* check = L" (unconfirmed: no full build to cross-check)";
+    if (g_setData) {
+        if (!scan::Reaches(reinterpret_cast<uint8_t*>(g_setData), fn, 2)) {
+            logx::Line(L"[look] %s at %p: NOT reached from the full build - anchors disagree, that part of the look hook is OFF",
+                       what, fn);
+            return false;
+        }
+        check = L" (confirmed: reached from the full build)";
+    }
     bool ok = MH_CreateHook(fn, detour, original) == MH_OK && MH_EnableHook(fn) == MH_OK;
-    logx::Line(L"[look] %s at %p%s", what, fn, ok ? L"" : L" - could not hook");
+    logx::Line(L"[look] %s at %p%s%s", what, fn, check, ok ? L"" : L" - could not hook");
     return ok;
 }
 
@@ -72,14 +85,15 @@ void Install() {
         return;
     }
     ULONGLONG t = GetTickCount64();
+    // the full build first: the primitives are cross-checked against it
+    g_setData = reinterpret_cast<SetDataFn>(scan::FunctionUsing("Fur Color", "40 55 53 57 41 56 41 57"));
+    logx::Line(L"[look] full build (SetDefaultCustomData) %s %p", g_setData ? L"at" : L"NOT FOUND -", g_setData);
     Hook(L"colour", "Pattern Mask Color", "48 89 5C 24 10", reinterpret_cast<void*>(&ColourDetour),
          reinterpret_cast<void**>(&g_colour));
     Hook(L"pattern mask", "Pattern Mask", "48 85 D2 0F 84", reinterpret_cast<void*>(&PatternMaskDetour),
          reinterpret_cast<void**>(&g_patternMask));
     Hook(L"markings mask", "Markings Mask", "48 85 D2 0F 84", reinterpret_cast<void*>(&MarkingsMaskDetour),
          reinterpret_cast<void**>(&g_markingsMask));
-    g_setData = reinterpret_cast<SetDataFn>(scan::FunctionUsing("Fur Color", "40 55 53 57 41 56 41 57"));
-    logx::Line(L"[look] full build (SetDefaultCustomData) %s %p", g_setData ? L"at" : L"NOT FOUND -", g_setData);
     logx::Line(L"[look] hooks found in %llu ms", GetTickCount64() - t);
 }
 

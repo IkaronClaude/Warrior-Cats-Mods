@@ -119,6 +119,36 @@ inline std::vector<uint8_t*> FunctionsReferencing(uint8_t* target) {
     return out;
 }
 
+// whether function `from` calls / jumps to `to` (E8 / E9 rel32) within `depth` levels of calls - a second, independent
+// anchor: a target found by its string must also sit where the call graph says it does. Scans each function's
+// body: its unwind entry plus the contiguous entries chained back to it (separate cold parts aside)
+inline bool Reaches(uint8_t* from, uint8_t* to, int depth) {
+    if (!from || !to) return false;
+    DWORD64 imageBase = 0;
+    auto* fn = RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(from), &imageBase, nullptr);
+    if (!fn) return false;
+    auto* begin = reinterpret_cast<uint8_t*>(imageBase + fn->BeginAddress);
+    auto* end = reinterpret_cast<uint8_t*>(imageBase + fn->EndAddress);
+    // a big function's later parts are separate unwind entries chained back to it, right after it
+    for (int guard = 0; guard < 64; ++guard) {
+        auto* next = RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(end), &imageBase, nullptr);
+        if (!next || reinterpret_cast<uint8_t*>(imageBase + next->BeginAddress) != end || FunctionStart(end) != begin) break;
+        end = reinterpret_cast<uint8_t*>(imageBase + next->EndAddress);
+    }
+    std::vector<uint8_t*> callees;
+    for (uint8_t* p = begin; p + 5 <= end; ++p) {
+        if (*p != 0xE8 && *p != 0xE9) continue;
+        uint8_t* target = RelTarget(p);
+        if (target == to) return true;
+        if (depth > 1 && RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(target), &imageBase, nullptr) &&
+            FunctionStart(target) == target && std::find(callees.begin(), callees.end(), target) == callees.end())
+            callees.push_back(target);
+    }
+    for (uint8_t* c : callees)
+        if (Reaches(c, to, depth - 1)) return true;
+    return false;
+}
+
 // the one function that uses the ASCII string `text` and starts with `prologue` (pattern syntax), or null
 inline uint8_t* FunctionUsing(const char* text, const char* prologue) {
     auto p = Parse(prologue);

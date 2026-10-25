@@ -32,16 +32,20 @@
 #include <Unreal/UClass.hpp>
 #include <Unreal/UFunction.hpp>
 #include <Unreal/UObject.hpp>
+#include <Unreal/UObjectArray.hpp>
 #include <Unreal/UObjectGlobals.hpp>
 #include <Unreal/Engine/UDataTable.hpp>
 #include <Unreal/UScriptStruct.hpp>
 
+#include <algorithm>
 #include <atomic>
+#include <mutex>
 #include <memory>
 #include <thread>
 #include <vector>
 
 #include <windows.h>
+#include <tlhelp32.h>
 
 #include "appearance.h"
 #include "commands.h"
@@ -285,6 +289,18 @@ int LuaDevAxisBindings(const LuaMadeSimple::Lua& lua) {
                 for (int i = 0; i < num; ++i) {
                     out += L"  " + nameAt(i) + L" ->";
                     CodeWithin(data + i * stride, stride, 3, L"", out);
+                    // a Blueprint binding: FScriptDelegate { FWeakObjectPtr (index, serial), FName function } after
+                    // the native delegate (TSharedPtr, 0x10) that follows the 0x10 FInputBinding head
+                    if (stride >= 0x30) {
+                        auto* fnName = reinterpret_cast<uint32_t*>(data + i * stride + 0x28);
+                        auto* weak = reinterpret_cast<int32_t*>(data + i * stride + 0x20);
+                        if (fnName[0] && fnName[0] < 0x4000000 && fnName[1] < 64) {
+                            FUObjectItem* item = weak[0] > 0 && weak[0] < FUObjectArray::GetNumElements() ? FUObjectArray::IndexToObject(weak[0]) : nullptr;
+                            UObject* obj = item ? item->GetUObject() : nullptr;
+                            out += L" bp " + (obj ? obj->GetName() : std::wstring(L"?")) + L"." +
+                                   FName(fnName[0], fnName[1]).ToString();
+                        }
+                    }
                     out += L"\n";
                 }
             }
@@ -296,6 +312,109 @@ int LuaDevAxisBindings(const LuaMadeSimple::Lua& lua) {
     std::string utf8(n > 0 ? n - 1 : 0, '\0');
     if (n > 1) WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, utf8.data(), n, nullptr, nullptr);
     lua.set_string(utf8);
+    return 1;
+}
+
+// dev: who reads / writes an axis value - WaCaNative_DevWatchAxis(component address, axis name). A hardware watchpoint
+// (debug register 0, read or write, 4 bytes) on that binding's AxisValue in every thread; each instruction that touches
+// it is logged once with its function, then the watch disarms itself after kWatchHits hits. For finding the code that
+// consumes an axis (the camera) when nothing is bound to it but its value
+constexpr int kWatchHits = 400;
+std::atomic<int> g_watchHits{0};
+std::mutex g_watchMutex;
+std::vector<uintptr_t> g_watchSeen;
+PVOID g_watchHandler = nullptr;
+
+void SetWatch(uintptr_t addr) {
+    // from a helper thread: a thread can't reliably set its own debug registers, and the caller (the game thread) is
+    // one of the threads to arm
+    std::thread([addr] {
+        DWORD self = GetCurrentThreadId();
+        HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        THREADENTRY32 te{sizeof(te)};
+        for (BOOL ok = Thread32First(snap, &te); ok; ok = Thread32Next(snap, &te)) {
+            if (te.th32OwnerProcessID != GetCurrentProcessId() || te.th32ThreadID == self) continue;
+            HANDLE t = OpenThread(THREAD_GET_CONTEXT | THREAD_SET_CONTEXT | THREAD_SUSPEND_RESUME, FALSE, te.th32ThreadID);
+            if (!t) continue;
+            SuspendThread(t);
+            CONTEXT c{};
+            c.ContextFlags = CONTEXT_DEBUG_REGISTERS;
+            if (GetThreadContext(t, &c)) {
+                c.Dr0 = addr;
+                c.Dr7 = addr ? (c.Dr7 & ~0xF0003ull) | 1ull | (3ull << 16) | (3ull << 18) : (c.Dr7 & ~0xF0003ull);
+                SetThreadContext(t, &c);
+            }
+            ResumeThread(t);
+            CloseHandle(t);
+        }
+        CloseHandle(snap);
+    }).join();
+}
+
+LONG CALLBACK WatchHandler(EXCEPTION_POINTERS* e) {
+    if (e->ExceptionRecord->ExceptionCode != EXCEPTION_SINGLE_STEP || !(e->ContextRecord->Dr6 & 1)) return EXCEPTION_CONTINUE_SEARCH;
+    e->ContextRecord->Dr6 = 0;
+    uintptr_t rip = e->ContextRecord->Rip;
+    int hit = ++g_watchHits;
+    bool first = false;
+    {
+        std::lock_guard<std::mutex> lock(g_watchMutex);
+        if (std::find(g_watchSeen.begin(), g_watchSeen.end(), rip) == g_watchSeen.end()) {
+            g_watchSeen.push_back(rip);
+            first = true;
+        }
+    }
+    if (first) {
+        std::wstring where = CodeOwner(rip);
+        if (where.empty()) {
+            // another module: its name + the offset
+            HMODULE m = nullptr;
+            wchar_t path[MAX_PATH] = L"?";
+            if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
+                                   reinterpret_cast<LPCWSTR>(rip), &m)) GetModuleFileNameW(m, path, MAX_PATH);
+            wchar_t buf[MAX_PATH + 64];
+            swprintf_s(buf, L"%s+0x%llX", wcsrchr(path, L'\\') ? wcsrchr(path, L'\\') + 1 : path,
+                       static_cast<unsigned long long>(rip - reinterpret_cast<uintptr_t>(m)));
+            where = buf;
+        }
+        // a leaf accessor (GetAxisValue) stops on its ret: the caller - the actual consumer - is at [rsp]
+        if (*reinterpret_cast<uint8_t*>(rip) == 0xC3)
+            where += L", returning to " + CodeOwner(*reinterpret_cast<uintptr_t*>(e->ContextRecord->Rsp));
+        logx::Line(L"[dev] watch: touched by the instruction before %s (thread %lu, hit %d)", where.c_str(), GetCurrentThreadId(), hit);
+    }
+    if (hit >= kWatchHits) {
+        e->ContextRecord->Dr7 &= ~0xF0003ull;                     // this thread now; the others from a helper
+        if (hit == kWatchHits) {
+            logx::Line(L"[dev] watch: %d hits - disarmed", hit);
+            std::thread([] { SetWatch(0); }).detach();
+        }
+    }
+    return EXCEPTION_CONTINUE_EXECUTION;
+}
+
+int LuaDevWatchAxis(const LuaMadeSimple::Lua& lua) {
+    auto* comp = reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(lua.get_integer()));
+    std::string axis(lua.get_string());
+    std::wstring want(axis.begin(), axis.end());
+    // UInputComponent::AxisBindings at +0xE0 (data, num), elements of 0x38: the name at +4, AxisValue at +0x30
+    auto* data = comp ? *reinterpret_cast<uint8_t**>(comp + 0xE0) : nullptr;
+    int32_t num = comp ? *reinterpret_cast<int32_t*>(comp + 0xE8) : 0;
+    uintptr_t target = 0;
+    for (int i = 0; data && i < num && i < 128; ++i) {
+        auto* p = reinterpret_cast<uint32_t*>(data + i * 0x38 + 4);
+        if (FName(p[0], p[1]).ToString() == want) target = reinterpret_cast<uintptr_t>(data + i * 0x38 + 0x30);
+    }
+    if (!target) {
+        logx::Line(L"[dev] watch: no axis binding %s", want.c_str());
+        lua.set_bool(false);
+        return 1;
+    }
+    if (!g_watchHandler) g_watchHandler = AddVectoredExceptionHandler(1, &WatchHandler);
+    g_watchHits = 0;
+    { std::lock_guard<std::mutex> lock(g_watchMutex); g_watchSeen.clear(); }
+    SetWatch(target);
+    logx::Line(L"[dev] watch: armed on %s's AxisValue at %p", want.c_str(), reinterpret_cast<void*>(target));
+    lua.set_bool(true);
     return 1;
 }
 
@@ -370,6 +489,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);
     lua.register_function("WaCaNative_CloneTableRow", &LuaCloneTableRow);
     lua.register_function("WaCaNative_DevAxisBindings", &LuaDevAxisBindings);
+    lua.register_function("WaCaNative_DevWatchAxis", &LuaDevWatchAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));
 }
