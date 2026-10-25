@@ -24,7 +24,7 @@ ames.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
     combined freely, and looks like "Colourpoint" (Look = Colourpoint).
 
   - No more doubled cat names from the game's generator ("Blazeblaze").
-  - Fixed cats for specific roles: configoster.ini + roster files (see rosters\Example.ini) pin a story cat or a
+  - Fixed cats for specific roles: configoster.ini + roster files (see rostersExample.ini) pin a story cat or a
     clan's leader / deputy / warriors ... to a name and look.
 
 ADDING YOUR OWN MODS
