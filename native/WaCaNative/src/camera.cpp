@@ -41,20 +41,30 @@ namespace {
 
 using UpdateFn = void(__fastcall*)(void* component, void* input, float dt);
 using TurnFn = float(__fastcall*)(void* component, float deadZone);
+using AxisFn = float(__fastcall*)(void* input, const uint8_t* command);
 UpdateFn g_update = nullptr;
 TurnFn g_turn = nullptr;
+AxisFn g_pitchAxis = nullptr;               // the raw axis getter the update asks for camera-up (vtable +0x1008)
+uint8_t* g_pitchAxisAt = nullptr;
+bool g_pitchTried = false;
 
 std::atomic<bool> g_on{false};
 std::atomic<float> g_yawScale{0.f};
 std::atomic<float> g_pitchScale{0.f};
 
 // layout of the 2026-10-25 build (see the file comment)
-constexpr int kTurnSpeed = 0x1CC, kIdleTime = 0x220;
-constexpr int kInvertYaw = 0x8B3;
+constexpr int kTurnSpeed = 0x1CC, kPitchSpeed = 0x1D0, kCurve = 0x1D4, kIdleTime = 0x220;
+constexpr int kInvertYaw = 0x8B3, kNoInvertPitch = 0x8B4;
+constexpr int kAxisGetterSlot = 0x1008;
+constexpr uint8_t kCameraUp = 62;
 
-// this frame's update, for the turn function it calls (both on the game thread)
+// this frame's update, for the functions it calls (all on the game thread)
+void* g_frameComponent = nullptr;
 void* g_frameInput = nullptr;
 float g_frameDt = 0.f;
+// the pitch speed swapped for this frame (restored after the update), see PitchAxisDetour
+bool g_speedSwapped = false;
+float g_savedPitchSpeed = 0.f;
 
 // weak: a level change destroys it; looked up again (once) when gone
 FWeakObjectPtr g_pc;
@@ -84,11 +94,69 @@ bool MouseDelta(float& dx, float& dy) {
     return true;
 }
 
+// Pitch: the update asks the raw axis getter for camera-up (v), clamps it to [-1, 1] and adds
+// sign(v) * |v|^curve * dt * pitch speed - capped at dt * pitch speed per frame. So for a frame with mouse movement
+// the getter answers sign(total) (|v| = 1: the curve does nothing) and the pitch speed becomes |total| / dt, total
+// being the stick's own degrees plus the mouse's: the game adds exactly that, still inside its own pitch limits.
+// The mouse's direction mirrors the old MouseY:-0.3 axis mapping through the getter's invert rule (camera-up is
+// flipped unless the player's "don't invert" flag is set).
+float __fastcall PitchAxisDetour(void* input, const uint8_t* command) {
+    float v = g_pitchAxis(input, command);
+    if (!g_on || input != g_frameInput || !g_frameComponent || !command || *command != kCameraUp || g_frameDt <= 0.f)
+        return v;
+    float dx = 0.f, dy = 0.f;
+    if (!MouseDelta(dx, dy) || dy == 0.f) return v;
+    auto* comp = static_cast<uint8_t*>(g_frameComponent);
+    auto* in = static_cast<uint8_t*>(input);
+    float speed = *reinterpret_cast<float*>(comp + kPitchSpeed);
+    float curve = *reinterpret_cast<float*>(comp + kCurve);
+    float stick = std::fmax(-1.f, std::fmin(1.f, v));
+    float stickDegrees = (stick > 0.f ? 1.f : stick < 0.f ? -1.f : 0.f) * std::pow(std::fabs(stick), curve) * g_frameDt * speed;
+    float mouseDegrees = -dy * (in[kNoInvertPitch] ? 1.f : -1.f) * g_pitchScale;
+    float total = stickDegrees + mouseDegrees;
+    static bool reported = false;
+    if (!reported) {
+        reported = true;
+        logx::Line(L"[camera] first mouse pitch: delta %.3f -> %.2f deg (+ stick %.2f; pitch speed %.1f, dt %.4f)", dy,
+                   mouseDegrees, stickDegrees, speed, g_frameDt);
+    }
+    if (total == 0.f) return 0.f;
+    if (!g_speedSwapped) {
+        g_speedSwapped = true;
+        g_savedPitchSpeed = speed;
+    }
+    *reinterpret_cast<float*>(comp + kPitchSpeed) = std::fabs(total) / g_frameDt;
+    *reinterpret_cast<float*>(comp + kIdleTime) = 0.f;
+    return total > 0.f ? 1.f : -1.f;
+}
+
+// the axis getter is a virtual of the input source: hooked from its vtable on the first update (anchored: the
+// update calls exactly that slot, and the function there reads the invert flags)
+void HookPitchAxis(void* input) {
+    g_pitchTried = true;
+    auto* fn = (*reinterpret_cast<uint8_t***>(input))[kAxisGetterSlot / 8];
+    if (!scan::BodyContains(fn, "80 BB B4 08 00 00 00", 1)) {
+        logx::Line(L"[camera] pitch axis getter at %p doesn't read the invert flag - anchors disagree, mouse pitch OFF", fn);
+        return;
+    }
+    bool ok = MH_CreateHook(fn, reinterpret_cast<void*>(&PitchAxisDetour), reinterpret_cast<void**>(&g_pitchAxis)) == MH_OK &&
+              MH_EnableHook(fn) == MH_OK;
+    if (ok) g_pitchAxisAt = fn;
+    logx::Line(L"[camera] pitch axis getter at %p (confirmed: reads the invert flag)%s", fn, ok ? L"" : L" - could not hook");
+}
+
 void __fastcall UpdateDetour(void* component, void* input, float dt) {
+    if (!g_pitchTried && input) HookPitchAxis(input);
+    g_frameComponent = component;
     g_frameInput = input;
     g_frameDt = dt;
     g_update(component, input, dt);
+    if (g_speedSwapped) {
+        *reinterpret_cast<float*>(static_cast<uint8_t*>(component) + kPitchSpeed) = g_savedPitchSpeed;
+        g_speedSwapped = false;
+    }
     g_frameInput = nullptr;
+    g_frameComponent = nullptr;
 }
 
 // the game's turn (stick) + the mouse's yaw in turn units: the caller multiplies by turn speed * dt
@@ -126,6 +194,10 @@ void Install() {
     if (!scan::BodyContains(update, "C6 45 67 3E", 2)) {
         logx::Line(L"[camera] update at %p: its body doesn't ask for the camera axes - anchors disagree, mouse look OFF", update);
         return;
+    }
+    if (!scan::BodyContains(update, "FF 90 08 10 00 00", 1)) {        // call qword ptr [rax + 1008h]: the pitch axis
+        logx::Line(L"[camera] update at %p doesn't call the pitch axis slot - mouse pitch OFF (yaw unaffected)", update);
+        g_pitchTried = true;
     }
     auto* turn = scan::CalleeWhere(update, "C6 44 24 70 3F");
     if (!turn) {

@@ -189,6 +189,53 @@ for (file, kind), hooks in sorted(resolved.items()):
         print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {label:34} reached from {root_label} (0x{IB + root:X}) '
               f'within 2 calls   [{file}]')
 
+# Body anchors on a string-found function held in a variable (camera.cpp): `auto* v = scan::FunctionUsing("a", ...)`
+# then scan::BodyContains(v, "pattern", n) / scan::CalleeWhere(v, "pattern") - same checks as scan.h
+def body_count(fn, pattern):
+    r = primary_range(fn)
+    if not r:
+        return 0
+    toks = pattern.split()
+    n = 0
+    for p in range(r[0], r[1] - len(toks) + 1):
+        if all(t.startswith('?') or image[p + k] == int(t, 16) for k, t in enumerate(toks)):
+            n += 1
+    return n
+
+
+VAR = re.compile(r'auto\*\s+(\w+)\s*=\s*scan::FunctionUsing\(\s*"((?:[^"\\]|\\.)*)"')
+BODY = re.compile(r'scan::BodyContains\(\s*(\w+)\s*,\s*"([0-9A-Fa-f? ]+)"\s*,\s*(\d+)\s*\)')
+CALLEE = re.compile(r'scan::CalleeWhere\(\s*(\w+)\s*,\s*"([0-9A-Fa-f? ]+)"\s*\)')
+for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
+    file = os.path.basename(path)
+    text = open(path, encoding='utf-8').read()
+    found = dict(resolved.get((file, 'root'), []))
+    roots = {m.group(1): found.get(m.group(2)) for m in VAR.finditer(text)}
+    for m in BODY.finditer(text):
+        fn = roots.get(m.group(1))
+        if fn is None:
+            continue
+        n = body_count(fn, m.group(2))
+        ok = n >= int(m.group(3))
+        chain_failed += not ok
+        print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {m.group(1):34} body holds {m.group(2)} x{n} '
+              f'(needs {m.group(3)})   [{file}]')
+    for m in CALLEE.finditer(text):
+        fn = roots.get(m.group(1))
+        if fn is None:
+            continue
+        r = primary_range(fn)
+        hits = set()
+        for p in range(r[0], r[1] - 4):
+            if image[p] == 0xE8:
+                t = p + 5 + struct.unpack_from('<i', image, p + 1)[0]
+                if primary_range(t) and body_count(t, m.group(2)) >= 1:
+                    hits.add(t)
+        ok = len(hits) == 1
+        chain_failed += not ok
+        print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {m.group(1):34} calls '
+              f'{" ".join(hex(IB + h) for h in sorted(hits)) or "nothing"} holding {m.group(2)}   [{file}]')
+
 print(f'\n{len(targets) - failed} of {len(targets)} hook targets resolve uniquely' +
       (f', {chain_failed} cross-check(s) failed' if chain_failed else '') +
       ('' if not failed and not chain_failed else ' - FIX BEFORE RELEASE'))

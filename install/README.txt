@@ -34,7 +34,7 @@ WHAT IT DOES (0.6.0)
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
   - Space advances a conversation (Enter still works too).
   - A click continues the "press any key" title screen.
-  - Mouse look: the camera turns left / right exactly with the mouse (LookYaw in keybinds.ini).
+  - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
   - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).
   - Your own cat name: names.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
     Your save keeps the game's name, so online features and uninstalling are safe.

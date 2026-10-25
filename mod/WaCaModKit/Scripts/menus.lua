@@ -128,7 +128,7 @@ update = function(leaving, full, decided)
 end
 
 -- Mouse look (native camera.cpp): the mouse turns the game's camera directly, in gameplay only - in a menu it moves
--- the cursor. Sensitivity: keybinds.ini [Mouse] LookYaw (degrees per mouse unit; up / down is still the [Axes] MouseY)
+-- the cursor. Sensitivity: keybinds.ini [Mouse] LookYaw / LookPitch (degrees per mouse unit)
 local look = { yaw = 2.0, pitch = 1.5, on = nil }
 function Menus.MouseLook(on)
     if gameplayCapture == 0 then on = false end
@@ -184,6 +184,7 @@ function Menus.Init(c)
     enabled = (mouse.MenuCursor or "1") ~= "0"
     gameplayCapture = tonumber(mouse.GameplayCapture or "") or gameplayCapture
     look.yaw = tonumber(mouse.LookYaw or "") or look.yaw
+    look.pitch = tonumber(mouse.LookPitch or "") or look.pitch
     -- no menu cursor handling: nothing tells gameplay from menus, so mouse look is simply on
     if not enabled then Menus.MouseLook(true) return end
     -- Decided on the next tick, never inside the event: a screen is built inside the game's own input handling (the

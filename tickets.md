@@ -67,8 +67,11 @@ game data in this repo.
   camera tick clamps pitch +-89.9, yaw free, then smooths and recentres behind the cat when idle). VM-proven: the
   turn value carries the mouse (delta 37.8 -> 75.6 deg); the VIEW change could not be measured reliably on the VM
   (CameraCachePrivate reads flaky at 0.6 fps) -> OPERATOR CHECK. Mouse look on/off follows the menu cursor.
-  Left: pitch (own getter vtable +0x1008 + curve; MouseY stays on the [Axes] path meanwhile); [Mouse]
-  GameplayCapture = 3 (drag to look) isn't honoured by the native path yet.
+  PITCH done too: the raw axis getter (vtable +0x1008, hooked from the live vtable, anchored: the update calls that
+  slot + the getter reads the invert flag) answers sign(total) and the pitch speed becomes |total| / dt for that
+  frame (restored after) - stick + mouse degrees exactly, inside the game's pitch limits. VM: delta 5.6 -> 8.4 deg,
+  game alive. MouseX / MouseY are out of Player_Camera_* (photo mode keeps them). Left: [Mouse] GameplayCapture = 3
+  (drag to look) isn't honoured by the native path; the on-screen feel = operator check.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). Needs the operator check (below).
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
