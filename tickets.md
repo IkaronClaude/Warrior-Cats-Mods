@@ -48,13 +48,17 @@ game data in this repo.
   - RESOLVED 2026-10-25: the "VM crash" on the customisation screen was the TEST HARNESS - it built the main menu by
     hand on the logos map (M_LogosMap), so the creator never had its level / preview cat. Through the real flow
     (logos -> splash -> Enter -> L_MainMenu_P) the customisation screen works on the VM.
-  - KEY FINDING (VM, real creator): the pattern grid lists 24 items = "none" + Pattern 1..23 - the game lists its
-    pattern TYPES, not DT_Patterns' rows. The cloned WaCa row (it carries its fallback's type) is NOT listed. The
-    markings grid lists 24 for 20 rows (more sources: deluxe?). So "entries in the native grid" needs another way in:
-    a new EPatternType / EMarkingType value per WaCa look (the enums' names array, at runtime) with its row, or
-    hooking the grid fill to append items. Next: find the native grid fill (what it iterates) on the VM.
-    Fixed meanwhile: the grid choice mapping (position -> WaCa entry) now runs only when the grid is exactly none +
-    game rows + WaCa rows - before, choosing Pattern 23 would have stored look:Colourpoint.
+  - DONE for PATTERNS (VM, real creator, 2026-10-25): the grids list UWrcGuiManager.ReadyPatterns /
+    ReadyMarkings (fill: 0x1418C2740, found with a hardware watch on the grid's Items), built from the tables' rows -
+    so the cloned WaCa row IS in the game's own grid (ReadyPatterns 0..23, WaCa_Colourpoint = 23; item labels are
+    generic "Pattern N"). Choosing it logged "Pattern entry 23 chosen = Colourpoint (the cat keeps PatternIdx 12)"
+    and rebuilt the preview cats with the WaCa look. Mapping = grid position -> ReadyPatterns index -> row.
+    OPEN: the markings grid shows 24 items for 21 ready indices (3 more from elsewhere - deluxe?) - mapping off there
+    until that source is known; an icon / label for the WaCa item (labels are "Pattern N").
+  - The customisation crash on the VM: AGuiScreenBasePreview's setup (0x141915150) takes the first
+    GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
+    there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
+    the screen's GriNav, so the creator always opens in the main menu level.
   - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
         the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
   - [ ] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
