@@ -15,7 +15,10 @@
 local Creator = {}
 
 local WaCa, log, modDir, ctx
--- the colour index fields -> their palette, the look's colour slot, and the game's own palette size
+-- the colour index fields -> their palette, the look's colour slot. Verified in the game's code (2026-10-25 build,
+-- 0x1417B2155): "Pattern Mask Color" = PatternMaskColors[Pattern01ColorIdx], "Markings Mask Color" =
+-- MarkingMaskColors[Pattern02ColorIdx]; the index is checked against the palette's CURRENT length (so appended colours
+-- render, and an index past the end is skipped, never a crash)
 local PALETTES = {
     { field = "FurColorIdx", palette = "FurColors", slot = "Fur", section = "Fur" },
     { field = "Pattern01ColorIdx", palette = "PatternMaskColors", slot = "Pattern", section = "Pattern" },

@@ -40,7 +40,7 @@ game data in this repo.
       0.5.0 (2026-10-25): DONE, verified headless as far as possible (creator.lua):
       - palettes extended from config/palette.ini (FurColors / PatternMaskColors / MarkingMaskColors 25 + ours);
         a custom index on any player cat -> its exact colour into the look + the nearest game index (verified: idx 30
-        -> #A8989F recorded, idx 11 kept); ASSUMED pairing Pattern01ColorIdx = pattern, Pattern02ColorIdx = markings
+        -> #A8989F recorded, idx 11 kept); pairing VERIFIED in the game code (0x1417B2155: Pattern01ColorIdx -> PatternMaskColors, Pattern02ColorIdx -> MarkingMaskColors; index bounds-checked against the current palette length)
       - name screen: EditableTextBox "your name" + the game's list noted as the online name (verified on the real
         WBP_GuiScreenSelectName shown headless; typed text captured)
       - WaCa panel on the customisation screen (look / pattern shape / markings shape; arrows via LMB + IsHovered, F5-F7)
