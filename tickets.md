@@ -38,6 +38,10 @@ game data in this repo.
         it (panel OnGriIdItemChanged + the grid's current item position) stores look:<Name> and keeps the fallback's
         index in the cat data. NOT VERIFIED: that the grid lists the extra row, and the choice handler - the VM
         cannot open the customisation screen (below). Next: operator check; an icon (IconHelper) for Colourpoint.
+        The panel standalone lists 0 items (it fills natively only with a preview cat). For the operator check the
+        log now says, on the first grid move, "grid lists N items (the game's own: 23, WaCa rows added: 1) - WaCa
+        entries listed / NOT listed" - one look at the log answers whether the game fills the grid from the rows.
+        Fixed: a reload no longer renumbers the WaCa entries (the game's rows counted without WaCa_ rows).
   - VM blocker (not a mod bug): the customisation screen crashes on the VM at 0x141918F78 with the mod's Lua AND
     the look hooks off (WACA_NOLOOK=1): UGuiScreenBasePreview.CatRef (+0x488) is null - the preview cat actor
     (AGuiCatCustomActor) never exists on the VM (none even after 5 min). Probably the GPU-less render path.
@@ -73,7 +77,8 @@ game data in this repo.
   game alive. MouseX / MouseY are out of Player_Camera_* (photo mode keeps them). Left: [Mouse] GameplayCapture = 3
   (drag to look) isn't honoured by the native path; the on-screen feel = operator check.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
-  while a QuestGiverWidget is up (d61c6fa). Needs the operator check (below).
+  while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
+  logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
   (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
   logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
@@ -83,8 +88,9 @@ game data in this repo.
   (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
   DONE too: scan::Reaches - each look primitive must be reachable from the full build within 2 calls (chained
   unwind bodies included) or it is NOT hooked; same check in the tool. VM: 3 of 3 "confirmed" at runtime.
-- [~] P2 a click skips the splash: menus.lua - a left click while GuiScreenSplash is up presses Enter. The VM never
-  shows the splash (IntroLogos -> MainMenu): operator check.
+- [~] P2 a click skips the splash: menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
+  with the game's own WBP_GuiScreenSplash put on screen: the click logged "click on the splash - pressing Enter".
+  Left: the operator sees the real splash continue.
 - [ ] Per-save sidecar: the write path end to end (a value changed in game -> the game's Save -> the sidecar file).
   Testable on the VM now (PROJECT_PLAN.md "Testing on the GPU-less VM").
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):

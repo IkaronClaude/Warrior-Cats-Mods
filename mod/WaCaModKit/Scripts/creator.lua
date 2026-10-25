@@ -841,7 +841,12 @@ local function addGridRows()
             log("creator grid: %s table not available - no WaCa entries in it", kind)
         else
             local names, data = tableRows(t)
-            local state = { vanilla = #names, entries = {} }
+            -- the game's own rows only: a reload (or a second Started) finds our WaCa_ rows already in the table
+            local vanilla = 0
+            for _, name in ipairs(names) do
+                if not name:match("^WaCa_") then vanilla = vanilla + 1 end
+            end
+            local state = { vanilla = vanilla, entries = {} }
             for _, l in ipairs(offeredLooks()) do
                 if l.row == k.maskKey then
                     local file = WaCa.ReadIni(modDir .. "/looks/" .. l.name .. ".ini")
@@ -888,6 +893,15 @@ local function onGridChanged(kind, panel)
     local state = gridRows[kind]
     local grid
     pcall(function() grid = panel.mcGuiGrid end)
+    -- once per grid: does the game list our rows? (it fills the grid natively - from the table's rows, or not)
+    if state and grid and grid:IsValid() and not state.counted then
+        state.counted = true
+        local n = 0
+        pcall(function() n = #grid.Items end)
+        log("creator grid: %s grid lists %d items (the game's own: %d, WaCa rows added: %d) - %s", kind, n, state.vanilla,
+            #state.entries, n >= state.vanilla + #state.entries and "WaCa entries listed"
+                or "WaCa entries NOT listed (the game doesn't fill this grid from the table's rows)")
+    end
     local position = state and grid and grid:IsValid() and gridPosition(grid)
     if not position then return end
     local k = GRID_KINDS[kind]
