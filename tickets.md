@@ -231,6 +231,26 @@ game data in this repo.
 - [ ] **14. Pacing.** Progression must come from time + duties + training, not "3 hunts until deputy". No old deputy
       getting canned for "not doing enough" at your own ceremony. Ceremonies need proper preconditions.
 
+Living world (operator 2026-10-25: "that, plus the other planned features, will make the world feel properly REAL and
+lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
+- [ ] **20. Intentional time skips.** Time passes on screen and on purpose ("a moon passes", with what happened in it),
+      never implied by a story jump. A skip is a world event the other systems react to (season, prey, ages, ranks).
+- [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
+      intentional time skips, and weather within a season (rain, fog, snow, heat). Both are world state that prey,
+      patrols, duties and visuals read. Find what the game already has (sky / lighting / any weather actors, the
+      level's time-of-day setup) before building new.
+- [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
+      - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
+        the fresh-kill pile (it's poisoned).
+      - seasons: leaf-bare = fewer spawns and smaller patrol hauls, especially of prey that hibernates (no / few
+        hibernators at all in deep winter).
+      - one prey table per species with season / event / weather modifiers (data, so mods can add prey and events).
+- [ ] **23. Random prey spawns.** Prey spawns at random times in random places (within each species' habitat: fish
+      in water, birds in trees / open ground, voles in undergrowth ...), not at fixed points. Find the game's prey
+      spawner first (the hunting / prey AI found under P0).
+- [ ] **24. (Bonus) StarClan guidance leads to prey.** The game's StarClan guidance feature points the player to
+      these random prey spawns: hunting by following StarClan's lead. Find how the guidance feature picks its target.
+
 - [ ] **Dialogue text bugs (operator, 2026-10-24).** Some lines show unfilled format arguments, e.g. "It seems that 1's
       Prophecy is true": a name placeholder left as an argument index or default. Find the dialogue tables
       (`Quests/NpcDialogues`, `Quests/StoryDialogues`, `Sequencer/DT_QuestSequenceDialogues`) and the FText format
