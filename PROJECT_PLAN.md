@@ -118,3 +118,18 @@ retry the install on this VM.
 - 2026-10-24: the operator set the goal: an open-source modding framework ASAP. The first hooks are customisation, name
   choice and PC controls, with clean extensible APIs; ease of install front and center. Z: is ours to modify. Discovery
   done (above): engine 5.7.4, UE4SS works, the dumps exist, the customisation / name / input structures are mapped.
+
+## Running the game WITH a renderer on the GPU-less VM: not possible (2026-10-25)
+Every route was tried; a real-creator check needs the operator's PC.
+- `-dx11 -warp`: "A D3D11-compatible GPU (Feature Level 11.0, Shader Model 5.0) is required".
+- `-vulkan` with Mesa lavapipe (VK_ICD_FILENAMES): "Unable to launch with RHI 'Vulkan' since the project is not
+  configured to support it" (the game ships D3D12 only).
+- `-dx12 -warp` with the system WARP: LowLevelFatalError in PipelineStateCache.cpp:602 (PSO creation).
+- `-dx12 -warp` with the current WARP (Microsoft.Direct3D.WARP 1.0.21 d3d10warp.dll next to the exe): the device comes
+  up, but swap-chain creation fails (D3D12Viewport.cpp:572 E_INVALIDARG), also with an 8-bit back buffer and tearing
+  off - the VM's remote display adapter rejects the swap chain.
+
+Headless (`-nullrhi`) the game reaches the "press any key" splash and stops there: the splash reads real input, and
+with no window there is none. Key / command UFUNCTIONs, the flow manager and fake login completions don't advance it.
+Headless tests therefore show creator screens directly (WidgetBlueprintLibrary.Create + AddToViewport): the name
+screen works that way; the customisation screen crashes outside the real creator flow.
