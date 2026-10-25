@@ -222,7 +222,34 @@ game data in this repo.
 - [ ] **15. Clan-sim day.** Each day you get assignments based on the clan's needs: hunt, patrol, night watch, train
       with your mentor, train your apprentice, ... From deputy rank on, your job becomes ASSIGNING the day's duties
       (then joining whichever you want). This is the backbone that 4 / 6 / 7 / 8 / 14 / 17 plug into.
-- [ ] **4. Day / night cycle.** Duties at specific times of day (dawn patrol, night watch).
+- [ ] **4. Day / night cycle (Dredge-style, with exhaustion).** Operator 2026-10-25: like Dredge's day cycle, but the
+      pressure is EXHAUSTION instead of spooky things - staying out late / doing too much tires your cat (slower,
+      worse at hunting / fighting), sleep resets it. A day has three phases, the natural split points for duties:
+      **morning** (dawn patrol, morning hunt), **afternoon**, **evening / night** (evening patrol, night watch).
+      Sleeping skips to the next phase / day. The phases are what the day scripts (25) schedule against.
+- [ ] **25. Story as days (day scripts).** Operator 2026-10-25: the story is defined in DAYS, as data, which keeps it
+      organised. Each day defines:
+      - per phase (morning / afternoon / evening): cutscenes, the main story quest if any, where you may go
+      - the daily duties while below deputy, as chances (hunt 70% / patrol 30% ...) or fixed (train with mentor)
+      - which cats get new dialogue
+      - season / time of year, and the weather (fixed, or chances: rain 70% / snow 10% / sun 20%)
+      - stats a day can copy from an earlier day ("as day 10") so runs of similar days stay short
+      - the condition to move on to the next day. Until it holds, the day REPEATS: same setup, minus the cutscenes
+        already seen and quests already done, with only the allowed randomness (weather, duty rolls).
+      Examples from the operator:
+      - Day 1: in the nursery as a kit, can't leave the den; talk to the other kits / mum; sleep to skip to evening.
+        Evening: ceremony cutscene, promoted to apprentice. Summer, nice weather.
+      - Day 2: morning: starting out with your mentor (cutscene). Afternoon: exploring the territory with your mentor
+        (main quest, given locations). Evening: cutscene sharing the excitement with a cat made apprentice the same
+        day.
+      - Day 10: big story beat, promotion to warrior. Duties hunt 70% / patrol 30%; winter; rain 70% / snow 10% /
+        sun 20%. Evening: vigil cutscene (awake all night).
+      - Day 11: wake up in the afternoon (after the vigil); otherwise as day 10.
+      - Day 12: wake up in the morning; as day 11; main quest: find and fight off the rogues. Repeats until the
+        rogues are fought off.
+      - Day 13: the next big story beat.
+      This is the backbone 15 (clan-sim day) fills in from deputy rank on. Needs 4 (phases), 21 (season / weather) and
+      the game's quest / cutscene / dialogue hooks.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
@@ -236,9 +263,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **20. Intentional time skips.** Time passes on screen and on purpose ("a moon passes", with what happened in it),
       never implied by a story jump. A skip is a world event the other systems react to (season, prey, ages, ranks).
 - [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
-      intentional time skips, and weather within a season (rain, fog, snow, heat). Both are world state that prey,
-      patrols, duties and visuals read. Find what the game already has (sky / lighting / any weather actors, the
-      level's time-of-day setup) before building new.
+      intentional time skips, and weather within a season. Both are world state that prey, patrols, duties and visuals
+      read. Find what the game already has (sky / lighting / any weather actors, the level's time-of-day setup) before
+      building new. Weights (operator 2026-10-25):
+      - **Rain: very important.** Full rain (visuals, sound, wet ground) and its effects on prey / scent / patrols.
+      - Sun / clear and the season's light: the baseline.
+      - **Snow: low priority, minimal.** A proof of concept is enough (some snow piles here and there in leaf-bare).
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).
@@ -281,7 +311,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **18. More graphics options.** The current ones are very lackluster; expose the engine's scalability groups +
       extras.
 
+- [ ] **26. Prey scent / visual trails** (operator 2026-10-25: "sick for future work", like The Isle). Prey leaves
+      trails - scent you detect (a sense / sniff mode) and visual signs (tracks, disturbed undergrowth) - that you can
+      follow to the prey. Ties into 23 (random spawns: the trail is how you find them), 21 (rain washes scent out,
+      snow keeps tracks) and 24 (StarClan guidance as an alternative lead).
+
 ## P3: Later / big content
+- [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
+      missed when not done by a given day, so the story isn't one fixed line.
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
