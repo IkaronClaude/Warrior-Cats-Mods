@@ -30,8 +30,11 @@ game data in this repo.
   redesign tickets, the "creator finding" note and the old "Creator UI injection").
   - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
         CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
-  - [ ] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK (pattern /
-        marking / colour indices). Started: looks/*.ini `Fallback =` (Colourpoint: P13_Tabby), creator.ini PackFallback.
+  - [x] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK: every enabled
+        mod's looks/*.ini is discovered (IterateGameDirectories + enabled.txt / mods.txt), id "<Mod>/looks/<File>.ini",
+        offered and added as a grid row with its Fallback / Label (creator.ini AutoLooks; 2357c88). VM: a test mod's
+        TestMitts.ini became DT_Markings row 21 "Test Mitts" next to Colourpoint. Colour indices: still only the
+        palette.ini swatches.
   - [~] Entries in the native pattern / marking grids. DONE so far: native row cloner (tables.cpp, d61c6fa), and at
         startup each offered pattern / markings look becomes a row of DT_Patterns / DT_Markings copied from its
         fallback's row (VM-verified: "WaCa_Colourpoint" added, copied from NewRow_11 = P13_Tabby, 24 rows). Choosing
