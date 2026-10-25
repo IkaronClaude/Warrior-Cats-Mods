@@ -967,8 +967,9 @@ local function onGridChanged(kind, panel)
     -- The grid lists UWrcGuiManager.ReadyPatterns / ReadyMarkings: one item per index, in that order - the tables'
     -- row indices, ours included (VM 2026-10-25: ReadyPatterns 0..23 with WaCa_Colourpoint = 23; the items' labels
     -- are generic, "Pattern 1".."Pattern 23"). So a grid position is a row through that list; an index past the game's
-    -- own rows is a WaCa entry. A grid whose item count isn't the list's (the markings grid showed 24 items for 21
-    -- indices) has more sources than this list: no mapping there - the game's choices stay as they are.
+    -- own rows is a WaCa entry. The markings grid adds its own items BEFORE the list's (its fill, 0x1418C33D0, adds
+    -- them ahead of the loop over ReadyMarkings: 24 items for 21 indices), so the list starts at item (items -
+    -- indices); those leading items are the game's. A grid with FEWER items than its list: no mapping.
     if not (state and grid and grid:IsValid()) then return end
     local n, ready = 0, nil
     pcall(function() n = #grid.Items end)
@@ -980,15 +981,17 @@ local function onGridChanged(kind, panel)
     pcall(function() count = #ready end)
     if not state.counted then
         state.counted = true
-        log("creator grid: %s grid lists %d items, the ready list %d indices (the game's rows: %d, WaCa rows: %d)%s",
-            kind, n, count, state.vanilla, #state.entries, n == count and "" or " - counts differ: no WaCa choice here")
+        log("creator grid: %s grid lists %d items, the ready list %d indices from item %d (the game's rows: %d, WaCa "
+            .. "rows: %d)%s", kind, n, count, n - count, state.vanilla, #state.entries,
+            n >= count and "" or " - fewer items than indices: no WaCa choice here")
     end
-    if n ~= count then return end
+    if n < count then return end
     local position = gridPosition(grid)
     if not position then return end
     local index
-    pcall(function() index = ready[position + 1] end)
-    if index == nil then return end
+    local at = position - (n - count)               -- 0-based place in the ready list; < 0 = a leading game item
+    if at >= 0 then pcall(function() index = ready[at + 1] end) end
+    if index == nil then index = -1 end
     local k = GRID_KINDS[kind]
     local entry = state.entries[index - state.vanilla + 1]
     local f = FALLBACK_FIELD[k.maskKey]

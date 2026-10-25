@@ -53,8 +53,9 @@ game data in this repo.
     so the cloned WaCa row IS in the game's own grid (ReadyPatterns 0..23, WaCa_Colourpoint = 23; item labels are
     generic "Pattern N"). Choosing it logged "Pattern entry 23 chosen = Colourpoint (the cat keeps PatternIdx 12)"
     and rebuilt the preview cats with the WaCa look. Mapping = grid position -> ReadyPatterns index -> row.
-    OPEN: the markings grid shows 24 items for 21 ready indices (3 more from elsewhere - deluxe?) - mapping off there
-    until that source is known; an icon / label for the WaCa item (labels are "Pattern N").
+    MARKINGS too: their fill (0x1418C33D0) adds 3 game items AHEAD of the ReadyMarkings loop; mapping = position -
+    (items - indices). VM: the last markings item -> "Markings entry 23 chosen = TestMitts (the cat keeps
+    MarkingIdx 3)". OPEN: a label / icon for the WaCa items (the game labels them "Pattern N").
   - The customisation crash on the VM: AGuiScreenBasePreview's setup (0x141915150) takes the first
     GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
     there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
