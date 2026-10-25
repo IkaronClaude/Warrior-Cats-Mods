@@ -12,6 +12,7 @@
 
 #include "MinHook.h"
 #include "appearance.h"
+#include "camera.h"
 #include "bridge.h"
 #include "input.h"
 #include "keys.h"
@@ -57,6 +58,7 @@ public:
         text::Install(input::FNameCtor());
         ui::Init(input::FNameCtor());
         appearance::Install();
+        camera::Install();
     }
 
     auto on_unreal_init() -> void override { bridge::Install(); }

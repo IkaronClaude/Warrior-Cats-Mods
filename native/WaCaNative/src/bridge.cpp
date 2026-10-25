@@ -326,6 +326,7 @@ std::atomic<int> g_watchHits{0};
 std::mutex g_watchMutex;
 std::vector<uintptr_t> g_watchSeen;
 PVOID g_watchHandler = nullptr;
+int g_watchLenBits = 3;                                   // DR7 length: 3 = 4 bytes, 2 = 8 bytes
 
 void SetWatch(uintptr_t addr) {
     // from a helper thread: a thread can't reliably set its own debug registers, and the caller (the game thread) is
@@ -343,7 +344,7 @@ void SetWatch(uintptr_t addr) {
             c.ContextFlags = CONTEXT_DEBUG_REGISTERS;
             if (GetThreadContext(t, &c)) {
                 c.Dr0 = addr;
-                c.Dr7 = addr ? (c.Dr7 & ~0xF0003ull) | 1ull | (3ull << 16) | (3ull << 18) : (c.Dr7 & ~0xF0003ull);
+                c.Dr7 = addr ? (c.Dr7 & ~0xF0003ull) | 1ull | (3ull << 16) | (static_cast<unsigned long long>(g_watchLenBits) << 18) : (c.Dr7 & ~0xF0003ull);
                 SetThreadContext(t, &c);
             }
             ResumeThread(t);
@@ -413,9 +414,43 @@ int LuaDevWatchAxis(const LuaMadeSimple::Lua& lua) {
     }
     if (!g_watchHandler) g_watchHandler = AddVectoredExceptionHandler(1, &WatchHandler);
     g_watchHits = 0;
+    g_watchLenBits = 3;
     { std::lock_guard<std::mutex> lock(g_watchMutex); g_watchSeen.clear(); }
     SetWatch(target);
     logx::Line(L"[dev] watch: armed on %s's AxisValue at %p", want.c_str(), reinterpret_cast<void*>(target));
+    lua.set_bool(true);
+    return 1;
+}
+
+// dev: n floats at an address as text - WaCaNative_DevReadFloats(address, n) (unreflected fields, e.g. limits)
+int LuaDevReadFloats(const LuaMadeSimple::Lua& lua) {
+    auto* p = reinterpret_cast<const float*>(static_cast<uintptr_t>(lua.get_integer()));
+    int n = static_cast<int>(lua.get_integer());
+    std::string out;
+    for (int i = 0; p && i < n && i < 64 && Readable(p + i, 4); ++i) {
+        char buf[32];
+        snprintf(buf, sizeof(buf), "%s%.3f", i ? " " : "", p[i]);
+        out += buf;
+    }
+    lua.set_string(out);
+    return 1;
+}
+
+// dev: the same watchpoint on any address - WaCaNative_DevWatchAddress(address, 4 or 8 bytes)
+int LuaDevWatchAddress(const LuaMadeSimple::Lua& lua) {
+    auto target = static_cast<uintptr_t>(lua.get_integer());
+    int bytes = static_cast<int>(lua.get_integer());
+    if (!target || (bytes == 8 ? target % 8 : target % 4)) {
+        logx::Line(L"[dev] watch: bad address %p (needs %d-byte alignment)", reinterpret_cast<void*>(target), bytes == 8 ? 8 : 4);
+        lua.set_bool(false);
+        return 1;
+    }
+    if (!g_watchHandler) g_watchHandler = AddVectoredExceptionHandler(1, &WatchHandler);
+    g_watchHits = 0;
+    g_watchLenBits = bytes == 8 ? 2 : 3;
+    { std::lock_guard<std::mutex> lock(g_watchMutex); g_watchSeen.clear(); }
+    SetWatch(target);
+    logx::Line(L"[dev] watch: armed on %p (%d bytes)", reinterpret_cast<void*>(target), bytes == 8 ? 8 : 4);
     lua.set_bool(true);
     return 1;
 }
@@ -532,6 +567,8 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_CloneTableRow", &LuaCloneTableRow);
     lua.register_function("WaCaNative_DevAxisBindings", &LuaDevAxisBindings);
     lua.register_function("WaCaNative_DevWatchAxis", &LuaDevWatchAxis);
+    lua.register_function("WaCaNative_DevWatchAddress", &LuaDevWatchAddress);
+    lua.register_function("WaCaNative_DevReadFloats", &LuaDevReadFloats);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));

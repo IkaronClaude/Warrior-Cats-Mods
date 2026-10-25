@@ -4,6 +4,7 @@
   vm_input.py keydown|keyup <vk hex>     hold / release a key (a held arrow key = a full stick axis)
   vm_input.py click <x> <y>              a left click at client coordinates
   vm_input.py move <x> <y>               a mouse move to client coordinates
+  vm_input.py nudge <dx> <dy> [steps]     relative mouse motion via SendInput (raw input, like a real mouse)
 
 Posts window messages to the game's top-level window (found by the game's process name), so it needs no focus and no
 interactive desktop."""
@@ -77,6 +78,22 @@ def main():
     cmd = sys.argv[1]
     if cmd == "key":
         key(hwnd, int(sys.argv[2], 16), int(sys.argv[3]) if len(sys.argv) > 3 else 1)
+    elif cmd == "nudge":
+        # relative mouse motion through the real input stack (SendInput: raw input, as a physical mouse) - posted
+        # WM_MOUSEMOVE / SetCursorPos never reach a game reading raw mouse deltas
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wt.LONG), ("dy", wt.LONG), ("mouseData", wt.DWORD), ("dwFlags", wt.DWORD),
+                        ("time", wt.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wt.DWORD), ("mi", MOUSEINPUT)]          # 40 bytes on x64, as SendInput checks
+
+        user32.SetForegroundWindow(hwnd)
+        dx, dy, steps = int(sys.argv[2]), int(sys.argv[3]), int(sys.argv[4]) if len(sys.argv) > 4 else 10
+        for _ in range(steps):
+            inp = INPUT(0, MOUSEINPUT(dx, dy, 0, 0x0001, 0, 0))          # INPUT_MOUSE, MOUSEEVENTF_MOVE
+            user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+            time.sleep(0.1)
     elif cmd in ("keydown", "keyup"):
         vk = int(sys.argv[2], 16)
         down = 1 | (user32.MapVirtualKeyW(vk, 0) << 16)

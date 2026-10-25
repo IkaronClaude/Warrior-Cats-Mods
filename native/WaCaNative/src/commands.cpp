@@ -5,8 +5,10 @@
 //   DevWatch|<address hex>|<length>  DevWatchRow|<table hex>|<row>|<offset hex>|<length>  DevUnwatch
 //   PressKey|<Unreal key name>                      a real key press + release posted to the game window (KeyAliases)
 //   DevPressKey|<vk hex>  DevStack|<label>                                        (dev.cpp)
+//   MouseLook|<0/1>|<yaw degrees per mouse unit>|<pitch degrees per mouse unit>   mouse look on / off (camera.cpp)
 #include "commands.h"
 
+#include "camera.h"
 #include "dev.h"
 #include "log.h"
 #include "steam.h"
@@ -41,6 +43,8 @@ bool Run(const std::wstring& cmd) {
     else if (verb == L"PressKey") dev::PressKeyNamed(Arg(cmd, 1));
     else if (verb == L"DevStack") dev::Stack(Arg(cmd, 1));
     else if (verb == L"SteamKeyboard") steam::ShowKeyboard(Arg(cmd, 1), Arg(cmd, 2));
+    else if (verb == L"MouseLook") camera::SetMouseLook(Arg(cmd, 1) == L"1", std::wcstof(Arg(cmd, 2).c_str(), nullptr),
+                                                         std::wcstof(Arg(cmd, 3).c_str(), nullptr));
     else {
         logx::Line(L"[commands] unknown command %s", cmd.c_str());
         return false;

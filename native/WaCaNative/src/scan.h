@@ -149,6 +149,53 @@ inline bool Reaches(uint8_t* from, uint8_t* to, int depth) {
     return false;
 }
 
+// whether function `fn`'s body (as Reaches scans it) holds `pattern` at least `count` times - a second anchor for a
+// function whose body is known (an immediate it uses, a call layout)
+inline bool BodyContains(uint8_t* fn, const char* pattern, int count) {
+    DWORD64 imageBase = 0;
+    auto* entry = fn ? RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(fn), &imageBase, nullptr) : nullptr;
+    if (!entry) return false;
+    auto* end = reinterpret_cast<uint8_t*>(imageBase + entry->EndAddress);
+    for (int guard = 0; guard < 64; ++guard) {
+        auto* next = RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(end), &imageBase, nullptr);
+        if (!next || reinterpret_cast<uint8_t*>(imageBase + next->BeginAddress) != end || FunctionStart(end) != fn) break;
+        end = reinterpret_cast<uint8_t*>(imageBase + next->EndAddress);
+    }
+    auto p = Parse(pattern);
+    int found = 0;
+    for (uint8_t* at = fn; at + p.Bytes.size() <= end; ++at) {
+        bool ok = true;
+        for (size_t k = 0; k < p.Bytes.size() && ok; ++k) ok = !p.Mask[k] || at[k] == p.Bytes[k];
+        found += ok;
+    }
+    return found >= count;
+}
+
+// the one function `fn` calls (E8, a function start) whose body holds `pattern` - a function with no string of its
+// own, anchored on an anchored caller plus what it does; none or several = null
+inline uint8_t* CalleeWhere(uint8_t* fn, const char* pattern) {
+    DWORD64 imageBase = 0;
+    auto* entry = fn ? RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(fn), &imageBase, nullptr) : nullptr;
+    if (!entry) return nullptr;
+    auto* end = reinterpret_cast<uint8_t*>(imageBase + entry->EndAddress);
+    for (int guard = 0; guard < 64; ++guard) {
+        auto* next = RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(end), &imageBase, nullptr);
+        if (!next || reinterpret_cast<uint8_t*>(imageBase + next->BeginAddress) != end || FunctionStart(end) != fn) break;
+        end = reinterpret_cast<uint8_t*>(imageBase + next->EndAddress);
+    }
+    uint8_t* found = nullptr;
+    for (uint8_t* p = fn; p + 5 <= end; ++p) {
+        if (*p != 0xE8) continue;
+        uint8_t* t = RelTarget(p);
+        if (t == found || !RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(t), &imageBase, nullptr) || FunctionStart(t) != t ||
+            !BodyContains(t, pattern, 1))
+            continue;
+        if (found) return nullptr;                       // ambiguous
+        found = t;
+    }
+    return found;
+}
+
 // the one function that uses the ASCII string `text` and starts with `prologue` (pattern syntax), or null
 inline uint8_t* FunctionUsing(const char* text, const char* prologue) {
     auto p = Parse(prologue);

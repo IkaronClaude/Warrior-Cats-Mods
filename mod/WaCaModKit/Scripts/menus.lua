@@ -124,6 +124,17 @@ update = function(leaving, full, decided)
     -- the first decision is only logged when it shows the cursor (at start-up the game's own state is "hidden")
     if shown ~= nil or want then log("mouse cursor %s", want and "shown (menu)" or "hidden (gameplay)") end
     shown = want
+    Menus.MouseLook(not want)
+end
+
+-- Mouse look (native camera.cpp): the mouse turns the game's camera directly, in gameplay only - in a menu it moves
+-- the cursor. Sensitivity: keybinds.ini [Mouse] LookYaw (degrees per mouse unit; up / down is still the [Axes] MouseY)
+local look = { yaw = 2.0, pitch = 1.5, on = nil }
+function Menus.MouseLook(on)
+    if gameplayCapture == 0 then on = false end
+    if look.on == on then return end
+    look.on = on
+    WaCa.Command(string.format("MouseLook|%d|%.4f|%.4f", on and 1 or 0, look.yaw, look.pitch))
 end
 
 -- Mouse clicks on the game's own menu buttons. Every button control carries a UMG collision button (Slate hit-tests
@@ -172,7 +183,9 @@ function Menus.Init(c)
     local mouse = ini and ini["Mouse"] or {}
     enabled = (mouse.MenuCursor or "1") ~= "0"
     gameplayCapture = tonumber(mouse.GameplayCapture or "") or gameplayCapture
-    if not enabled then return end
+    look.yaw = tonumber(mouse.LookYaw or "") or look.yaw
+    -- no menu cursor handling: nothing tells gameplay from menus, so mouse look is simply on
+    if not enabled then Menus.MouseLook(true) return end
     -- Decided on the next tick, never inside the event: a screen is built inside the game's own input handling (the
     -- pause menu inside SwtPlayerController.OnListenCommand), and changing the input mode there (focus, flushed keys)
     -- pulled things from under the game - it crashed opening the pause menu (VM, 2026-10-25). One decision per tick,

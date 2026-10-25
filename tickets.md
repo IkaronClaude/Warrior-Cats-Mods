@@ -61,6 +61,14 @@ game data in this repo.
   PLAN: MouseX / MouseY out of Player_Camera_* into their own value-only bindings (standard UE input, keybind-menu
   friendly); detour the camera update 0x1417A61B0 (string / call-graph anchors via the relocation framework) and
   after it add delta * sensitivity straight to yaw (+ pitch on its path) - no dead zone, curve, clamp or dt.
+  IMPLEMENTED (yaw) in camera.cpp: the mouse (GetInputMouseDelta, standard UE MouseX) goes into the game's own
+  turn value as degrees / (turn speed * dt) - turn detour on the update's camera-right callee, anchors "LookAtYaw" +
+  body checks. Direct writes to CameraActor+0x3A0 do NOT work (only honoured while the camera sees input; the
+  camera tick clamps pitch +-89.9, yaw free, then smooths and recentres behind the cat when idle). VM-proven: the
+  turn value carries the mouse (delta 37.8 -> 75.6 deg); the VIEW change could not be measured reliably on the VM
+  (CameraCachePrivate reads flaky at 0.6 fps) -> OPERATOR CHECK. Mouse look on/off follows the menu cursor.
+  Left: pitch (own getter vtable +0x1008 + curve; MouseY stays on the [Axes] path meanwhile); [Mouse]
+  GameplayCapture = 3 (drag to look) isn't honoured by the native path yet.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). Needs the operator check (below).
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
@@ -85,6 +93,8 @@ game data in this repo.
     game's patterns still work after it (the VM can't open that screen)
   - Space advances a conversation
   - a click on the splash ("press any key") continues
+  - mouse look left / right: turns with the mouse at any speed, no stick cap; feel of LookYaw = 2.0; recentring
+    while you hold the mouse still (the game's own behaviour)
 
 ## P0: Foundation (nothing else can start until this works)
 - [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
