@@ -21,6 +21,7 @@ if (args.Length < 3)
 var game = Enum.Parse<EGame>(args[1]);
 OodleHelper.Initialize();
 var provider = new DefaultFileProvider(args[0], SearchOption.TopDirectoryOnly, new VersionContainer(game));
+provider.ReadScriptData = true;     // keep Blueprint bytecode (function graphs) in json exports
 provider.Initialize();
 provider.SubmitKey(new FGuid(), new FAesKey(new byte[32]));
 provider.PostMount();
