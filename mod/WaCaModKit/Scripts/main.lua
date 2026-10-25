@@ -436,7 +436,10 @@ WaCa.On("KeyDown", function(_, name)
     local targets = dialogueAliases[name]
     if not targets or not dialogueUp() then return end
     for _, target in ipairs(targets) do
-        if not dialogueAliases[target] then WaCa.Command("PressKey|" .. target) end
+        if not dialogueAliases[target] then
+            log("dialogue: %s -> %s", name, target)
+            WaCa.Command("PressKey|" .. target)
+        end
     end
 end)
 
