@@ -399,7 +399,7 @@ table.insert(onSlotChanged, function() Roster.Run(true) end)
 
 -- The character creator: extra palette colours + the name field (creator.lua)
 Creator.Init({
-    WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue, slotValue = slotValue,
+    WaCa = WaCa, log = log, modDir = modDir, modsDir = modsDir, setSlotValue = setSlotValue, slotValue = slotValue,
     refreshLook = lookChanged,
     writeSlot = function() slot.dirty = true; saveSlot() end,
     slotId = function() return slot.id end,

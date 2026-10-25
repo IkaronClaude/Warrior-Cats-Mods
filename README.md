@@ -95,7 +95,8 @@ state corrupt it.
 Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`; with
 `Row = Pattern` / `Row = Markings` it is offered as one of that row's shapes, see `looks/Colourpoint.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
-Such a look is an entry in the creator's own pattern / markings grid: a copy of its `Fallback =` shape's row in
+A look mod needs no config edit: every enabled mod's `looks/*.ini` is offered automatically (id
+`<Mod>/looks/<File>.ini`; `creator.ini` `AutoLooks = 0` turns that off). Such a look is an entry in the creator's own pattern / markings grid: a copy of its `Fallback =` shape's row in
 the game's table, named by `Label =` (else the look's name), with its grid icon from `Icon = /Game/...` (else the
 fallback's). The saved cat keeps the fallback's index, so the save works without the mod.
 

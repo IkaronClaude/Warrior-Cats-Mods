@@ -14,7 +14,7 @@
 -- game creates that slot (and saved with the game's next save); loading an existing save instead drops it.
 local Creator = {}
 
-local WaCa, log, modDir, ctx
+local WaCa, log, modDir, modsDir, ctx
 -- the colour index fields -> their palette, the look's colour slot. Verified in the game's code (2026-10-25 build,
 -- 0x1417B2155): "Pattern Mask Color" = PatternMaskColors[Pattern01ColorIdx], "Markings Mask Color" =
 -- MarkingMaskColors[Pattern02ColorIdx]; the index is checked against the palette's CURRENT length (so appended colours
@@ -535,18 +535,89 @@ local function sortedEnum(enum, pattern)
     return names
 end
 
--- the looks offered (creator.ini Looks) with the row each belongs to: a look file's "Row = Pattern" / "Row =
--- Markings" lists it among that row's shapes (a look that IS a pattern, e.g. Colourpoint); no Row = the Look row
+-- A look's id: "<Name>" = WaCa ModKit's own looks/<Name>.ini, "<Mod>/looks/<File>.ini" = another mod's (the same
+-- rule as main.lua's mergeLook). Its file, read.
+local function lookIni(id)
+    local path = id:find("[/\\]") and (modsDir .. "/" .. id) or (modDir .. "/looks/" .. id .. ".ini")
+    return WaCa.ReadIni(path)
+end
+
+-- the enabled mods (UE4SS: a mod's enabled.txt, or "<Mod> : 1" in Mods/mods.txt)
+local function enabledMods(mods)
+    local listed = {}
+    local txt = io.open(modsDir .. "/mods.txt", "r")
+    if txt then
+        for line in txt:lines() do
+            local name, on = line:match("^%s*([^:;%s][^:]-)%s*:%s*(%d)")
+            if name then listed[name] = on == "1" end
+        end
+        txt:close()
+    end
+    local out = {}
+    for name, dir in pairs(mods) do
+        if type(dir) == "table" and not tostring(name):match("^__") then
+            local hasEnabled = false
+            for _, f in pairs(dir.__files or {}) do
+                if tostring(f.__name):lower() == "enabled.txt" then hasEnabled = true end
+            end
+            if hasEnabled or listed[name] then out[name] = dir end
+        end
+    end
+    return out
+end
+
+-- Looks other mods bring: every enabled mod's looks/*.ini with a [Look] section - a mod is a folder you drop in, no
+-- config edit (creator.ini AutoLooks = 0 turns it off). Ids "<Mod>/looks/<File>.ini". Read once per game.
+local discovered
+local function discoveredLooks()
+    if discovered then return discovered end
+    discovered = {}
+    local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
+    if ((ini["Creator"] or {}).AutoLooks or "1") == "0" then return discovered end
+    local ok, err = pcall(function()
+        local mods = IterateGameDirectories().Game.Binaries.Win64.ue4ss.Mods
+        local own = modDir:match("([^/\\]+)$")
+        for name, dir in pairs(enabledMods(mods)) do
+            local looks = name ~= own and (dir.looks or dir.Looks)
+            for _, f in pairs(looks and looks.__files or {}) do
+                local file = tostring(f.__name)
+                if file:lower():match("%.ini$") then
+                    local id = name .. "/" .. (dir.looks and "looks" or "Looks") .. "/" .. file
+                    if (lookIni(id) or {})["Look"] then table.insert(discovered, id) end
+                end
+            end
+        end
+    end)
+    if not ok then log("looks: other mods' looks not read (%s)", tostring(err)) end
+    table.sort(discovered)
+    if #discovered > 0 then log("looks from other mods: %s", table.concat(discovered, ", ")) end
+    return discovered
+end
+
+-- the looks offered (creator.ini Looks, then the other mods') with the row each belongs to: a look file's
+-- "Row = Pattern" / "Row = Markings" lists it among that row's shapes (a look that IS a pattern, e.g. Colourpoint);
+-- no Row = the Look row
 local function offeredLooks()
     local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
     local out = {}
-    for name in ((ini["Creator"] or {}).Looks or ""):gmatch("[^,]+") do
-        name = name:gsub("^%s+", ""):gsub("%s+$", "")
-        local l = WaCa.ReadIni(modDir .. "/looks/" .. name .. ".ini")
+    local function offer(id)
+        local l = lookIni(id)
         local row = l and l["Look"] and l["Look"].Row or ""
-        table.insert(out, { name = name, row = row ~= "" and row .. "Mask" or "Look" })
+        table.insert(out, { name = id, row = row ~= "" and row .. "Mask" or "Look" })
     end
+    for name in ((ini["Creator"] or {}).Looks or ""):gmatch("[^,]+") do
+        offer((name:gsub("^%s+", ""):gsub("%s+$", "")))
+    end
+    for _, id in ipairs(discoveredLooks()) do offer(id) end
     return out
+end
+
+-- a look's display name: its Label, else the file / look name
+local function lookLabel(id)
+    local l = lookIni(id)
+    local label = l and l["Look"] and l["Look"].Label
+    if label and label ~= "" then return label end
+    return (id:match("([^/\\]+)%.ini$") or id)
 end
 
 local function choicesFor(key)
@@ -555,7 +626,7 @@ local function choicesFor(key)
     local list = { { label = "No override", value = nil } }
     for _, l in ipairs(offeredLooks()) do
         if l.row == key then
-            table.insert(list, { label = key == "Look" and l.name or l.name .. " (WaCa)",
+            table.insert(list, { label = key == "Look" and lookLabel(l.name) or lookLabel(l.name) .. " (WaCa)",
                                  value = key == "Look" and l.name or "look:" .. l.name })
         end
     end
@@ -612,7 +683,7 @@ local function fallbackFor(rowKey, value)
     if not name then
         local look = value:match("^look:(.+)$")
         if look then
-            local l = WaCa.ReadIni(modDir .. "/looks/" .. look .. ".ini")
+            local l = lookIni(look)
             name = l and l["Look"] and l["Look"].Fallback
         else
             name = cfgValue("PackFallback")
@@ -849,7 +920,7 @@ local function addGridRows()
             local state = { vanilla = vanilla, entries = {} }
             for _, l in ipairs(offeredLooks()) do
                 if l.row == k.maskKey then
-                    local file = WaCa.ReadIni(modDir .. "/looks/" .. l.name .. ".ini")
+                    local file = lookIni(l.name)
                     local look = file and file["Look"] or {}
                     local fallback = roles[k.enum] and roles[k.enum][look.Fallback or ""]
                     -- the fallback's own row is the source (found by its type); none = the table's first row
@@ -860,7 +931,7 @@ local function addGridRows()
                     end
                     local rowName = "WaCa_" .. l.name:gsub("[^%w]", "_")
                     if source and WaCaNative_CloneTableRow(t:GetAddress(), source, rowName) then
-                        WaCaNative_SetTableField(t:GetAddress(), rowName, "StringName", look.Label or l.name)
+                        WaCaNative_SetTableField(t:GetAddress(), rowName, "StringName", lookLabel(l.name))
                         if (look.Icon or "") ~= "" then WaCaNative_SetTableField(t:GetAddress(), rowName, "IconHelper", look.Icon) end
                         table.insert(state.entries, { look = l.name, fallback = fallback })
                         log("creator grid: %s entry %d = %s (fallback %s, copied from %s)", kind,
@@ -929,6 +1000,7 @@ end
 function Creator.Init(c)
     ctx = c
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
+    modsDir = c.modsDir or (modDir:match("^(.+)[/\\][^/\\]+$") or modDir)
     WaCa.On("ScreenShown", onScreenShown)
     WaCa.On("ScreenHidden", onScreenHidden)
     WaCa.On("ScreenFocusIn", nameFocusIn)
