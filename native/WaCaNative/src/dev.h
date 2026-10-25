@@ -7,4 +7,5 @@ namespace dev {
 void Watch(const std::wstring& addrHex, const std::wstring& lenText);
 void Unwatch();
 void PressKey(const std::wstring& vkHex);
+void Stack(const std::wstring& label);
 }

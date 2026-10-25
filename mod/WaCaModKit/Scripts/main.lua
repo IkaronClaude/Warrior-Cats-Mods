@@ -393,6 +393,8 @@ end
 -- the Lua VM (operator 2026-10-25: after a while cycling patterns in the creator; reproduced headless with F6 x 75).
 local Menus = require("menus")
 Menus.Init({ WaCa = WaCa, log = log, modDir = modDir })
+local Dev = require("dev")
+Dev.Init({ WaCa = WaCa, log = log, modDir = modDir })
 
 LoopInGameThreadWithDelay(300, function()
     local ok, err = pcall(Creator.FastTick)
@@ -411,6 +413,7 @@ local function slowTick()
         applyUIKeys()
     end
     checkSlot()
+    Dev.Tick()
     Creator.Tick()
     local cat = playerCustomData()
     if cat then Creator.OnPlayerCat(cat) end

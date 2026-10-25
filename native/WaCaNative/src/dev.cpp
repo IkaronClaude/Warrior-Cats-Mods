@@ -5,6 +5,8 @@
 //                                            offset and a short call stack (WaCaNative.log, "[dev]")
 //   DevUnwatch                               clears it
 //   DevPressKey|<virtual key hex>            a key press + release posted to the game window, as Windows sends it
+//   DevStack|<label>                         the calling thread's native call stack (from inside a Lua hook: shows
+//                                            the game code that called the hooked function)
 #include "dev.h"
 
 #include <windows.h>
@@ -127,6 +129,14 @@ void Watch(const std::wstring& addrHex, const std::wstring& lenText) {
 void Unwatch() {
     g_watch = 0;
     SetDebugRegisters(0, 8);
+}
+
+void Stack(const std::wstring& label) {
+    void* frames[40];
+    USHORT n = RtlCaptureStackBackTrace(0, 40, frames, nullptr);
+    std::wstring out;
+    for (USHORT i = 0; i < n; ++i) out += L"\n    " + Where(reinterpret_cast<uintptr_t>(frames[i]));
+    logx::Line(L"[dev] stack %s:%s", label.c_str(), out.c_str());
 }
 
 void PressKey(const std::wstring& vkHex) {
