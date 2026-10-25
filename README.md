@@ -5,7 +5,7 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.5.4
+## What's in 0.5.3
 - **In the game's character creator:**
   - **Your own name:** a text box on the name screen. The game's name list stays as your *online* name (what the
     save and online features keep); the typed name is what you see in the game.

@@ -26,7 +26,7 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
-- [ ] 0.5.4 (2026-10-25, operator: a crash in the creator after a long time cycling custom patterns; the custom
+- [ ] 0.5.3 fix, tag moved (2026-10-25, operator: a crash in the creator after a long time cycling custom patterns; the custom
       patterns did not render on the cat). Crash: inside UE4SS during a hook (PCallStack all UE4SS -> game 0x4A1BDD2),
       read of 0xFFFFFFFFFFFFFFFF = a stale object. Fixed the likely cause: the creator held widget wrappers (name box,
       panel buttons / values) and texture objects across ticks and identified screens by ADDRESS (a rebuilt screen
