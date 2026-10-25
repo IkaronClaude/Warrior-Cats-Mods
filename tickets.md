@@ -146,6 +146,9 @@ game data in this repo.
       extras.
 
 ## P3: Later / big content
+- [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
+      traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
+      stat effect; the visuals read from it, the stats keep the original choice.
 - [ ] **Story.** Pour the existing thin story into the new systems, then expand it toward the books (needs 15 + 17).
 - [ ] **12. Romance + kits (far future).** The friendship system already exists. Add a mate, kits of your own, watching
       them grow up. Maybe in a free-play mode after the story concludes.
