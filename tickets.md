@@ -31,9 +31,8 @@ game data in this repo.
       WaCa.On / WaCa.Watch / WaCa.Ready, built-in ScreenShown / ScreenHidden / ScreenFocusIn / ScreenFocusOut /
       CatSpawned / SteamTextInput / Started; both Lua loops removed; WaCaNative_Command replaces the string-table
       channel. Headless-proven (PROJECT_PLAN.md "Event-driven foundation"). Not released yet (see the two P1s below).
-- [ ] P1 CI secret UE4SS_SOURCE_TOKEN (operator): a GitHub token of an Epic-linked account that can read
-  Re-UE4SS/UEPseudo, as a repository secret - the release workflow now builds the DLL from UE4SS source and fails
-  without it. Then tag v0.6.0.
+- [x] CI secret UE4SS_SOURCE_TOKEN (2026-10-25): set by the operator; v0.6.0 released by CI (full UE4SS build 12m22s
+      on the runner). Build-output cache added after (first used by the next tag).
 - [ ] P1 verify 0.6.0 on a GPU (operator's PC): CatSpawned in real gameplay (name / look / roster on spawn), the
   menu cursor staying visible without the old per-tick re-assert, the name box flow with a real keyboard and the
   Steam keyboard, the creator panel re-attaching after menu commands.
