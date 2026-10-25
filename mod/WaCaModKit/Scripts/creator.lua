@@ -90,7 +90,7 @@ end
 local function sanitize()
     if not extended then return end
     local gm = FindFirstOf("SwtAdventureGuiManager")
-    for _, cat in ipairs(WaCa.PlayerCats()) do
+    for _, cat in ipairs(WaCa.PlayerCats(creatorOpen())) do
         local d = cat.CustomData
         local changed = false
         for _, p in ipairs(PALETTES) do
@@ -217,6 +217,11 @@ function Creator.OnSlotChanged(id)
     log("character creation saved with the new save slot %s", id)
     pending = nil
     justCommitted = creatorOpen()
+end
+
+-- is one of the character creator's screens showing?
+function Creator.IsOpen()
+    return creatorOpen()
 end
 
 -- the look to show on the creator preview while creating (pending), or nil

@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.2"
+local VERSION = "0.5.3"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -233,12 +233,26 @@ local function applyAppearance(force)
     local cfg, stamp = readAppearance()
     if stamp == "" then return end
     if stamp ~= appearanceStamp then appearanceStamp, appliedCats, force = stamp, {}, true end
-    for _, cat in ipairs(WaCa.PlayerCats()) do
+    local creating = Creator.IsOpen()
+    for _, cat in ipairs(WaCa.PlayerCats(creating)) do
         local id = cat:GetFullName()
         if force or not appliedCats[id] or not showsAppearance(cat, cfg) then
             applyAppearanceTo(cat, cfg)
             if not appliedCats[id] then log("appearance applied to %s", id:match("([^.:]+)$") or id) end
             appliedCats[id] = true
+        end
+    end
+    -- the creator closed: a preview cat that got our look goes back to the game's own (the game reuses that actor
+    -- for other cats, e.g. Dapplepatch on "Select Your Cat")
+    if not creating then
+        for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
+            local comp = preview:IsValid() and preview.CustomizableMeshComponent
+            local id = comp and comp:IsValid() and comp:GetFullName()
+            if id and appliedCats[id] then
+                appliedCats[id] = nil
+                pcall(function() preview:RefreshPattern() end)
+                log("creator closed: the preview cat is back to the game's look")
+            end
         end
     end
 end
@@ -305,12 +319,14 @@ log("%d key aliases", n)
 -- Menu keys (config/keybinds.ini [UIKeys] Row = Key): the menus' own keyboard keys and hint icons
 local function applyUIKeys()
     local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
-    local section = ini and ini["UIKeys"]
-    if not section then return end
-    for _, row in ipairs(section.__order) do
-        if not WaCa.SetUIKey(row, section[row]) then log("menu key %s: the key table is not loaded", row) end
+    local keys, icons = ini and ini["UIKeys"], ini and ini["UIIcons"]
+    for _, row in ipairs(keys and keys.__order or {}) do
+        if not WaCa.SetUIKey(row, keys[row]) then log("menu key %s: the key table is not loaded", row) end
     end
-    log("%d menu keys set", #section.__order)
+    for _, row in ipairs(icons and icons.__order or {}) do
+        if not WaCa.SetUIIcon(row, icons[row]) then log("menu icon %s: no icon for %s", row, icons[row]) end
+    end
+    log("%d menu keys, %d menu icons set", keys and #keys.__order or 0, icons and #icons.__order or 0)
 end
 
 LoopAsync(300, function()

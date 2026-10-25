@@ -81,10 +81,12 @@ void SetUIKey(const std::wstring& tableHex, const std::wstring& row, const std::
         logx::Line(L"[ui] SetUIKey: no row %s", row.c_str());
         return;
     }
-    *reinterpret_cast<ue::FName*>(r + kRowKey) = Name(key);
-    // the key's cached details belong to the old key: drop them (looked up again on demand; one reference leaks)
-    *reinterpret_cast<void**>(r + kRowKey + 0x08) = nullptr;
-    *reinterpret_cast<void**>(r + kRowKey + 0x10) = nullptr;
+    if (!key.empty()) {   // an empty key: only the icon changes
+        *reinterpret_cast<ue::FName*>(r + kRowKey) = Name(key);
+        // the key's cached details belong to the old key: drop them (looked up again on demand; one reference leaks)
+        *reinterpret_cast<void**>(r + kRowKey + 0x08) = nullptr;
+        *reinterpret_cast<void**>(r + kRowKey + 0x10) = nullptr;
+    }
     if (!icon.empty()) {
         SetSoftTexture(r + kRowImage, icon);
         SetSoftTexture(r + kRowHudImage, icon);

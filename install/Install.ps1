@@ -64,7 +64,18 @@ $keep = $null
 if (Test-Path $cfg) { $keep = Join-Path $env:TEMP "WaCaModKit-config-$(Get-Random)"; Copy-Item $cfg $keep -Recurse }
 $oldMods = if (Test-Path $modsTxt) { Get-Content $modsTxt } else { @() }
 Copy-Item (Join-Path $Payload "Wrc\Binaries\Win64\*") $Win64 -Recurse -Force
-if ($keep) { Copy-Item (Join-Path $keep "*") $cfg -Recurse -Force; Remove-Item $keep -Recurse -Force }
+if ($keep) {
+    # keybinds.ini from 0.3.1 - 0.5.2 with its untouched default "Escape REPLACES BackSpace in menus" block: since 0.5.3
+    # both keys work (an alias), so that file is replaced by the new defaults (the old one kept as keybinds.ini.bak)
+    $oldKeys = Join-Path $keep "keybinds.ini"
+    if ((Test-Path $oldKeys) -and ((Get-Content $oldKeys -Raw) -match "; back / close on Escape instead of BackSpace\r?\nButton_B = Escape\r?\nButton_Back = Escape")) {
+        Copy-Item $oldKeys (Join-Path $cfg "keybinds.ini.bak") -Force
+        Remove-Item $oldKeys
+        Write-Host "keybinds.ini updated to the new defaults (Escape AND BackSpace go back in menus); your old one: keybinds.ini.bak"
+    }
+    Copy-Item (Join-Path $keep "*") $cfg -Recurse -Force
+    Remove-Item $keep -Recurse -Force
+}
 if ($oldMods.Count -gt 0) {
     # the user's list stays as it was; only mods it doesn't mention yet are added (before the Keybinds line)
     $known = @{}

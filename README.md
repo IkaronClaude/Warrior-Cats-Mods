@@ -5,7 +5,7 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.5.2
+## What's in 0.5.3
 - **In the game's character creator:**
   - **Your own name:** a text box on the name screen. The game's name list stays as your *online* name (what the
     save and online features keep); the typed name is what you see in the game.
@@ -27,7 +27,7 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
   extra colours / masks. Only valid game values go into the save, so it stays loadable without the mod.
 
 ## Also in 0.3.1
-- **Escape** pauses (instead of P), and goes back / closes in menus (instead of BackSpace), with the Esc icon shown.
+- **Escape** pauses (instead of P), and goes back / closes in every menu (the character creator included) - BackSpace keeps working too; the menus show the Esc icon.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
   (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), and key aliases (`[KeyAliases]`). Every
@@ -68,7 +68,7 @@ local file = WaCa.SlotFile("MyMod")                       -- nil until a save sl
 local data = WaCa.ReadIni(file) or {}
 WaCa.WriteIni(file, data)
 ```
-Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")`.
+Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")` (replaces the key) or `WaCa.SetUIIcon("Button_B", "Escape")` (icon only).
 
 Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).

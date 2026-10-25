@@ -10,7 +10,7 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.5.2)
+WHAT IT DOES (0.5.3)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
 
   In the character creator:
@@ -24,7 +24,7 @@ WHAT IT DOES (0.5.2)
 
   Everywhere:
 
-  - Escape instead of P to pause, and Escape instead of BackSpace for back / close in menus.
+  - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).
   - Your own cat name: names.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).

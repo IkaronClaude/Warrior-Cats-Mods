@@ -98,6 +98,22 @@ function WaCa.SetUIKey(row, key, icon)
     return WaCa.Command(string.format("SetUIKey|%X|%s|%s|%s", tbl:GetAddress(), row, key, icon))
 end
 
+-- only the hint icon of a menu row (its key stays): e.g. SetUIIcon("Button_B", "Escape") shows Esc for "back" while
+-- BackSpace still works (pair it with a key alias Escape -> BackSpace so Esc works too)
+function WaCa.SetUIIcon(row, iconKey)
+    local name = string.format("T_UI_Controller_Pc_%s_D", iconKey)
+    local path = string.format("/Game/Platforms/Windows/UXD/Textures/Controllers/Gameplay/%s.%s", name, name)
+    local ok, tex = pcall(LoadAsset, path)
+    if not (ok and tex and tex:IsValid()) then return false end
+    local tbl = StaticFindObject(WaCa.UI_KEYS_TABLE)
+    if not tbl or not tbl:IsValid() then
+        local ok2, loaded = pcall(LoadAsset, WaCa.UI_KEYS_TABLE)
+        tbl = ok2 and loaded or nil
+    end
+    if not tbl or not tbl:IsValid() then return false end
+    return WaCa.Command(string.format("SetUIKey|%X|%s||%s", tbl:GetAddress(), row, path))
+end
+
 -- a simple ini reader: { [section] = { key = value } }, keys in file order in section.__order
 function WaCa.ReadIni(path)
     local f = io.open(path, "r")
@@ -322,8 +338,10 @@ function WaCa.SetPartColor(cat, partName, slot, color)
     if part and part:IsValid() then part:SetVectorParameterValueOnMaterials(FName(WaCa.COAT_COLORS[slot] or slot), color) end
 end
 
--- the player's cat (the customizable mesh on the player's pawn) and the creation screen's preview cat, when present
-function WaCa.PlayerCats()
+-- the player's cat: the customizable mesh on the player's pawn, the player's cat in cutscenes (bIsPlayer), and - only
+-- when withPreview is true (pass true while the character creator is open) - the creator's preview cat. The game
+-- reuses that preview actor on other screens ("Select Your Cat" shows other cats, e.g. Dapplepatch, with it).
+function WaCa.PlayerCats(withPreview)
     local out = {}
     local pc = FindFirstOf("PlayerController")
     local pawn = pc and pc:IsValid() and pc.Pawn
@@ -333,9 +351,11 @@ function WaCa.PlayerCats()
             if comp:IsValid() and comp:GetOwner():GetFullName() == pawnName then table.insert(out, comp) end
         end
     end
-    for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-        local comp = preview:IsValid() and preview.CustomizableMeshComponent
-        if comp and comp:IsValid() then table.insert(out, comp) end
+    if withPreview then
+        for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
+            local comp = preview:IsValid() and preview.CustomizableMeshComponent
+            if comp and comp:IsValid() then table.insert(out, comp) end
+        end
     end
     -- the player's cat as the creator and cutscenes show it (BP_WrcSK_Customization_Player and friends: a skeletal
     -- mesh actor flagged bIsPlayer)

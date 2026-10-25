@@ -26,6 +26,11 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] 0.5.3 (2026-10-25, operator): the creator preview actor (GuiCatCustomActor) is reused by "Select Your Cat"
+      (Dapplepatch got the player's look) - the preview counts as the player's cat only while a creator screen is
+      open, and gets the game's look back (RefreshPattern) when the creator closes. Menus: Escape AND BackSpace go
+      back everywhere ([KeyAliases] Escape = BackSpace, [UIIcons] Esc icon; [UIKeys] empty by default), the installer
+      migrates the old default keybinds.ini.
 - [ ] **Per-save sidecar (goal 2026-10-25).** DONE (data layer): SaveGames/WrcGame.<slot>.WaCaModKit.ini ([Name]
       Prefix / Suffix, [Appearance] = appearance.ini keys) loads when the active slot (SwtSaveManager.SaveGame
       .saveSlots[CurrentSaveSlotIndex], a GUID) changes and wins over the global inis; in-game changes are written on
