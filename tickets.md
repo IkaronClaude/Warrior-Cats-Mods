@@ -51,6 +51,11 @@ game data in this repo.
       0.5.1: save -> fresh restart round trip verified headless (run 1: creation + K2_CreateSaveSlot + Save writes
       the sidecar; run 2: the slot's sidecar loads and the look is applied to the player cats); name-box re-store spam
       after the commit fixed.
+      0.5.2: the module's own panel ATTACHED TO THE REAL CUSTOMISATION SCREEN headless (WBP_GuiScreenCustomization
+      created, not shown - showing it outside the creator flow crashes - with creator.ini AttachHidden = 1): all 7
+      panel widgets in its CanvasRoot, F7 / F5 change the choices and the panel's value text. The real screen has the
+      colour panel + its fur option. Palette sizes: of the 33 game functions that touch all four palettes, none uses a
+      fixed 25 - the code works from the arrays' length (the colour apply code bounds-checks against it).
       OPEN (needs a GPU - the VM has none; headless stops at the splash, which reads real input): the operator's
       real-creator test - position / font of the name box and the WaCa panel, clicking the panel arrows, the panel on
       the real customisation screen.

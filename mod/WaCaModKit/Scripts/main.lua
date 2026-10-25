@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.1"
+local VERSION = "0.5.2"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."

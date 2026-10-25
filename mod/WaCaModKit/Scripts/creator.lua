@@ -261,11 +261,21 @@ local function choicesFor(key)
 end
 
 -- the screen that hosts the panel (creator.ini PanelScreen; the customisation screen - other values are for tests)
+local creatorCfg, creatorCfgTime = {}, -1
+local function cfgValue(key)
+    if os.time() - creatorCfgTime >= 5 then          -- the panel polls often: re-read creator.ini every few seconds
+        local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
+        creatorCfg, creatorCfgTime = ini["Creator"] or {}, os.time()
+    end
+    return creatorCfg[key] or ""
+end
 local function panelScreen()
-    local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
-    local s = ini["Creator"] and ini["Creator"].PanelScreen or ""
+    local s = cfgValue("PanelScreen")
     return s ~= "" and s or "GuiScreenCustomization"
 end
+-- debug (creator.ini AttachHidden = 1): attach the panel to the screen even while it isn't shown - for headless tests
+-- on the real customisation screen, which can't be shown outside the creator flow
+local function attachHidden() return cfgValue("AttachHidden") == "1" end
 
 local ROWS = {
     { key = "Look", label = "Look (F5)" },
@@ -333,7 +343,7 @@ end
 
 local function updatePanel()
     local screen = FindFirstOf(panelScreen())
-    if not screen or not screen:IsValid() or not screen:IsInViewport() then return end
+    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) then return end
     if not panel or panel.screen ~= screen:GetAddress() then
         local ok, err = pcall(setupPanel, screen)
         if not ok then log("customisation screen: %s", tostring(err)) panel = nil end
@@ -344,7 +354,7 @@ end
 local function onKey(name)
     if not panel then return end
     local screen = FindFirstOf(panelScreen())
-    if not screen or not screen:IsValid() or not screen:IsInViewport() or screen:GetAddress() ~= panel.screen then return end
+    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) or screen:GetAddress() ~= panel.screen then return end
     if name == "LeftMouseButton" then
         for _, row in ipairs(panel.rows) do
             if row.prev:IsValid() and row.prev:IsHovered() then setChoice(row, row.index - 1) return end
@@ -358,10 +368,8 @@ end
 
 -- the name screen, polled often (typing then confirming quickly must not lose the last letters)
 function Creator.FastTick()
-    if pending then
-        updateNameScreen()
-        updatePanel()
-    end
+    if pending then updateNameScreen() end
+    if pending or attachHidden() then updatePanel() end
 end
 
 function Creator.Tick()
