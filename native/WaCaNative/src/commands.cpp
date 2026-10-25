@@ -3,6 +3,7 @@
 //   SetUIKey|<DataTable address hex>|<row>|<key>[|<icon texture object path>]   (ui.cpp)
 //   SteamKeyboard|<description>|<existing text>      the answer arrives as the SteamTextInput event (steam.cpp)
 //   DevWatch|<address hex>|<length>  DevWatchRow|<table hex>|<row>|<offset hex>|<length>  DevUnwatch
+//   PressKey|<Unreal key name>                      a real key press + release posted to the game window (KeyAliases)
 //   DevPressKey|<vk hex>  DevStack|<label>                                        (dev.cpp)
 #include "commands.h"
 
@@ -37,6 +38,7 @@ bool Run(const std::wstring& cmd) {
     else if (verb == L"DevWatchRow") dev::Watch(ui::RowAddressHex(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3)), Arg(cmd, 4));
     else if (verb == L"DevUnwatch") dev::Unwatch();
     else if (verb == L"DevPressKey") dev::PressKey(Arg(cmd, 1));
+    else if (verb == L"PressKey") dev::PressKeyNamed(Arg(cmd, 1));
     else if (verb == L"DevStack") dev::Stack(Arg(cmd, 1));
     else if (verb == L"SteamKeyboard") steam::ShowKeyboard(Arg(cmd, 1), Arg(cmd, 2));
     else {

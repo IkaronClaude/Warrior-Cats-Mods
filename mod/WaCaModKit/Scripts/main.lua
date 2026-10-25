@@ -184,7 +184,7 @@ local function mergeLook(own)
         local lookIni = WaCa.ReadIni(path)
         local l = lookIni and lookIni["Look"]
         if not l then log("look '%s' not found (%s)", look, path) return end
-        for _, k in ipairs(l.__order) do if k ~= "Row" then add(k, l[k]) end end
+        for _, k in ipairs(l.__order) do if k ~= "Row" and k ~= "Fallback" then add(k, l[k]) end end
     end
     if (own.Look or "") ~= "" then addLook(own.Look) end
     for _, slot in ipairs({ "PatternMask", "MarkingsMask" }) do
@@ -292,31 +292,37 @@ local function showsAppearance(cat, cfg)
 end
 
 local appliedCats = {}
+local selfRefresh = false          -- our own RefreshPattern call is running: its hook must not start another pass
+local requestRefresh               -- (defined below) the once-per-tick refresh
 table.insert(onSlotChanged, function() appearanceStamp, appliedCats = nil, {} end)
 local function applyAppearance(force)
     local cfg, stamp = readAppearance()
     if stamp == "" then return end
     if stamp ~= appearanceStamp then appearanceStamp, appliedCats, force = stamp, {}, true end
     local creating = Creator.IsOpen()
+    local current = {}
     for _, cat in ipairs(WaCa.PlayerCats(creating)) do
         local id = cat:GetFullName()
+        current[id] = true
         if force or not appliedCats[id] or not showsAppearance(cat, cfg) then
             applyAppearanceTo(cat, cfg)
             if not appliedCats[id] then log("appearance applied to %s", id:match("([^.:]+)$") or id) end
             appliedCats[id] = true
         end
     end
-    -- the creator closed: a preview cat that got our look goes back to the game's own (the game reuses that actor
-    -- for other cats, e.g. Dapplepatch on "Select Your Cat")
-    if not creating then
-        for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-            local comp = preview:IsValid() and preview.CustomizableMeshComponent
-            local id = comp and comp:IsValid() and comp:GetFullName()
-            if id and appliedCats[id] then
-                appliedCats[id] = nil
-                pcall(function() preview:RefreshPattern() end)
-                log("creator closed: the preview cat is back to the game's look")
-            end
+    -- A preview cat that got our look but no longer shows the player's cat (the creator closed, or the game reused the
+    -- actor for another cat, e.g. Dapplepatch on "Select Your Cat") goes back to the game's own look. Only those: one
+    -- that still shows the player's cat (a headshot) keeps it - resetting it too re-applied the look on the next pass,
+    -- reset it again, ... every frame (operator 2026-10-25: the intro cutscene at one frame per few seconds, 8 MB log).
+    for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
+        local comp = preview:IsValid() and preview.CustomizableMeshComponent
+        local id = comp and comp:IsValid() and comp:GetFullName()
+        if id and appliedCats[id] and not current[id] then
+            appliedCats[id] = nil
+            selfRefresh = true
+            pcall(function() preview:RefreshPattern() end)
+            selfRefresh = false
+            log("a preview cat no longer shows yours: back to the game's look")
         end
     end
 end
@@ -343,7 +349,7 @@ for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponen
                       "/Script/Wrc.GuiCatCustomActor:RefreshPattern", "/Script/Wrc.GuiCatCustomActor:RefreshShape",
                       "/Script/Wrc.GuiCatCustomActor:SetCustomDataFromSave" }) do
     pcall(RegisterHook, fn, function() end, function()
-        ExecuteInGameThread(function() applyAppearance(true); applyName() end)
+        if not selfRefresh then requestRefresh(true) end
     end)
 end
 
@@ -362,24 +368,19 @@ local function loadAliases()
 end
 loadAliases()
 
-local inAlias = false
-local function aliasHook(fnName)
-    return function(self, key)
-        if inAlias then return end
-        local ok, name = pcall(function() return key:get().KeyName:ToString() end)
-        if not ok or not aliases[name] then return end
-        local controller = self:get()
-        inAlias = true
-        for _, target in ipairs(aliases[name]) do
-            pcall(function() controller[fnName](controller, { KeyName = FName(target) }) end)
-        end
-        inAlias = false
+-- An alias posts a REAL key press of its target to the game window (native PressKey): menus only react to real input
+-- - calling the controller's OnKeyPressed with the target never reached them (Escape did nothing, operator
+-- 2026-10-25). A press is enough: the posted key is pressed and released. A target that is itself aliased is skipped
+-- (no loops).
+local function aliasHook(self, key)
+    local ok, name = pcall(function() return key:get().KeyName:ToString() end)
+    if not ok or not aliases[name] then return end
+    for _, target in ipairs(aliases[name]) do
+        if not aliases[target] then WaCa.Command("PressKey|" .. target) end
     end
 end
-for _, fn in ipairs({ "OnKeyPressed", "OnKeyReleased", "OnKeyRepeat" }) do
-    local ok, err = pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:" .. fn, aliasHook(fn))
-    if not ok then log("key aliases: could not hook %s (%s)", fn, tostring(err)) end
-end
+local ok, err = pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:OnKeyPressed", aliasHook)
+if not ok then log("key aliases: could not hook OnKeyPressed (%s)", tostring(err)) end
 local n = 0
 for _ in pairs(aliases) do n = n + 1 end
 log("%d key aliases", n)
@@ -417,12 +418,31 @@ end
 
 -- the player's cat as it is now: a pending creation settled, the name (it changes with your rank - the ceremony is a
 -- screen) and the look applied
-local function refreshPlayer()
+local function refreshPlayer(force)
     checkSlot()
     local cat = playerCustomData()
     if cat then Creator.OnPlayerCat(cat) end
     applyName()
-    applyAppearance(false)
+    applyAppearance(force)
+end
+
+-- Events can come in bursts (a level or cutscene starting spawns dozens of characters in one frame): the refresh is
+-- not done per event but ONCE, on the next game tick, however many events asked for it. (Doing it per event froze
+-- the intro cutscene - one frame every few seconds, operator 2026-10-25.)
+local refreshDue, forceDue = false, false
+requestRefresh = function(force)
+    if force then forceDue = true end
+    if refreshDue then return end
+    refreshDue = true
+    ExecuteInGameThread(function()
+        local f = forceDue
+        refreshDue, forceDue = false, false
+        local t = os.clock()
+        local ok, err = pcall(refreshPlayer, f)
+        if not ok then log("refresh: %s", tostring(err)) end
+        local ms = (os.clock() - t) * 1000
+        if ms > 20 then log("refresh took %.0f ms", ms) end
+    end)
 end
 
 local function guarded(label, fn)
@@ -432,14 +452,24 @@ local function guarded(label, fn)
     end
 end
 
+-- the player's own cat (its pawn, or a cutscene cat flagged as the player)
+local function isPlayerCat(actor)
+    if not actor or not actor:IsValid() then return false end
+    local pc = FindFirstOf("PlayerController")
+    local pawn = pc and pc:IsValid() and pc.Pawn
+    if pawn and pawn:IsValid() and pawn:GetFullName() == actor:GetFullName() then return true end
+    local ok, flagged = pcall(function() return actor.bIsPlayer end)
+    return ok and flagged == true
+end
+
 WaCa.On("ScreenShown", guarded("screen shown", function()
     gameReady()
-    refreshPlayer()
+    requestRefresh()
 end))
-WaCa.On("ScreenHidden", guarded("screen hidden", refreshPlayer))
+WaCa.On("ScreenHidden", guarded("screen hidden", function() requestRefresh() end))
 WaCa.On("CatSpawned", guarded("cat spawned", function(actor)
     Roster.SyncCat(WaCa.CatComponent(actor))
-    refreshPlayer()
+    if isPlayerCat(actor) then requestRefresh() end
 end))
 
 WaCa.Ready()

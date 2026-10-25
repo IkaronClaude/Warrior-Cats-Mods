@@ -199,6 +199,8 @@ end
 -- (its Button_A / Button_Confirm rows get no key), so Enter on the list can no longer skip the custom name. The
 -- creator.ini NameBoxKeys (Tab, the left stick click by default) leave the box without going on.
 local CONFIRM_ROWS = { "Button_A", "Button_Confirm" }
+-- rows with no key on the keyboard, unused by the name screen: they carry the held confirm key (see holdConfirm)
+local CARRIER_ROWS = { "Button_StickL", "Button_StickR" }
 -- the screens with a name box: the creator's name screen (your own name = the prefix) and the warrior ceremony's
 -- suffix choice (your own warrior suffix)
 local NAME_SCREENS = {
@@ -240,6 +242,25 @@ local function holdConfirm()
             if key and keys[key] then
                 table.insert(name.held, { t = tpath, row = row, key = key })
                 WaCa.SetUIKeyIn(t, row, "None")
+            end
+        end
+    end
+    -- A key bound to no row never reaches the game's key handler, so the mod stopped seeing Enter at all (the confirm
+    -- on the list no longer moved into the box - operator 2026-10-25). Each held key rides on a row that has no key
+    -- in that table and does nothing on the name screen, given back with the rest.
+    for _, t in ipairs(WaCa.MenuKeyTables()) do
+        local tpath = t:GetFullName():gsub("^%S+ ", "")
+        local carried = {}
+        for _, h in ipairs(name.held) do
+            if h.t == tpath and not carried[h.key] then
+                for _, row in ipairs(CARRIER_ROWS) do
+                    if WaCa.UIRowKey(t, row) == "None" then
+                        WaCa.SetUIKeyIn(t, row, h.key)
+                        table.insert(name.held, { t = tpath, row = row, key = "None" })
+                        carried[h.key] = true
+                        break
+                    end
+                end
             end
         end
     end
@@ -312,6 +333,8 @@ local function setupNameScreen(screen, spec)
     local label = newWidget("TextBlock", screen.WidgetTree, "WaCaNameLabel")
     label:SetText(FText(spec.label))
     local box = newWidget("EditableTextBox", screen.WidgetTree, "WaCaNameBox")
+    -- Return in the box commits and lets go of the keyboard: that focus loss is "name done, on to the next screen"
+    pcall(function() box.ClearKeyboardFocusOnCommit = true end)
     -- no hint text: the box draws it in the engine's default style (blurry and barely legible - operator 2026-10-25)
     if info and info:IsValid() then
         pcall(function() label:SetFont(info.Font) end)
@@ -376,10 +399,12 @@ end
 
 -- keyboard focus entered / left the name screen's widgets: the box took the keyboard / let it go (Enter in it = on to
 -- the next screen; our leave keys = back to the list)
+-- The game's own screens don't use keyboard focus (they navigate their own way), so focus entering the name screen IS
+-- the box taking it - by our confirm, or a mouse click into it. (HasKeyboardFocus lags behind the event: a click into
+-- the box then Return did nothing - operator 2026-10-25.)
 local function nameFocusIn(screen)
-    local box = ourNameScreen(screen)
-    if not box then return end
-    if name.wantFocus or box:HasKeyboardFocus() then name.focused = true end    -- ours, or a click into the box
+    if not ourNameScreen(screen) then return end
+    name.focused = true
     name.wantFocus = nil
 end
 
@@ -594,10 +619,52 @@ local function rowText(row)
     return row.choices[row.index].label
 end
 
+-- The base-game fallback of a WaCa pattern / markings shape: the game pattern (or marking) the cat really gets, so
+-- the game shows the matching colour picker (it hides the pattern colour while the cat has no pattern - operator
+-- 2026-10-25, Colourpoint chosen on a cat without a pattern) and other players see the fallback. A game shape is its
+-- own fallback; a look names one ("Fallback = P13_Tabby" in its [Look]); a pattern pack: creator.ini PackFallback.
+local FALLBACK_FIELD = { PatternMask = { field = "PatternIdx", enum = "EPatternType" },
+                         MarkingsMask = { field = "MarkingIdx", enum = "EMarkingType" } }
+
+local function fallbackFor(rowKey, value)
+    local f = FALLBACK_FIELD[rowKey]
+    if not f or not value then return nil end
+    local name = value:match("^game:(.+)$")
+    if not name then
+        local look = value:match("^look:(.+)$")
+        if look then
+            local l = WaCa.ReadIni(modDir .. "/looks/" .. look .. ".ini")
+            name = l and l["Look"] and l["Look"].Fallback
+        else
+            name = cfgValue("PackFallback")
+        end
+    end
+    local idx = name and roles[f.enum] and roles[f.enum][name]
+    return idx and f or nil, idx
+end
+
+-- the creator preview cats without a game pattern / marking get the shape's fallback
+local function applyFallback(rowKey, value)
+    local f, idx = fallbackFor(rowKey, value)
+    if not f then return end
+    for _, comp in ipairs(WaCa.PreviewCats()) do
+        local d = comp.CustomData
+        local cur = d[f.field]
+        if cur and cur < 0 then
+            d[f.field] = idx
+            log("creator: %s %d -> %d (the WaCa shape's base-game fallback)", f.field, cur, idx)
+        elseif cur then
+            -- logged so a "no pattern" value other than a negative one shows up in a player's log
+            log("creator: %s stays %d (the cat has its own game shape)", f.field, cur)
+        end
+    end
+end
+
 local function setChoice(row, index)
     row.index = (index - 1) % #row.choices + 1
     local value = row.choices[row.index].value
     store("Appearance", row.key, value)
+    applyFallback(row.key, value)
     local value = panel and child(panel.tree, "WaCaPanelValue" .. row.n)
     if value then value:SetText(FText(rowText(row))) end
     log("creator: %s = %s", row.key, rowText(row))

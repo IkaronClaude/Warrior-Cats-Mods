@@ -26,6 +26,7 @@
 #include <Mod/LuaMod.hpp>
 #include <LuaMadeSimple/LuaMadeSimple.hpp>
 #include <LuaType/LuaUObject.hpp>
+#include <Unreal/FWeakObjectPtr.hpp>
 #include <Unreal/Hooks/Hooks.hpp>
 #include <Unreal/NameTypes.hpp>
 #include <Unreal/UClass.hpp>
@@ -178,6 +179,43 @@ int LuaReady(const LuaMadeSimple::Lua& lua) {
     return 0;
 }
 
+// dev: the bindings of a multicast delegate - WaCaNative_DevDelegate(object address, property offset) -> text
+// "Object.Function; ..." (a TArray of FScriptDelegate = FWeakObjectPtr + FName, 16 bytes each on this build)
+int LuaDevDelegate(const LuaMadeSimple::Lua& lua) {
+    auto object = static_cast<uintptr_t>(lua.get_integer());
+    auto offset = static_cast<uintptr_t>(lua.get_integer());
+    struct Binding {
+        FWeakObjectPtr Object;
+        uint32_t NameIndex;
+        uint32_t NameNumber;
+    };
+    struct Array {
+        Binding* Data;
+        int32_t Num;
+        int32_t Max;
+    };
+    std::wstring out;
+    auto* arr = reinterpret_cast<Array*>(object + offset);
+    if (arr->Num < 0 || arr->Num > 64) {
+        out = L"(not a delegate array)";
+    } else if (arr->Num == 0) {
+        out = L"(nothing bound)";
+    }
+    for (int32_t i = 0; arr->Num > 0 && arr->Num <= 64 && i < arr->Num; ++i) {
+        UObject* bound = arr->Data[i].Object.Get();
+        FName fn(arr->Data[i].NameIndex, arr->Data[i].NameNumber);
+        if (!out.empty()) out += L"; ";
+        out += bound ? bound->GetFullName() : std::wstring(L"(gone)");
+        out += L" :: ";
+        out += fn.ToString();
+    }
+    int n = WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string utf8(n > 0 ? n - 1 : 0, '\0');
+    if (n > 1) WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+    lua.set_string(utf8);
+    return 1;
+}
+
 int LuaCommand(const LuaMadeSimple::Lua& lua) {
     if (!lua.is_string()) lua.throw_error("WaCaNative_Command(text)");
     bool ok = commands::Run(Wide(std::string(lua.get_string())));
@@ -215,6 +253,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_Watch", &LuaWatch);
     lua.register_function("WaCaNative_Ready", &LuaReady);
     lua.register_function("WaCaNative_Command", &LuaCommand);
+    lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
     g_states.push_back(std::move(state));
 }
 

@@ -139,6 +139,38 @@ void Stack(const std::wstring& label) {
     logx::Line(L"[dev] stack %s:%s", label.c_str(), out.c_str());
 }
 
+// an Unreal key name ("BackSpace", "Enter", "A", "F5", "One") as a Windows virtual key, 0 when unknown
+UINT VirtualKey(const std::wstring& name) {
+    static const struct { const wchar_t* name; UINT vk; } kNamed[] = {
+        {L"BackSpace", VK_BACK}, {L"Tab", VK_TAB}, {L"Enter", VK_RETURN}, {L"Escape", VK_ESCAPE},
+        {L"SpaceBar", VK_SPACE}, {L"Left", VK_LEFT}, {L"Up", VK_UP}, {L"Right", VK_RIGHT}, {L"Down", VK_DOWN},
+        {L"Insert", VK_INSERT}, {L"Delete", VK_DELETE}, {L"Home", VK_HOME}, {L"End", VK_END},
+        {L"PageUp", VK_PRIOR}, {L"PageDown", VK_NEXT}, {L"LeftShift", VK_LSHIFT}, {L"RightShift", VK_RSHIFT},
+        {L"LeftControl", VK_LCONTROL}, {L"RightControl", VK_RCONTROL}, {L"LeftAlt", VK_LMENU}, {L"RightAlt", VK_RMENU},
+        {L"Zero", '0'}, {L"One", '1'}, {L"Two", '2'}, {L"Three", '3'}, {L"Four", '4'}, {L"Five", '5'},
+        {L"Six", '6'}, {L"Seven", '7'}, {L"Eight", '8'}, {L"Nine", '9'},
+    };
+    for (const auto& k : kNamed)
+        if (name == k.name) return k.vk;
+    if (name.size() == 1 && name[0] >= L'A' && name[0] <= L'Z') return name[0];
+    if (name.size() >= 2 && name[0] == L'F') {
+        int n = _wtoi(name.c_str() + 1);
+        if (n >= 1 && n <= 24) return VK_F1 + n - 1;
+    }
+    return 0;
+}
+
+void PressKeyNamed(const std::wstring& keyName) {
+    UINT vk = VirtualKey(keyName);
+    if (!vk) {
+        logx::Line(L"[keys] PressKey: no Windows key for %s", keyName.c_str());
+        return;
+    }
+    wchar_t hex[16];
+    swprintf_s(hex, L"%X", vk);
+    PressKey(hex);
+}
+
 void PressKey(const std::wstring& vkHex) {
     FindWindowCtx ctx;
     EnumWindows(EnumProc, reinterpret_cast<LPARAM>(&ctx));
