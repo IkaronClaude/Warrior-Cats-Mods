@@ -82,7 +82,11 @@ game data in this repo.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
   logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
-- [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
+- [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
+  (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
+  layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
+  them offline except the save hook's UFunction lookup (runtime only, logged at start-up). 5 of 5 + 6 cross-checks
+  pass on the current exe. Original ticket: every hook target found by several independent means
   (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
   logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
   (string -> referencing code -> unwind-table function start -> prologue check) for the look hooks.
@@ -113,7 +117,7 @@ game data in this repo.
     while you hold the mouse still (the game's own behaviour)
 
 ## P0: Foundation (nothing else can start until this works)
-- [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
+- [x] **Engine version + toolchain.** DONE: UE 5.7.4 (PROJECT_PLAN.md; AssetDump EGame GAME_UE5_7, UE4SS 3.0.1). Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
       wrapped (`.bind` section). Hints: pak v12, utoc v8, so 5.4 or later. Get FModel to browse the paks, plus a
       `.usmap` mappings file (UE4SS dumper or community). Record versions + download sources in PROJECT_PLAN.md.
 - [ ] **Asset map.** Extract (FModel export, into gitignored `extracted/`) and map how these work:
@@ -128,17 +132,18 @@ game data in this repo.
       - save data (where the clan roster lives)
 
       Write the map into PROJECT_PLAN.md.
-- [ ] **UE4SS injection.** Get UE4SS running: check SteamStub / EOS / any anti-cheat; the game uses the EOS SDK for its
+- [x] **UE4SS injection.** DONE: UE4SS 3.0.1 runs (Lua + the WaCaNative C++ mod), object + header dumps in dumps/. Get UE4SS running: check SteamStub / EOS / any anti-cheat; the game uses the EOS SDK for its
       online content. Live object dump + C++ header dump for a skeleton project. Lua hello-world hook on a gameplay
       function.
 - [ ] **Mod pipeline.** A skeleton UE project in the matching engine version (dummy classes from the header dump). Cook a
       test Blueprint mod and load it from a `~mods` pak (IoStore: retoc / ZenTools for repacking). Prove ONE change
       end to end, e.g. a string edit.
-- [ ] **Deploy rule.** Installing a mod writes into the game folder on Z:. Agree with the operator where mods are
+- [x] **Deploy rule.** DONE: the release zip installs / uninstalls itself (Install.bat / Uninstall.bat); the Z:
+      install is ours to modify (operator), backups as *.vmtest-backup / before overwriting. Installing a mod writes into the game folder on Z:. Agree with the operator where mods are
       installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
-- [ ] **Procedural names: no doubled prefix / suffix** (operator 2026-10-25: "Blazeblaze"). The NPC name generator
+- [~] **Procedural names: no doubled prefix / suffix** (done, operator check open) (operator 2026-10-25: "Blazeblaze"). The NPC name generator
       (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
       the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
       into the procedural generation.
@@ -160,8 +165,10 @@ game data in this repo.
       just read and write the engine's own input mappings (UPlayerInput action / axis mappings, the menus'
       DT_GamepadButtons* rows, the viewport capture mode) - the menu saves them to keybinds.ini, the one source. The
       raw KeyDown event only observes (aliases press real keys), so it stays compatible.
-- [ ] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
-- [ ] **3. Free-form name input.** The player types any name. Keep an auto-generated fallback name for online content
+- [~] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
+      2026-10-25: mouse CAMERA done (camera.cpp: yaw + pitch through the game's own turn / pitch steps, uncapped);
+      movement relative to the camera = next.
+- [~] **3. Free-form name input.** (names.ini + the creator's name box done; operator checks open) The player types any name. Keep an auto-generated fallback name for online content
       (minor relevance); find what the online side reads.
       0.2 (2026-10-24): `config/names.ini` (Prefix / optional warrior Suffix) rewrites the string-table entry of the
       player's CURRENT name (STR_CAT_NAME<n><suffix>); the save keeps the game's ids. Text overrides (WaCaNative
@@ -237,6 +244,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       (`Quests/NpcDialogues`, `Quests/StoryDialogues`, `Sequencer/DT_QuestSequenceDialogues`) and the FText format
       call that fills them. List every line whose placeholders the game doesn't fill, then fix it: either supply the
       argument at the format call (hook) or patch the text.
+      FINDINGS 2026-10-25: Strings_EN.csv has ~1300 role placeholders ({THE WARRIOR FATHER} 186, {PLAYER} 170,
+      {THE INSECURE LEADER} 117, {THE AGING LEADER} 113, ... {PLAYER WARRIOR NAME}, {RIVER CLAN DEPUTY}) - NONE of
+      those names is a literal in the exe, so they are filled from DATA (role -> current cat, the wacaroles mapping),
+      not code. {Player} (77 UTF-16 literals in the exe) and {Friend} (2) are code-supplied, so the two case-variant
+      lines (TheUnchosenApprentice "Good-bye, {Player}", STR_DEN_VISIT_FRIEND_HELPED) are likely fine. The reported
+      "It seems that 1's Prophecy is true" isn't an EN line as such: most likely a role placeholder whose role had no
+      cat assigned yet, filled with a numeric default. Next: hook the role -> name resolution (find the data table the
+      roles come from) and log every role resolved to a number / empty; needs a story save at that point (operator's
+      save, or reach it on the VM).
 
 ## P2: Depth, presentation
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
