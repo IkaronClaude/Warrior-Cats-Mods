@@ -192,6 +192,15 @@ The game now runs on the VM, slowly but fully: menus, loading a save, the world,
   WaCaModKit's Lua stubbed out too, and not at all with sound on.
 - Speed: ~1.7 fps in menus, ~0.3 fps in the world (WARP uses all 24 cores). Game time is clamped, so it runs slow,
   but logic, events, screens, keys and clicks all work.
+- **Fast loop (measured):** `-ResX=480 -ResY=270` plus the VM's own GameUserSettings.ini at `sg.ResolutionQuality=25`,
+  `bUseVSync=False`: main menu 14 s, world 47 s (was ~4 min), 0.6 fps in the world. Lua changes need no restart: the
+  test install has UE4SS's `EnableAutoReloadingLuaMods = 1` (not shipped), so copying a .lua reloads every Lua mod in
+  place; WaCaNative's event bus survives it and `Started` replays the screens up. `native\build.bat` configures only a
+  new build tree: 3 s with no change, ~11 s for bridge.cpp. `-nullrhi` stops at the main menu (the harness's
+  scheduled menu press never runs), so it doesn't help.
+- The creator's customisation screen crashes on the VM even with no mod code (WACA_NOLOOK=1, Lua stubbed):
+  UGuiScreenBasePreview.CatRef is null - the preview cat actor never exists here. Customisation tests need the
+  operator.
 - Input: `tools/vm_input.py key <vk hex>` / `click <x> <y>` (moves the real cursor: Slate reads it). The test mod
   (Mods/WaCaTest, not shipped) drives flows: main menu -> story -> Select Your Cat; a real Enter there loads the save.
 - Verified this way: menu mouse clicks (main menu -> Defender Mode), KeyDown, Escape -> BackSpace alias in menus
