@@ -133,3 +133,19 @@ Headless (`-nullrhi`) the game reaches the "press any key" splash and stops ther
 with no window there is none. Key / command UFUNCTIONs, the flow manager and fake login completions don't advance it.
 Headless tests therefore show creator screens directly (WidgetBlueprintLibrary.Create + AddToViewport): the name
 screen works that way; the customisation screen crashes outside the real creator flow.
+
+## C++ mods against the UE4SS SDK: proven (2026-10-25)
+UE4SS builds from source on this VM and a C++ mod built against it loads in the game.
+- Source: `tools/bin/src/RE-UE4SS` (gitignored) at **8333063**, the same commit as the UE4SS v3.0.1 Beta DLL we ship
+  (its log says "Git SHA #83330635"). A C++ mod must match the shipped UE4SS.dll, so keep the two on one commit.
+- Needs the private UEPseudo submodule (the IkaronClaude account's Epic link + EpicGames org membership), VS 18 C++
+  tools, Ninja and Rust (cargo, for patternsleuth).
+- Build: `tools/bin/src/build.bat` = vcvars64 + `cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Game__Shipping__Win64` over
+  a root CMakeLists that adds `RE-UE4SS` and the mod (`HelloMod`: a CppUserModBase with `start_mod` /
+  `uninstall_mod` exports, `target_link_libraries(... UE4SS)`).
+- A full build takes about 13 GB in `build/` (PDBs and the cargo target). A disk-full stop mid-link leaves a corrupt
+  UE4SS.pdb (LNK1318): delete it and re-run, and ninja resumes.
+- Install: `ue4ss/Mods/<Name>/dlls/main.dll` + `enabled.txt`. Headless test: the log showed
+  "[HelloMod] unreal init" 4 s after the mod started.
+- This unblocks the native half of the creator redesign: UDataTable rows (AddRow failed from Lua with
+  "ICppStructOps::Copy unavailable") and ProcessEvent / object-notification hooks without our own MinHook detours.
