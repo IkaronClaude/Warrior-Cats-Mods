@@ -14,6 +14,7 @@
 #include "bridge.h"
 #include "input.h"
 #include "log.h"
+#include "render.h"
 #include "text.h"
 #include "ui.h"
 
@@ -48,6 +49,7 @@ public:
             logx::Line(L"MinHook failed to initialise");
             return;
         }
+        render::Install();
         input::Install(dir);
         text::Install(input::FNameCtor());
         ui::Init(input::FNameCtor());

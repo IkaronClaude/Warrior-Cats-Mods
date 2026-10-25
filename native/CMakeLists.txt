@@ -26,7 +26,8 @@ add_library(WaCaNative SHARED
     WaCaNative/src/text.cpp
     WaCaNative/src/ui.cpp
     WaCaNative/src/dev.cpp
-    WaCaNative/src/steam.cpp)
-target_link_libraries(WaCaNative PRIVATE minhook UE4SS)
+    WaCaNative/src/steam.cpp
+    WaCaNative/src/render.cpp)
+target_link_libraries(WaCaNative PRIVATE minhook UE4SS dxgi dxguid)
 target_compile_definitions(WaCaNative PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 set_target_properties(WaCaNative PROPERTIES OUTPUT_NAME main)
