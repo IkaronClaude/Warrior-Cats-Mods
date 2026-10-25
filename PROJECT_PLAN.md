@@ -180,3 +180,20 @@ event.
   now uses the dynamic CRT (/MD) like UE4SS.
 - CI: the release workflow clones RE-UE4SS at 8333063 with submodules; needs the repository secret
   `UE4SS_SOURCE_TOKEN` (an Epic-linked account's token). Not set yet: a v0.6.0 tag would fail until it is.
+
+## Testing on the GPU-less VM (2026-10-25)
+The game now runs on the VM, slowly but fully: menus, loading a save, the world, the pause menu.
+- Launch: `Wrc-Win64-Shipping-NoStub.exe -dx12 -warp -wacaoffscreen -windowed -ResX=960 -ResY=540` with the newer
+  WARP (`d3d10warp.dll` 1.0.21 from NuGet `Microsoft.Direct3D.WARP`, next to the exe). render.cpp (only with -warp):
+  the swap chain is made without tearing and, with -wacaoffscreen, frames are rendered but never presented - the VM's
+  display path refuses presents after a few frames and once took DWM down.
+- **Never `-nosound`**: the pause menu needs an audio device - without one it dereferences a null object
+  (EXCEPTION_ACCESS_VIOLATION reading 0x418, inside SwtPlayerController.OnListenCommand). Isolated: it crashed with
+  WaCaModKit's Lua stubbed out too, and not at all with sound on.
+- Speed: ~1.7 fps in menus, ~0.3 fps in the world (WARP uses all 24 cores). Game time is clamped, so it runs slow,
+  but logic, events, screens, keys and clicks all work.
+- Input: `tools/vm_input.py key <vk hex>` / `click <x> <y>` (moves the real cursor: Slate reads it). The test mod
+  (Mods/WaCaTest, not shipped) drives flows: main menu -> story -> Select Your Cat; a real Enter there loads the save.
+- Verified this way: menu mouse clicks (main menu -> Defender Mode), KeyDown, Escape -> BackSpace alias in menus
+  only, pause opens and closes with Escape, the cursor switching menu / gameplay, and the look hook (the player's body
+  material read back with the test look's colour and mask).
