@@ -39,7 +39,7 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Escape** pauses (instead of P), and goes back / closes in every menu (the character creator included) - BackSpace keeps working too; the menus show the Esc icon.
 - **Mouse look**: the camera (the gamepad's right stick) follows the mouse; sensitivity in `keybinds.ini`.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
-  (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), and key aliases (`[KeyAliases]`). Every
+  (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), key aliases in menus (`[KeyAliases]`) and in conversations (`[DialogueKeyAliases]`: Space advances dialogue). Every
   command and its default is listed inside. Gamepad bindings are untouched.
 
 - **Free-form name** for your cat: `config/names.ini` (`Prefix = Moss` gives Mosskit, Mosspaw, Moss<warrior suffix>;
@@ -94,6 +94,13 @@ state corrupt it.
 Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`; with
 `Row = Pattern` / `Row = Markings` it is offered as one of that row's shapes, see `looks/Colourpoint.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
+Such a look is an entry in the creator's own pattern / markings grid: a copy of its `Fallback =` shape's row in
+the game's table, named by `Label =` (else the look's name), with its grid icon from `Icon = /Game/...` (else the
+fallback's). The saved cat keeps the fallback's index, so the save works without the mod.
+
+Rows of the game's data tables from code: `WaCaNative_CloneTableRow(table:GetAddress(), "FromRow", "NewRow")` and
+`WaCaNative_SetTableField(table:GetAddress(), "NewRow", "Field", "value")` (text, `/Game/...` asset paths, enum names,
+numbers, bools).
 
 All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset/Strings_<LANG>.csv`). Cat names are
 entries in it too: `STR_CAT_NAME<n><suffix id>`.
@@ -114,6 +121,8 @@ entries in it too: `STR_CAT_NAME<n><suffix id>`.
   Epic Games. The release workflow uses the secret `UE4SS_SOURCE_TOKEN` for it. The first build takes about
   10 minutes.
 - `tools\package.ps1`: builds `dist\WaCaModKit-<version>.zip`. Needs UE4SS extracted into `tools\bin\ue4ss`.
+- `tools/check_hooks.py <unpacked exe>`: checks every native hook target against a game exe (run it on a game update
+  before a release); the targets are read from the native sources.
 - `tools/AssetDump`: a headless CUE4Parse reader for the game's paks (for research; output stays out of git).
 
 No game files or game data are in this repository.

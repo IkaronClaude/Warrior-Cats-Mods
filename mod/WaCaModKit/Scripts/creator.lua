@@ -802,6 +802,116 @@ local function onScreenHidden(screen)
     end
 end
 
+---------------------------------------------------------------------------------------------------------------------
+-- WaCa looks as entries of the game's OWN pattern / markings grids. Each offered look that is a pattern or markings
+-- shape (creator.ini Looks, look file "Row = Pattern" / "Row = Markings") becomes a row of the game's table
+-- (DT_Patterns / DT_Markings), a copy of its fallback's row (WaCaNative_CloneTableRow), named after the look - the
+-- creator lists it like the game's own (its icon: the look's "Icon = /Game/...", else the fallback's). Choosing it
+-- stores the look (look:<Name>), and the cat's data keeps the FALLBACK's index: the save stays valid without the mod
+-- and other players see the fallback. Choosing one of the game's entries clears the WaCa shape for that slot.
+-- Which entry was chosen comes from the grid itself (its navigation's current item), after the panel's own
+-- OnGriIdItemChanged - the cat's data can't tell (a copied row has the fallback's type).
+local GRID_KINDS = {
+    Pattern = { table = "/Game/Gameplay/DataTables/Customization/DT_Patterns.DT_Patterns", typeField = "PatternType",
+                enum = "EPatternType", maskKey = "PatternMask", panel = "/Script/Wrc.GuiCustomizationPatternPanel" },
+    Markings = { table = "/Game/Gameplay/DataTables/Customization/DT_Markings.DT_Markings", typeField = "MarkingType",
+                 enum = "EMarkingType", maskKey = "MarkingsMask", panel = "/Script/Wrc.GuiCustomizationMarkingsPanel" },
+}
+local gridRows = {}       -- kind -> { vanilla = n, entries = { {look, fallback} ... } in the order added }
+
+local function tableRows(t)
+    local names, data = {}, {}
+    pcall(function()
+        t:ForEachRow(function(name, row)
+            table.insert(names, tostring(name))
+            table.insert(data, row)
+        end)
+    end)
+    return names, data
+end
+
+local function addGridRows()
+    for kind, k in pairs(GRID_KINDS) do
+        local t = StaticFindObject(k.table)
+        if not t or not t:IsValid() then
+            local ok, loaded = pcall(LoadAsset, k.table)
+            t = ok and loaded or nil
+        end
+        if not t or not t:IsValid() or not WaCaNative_CloneTableRow then
+            log("creator grid: %s table not available - no WaCa entries in it", kind)
+        else
+            local names, data = tableRows(t)
+            local state = { vanilla = #names, entries = {} }
+            for _, l in ipairs(offeredLooks()) do
+                if l.row == k.maskKey then
+                    local file = WaCa.ReadIni(modDir .. "/looks/" .. l.name .. ".ini")
+                    local look = file and file["Look"] or {}
+                    local fallback = roles[k.enum] and roles[k.enum][look.Fallback or ""]
+                    -- the fallback's own row is the source (found by its type); none = the table's first row
+                    local source = names[1]
+                    for i, row in ipairs(data) do
+                        local ok, ty = pcall(function() return row[k.typeField] end)
+                        if ok and ty == fallback then source = names[i] break end
+                    end
+                    local rowName = "WaCa_" .. l.name:gsub("[^%w]", "_")
+                    if source and WaCaNative_CloneTableRow(t:GetAddress(), source, rowName) then
+                        WaCaNative_SetTableField(t:GetAddress(), rowName, "StringName", look.Label or l.name)
+                        if (look.Icon or "") ~= "" then WaCaNative_SetTableField(t:GetAddress(), rowName, "IconHelper", look.Icon) end
+                        table.insert(state.entries, { look = l.name, fallback = fallback })
+                        log("creator grid: %s entry %d = %s (fallback %s, copied from %s)", kind,
+                            state.vanilla + #state.entries, l.name, tostring(look.Fallback), source)
+                    end
+                end
+            end
+            gridRows[kind] = state
+        end
+    end
+end
+
+-- the position (0-based) of the grid's current item, or nil
+local function gridPosition(grid)
+    local current
+    pcall(function() current = grid.GridNavigation.CurrentControl end)
+    if not current or not current:IsValid() then return nil end
+    local id = current:GetFullName()
+    local position
+    pcall(function()
+        for i = 1, #grid.Items do
+            local item = grid.Items[i]
+            if item:IsValid() and item:GetFullName() == id then position = i - 1 break end
+        end
+    end)
+    return position
+end
+
+local function onGridChanged(kind, panel)
+    local state = gridRows[kind]
+    local grid
+    pcall(function() grid = panel.mcGuiGrid end)
+    local position = state and grid and grid:IsValid() and gridPosition(grid)
+    if not position then return end
+    local k = GRID_KINDS[kind]
+    local entry = state.entries[position - state.vanilla + 1]
+    local f = FALLBACK_FIELD[k.maskKey]
+    if position >= state.vanilla and entry then
+        store("Appearance", k.maskKey, "look:" .. entry.look)
+        -- the cat's data: the fallback (the game may have stored our row's position)
+        for _, comp in ipairs(WaCa.PreviewCats()) do
+            local d = comp.CustomData
+            if entry.fallback and d[f.field] and d[f.field] >= state.vanilla then d[f.field] = entry.fallback end
+        end
+        log("creator grid: %s entry %d chosen = %s (the cat keeps %s %s)", kind, position, entry.look, f.field,
+            tostring(entry.fallback))
+    else
+        local had = pending and pending.Appearance and pending.Appearance[k.maskKey]
+        if had and tostring(had):match("^look:") then
+            store("Appearance", k.maskKey, nil)
+            log("creator grid: %s entry %d chosen (a game shape - the WaCa shape is cleared)", kind, position)
+        end
+    end
+    ctx.refreshLook()
+end
+
 function Creator.Init(c)
     ctx = c
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
@@ -810,6 +920,13 @@ function Creator.Init(c)
     WaCa.On("ScreenFocusIn", nameFocusIn)
     WaCa.On("ScreenFocusOut", nameFocusOut)
     WaCa.On("SteamTextInput", function(_, submitted, text) steamText(submitted, text) end)
+    -- WaCa looks in the game's own pattern / markings grids (rows added once the game is up)
+    WaCa.On("Started", addGridRows)
+    for kind, k in pairs(GRID_KINDS) do
+        local event = "WaCaGrid" .. kind
+        WaCa.Watch("OnGriIdItemChanged", k.panel, event, "post")
+        WaCa.On(event, function(panel) onGridChanged(kind, panel) end)
+    end
     -- after a menu command on the panel's screen (it may have rebuilt its content and dropped our widgets)
     pcall(RegisterHook, "/Script/SwtEngine.SwtScreen:OnListenCommand", function() end, function(self)
         local screen = self:get()

@@ -32,21 +32,32 @@ game data in this repo.
         CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
   - [ ] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK (pattern /
         marking / colour indices). Started: looks/*.ini `Fallback =` (Colourpoint: P13_Tabby), creator.ini PackFallback.
-  - [ ] Entries in the native pattern / marking grids (mcGuiPatternPanel.mcGuiGrid, WBP_GuiCustomizationPatternItem_C
-        items; DT_Patterns 23 rows NewRow..NewRow_21 = PatternType 0-22, DT_Markings 20 rows, on
-        USwtAdventureGameInstance PatternsDataTable / MarkingsDataTable / DeluxeDataTable). Find how DLC rows join the
-        grid and ride that. UE4SS UDataTable:AddRow fails ("ICppStructOps::Copy unavailable"): rows need native code.
+  - [~] Entries in the native pattern / marking grids. DONE so far: native row cloner (tables.cpp, d61c6fa), and at
+        startup each offered pattern / markings look becomes a row of DT_Patterns / DT_Markings copied from its
+        fallback's row (VM-verified: "WaCa_Colourpoint" added, copied from NewRow_11 = P13_Tabby, 24 rows). Choosing
+        it (panel OnGriIdItemChanged + the grid's current item position) stores look:<Name> and keeps the fallback's
+        index in the cat data. NOT VERIFIED: that the grid lists the extra row, and the choice handler - the VM
+        cannot open the customisation screen (below). Next: operator check; an icon (IconHelper) for Colourpoint.
+  - VM blocker (not a mod bug): the customisation screen crashes on the VM at 0x141918F78 with the mod's Lua AND
+    the look hooks off (WACA_NOLOOK=1): UGuiScreenBasePreview.CatRef (+0x488) is null - the preview cat actor
+    (AGuiCatCustomActor) never exists on the VM (none even after 5 min). Probably the GPU-less render path.
   - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
         the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
   - [ ] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
   - [ ] Then: drop the WaCa side panel.
 - [ ] P1 mouse look feel (operator): the camera clamps the mouse axis to the stick range and runs it through the stick
   curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
-- [ ] P1 Spacebar also advances dialogue (operator 2026-10-25).
+  Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
+  controller's WrcInputComponent has 4 at +0xE0; the camera axes not on it).
+- [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
+  while a QuestGiverWidget is up (d61c6fa). Needs the operator check (below).
 - [ ] P1 relocation framework for detours (operator 2026-10-25): every hook target found by several independent means
   (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
   logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
   (string -> referencing code -> unwind-table function start -> prologue check) for the look hooks.
+  DONE: tools/check_hooks.py <exe> - reads the targets from the native sources, resolves them offline the same way
+  (4 of 4 unique on the current exe, same addresses as the runtime). Left: a second independent anchor per target
+  (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
 - [ ] P2 a click skips the splash ("press any key" ignores mouse buttons).
 - [ ] Per-save sidecar: the write path end to end (a value changed in game -> the game's Save -> the sidecar file).
   Testable on the VM now (PROJECT_PLAN.md "Testing on the GPU-less VM").
@@ -55,6 +66,9 @@ game data in this repo.
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
   - Escape: pause menu open / close, back in every menu (VM-verified, feel)
   - the look on your own saves (VM-verified with a test look)
+  - the creator: Colourpoint listed in the pattern grid (after the game's 23); choosing it shows Colourpoint, the
+    game's patterns still work after it (the VM can't open that screen)
+  - Space advances a conversation
 
 ## P0: Foundation (nothing else can start until this works)
 - [ ] **Engine version + toolchain.** Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-

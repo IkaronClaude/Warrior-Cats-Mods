@@ -220,6 +220,85 @@ int LuaDevDelegate(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// dev: an input component's axis bindings - WaCaNative_DevAxisBindings(component address) -> text "AxisName -> code
+// addresses ..." per binding. AxisBindings is not reflected: the array is found by its shape (data, num, max) and its
+// element size / name offset by EVERY element's FName resolving to a name (one an axis-like name: "Player_...",
+// "Axis..."). Each binding is then searched three pointers deep (TSharedPtr -> TDelegate -> its heap instance -> the
+// bound method) for addresses into the game's code: the handler the axis calls
+std::wstring CodeOwner(uintptr_t addr) {
+    auto* base = reinterpret_cast<uint8_t*>(GetModuleHandleW(nullptr));
+    auto* nt = reinterpret_cast<IMAGE_NT_HEADERS*>(base + reinterpret_cast<IMAGE_DOS_HEADER*>(base)->e_lfanew);
+    auto lo = reinterpret_cast<uintptr_t>(base);
+    if (addr < lo || addr >= lo + nt->OptionalHeader.SizeOfImage) return L"";
+    DWORD64 imageBase = 0;
+    auto* fn = RtlLookupFunctionEntry(addr, &imageBase, nullptr);
+    if (!fn) return L"";
+    wchar_t buf[64];
+    swprintf_s(buf, L"0x%llX (func 0x%llX)", static_cast<unsigned long long>(addr - lo + 0x140000000ull),
+               static_cast<unsigned long long>(fn->BeginAddress + 0x140000000ull));
+    return buf;
+}
+
+bool Readable(const void* p, size_t n) { return p && !IsBadReadPtr(p, n); }
+
+// code addresses reachable from `at` (n bytes) within `depth` pointer hops, with the path ("+8>+0>+10")
+void CodeWithin(const uint8_t* at, int n, int depth, const std::wstring& path, std::wstring& out) {
+    for (int q = 0; q + 8 <= n; q += 8) {
+        auto v = *reinterpret_cast<const uintptr_t*>(at + q);
+        wchar_t step[16];
+        swprintf_s(step, L"+%X", q);
+        std::wstring code = CodeOwner(v);
+        if (!code.empty()) out += L" [" + path + step + L"]" + code;
+        else if (depth > 0 && v > 0x10000 && Readable(reinterpret_cast<void*>(v), 0x30))
+            CodeWithin(reinterpret_cast<const uint8_t*>(v), 0x30, depth - 1, path + step + L">", out);
+    }
+}
+
+int LuaDevAxisBindings(const LuaMadeSimple::Lua& lua) {
+    auto* comp = reinterpret_cast<uint8_t*>(static_cast<uintptr_t>(lua.get_integer()));
+    std::wstring out;
+    for (int off = 0x28; comp && off < 0x400 && out.empty(); off += 8) {
+        if (!Readable(comp + off, 16)) break;
+        auto* data = *reinterpret_cast<uint8_t**>(comp + off);
+        int32_t num = *reinterpret_cast<int32_t*>(comp + off + 8);
+        int32_t max = *reinterpret_cast<int32_t*>(comp + off + 12);
+        if (num < 1 || num > 128 || max < num || max > 1024 || !Readable(data, 16)) continue;
+        for (int stride = 0x18; stride <= 0x100 && out.empty(); stride += 8) {
+            if (!Readable(data, static_cast<size_t>(stride) * num)) break;
+            for (int nameOff = 0; nameOff <= 8 && out.empty(); nameOff += 4) {
+                auto nameAt = [&](int i) {
+                    auto* p = reinterpret_cast<uint32_t*>(data + i * stride + nameOff);
+                    if (p[0] == 0 || p[0] > 0x4000000 || p[1] > 64) return std::wstring();
+                    return FName(p[0], p[1]).ToString();
+                };
+                bool all = true, axisLike = false;
+                for (int i = 0; i < num && all; ++i) {
+                    std::wstring name = nameAt(i);
+                    all = !name.empty() && name != L"None";
+                    axisLike = axisLike || name.rfind(L"Player_", 0) == 0 || name.rfind(L"Axis", 0) == 0 ||
+                               name.find(L"Camera") != std::wstring::npos;
+                }
+                if (!all || !axisLike) continue;
+                wchar_t head[96];
+                swprintf_s(head, L"array at +0x%X, %d bindings, stride 0x%X, name at +%d\n", off, num, stride, nameOff);
+                out = head;
+                for (int i = 0; i < num; ++i) {
+                    out += L"  " + nameAt(i) + L" ->";
+                    CodeWithin(data + i * stride, stride, 3, L"", out);
+                    out += L"\n";
+                }
+            }
+        }
+    }
+    if (out.empty()) out = L"(no axis binding array found)";
+    logx::Line(L"[dev] axis bindings:\n%s", out.c_str());
+    int n = WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string utf8(n > 0 ? n - 1 : 0, '\0');
+    if (n > 1) WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+    lua.set_string(utf8);
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -290,6 +369,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
     lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);
     lua.register_function("WaCaNative_CloneTableRow", &LuaCloneTableRow);
+    lua.register_function("WaCaNative_DevAxisBindings", &LuaDevAxisBindings);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));
 }

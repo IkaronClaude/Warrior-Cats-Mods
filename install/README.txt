@@ -32,6 +32,7 @@ WHAT IT DOES (0.6.0)
     few seconds: names, looks and the menu cursor are right at once.
   - The mouse cursor shows in menus.
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
+  - Space advances a conversation (Enter still works too).
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).
   - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).
   - Your own cat name: names.ini (Prefix = Moss -> Mosskit, Mosspaw, ...).
