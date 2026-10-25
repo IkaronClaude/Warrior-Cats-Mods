@@ -10,8 +10,19 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.4.0)
+WHAT IT DOES (0.5.0)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
+
+  In the character creator:
+  - Type your own name on the name screen. The game's name list is your ONLINE name (what the save and online
+    features keep); your typed name is what you see in the game.
+  - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
+  - A WaCa panel on the customisation screen: a look (e.g. Colourpoint) and the shape of the pattern / markings from
+    any of the game's patterns and markings - combine two markings. Click the arrows or press F5 / F6 / F7.
+  These choices are saved next to your save (WrcGame.<slot>.WaCaModKit.ini in the game's save folder) and come back
+  when you load it. The game's own save stays loadable without the mod.
+
+  Everywhere:
 
   - Escape instead of P to pause, and Escape instead of BackSpace for back / close in menus.
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).

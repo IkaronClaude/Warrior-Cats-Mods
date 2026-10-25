@@ -5,7 +5,20 @@ An open-source modding framework and fix pack for **Warrior Cats: Clans of the F
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam
 as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 
-## What's in 0.4
+## What's in 0.5
+- **In the game's character creator:**
+  - **Your own name:** a text box on the name screen. The game's name list stays as your *online* name (what the
+    save and online features keep); the typed name is what you see in the game.
+  - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
+    from `config/palette.ini`.
+  - **A WaCa panel** on the customisation screen: a look preset (e.g. Colourpoint), and the *shape* of the pattern
+    and of the markings from any of the game's 23 patterns and 20 markings (or a PNG pack) - so two markings can be
+    combined. Click the arrows, or press F5 / F6 / F7.
+- **Saved with your save, applied when you load it:** everything chosen goes into a small file next to the game's
+  save (`WrcGame.<slot>.WaCaModKit.ini`), written when the game saves. The game's own save only ever gets the game's
+  own values (a custom colour is saved as the nearest game colour), so it stays loadable without the mod.
+
+## Also in 0.4
 - **No more doubled names** from the game's generator ("Blazeblaze" gets another suffix its rank already uses; the
   same cat always gets the same name).
 - **Fixed cats for specific roles** (`config/roster.ini` + roster files, see `rosters/Example.ini`): pin a story cat
@@ -30,10 +43,10 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
   markings in either mask slot (`MarkingsMask = game:M12_Mask`, so two markings can be combined), PNG pattern packs,
   and looks: presets like the included **Colourpoint** (`Look = Colourpoint`). Display only - the save keeps the
   game's look.
-- **Per-save data** (in development): each save slot can carry its own name and look in a sidecar file next to the
-  game's save (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`). It is
-  loaded automatically with that save and wins over the global `names.ini` / `appearance.ini`; the game's save file is
-  never modified. Choosing custom options inside the game's own creator is next.
+- **Per-save data:** each save slot carries its own name and look in a sidecar file next to the game's save
+  (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`), loaded
+  automatically with that save; it wins over the global `names.ini` / `appearance.ini` (the defaults for saves without
+  their own). The game's save file is never modified by the mod.
 
 ## For modders
 Other UE4SS Lua mods can use the shared API:

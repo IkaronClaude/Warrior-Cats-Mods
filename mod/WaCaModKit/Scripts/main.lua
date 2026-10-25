@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.4.0"
+local VERSION = "0.5.0"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -170,9 +170,12 @@ local function mergeLook(own)
     return cfg, table.concat(stamp, ";")
 end
 
+local Creator = require("creator")
+
 local function readAppearance()
-    -- the save slot's own look (its [Appearance] section) replaces appearance.ini as a whole
-    local own = slot.data["Appearance"]
+    -- while creating a cat, the look chosen in the creator; else the save slot's own look (its [Appearance] section),
+    -- which replaces appearance.ini as a whole
+    local own = Creator.PendingLook() or slot.data["Appearance"]
     if not own or #(own.__order or {}) == 0 then
         local ini = WaCa.ReadIni(modDir .. "/config/appearance.ini")
         own = ini and ini["Player"] or {}
@@ -248,6 +251,13 @@ Roster.Init({
 })
 table.insert(onSlotChanged, function() Roster.Run(true) end)
 
+-- The character creator: extra palette colours + the name field (creator.lua)
+Creator.Init({
+    WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue,
+    refreshLook = function() applyAppearance(true) end,
+})
+table.insert(onSlotChanged, Creator.OnSlotChanged)
+
 -- straight after the game refreshes a cat's look
 for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponent:RefreshShape",
                       "/Script/Wrc.GuiCatCustomActor:RefreshPattern", "/Script/Wrc.GuiCatCustomActor:RefreshShape",
@@ -303,6 +313,11 @@ local function applyUIKeys()
     log("%d menu keys set", #section.__order)
 end
 
+LoopAsync(300, function()
+    ExecuteInGameThread(function() pcall(Creator.FastTick) end)
+    return false
+end)
+
 -- wait for the game's text, then apply; the name is checked every few seconds (it changes with your rank)
 local textApplied = false
 LoopAsync(2000, function()
@@ -314,6 +329,7 @@ LoopAsync(2000, function()
             applyUIKeys()
         end
         checkSlot()
+        Creator.Tick()
         applyName()
         applyAppearance(false)
         Roster.Run(false)

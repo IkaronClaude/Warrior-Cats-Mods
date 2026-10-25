@@ -37,6 +37,19 @@ game data in this repo.
       AGuiCatCustomActor = the preview. Plan: extra swatches / entries in those grids (CreateWidget of the grid's
       GridItemClass, added to Items + the canvas + GridNavigation), a choice -> the slot's [Appearance] + a vanilla
       fallback index in the game's data. Needs live observation of the creator (open it headless via Lua).
+      0.5.0 (2026-10-25): DONE, verified headless as far as possible (creator.lua):
+      - palettes extended from config/palette.ini (FurColors / PatternMaskColors / MarkingMaskColors 25 + ours);
+        a custom index on any player cat -> its exact colour into the look + the nearest game index (verified: idx 30
+        -> #A8989F recorded, idx 11 kept); ASSUMED pairing Pattern01ColorIdx = pattern, Pattern02ColorIdx = markings
+      - name screen: EditableTextBox "your name" + the game's list noted as the online name (verified on the real
+        WBP_GuiScreenSelectName shown headless; typed text captured)
+      - WaCa panel on the customisation screen (look / pattern shape / markings shape; arrows via LMB + IsHovered, F5-F7)
+        (verified hosted on the name screen - the customisation screen can't be built outside the creator; its root
+        is a CanvasPanel like the name screen's)
+      - pending creation -> the NEW save slot's sidecar (verified: K2_CreateSaveSlot + Save -> sidecar with Prefix +
+        Fur); an existing save loaded instead drops it
+      OPEN: the operator's real-creator test (layout / font of the injected widgets, the pairing assumption, clicks).
+      Headless navigation is blocked at the splash ("press any key" needs real input).
 - [ ] **Escape as "back" in menus** (operator test: menus use BackSpace, the pause menu shows a BackSpace close
       button). Source: UXD/Buttons/DT_GamepadButtonsKeyboard rows Button_B / Button_Back = BackSpace (key + hint
       icon). Fix at the data: those rows -> Escape (+ the Esc icon). 0.3.1: DONE - [UIKeys] rewrites the rows natively
