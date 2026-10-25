@@ -51,6 +51,26 @@ jobs:
           git -C tools/bin/src/RE-UE4SS checkout 8333063
           git -C tools/bin/src/RE-UE4SS submodule update --init --recursive
           if ($LASTEXITCODE -ne 0) { throw "submodules failed (is the token's account linked to Epic Games?)" }
+          # a fresh clone stamps every file "now", which would make ninja rebuild all of UE4SS over the cached build
+          # below: every source file gets one fixed old date instead (the cache's outputs are newer than it)
+          $old = [datetime]"2000-01-01"
+          Get-ChildItem tools/bin/src/RE-UE4SS -Recurse -File -Force | ForEach-Object { $_.LastWriteTime = $old }
+
+      # UE4SS's compiled build (about 2 GB), so a release compiles only the mod. Keyed by the UE4SS commit and our
+      # CMakeLists; a new UE4SS version or build setup starts a fresh cache. Only build output is cached, never the
+      # UE4SS source: caches on the default branch can be restored by pull requests from forks, and the source
+      # includes the private (Epic-licensed) UEPseudo.
+      # (the runner image too: a new image can bring a new compiler, and the cached CMake setup names the old one)
+      - name: Runner image
+        id: image
+        shell: pwsh
+        run: '"version=$env:ImageVersion" >> $env:GITHUB_OUTPUT'
+
+      - name: UE4SS build cache
+        uses: actions/cache@v4
+        with:
+          path: native/build
+          key: ue4ss-build-8333063-${{ steps.image.outputs.version }}-${{ hashFiles('native/CMakeLists.txt') }}-v1
 
       - name: Native DLL
         shell: cmd
