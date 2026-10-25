@@ -370,17 +370,13 @@ loadAliases()
 
 -- An alias posts a REAL key press of its target to the game window (native PressKey): menus only react to real input
 -- - calling the controller's OnKeyPressed with the target never reached them (Escape did nothing, operator
--- 2026-10-25). A press is enough: the posted key is pressed and released. A target that is itself aliased is skipped
--- (no loops).
-local function aliasHook(self, key)
-    local ok, name = pcall(function() return key:get().KeyName:ToString() end)
-    if not ok or not aliases[name] then return end
-    for _, target in ipairs(aliases[name]) do
+-- 2026-10-25). Presses come from the raw KeyDown event (the window's own key messages, before the game routes them -
+-- so a paused game or a key bound to nothing still counts). A target that is itself aliased is skipped (no loops).
+WaCa.On("KeyDown", function(_, name)
+    for _, target in ipairs(aliases[name] or {}) do
         if not aliases[target] then WaCa.Command("PressKey|" .. target) end
     end
-end
-local ok, err = pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:OnKeyPressed", aliasHook)
-if not ok then log("key aliases: could not hook OnKeyPressed (%s)", tostring(err)) end
+end)
 local n = 0
 for _ in pairs(aliases) do n = n + 1 end
 log("%d key aliases", n)

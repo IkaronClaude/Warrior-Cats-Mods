@@ -2,6 +2,7 @@
 #pragma once
 #include <cstdarg>
 #include <cstdio>
+#include <share.h>
 #include <mutex>
 #include <string>
 
@@ -12,7 +13,8 @@ inline FILE*& File() { static FILE* f = nullptr; return f; }
 
 inline void Open(const std::wstring& path) {
     std::lock_guard g(Lock());
-    _wfopen_s(&File(), path.c_str(), L"w, ccs=UTF-8");
+    // shared for reading: the log can be read (copied, tailed) while the game runs
+    File() = _wfsopen(path.c_str(), L"w, ccs=UTF-8", _SH_DENYWR);
 }
 
 inline void Line(const wchar_t* fmt, ...) {

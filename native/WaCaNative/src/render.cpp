@@ -165,7 +165,27 @@ void DumpD3D12Messages(IDXGISwapChain* sc) {
     if (queue) queue->Release();
 }
 
+// -warp -wacaoffscreen: frames are rendered but never presented. The VM's display path refuses presents after a few
+// frames and took DWM down once; without presents DWM is never involved. The game runs on; screenshots (the engine's
+// "shot" command) read the rendered frame, not the window, and input posted to the window still arrives.
+bool g_offscreen = false;
+
 HRESULT STDMETHODCALLTYPE PresentDetour(IDXGISwapChain* sc, UINT sync, UINT flags) {
+    if (g_offscreen) {
+        // the frame rate, every 10 s of frames (on WARP it is the first thing to know)
+        static ULONGLONG since = GetTickCount64();
+        static unsigned frames = 0, total = 0;
+        ++frames;
+        ++total;
+        ULONGLONG now = GetTickCount64();
+        if (total == 1) logx::Line(L"[render] offscreen: frames are rendered, not presented");
+        if (now - since >= 10000) {
+            logx::Line(L"[render] offscreen: %.1f fps (%u frames so far)", frames * 1000.0 / (now - since), total);
+            since = now;
+            frames = 0;
+        }
+        return S_OK;
+    }
     HRESULT hr = g_present(sc, sync, flags);
     if (SUCCEEDED(hr) || hr != DXGI_ERROR_INVALID_CALL && hr != E_INVALIDARG) return hr;
     HRESULT hr2 = g_present(sc, sync, flags & ~DXGI_PRESENT_ALLOW_TEARING);
@@ -360,6 +380,7 @@ void Install() {
     // five Presents succeed; from the sixth on every Present returns E_INVALIDARG (DXGI's debug layer silent), and one
     // run took the VM's DWM down with it. Experiments with rendering on the VM are paused.
     if (!wcsstr(GetCommandLineW(), L"-warp")) return;
+    g_offscreen = wcsstr(GetCommandLineW(), L"-wacaoffscreen") != nullptr;
     if (wcsstr(GetCommandLineW(), L"-d3ddebug")) {
         CaptureDebugOutput();
         EnableDebugLayers();

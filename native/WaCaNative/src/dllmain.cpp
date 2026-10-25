@@ -13,6 +13,7 @@
 #include "MinHook.h"
 #include "bridge.h"
 #include "input.h"
+#include "keys.h"
 #include "log.h"
 #include "render.h"
 #include "text.h"
@@ -50,6 +51,7 @@ public:
             return;
         }
         render::Install();
+        keys::Install();
         input::Install(dir);
         text::Install(input::FNameCtor());
         ui::Init(input::FNameCtor());

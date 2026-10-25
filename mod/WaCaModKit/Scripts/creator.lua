@@ -199,8 +199,6 @@ end
 -- (its Button_A / Button_Confirm rows get no key), so Enter on the list can no longer skip the custom name. The
 -- creator.ini NameBoxKeys (Tab, the left stick click by default) leave the box without going on.
 local CONFIRM_ROWS = { "Button_A", "Button_Confirm" }
--- rows with no key on the keyboard, unused by the name screen: they carry the held confirm key (see holdConfirm)
-local CARRIER_ROWS = { "Button_StickL", "Button_StickR" }
 -- the screens with a name box: the creator's name screen (your own name = the prefix) and the warrior ceremony's
 -- suffix choice (your own warrior suffix)
 local NAME_SCREENS = {
@@ -242,25 +240,6 @@ local function holdConfirm()
             if key and keys[key] then
                 table.insert(name.held, { t = tpath, row = row, key = key })
                 WaCa.SetUIKeyIn(t, row, "None")
-            end
-        end
-    end
-    -- A key bound to no row never reaches the game's key handler, so the mod stopped seeing Enter at all (the confirm
-    -- on the list no longer moved into the box - operator 2026-10-25). Each held key rides on a row that has no key
-    -- in that table and does nothing on the name screen, given back with the rest.
-    for _, t in ipairs(WaCa.MenuKeyTables()) do
-        local tpath = t:GetFullName():gsub("^%S+ ", "")
-        local carried = {}
-        for _, h in ipairs(name.held) do
-            if h.t == tpath and not carried[h.key] then
-                for _, row in ipairs(CARRIER_ROWS) do
-                    if WaCa.UIRowKey(t, row) == "None" then
-                        WaCa.SetUIKeyIn(t, row, h.key)
-                        table.insert(name.held, { t = tpath, row = row, key = "None" })
-                        carried[h.key] = true
-                        break
-                    end
-                end
             end
         end
     end
@@ -848,13 +827,12 @@ function Creator.Init(c)
     pcall(RegisterHook, "/Script/Wrc.GuiPopupColorPicker:OnGridIdColorChanged", function() end, function()
         ExecuteInGameThread(sanitize)
     end)
-    pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:OnKeyPressed", function(_, key)
-        local ok, name = pcall(function() return key:get().KeyName:ToString() end)
-        if ok then
-            local k = name
-            ExecuteInGameThread(function() Creator.NameKey(k) end)
-        end
-        if ok and (name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7" or name == "BackSpace" or name == "Escape") then
+    -- raw key presses (KeyDown fires as the key reaches the game window, before the game handles it): the reaction
+    -- runs on the next tick, after the game saw the key - focusing the name box on Enter at once let that same Enter
+    -- commit the empty box
+    WaCa.On("KeyDown", function(_, name)
+        ExecuteInGameThread(function() Creator.NameKey(name) end)
+        if name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7" or name == "BackSpace" or name == "Escape" then
             ExecuteInGameThread(function() onKey(name) end)
         end
     end)
