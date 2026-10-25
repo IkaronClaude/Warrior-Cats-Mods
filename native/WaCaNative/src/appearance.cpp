@@ -65,6 +65,12 @@ bool Hook(const wchar_t* what, const char* anchor, const char* prologue, void* d
 namespace appearance {
 
 void Install() {
+    // test switch: WACA_NOLOOK=1 leaves the look build untouched (to tell a game / environment crash from ours)
+    wchar_t off[4] = {};
+    if (GetEnvironmentVariableW(L"WACA_NOLOOK", off, 4) && off[0] == L'1') {
+        logx::Line(L"[look] off (WACA_NOLOOK=1)");
+        return;
+    }
     ULONGLONG t = GetTickCount64();
     Hook(L"colour", "Pattern Mask Color", "48 89 5C 24 10", reinterpret_cast<void*>(&ColourDetour),
          reinterpret_cast<void**>(&g_colour));

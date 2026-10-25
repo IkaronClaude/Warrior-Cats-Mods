@@ -405,16 +405,40 @@ table.insert(onSlotChanged, Creator.OnSlotChanged)
 -- menus read raw keys (SwtPlayerController.OnKeyPressed / OnKeyReleased) rather than bindings - many use BackSpace as
 -- "back" - so "Escape = BackSpace" makes Escape work as back in menus too.
 local aliases = {}
+local dialogueAliases = {}
+local function readAliases(ini, section)
+    local out = {}
+    for _, k in ipairs(ini and ini[section] and ini[section].__order or {}) do
+        local targets = {}
+        for t in ini[section][k]:gmatch("[^,%s]+") do table.insert(targets, t) end
+        out[k] = targets
+    end
+    return out
+end
 local function loadAliases()
     local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
-    aliases = {}
-    for _, k in ipairs(ini and ini["KeyAliases"] and ini["KeyAliases"].__order or {}) do
-        local targets = {}
-        for t in ini["KeyAliases"][k]:gmatch("[^,%s]+") do table.insert(targets, t) end
-        aliases[k] = targets
-    end
+    aliases = readAliases(ini, "KeyAliases")
+    dialogueAliases = readAliases(ini, "DialogueKeyAliases")
 end
 loadAliases()
+
+-- Dialogue keys ([DialogueKeyAliases] Key = OtherKey): while a conversation is on screen, pressing Key also presses
+-- OtherKey as a real key press - SpaceBar = Enter: Space advances / confirms dialogue like Enter does (operator
+-- 2026-10-25). A conversation is the game's QuestGiverWidget (its "next" prompt is Button_Confirm = Enter); it is
+-- looked up when such a key is pressed, not tracked.
+local function dialogueUp()
+    for _, w in ipairs(FindAllOf("QuestGiverWidget") or {}) do
+        if w:IsValid() and w:IsInViewport() and w:IsVisible() then return true end
+    end
+    return false
+end
+WaCa.On("KeyDown", function(_, name)
+    local targets = dialogueAliases[name]
+    if not targets or not dialogueUp() then return end
+    for _, target in ipairs(targets) do
+        if not dialogueAliases[target] then WaCa.Command("PressKey|" .. target) end
+    end
+end)
 
 -- An alias posts a REAL key press of its target to the game window (native PressKey): menus only react to real input
 -- - calling the controller's OnKeyPressed with the target never reached them (Escape did nothing, operator

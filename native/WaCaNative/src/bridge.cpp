@@ -33,6 +33,8 @@
 #include <Unreal/UFunction.hpp>
 #include <Unreal/UObject.hpp>
 #include <Unreal/UObjectGlobals.hpp>
+#include <Unreal/Engine/UDataTable.hpp>
+#include <Unreal/UScriptStruct.hpp>
 
 #include <atomic>
 #include <memory>
@@ -43,6 +45,7 @@
 
 #include "appearance.h"
 #include "commands.h"
+#include "tables.h"
 #include "log.h"
 
 using namespace RC;
@@ -226,6 +229,27 @@ int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_CloneTableRow(DataTable address, existing row, new row) -> true / false: a new row in one of the game's
+// tables, a deep copy of an existing one (tables.cpp) - mod rows in the game's own lists (pattern / marking grids)
+int LuaCloneTableRow(const LuaMadeSimple::Lua& lua) {
+    auto* table = reinterpret_cast<void*>(static_cast<uintptr_t>(lua.get_integer()));
+    std::wstring from = Wide(std::string(lua.get_string()));
+    std::wstring to = Wide(std::string(lua.get_string()));
+    lua.set_bool(tables::CloneRow(table, from, to));
+    return 1;
+}
+
+// WaCaNative_SetTableField(DataTable address, row, field, value) -> true / false: text, a soft object path
+// ("/Game/Folder/Asset.Asset"), an enum value name, a bool or an integer
+int LuaSetTableField(const LuaMadeSimple::Lua& lua) {
+    auto* table = reinterpret_cast<void*>(static_cast<uintptr_t>(lua.get_integer()));
+    std::wstring row = Wide(std::string(lua.get_string()));
+    std::wstring field = Wide(std::string(lua.get_string()));
+    std::wstring value = Wide(std::string(lua.get_string()));
+    lua.set_bool(tables::SetField(table, row, field, value));
+    return 1;
+}
+
 int LuaCommand(const LuaMadeSimple::Lua& lua) {
     if (!lua.is_string()) lua.throw_error("WaCaNative_Command(text)");
     bool ok = commands::Run(Wide(std::string(lua.get_string())));
@@ -265,6 +289,8 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_Command", &LuaCommand);
     lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
     lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);
+    lua.register_function("WaCaNative_CloneTableRow", &LuaCloneTableRow);
+    lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));
 }
 
