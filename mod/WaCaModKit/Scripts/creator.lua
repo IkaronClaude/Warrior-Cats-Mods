@@ -964,21 +964,26 @@ local function onGridChanged(kind, panel)
     local state = gridRows[kind]
     local grid
     pcall(function() grid = panel.mcGuiGrid end)
-    -- once per grid: does the game list our rows? (it fills the grid natively - from the table's rows, or not)
+    -- The grid is filled natively: item 0 = "none", then one item per shape. VM 2026-10-25: the pattern grid held
+    -- 24 items = none + the game's 23 - the game lists its pattern TYPES, not the table's rows, so a WaCa row (which
+    -- carries its fallback's type) is not listed. A grid position counts as a WaCa entry only when the grid is exactly
+    -- none + the game's rows + ours; anything else (no WaCa items; the markings grid's 24 = more than its 20 rows + 1)
+    -- leaves the game's choices alone - a position mapping on the wrong layout picked "Colourpoint" for Pattern 23.
+    local n = 0
+    pcall(function() n = #grid.Items end)
+    local listed = state and n == 1 + state.vanilla + #state.entries
     if state and grid and grid:IsValid() and not state.counted then
         state.counted = true
-        local n = 0
-        pcall(function() n = #grid.Items end)
-        log("creator grid: %s grid lists %d items (the game's own: %d, WaCa rows added: %d) - %s", kind, n, state.vanilla,
-            #state.entries, n >= state.vanilla + #state.entries and "WaCa entries listed"
-                or "WaCa entries NOT listed (the game doesn't fill this grid from the table's rows)")
+        log("creator grid: %s grid lists %d items (none + the game's own %d + WaCa %d would be %d) - WaCa entries %s",
+            kind, n, state.vanilla, #state.entries, 1 + state.vanilla + #state.entries, listed and "listed" or "NOT listed")
     end
-    local position = state and grid and grid:IsValid() and gridPosition(grid)
+    if not listed then return end
+    local position = grid:IsValid() and gridPosition(grid)
     if not position then return end
     local k = GRID_KINDS[kind]
-    local entry = state.entries[position - state.vanilla + 1]
+    local entry = state.entries[position - (1 + state.vanilla) + 1]
     local f = FALLBACK_FIELD[k.maskKey]
-    if position >= state.vanilla and entry then
+    if position >= 1 + state.vanilla and entry then
         store("Appearance", k.maskKey, "look:" .. entry.look)
         -- the cat's data: the fallback (the game may have stored our row's position)
         for _, comp in ipairs(WaCa.PreviewCats()) do

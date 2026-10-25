@@ -45,9 +45,16 @@ game data in this repo.
         log now says, on the first grid move, "grid lists N items (the game's own: 23, WaCa rows added: 1) - WaCa
         entries listed / NOT listed" - one look at the log answers whether the game fills the grid from the rows.
         Fixed: a reload no longer renumbers the WaCa entries (the game's rows counted without WaCa_ rows).
-  - VM blocker (not a mod bug): the customisation screen crashes on the VM at 0x141918F78 with the mod's Lua AND
-    the look hooks off (WACA_NOLOOK=1): UGuiScreenBasePreview.CatRef (+0x488) is null - the preview cat actor
-    (AGuiCatCustomActor) never exists on the VM (none even after 5 min). Probably the GPU-less render path.
+  - RESOLVED 2026-10-25: the "VM crash" on the customisation screen was the TEST HARNESS - it built the main menu by
+    hand on the logos map (M_LogosMap), so the creator never had its level / preview cat. Through the real flow
+    (logos -> splash -> Enter -> L_MainMenu_P) the customisation screen works on the VM.
+  - KEY FINDING (VM, real creator): the pattern grid lists 24 items = "none" + Pattern 1..23 - the game lists its
+    pattern TYPES, not DT_Patterns' rows. The cloned WaCa row (it carries its fallback's type) is NOT listed. The
+    markings grid lists 24 for 20 rows (more sources: deluxe?). So "entries in the native grid" needs another way in:
+    a new EPatternType / EMarkingType value per WaCa look (the enums' names array, at runtime) with its row, or
+    hooking the grid fill to append items. Next: find the native grid fill (what it iterates) on the VM.
+    Fixed meanwhile: the grid choice mapping (position -> WaCa entry) now runs only when the grid is exactly none +
+    game rows + WaCa rows - before, choosing Pattern 23 would have stored look:Colourpoint.
   - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
         the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
   - [ ] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
