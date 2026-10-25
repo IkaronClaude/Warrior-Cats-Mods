@@ -66,10 +66,24 @@ local function nearestVanilla(arr, count, c)
     return best
 end
 
+-- the instance of a screen class that is showing (or, with anyInstance, the newest one). Never FindFirstOf: leaving a
+-- screen and coming back makes a new instance, and the old hidden one stays findable until garbage collection runs
+-- (about a minute) - the WaCa panel vanished for that long (operator 2026-10-25).
+local function shownScreen(cls, anyInstance)
+    local last
+    for _, s in ipairs(FindAllOf(cls) or {}) do
+        if s:IsValid() then
+            if s:IsInViewport() then return s end
+            last = s
+        end
+    end
+    return anyInstance and last or nil
+end
+Creator.ShownScreen = shownScreen
+
 local function creatorOpen()
     for _, cls in ipairs(CREATOR_SCREENS) do
-        local s = FindFirstOf(cls)
-        if s and s:IsValid() and s:IsInViewport() then return true end
+        if shownScreen(cls) then return true end
     end
     return false
 end
@@ -78,6 +92,14 @@ end
 local function store(section, key, value)
     if pending then
         pending[section] = pending[section] or { __order = {} }
+        if value == nil then
+            -- "no override": the key goes away entirely (an ordered key without a value broke the look merge)
+            pending[section][key] = nil
+            for i, k in ipairs(pending[section].__order) do
+                if k == key then table.remove(pending[section].__order, i) break end
+            end
+            return
+        end
         if pending[section][key] == nil then table.insert(pending[section].__order, key) end
         pending[section][key] = value
     else
@@ -174,8 +196,8 @@ local function setupNameScreen(screen)
 end
 
 local function updateNameScreen()
-    local screen = FindFirstOf("GuiScreenSelectName")
-    if not screen or not screen:IsValid() or not screen:IsInViewport() then return end
+    local screen = shownScreen("GuiScreenSelectName")
+    if not screen then return end
     local box = nameScreen == screenId(screen) and child(nameTree, "WaCaNameBox") or nil
     if not box then
         local ok, err = pcall(setupNameScreen, screen)
@@ -256,16 +278,31 @@ local function sortedEnum(enum, pattern)
     return names
 end
 
+-- the looks offered (creator.ini Looks) with the row each belongs to: a look file's "Row = Pattern" / "Row =
+-- Markings" lists it among that row's shapes (a look that IS a pattern, e.g. Colourpoint); no Row = the Look row
+local function offeredLooks()
+    local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
+    local out = {}
+    for name in ((ini["Creator"] or {}).Looks or ""):gmatch("[^,]+") do
+        name = name:gsub("^%s+", ""):gsub("%s+$", "")
+        local l = WaCa.ReadIni(modDir .. "/looks/" .. name .. ".ini")
+        local row = l and l["Look"] and l["Look"].Row or ""
+        table.insert(out, { name = name, row = row ~= "" and row .. "Mask" or "Look" })
+    end
+    return out
+end
+
 local function choicesFor(key)
     local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
     local cfg = ini["Creator"] or {}
-    local list = { { label = "(the game's)", value = nil } }
-    if key == "Look" then
-        for name in (cfg.Looks or ""):gmatch("[^,]+") do
-            name = name:gsub("^%s+", ""):gsub("%s+$", "")
-            table.insert(list, { label = name, value = name })
+    local list = { { label = "No override", value = nil } }
+    for _, l in ipairs(offeredLooks()) do
+        if l.row == key then
+            table.insert(list, { label = key == "Look" and l.name or l.name .. " (WaCa)",
+                                 value = key == "Look" and l.name or "look:" .. l.name })
         end
-    else
+    end
+    if key ~= "Look" then
         for _, n in ipairs(sortedEnum("EPatternType", "^P%d")) do table.insert(list, { label = n:gsub("_", " "), value = "game:" .. n }) end
         for _, n in ipairs(sortedEnum("EMarkingType", "^M%d")) do table.insert(list, { label = n:gsub("_", " "), value = "game:" .. n }) end
         for name in (cfg.Packs or ""):gmatch("[^,]+") do
@@ -294,10 +331,19 @@ end
 local function attachHidden() return cfgValue("AttachHidden") == "1" end
 
 local ROWS = {
-    { key = "Look", label = "Look (F5)" },
-    { key = "PatternMask", label = "Pattern shape (F6)" },
-    { key = "MarkingsMask", label = "Markings shape (F7)" },
+    { key = "Look", label = "Look (F5)", fkey = "F5" },
+    { key = "PatternMask", label = "Pattern shape (F6)", fkey = "F6" },
+    { key = "MarkingsMask", label = "Markings shape (F7)", fkey = "F7" },
 }
+
+-- a copy of a pending section (to revert to when the player backs out of the screen)
+local function copySection(s)
+    local out = { __order = {} }
+    for _, k in ipairs(s and s.__order or {}) do
+        if s[k] ~= nil then out[k] = s[k]; table.insert(out.__order, k) end
+    end
+    return out
+end
 
 local function rowText(row)
     return row.choices[row.index].label
@@ -339,11 +385,20 @@ local function setupPanel(screen)
         slot:SetPosition({ X = x, Y = y })
         slot:SetSize({ X = w, Y = h })
     end
-    panel = { screen = screenId(screen), tree = treePath(screen), rows = {} }
+    -- the same screen again (the panel only needed re-adding): keep the look to revert to from when it first showed
+    local snapshot = panel and panel.screen == screenId(screen) and panel.snapshot
+        or (pending and copySection(pending.Appearance))
+    panel = { screen = screenId(screen), tree = treePath(screen), rows = {}, snapshot = snapshot }
     at(text("WaCaPanelTitle", "WaCa ModKit"), -1150, 200, 1000, 80)
     local look = pending and pending.Appearance or {}
-    for i, r in ipairs(ROWS) do
-        local row = { n = i, key = r.key, choices = choicesFor(r.key), index = 1 }
+    local rows = {}
+    for _, r in ipairs(ROWS) do
+        local choices = choicesFor(r.key)
+        if #choices > 1 then table.insert(rows, { r = r, choices = choices }) end     -- a row with no choices: hidden
+    end
+    for i, e in ipairs(rows) do
+        local r = e.r
+        local row = { n = i, key = r.key, fkey = r.fkey, choices = e.choices, index = 1 }
         for j, c in ipairs(row.choices) do if c.value == look[r.key] then row.index = j end end
         local y = 200 + i * 110
         at(text("WaCaPanelLabel" .. i, r.label), -1150, y, 520, 90)
@@ -357,15 +412,32 @@ end
 
 -- the panel's screen when it is the one showing (by its unique name - never a stale object), else nil
 local function panelHost()
-    local screen = FindFirstOf(panelScreen())
-    if not screen or not screen:IsValid() or not (screen:IsInViewport() or attachHidden()) then return nil end
-    return screen
+    return shownScreen(panelScreen(), attachHidden())
+end
+
+-- our title still sits in the screen's root canvas (a screen that rebuilds its content drops our widgets, which then
+-- linger unattached until garbage collection)
+local function panelAttached(screen)
+    local title = child(panel.tree, "WaCaPanelTitle")
+    local parent = title and title:GetParent()
+    local root = screen.WidgetTree.RootWidget
+    return parent and parent:IsValid() and root and root:IsValid() and parent:GetFullName() == root:GetFullName()
 end
 
 local function updatePanel()
     local screen = panelHost()
-    if not screen then return end
-    if not panel or panel.screen ~= screenId(screen) or not child(panel.tree, "WaCaPanelTitle") then
+    if not screen then
+        -- the screen went away: backed out of (BackSpace / Escape just before) = its WaCa choices are dropped, like the
+        -- game drops its own; confirmed = they stay
+        if panel and panel.backAt and os.time() - panel.backAt <= 3 and pending and panel.snapshot then
+            pending.Appearance = copySection(panel.snapshot)
+            log("customisation screen: backed out - WaCa choices reverted")
+            ctx.refreshLook()
+        end
+        if panel then panel.backAt = nil end
+        return
+    end
+    if not panel or panel.screen ~= screenId(screen) or not panelAttached(screen) then
         local ok, err = pcall(setupPanel, screen)
         if not ok then log("customisation screen: %s", tostring(err)) panel = nil end
     end
@@ -383,8 +455,10 @@ local function onKey(name)
             if next and next:IsHovered() then setChoice(row, row.index + 1) return end
         end
     else
-        local n = ({ F5 = 1, F6 = 2, F7 = 3 })[name]
-        if n and panel.rows[n] then setChoice(panel.rows[n], panel.rows[n].index + 1) end
+        if name == "BackSpace" or name == "Escape" then panel.backAt = os.time() return end
+        for _, row in ipairs(panel.rows) do
+            if row.fkey == name then setChoice(row, row.index + 1) return end
+        end
     end
 end
 
@@ -409,7 +483,7 @@ function Creator.Init(c)
     end)
     pcall(RegisterHook, "/Script/SwtEngine.SwtPlayerController:OnKeyPressed", function(_, key)
         local ok, name = pcall(function() return key:get().KeyName:ToString() end)
-        if ok and (name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7") then
+        if ok and (name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7" or name == "BackSpace" or name == "Escape") then
             ExecuteInGameThread(function() onKey(name) end)
         end
     end)

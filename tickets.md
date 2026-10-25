@@ -26,6 +26,24 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [ ] P0 creator redesign (operator 2026-10-25): use the NATIVE customisation UI, not a side panel.
+  - Hook the native pattern / marking scroll grid (with its preview) so mods add entries there; the game ships DLC
+    patterns, so find how DLC rows join the grid (DT_Patterns / DLC data) and ride that.
+  - A mode switch in the editor: "online cat" (vanilla data, what others see) vs "local cat" (WaCa look); extra grid
+    entries / colours only in local mode; a "copy online look to local" button. Drop the per-row "pattern override" UI.
+  - Apply our look in the same refresh as the game's (no flash of the vanilla pattern after a colour change): hook the
+    material build, not a re-apply after it.
+  - Custom colours have no UI: a colour wheel / hex entry in local mode.
+- [ ] P1 mouse in menus (operator 2026-10-25): the splash can't be skipped with a click; menus can't be used with the
+  mouse. Found: controller bShowMouseCursor = false; screens navigate a USwtNavigation (CurrentControl) of GuiControls
+  that each have a UMG mcGuiButtonCollision; USwtScreen has OnUIPress / OnUIRelease(Control). Next: cursor on in
+  menus, hover -> selection, click -> confirm; splash: click = a key press.
+- [x] 0.5.3 fix, tag moved (2026-10-25): the creator crash ROOT CAUSE - LoopAsync ran our Lua on a worker thread
+      while game-thread hooks used the same Lua state (VM table corruption; reproduced headless with F6 x 75, gone
+      after moving every loop to LoopInGameThreadWithDelay). Also: F6 never wrapped to "No override" (a nil value
+      kept in the key order broke the look merge); the panel vanished for ~1 min after backing out and returning
+      (FindFirstOf found the old hidden screen until GC); backing out (BackSpace / Escape) reverts that screen's WaCa
+      choices; Colourpoint is a pattern shape (looks with Row = Pattern), tail / ears = the pattern colour.
 - [ ] 0.5.3 fix, tag moved (2026-10-25, operator: a crash in the creator after a long time cycling custom patterns; the custom
       patterns did not render on the cat). Crash: inside UE4SS during a hook (PCallStack all UE4SS -> game 0x4A1BDD2),
       read of 0xFFFFFFFFFFFFFFFF = a stale object. Fixed the likely cause: the creator held widget wrappers (name box,

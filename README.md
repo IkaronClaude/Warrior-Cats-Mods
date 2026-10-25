@@ -11,9 +11,10 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
     save and online features keep); the typed name is what you see in the game.
   - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
     from `config/palette.ini`.
-  - **A WaCa panel** on the customisation screen: a look preset (e.g. Colourpoint), and the *shape* of the pattern
-    and of the markings from any of the game's 23 patterns and 20 markings (or a PNG pack) - so two markings can be
-    combined. Click the arrows, or press F5 / F6 / F7.
+  - **A WaCa panel** on the customisation screen: the *shape* of the pattern and of the markings from any of the
+    game's 23 patterns and 20 markings, WaCa shapes like **Colourpoint** (coloured with the game's pattern colour
+    picker), or a PNG pack - so two markings can be combined. Click the arrows, or press F6 / F7 ("No override" = the
+    game's own). Backing out of the screen (BackSpace / Escape) drops that screen's WaCa choices, like the game's.
 - **Saved with your save, applied when you load it:** everything chosen goes into a small file next to the game's
   save (`WrcGame.<slot>.WaCaModKit.ini`), written when the game saves. The game's own save only ever gets the game's
   own values (a custom colour is saved as the nearest game colour), so it stays loadable without the mod.
@@ -41,7 +42,8 @@ as usual. `Uninstall.bat` removes everything; the mod never modifies game files.
 - **Customisation** (`config/appearance.ini`): any colour for every part of the coat (fur, pattern, markings, paw
   pads, inner ears, nose, whiskers), per-part colours (`Tail.Fur = #3E2B22`), any of the game's 23 patterns and 20
   markings in either mask slot (`MarkingsMask = game:M12_Mask`, so two markings can be combined), PNG pattern packs,
-  and looks: presets like the included **Colourpoint** (`Look = Colourpoint`). Display only - the save keeps the
+  per-part colours that follow a coat colour (`Tail.Fur = Pattern`), and looks: presets (`Look = Name`) or shapes
+  like the included **Colourpoint** (`PatternMask = look:Colourpoint`). Display only - the save keeps the
   game's look.
 - **Per-save data:** each save slot carries its own name and look in a sidecar file next to the game's save
   (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`), loaded
@@ -70,7 +72,8 @@ WaCa.WriteIni(file, data)
 ```
 Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")` (replaces the key) or `WaCa.SetUIIcon("Button_B", "Escape")` (icon only).
 
-Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`); a pattern
+Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`; with
+`Row = Pattern` / `Row = Markings` it is offered as one of that row's shapes, see `looks/Colourpoint.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
 
 All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset/Strings_<LANG>.csv`). Cat names are

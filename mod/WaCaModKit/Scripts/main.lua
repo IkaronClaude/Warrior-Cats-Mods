@@ -146,24 +146,30 @@ local appearanceStamp = nil
 
 -- config/appearance.ini [Player], on top of an optional look preset (Look = Colourpoint -> looks/Colourpoint.ini,
 -- or "<Mod>/<path>.ini" in another mod's folder): your own values win over the look's
+-- A look is a file of appearance values (looks/<Name>.ini [Look], or "<Mod>/<path>.ini"). It applies through
+-- Look = <Name>, or - for a look that is a pattern / marking shape (its "Row = Pattern" / "Row = Markings") - through
+-- PatternMask / MarkingsMask = look:<Name>, so it is one choice among that row's shapes. The player's own values win.
 local function mergeLook(own)
     local cfg, order = {}, {}
-    local look = own.Look or ""
-    if look ~= "" then
+    local function add(k, v)
+        if cfg[k] == nil then table.insert(order, k) end
+        cfg[k] = v
+    end
+    local function addLook(look)
         local path = look:find("[/\\]") and (modsDir .. "/" .. look) or (modDir .. "/looks/" .. look .. ".ini")
         local lookIni = WaCa.ReadIni(path)
         local l = lookIni and lookIni["Look"]
-        if l then
-            for _, k in ipairs(l.__order) do cfg[k] = l[k]; table.insert(order, k) end
-        else
-            log("look '%s' not found (%s)", look, path)
-        end
+        if not l then log("look '%s' not found (%s)", look, path) return end
+        for _, k in ipairs(l.__order) do if k ~= "Row" then add(k, l[k]) end end
+    end
+    if (own.Look or "") ~= "" then addLook(own.Look) end
+    for _, slot in ipairs({ "PatternMask", "MarkingsMask" }) do
+        local name = own[slot] and tostring(own[slot]):match("^look:(.+)$")
+        if name then addLook(name) end
     end
     for _, k in ipairs(own.__order or {}) do
-        if own[k] ~= "" then
-            if cfg[k] == nil then table.insert(order, k) end
-            cfg[k] = own[k]
-        end
+        local v = own[k]
+        if v ~= nil and v ~= "" and not tostring(v):match("^look:") then add(k, v) end
     end
     local stamp = {}
     for _, k in ipairs(order) do table.insert(stamp, k .. "=" .. cfg[k]) end
@@ -196,10 +202,21 @@ local function applyAppearanceTo(cat, cfg)
         local color = WaCa.ParseColor(cfg[slot])
         if color then WaCa.SetCatColor(cat, slot, color) end
     end
+    -- a per-part value may name a coat colour instead of a hex ("Tail.Fur = Pattern": the tail in the pattern's
+    -- colour, whatever the colour picker chose) - read from the body after the whole-cat colours went on
+    local body = cat.SkelMeshComp
+    local function coatColor(slotName)
+        local own = WaCa.ParseColor(cfg[slotName])
+        if own then return own end
+        local m = body and body:IsValid() and body:GetMaterial(0)
+        if not m or not m:IsValid() then return nil end
+        local v = m:K2_GetVectorParameterValue(FName(WaCa.COAT_COLORS[slotName]))
+        return { X = v.R, Y = v.G, Z = v.B }
+    end
     for key, value in pairs(cfg) do
         local partName, slot = tostring(key):match("^(%a+)%.(%a+)$")
         if partName and WaCa.PART_NAMES[partName] and WaCa.COAT_COLORS[slot] then
-            local color = WaCa.ParseColor(value)
+            local color = WaCa.COAT_COLORS[value] and coatColor(value) or WaCa.ParseColor(value)
             if color then WaCa.SetPartColor(cat, partName, slot, color) end
         end
     end
@@ -353,26 +370,30 @@ local function applyUIKeys()
     log("%d menu keys, %d menu icons set", keys and #keys.__order or 0, icons and #icons.__order or 0)
 end
 
-LoopAsync(300, function()
-    ExecuteInGameThread(function() pcall(Creator.FastTick) end)
-    return false
+-- Every loop runs ON THE GAME THREAD (LoopInGameThreadWithDelay). LoopAsync runs its callback on a worker thread with
+-- the same Lua state the game-thread hooks use; the two at once corrupted Lua's tables and crashed the game inside
+-- the Lua VM (operator 2026-10-25: after a while cycling patterns in the creator; reproduced headless with F6 x 75).
+LoopInGameThreadWithDelay(300, function()
+    local ok, err = pcall(Creator.FastTick)
+    if not ok then log("creator tick: %s", tostring(err)) end
 end)
 
 -- wait for the game's text, then apply; the name is checked every few seconds (it changes with your rank)
 local textApplied = false
-LoopAsync(2000, function()
-    ExecuteInGameThread(function()
-        if not WaCa.IsTextReady() then return end
-        if not textApplied then
-            textApplied = true
-            applyTextOverrides()
-            applyUIKeys()
-        end
-        checkSlot()
-        Creator.Tick()
-        applyName()
-        applyAppearance(false)
-        Roster.Run(false)
-    end)
-    return false
+local function slowTick()
+    if not WaCa.IsTextReady() then return end
+    if not textApplied then
+        textApplied = true
+        applyTextOverrides()
+        applyUIKeys()
+    end
+    checkSlot()
+    Creator.Tick()
+    applyName()
+    applyAppearance(false)
+    Roster.Run(false)
+end
+LoopInGameThreadWithDelay(2000, function()
+    local ok, err = pcall(slowTick)
+    if not ok then log("tick: %s", tostring(err)) end
 end)

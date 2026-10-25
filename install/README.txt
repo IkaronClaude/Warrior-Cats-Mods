@@ -17,8 +17,9 @@ WHAT IT DOES (0.5.3)
   - Type your own name on the name screen. The game's name list is your ONLINE name (what the save and online
     features keep); your typed name is what you see in the game.
   - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
-  - A WaCa panel on the customisation screen: a look (e.g. Colourpoint) and the shape of the pattern / markings from
-    any of the game's patterns and markings - combine two markings. Click the arrows or press F5 / F6 / F7.
+  - A WaCa panel on the customisation screen: the shape of the pattern / markings from any of the game's patterns
+    and markings, or "Colourpoint" (coloured with the game's pattern colour) - combine two markings. Click the arrows
+    or press F6 / F7. Backing out of the screen drops its WaCa choices.
   These choices are saved next to your save (WrcGame.<slot>.WaCaModKit.ini in the game's save folder) and come back
   when you load it. The game's own save stays loadable without the mod.
 
@@ -31,7 +32,7 @@ WHAT IT DOES (0.5.3)
     Your save keeps the game's name, so online features and uninstalling are safe.
   - Change any game text: text.ini.
   - Your cat's look: appearance.ini - any colour for every part of the coat, the game's patterns and markings
-    combined freely, and looks like "Colourpoint" (Look = Colourpoint).
+    combined freely, and Colourpoint (PatternMask = look:Colourpoint).
   - No more doubled cat names from the game's generator ("Blazeblaze").
   - Fixed cats for specific roles: roster.ini + roster files (see the rosters folder's Example.ini) pin a story cat
     or a clan's leader / deputy / warriors ... to a name and look.
