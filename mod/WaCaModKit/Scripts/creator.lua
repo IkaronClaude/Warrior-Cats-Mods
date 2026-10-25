@@ -647,10 +647,7 @@ local function setChoice(row, index)
     local value = panel and child(panel.tree, "WaCaPanelValue" .. row.n)
     if value then value:SetText(FText(rowText(row))) end
     log("creator: %s = %s", row.key, rowText(row))
-    -- back to the game's own look first (a mask set earlier stays otherwise), then ours on top
-    for _, actor in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-        if actor:IsValid() then pcall(function() actor:RefreshPattern() end) end
-    end
+    -- the preview cats are rebuilt by the game, with the new look in the build (main.lua's look hook)
     ctx.refreshLook()
 end
 

@@ -18,7 +18,7 @@
 local Roster = {}
 local roles = require("wacaroles")
 
-local WaCa, log, modDir, modsDir, applyLook
+local WaCa, log, modDir, modsDir, lookOf
 local fieldSet = {}
 
 local function enumName(enum, value)
@@ -113,6 +113,7 @@ local function loadRosters()
 end
 
 local pinnedLooks = {}   -- full name key -> roster section (for its appearance keys, applied to the spawned NPC)
+local lookBuilt = {}     -- component -> true once rebuilt for its pinned look
 
 local function pin(d, section, label)
     local before = str(d.PrefixNameId) .. str(d.SuffixNameId)
@@ -155,9 +156,24 @@ local function syncCat(comp)
                 if v ~= nil and cur ~= v then pcall(function() d[k] = v end) changed = true end
             end
         end
-        applyLook(comp, section)
+        -- its look goes on with the game's next build of it (the CatLookPart hook asks Roster.LookFor): one rebuild
+        local id = comp:GetFullName()
+        if not lookBuilt[id] then
+            lookBuilt[id] = true
+            changed = true
+        end
     end
     if changed then pcall(function() comp:RefreshShape() end) end
+end
+
+-- the WaCa look of a pinned cat (its roster section, merged like the player's look), or nil
+local lookCache = {}
+function Roster.LookFor(comp)
+    local ok, key = pcall(function() return str(comp.CustomData.PrefixNameId) .. str(comp.CustomData.SuffixNameId) end)
+    local section = ok and pinnedLooks[key]
+    if not section then return nil end
+    lookCache[key] = lookCache[key] or lookOf(section)
+    return lookCache[key]
 end
 
 -- every cat already in the world (after the generator ran: the ones spawned before it)
@@ -184,6 +200,7 @@ function Roster.Run(force)
         return
     end
     lastStamp = stamp
+    lookCache = {}                      -- the roster is read again: its looks too
     local sections = loadRosters()
     local pools = suffixPools(manager)
     local pinned = {}
@@ -205,7 +222,7 @@ function Roster.Run(force)
 end
 
 function Roster.Init(ctx)
-    WaCa, log, modDir, modsDir, applyLook = ctx.WaCa, ctx.log, ctx.modDir, ctx.modsDir, ctx.applyLook
+    WaCa, log, modDir, modsDir, lookOf = ctx.WaCa, ctx.log, ctx.modDir, ctx.modsDir, ctx.lookOf
     for _, f in ipairs(WaCa.CAT_DATA_FIELDS) do fieldSet[f] = true end
     pcall(RegisterHook, "/Script/SwtQuest.QuestManager:OnNPCGenerationCompleted", function() end, function()
         ExecuteInGameThread(function() Roster.Run(true) end)

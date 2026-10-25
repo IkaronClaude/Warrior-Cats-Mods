@@ -219,139 +219,187 @@ local function maskSource(name)
     return modDir .. "/patterns/" .. name
 end
 
-local function applyAppearanceTo(cat, cfg)
-    -- whole-cat colours first, then per-part ones ("Tail.Fur = #...") on top
-    for slot in pairs(WaCa.COAT_COLORS) do
-        local color = WaCa.ParseColor(cfg[slot])
-        if color then WaCa.SetCatColor(cat, slot, color) end
-    end
-    -- a per-part value may name a coat colour instead of a hex ("Tail.Fur = Pattern": the tail in the pattern's
-    -- colour, whatever the colour picker chose) - read from the body after the whole-cat colours went on
-    local body = cat.SkelMeshComp
-    local function coatColor(slotName)
-        local own = WaCa.ParseColor(cfg[slotName])
+-- The look is applied where the game BUILDS it (native CatLookPart, appearance.cpp): right after the game writes a
+-- colour or a mask to one part of a cat, that cat's WaCa look puts its own value on the same part, in the same call.
+-- No repaint afterwards and no check whether the look is still there: each build of the game includes it. When the
+-- look itself changes (a creator choice, another save, an edited ini), the cats it belongs to are simply rebuilt by
+-- the game (rebuildCats).
+
+-- a coat colour slot's value for one part: the part's own "Tail.Fur = ..." first, then the whole-cat value. A
+-- per-part value may name a coat slot ("Tail.Fur = Pattern": the tail in the pattern's colour, whatever the colour
+-- picker chose) - the configured colour of that slot, else the game's current one on this part.
+local function partColor(cfg, partName, part, slot)
+    local value = cfg[partName .. "." .. slot]
+    if value and WaCa.COAT_COLORS[value] then
+        local own = WaCa.ParseColor(cfg[value])
         if own then return own end
-        local m = body and body:IsValid() and body:GetMaterial(0)
+        local m = part:GetMaterial(0)
         if not m or not m:IsValid() then return nil end
-        local v = m:K2_GetVectorParameterValue(FName(WaCa.COAT_COLORS[slotName]))
+        local v = m:K2_GetVectorParameterValue(FName(WaCa.COAT_COLORS[value]))
         return { X = v.R, Y = v.G, Z = v.B }
     end
-    for key, value in pairs(cfg) do
-        local partName, slot = tostring(key):match("^(%a+)%.(%a+)$")
-        if partName and WaCa.PART_NAMES[partName] and WaCa.COAT_COLORS[slot] then
-            local color = WaCa.COAT_COLORS[value] and coatColor(value) or WaCa.ParseColor(value)
-            if color then WaCa.SetPartColor(cat, partName, slot, color) end
-        end
-    end
-    for slot in pairs(WaCa.COAT_MASKS) do
-        local source = cfg[slot .. "Mask"]
-        if source and source ~= "" then
-            if WaCa.SetCatMask(cat, slot, maskSource(source)) == 0 then log("%s mask '%s': no masks found", slot, source) end
-        end
-    end
+    return WaCa.ParseColor(value) or WaCa.ParseColor(cfg[slot])
 end
 
--- true when the cat already shows our first configured colour (the game rebuilds materials on some refreshes)
--- the body's material (dynamic), or nil
-local function bodyMaterial(cat)
-    local body = cat.SkelMeshComp
-    if not body or not body:IsValid() then return nil end
-    local m = body:GetMaterial(0)
-    if not m or not m:IsValid() or m:GetClass():GetFName():ToString() ~= "MaterialInstanceDynamic" then return nil end
-    return m
-end
-
--- true when the cat still shows the configured look: every configured colour and every configured mask on its body
--- (the game rebuilds materials on refreshes, and loads a newly chosen pattern texture a moment later - after which
--- our mask has to go on again)
-local function showsAppearance(cat, cfg)
-    local m = bodyMaterial(cat)
-    if not m then return false end
-    local checked = false
+local function applyColours(cfg, partName, part)
     for slot, param in pairs(WaCa.COAT_COLORS) do
-        local want = WaCa.ParseColor(cfg[slot])
-        if want then
-            local v = m:K2_GetVectorParameterValue(FName(param))
-            if math.abs(v.R - want.X) > 0.002 or math.abs(v.G - want.Y) > 0.002 or math.abs(v.B - want.Z) > 0.002 then return false end
-            checked = true
-        end
+        local color = partColor(cfg, partName, part, slot)
+        if color then part:SetVectorParameterValueOnMaterials(FName(param), color) end
     end
-    for slot, param in pairs(WaCa.COAT_MASKS) do
-        local source = cfg[slot .. "Mask"]
-        local game = source and source:match("^game:(.+)$")
-        if game then
-            local t = m:K2_GetTextureParameterValue(FName(param))
-            local want = string.format("T_Cat_Body_%s_M", game)
-            if not t or not t:IsValid() or t:GetFName():ToString() ~= want then return false end
-            checked = true
-        elseif source and source ~= "" then
-            return false          -- a PNG pack: no cheap check - applied every pass
-        end
-    end
-    return checked
 end
 
-local appliedCats = {}
-local selfRefresh = false          -- our own RefreshPattern call is running: its hook must not start another pass
-local requestRefresh               -- (defined below) the once-per-tick refresh
-table.insert(onSlotChanged, function() appearanceStamp, appliedCats = nil, {} end)
-local function applyAppearance(force)
-    local cfg, stamp = readAppearance()
-    if stamp == "" then return end
-    if stamp ~= appearanceStamp then appearanceStamp, appliedCats, force = stamp, {}, true end
-    local creating = Creator.IsOpen()
-    local current = {}
-    for _, cat in ipairs(WaCa.PlayerCats(creating)) do
-        local id = cat:GetFullName()
-        current[id] = true
-        if force or not appliedCats[id] or not showsAppearance(cat, cfg) then
-            applyAppearanceTo(cat, cfg)
-            if not appliedCats[id] then log("appearance applied to %s", id:match("([^.:]+)$") or id) end
-            appliedCats[id] = true
+local function applyMask(cfg, part, maskSlot)
+    local source = cfg[maskSlot .. "Mask"]
+    if source and source ~= "" then WaCa.SetPartMask(part, maskSlot, maskSource(source)) end
+end
+
+-- Which cats are the player's: the pawn's, a cutscene cat flagged bIsPlayer, and the creator's preview actors (all of
+-- them while creating; elsewhere those showing the player's cat - its headshots). Decided per component, cached until
+-- something that changes the answer happens (another save, the creator opening / closing, a new pawn).
+local playerCache, playerPrint = {}, nil
+local previewClass = nil
+local function forgetPlayerCats() playerCache, playerPrint = {}, nil end
+table.insert(onSlotChanged, forgetPlayerCats)
+
+local function isPlayerCat(comp)
+    local id = comp:GetFullName()
+    local known = playerCache[id]
+    if known ~= nil then return known end
+    local owner = comp:GetOwner()
+    local result = false
+    if owner and owner:IsValid() then
+        local pc = FindFirstOf("PlayerController")
+        local pawn = pc and pc:IsValid() and pc.Pawn
+        if pawn and pawn:IsValid() and pawn:GetFullName() == owner:GetFullName() then
+            result = true
+        else
+            local ok, flagged = pcall(function() return owner.bIsPlayer end)
+            if ok and flagged == true then
+                result = true
+            else
+                previewClass = previewClass or StaticFindObject("/Script/Wrc.GuiCatCustomActor")
+                if previewClass and owner:IsA(previewClass) then
+                    if Creator.IsOpen() then
+                        result = true
+                    else
+                        if playerPrint == nil then
+                            local data = playerCustomData()
+                            playerPrint = data and WaCa.CatFingerprint(data) or false
+                        end
+                        result = playerPrint and WaCa.CatFingerprint(comp.CustomData) == playerPrint or false
+                    end
+                end
+            end
         end
     end
-    -- A preview cat that got our look but no longer shows the player's cat (the creator closed, or the game reused the
-    -- actor for another cat, e.g. Dapplepatch on "Select Your Cat") goes back to the game's own look. Only those: one
-    -- that still shows the player's cat (a headshot) keeps it - resetting it too re-applied the look on the next pass,
-    -- reset it again, ... every frame (operator 2026-10-25: the intro cutscene at one frame per few seconds, 8 MB log).
-    for _, preview in ipairs(FindAllOf("GuiCatCustomActor") or {}) do
-        local comp = preview:IsValid() and preview.CustomizableMeshComponent
-        local id = comp and comp:IsValid() and comp:GetFullName()
-        if id and appliedCats[id] and not current[id] then
-            appliedCats[id] = nil
-            selfRefresh = true
-            pcall(function() preview:RefreshPattern() end)
-            selfRefresh = false
-            log("a preview cat no longer shows yours: back to the game's look")
+    playerCache[id] = result
+    return result
+end
+
+-- the player's look, read once per change (the ini files are not read per event)
+local lookCache = nil
+local function playerLook()
+    if not lookCache then
+        local cfg, stamp = readAppearance()
+        lookCache = { cfg = cfg, stamp = stamp }
+    end
+    return lookCache.cfg, lookCache.stamp
+end
+
+local Roster
+local requestRefresh               -- (defined below) the once-per-tick refresh
+
+-- the WaCa look of a cat component, or nil (the player's, or a pinned roster cat's)
+local function lookFor(comp)
+    if isPlayerCat(comp) then
+        local cfg, stamp = playerLook()
+        if stamp ~= "" then return cfg end
+        return nil
+    end
+    return Roster and Roster.LookFor(comp) or nil
+end
+
+local builtWithLook = {}     -- component -> true once a build of the game included its WaCa look
+
+WaCa.On("CatLookPart", function(comp, what, partFullName)
+    if not comp or not comp:IsValid() then return end
+    local cfg = lookFor(comp)
+    if not cfg then return end
+    local partName, part = WaCa.PartNameOf(comp, partFullName)
+    if not part then return end
+    if what == "PatternMask" then applyMask(cfg, part, "Pattern")
+    elseif what == "MarkingsMask" then applyMask(cfg, part, "Markings")
+    else applyColours(cfg, partName, part) end
+    local id = comp:GetFullName()
+    if not builtWithLook[id] then log("look: %s built with the WaCa look", id:match("([^.:]+%.[^.:]+)$") or id) end
+    builtWithLook[id] = true
+end)
+
+-- the game rebuilds a cat's look (and with it, through the hook, ours)
+local function rebuild(comp)
+    local owner = comp:GetOwner()
+    previewClass = previewClass or StaticFindObject("/Script/Wrc.GuiCatCustomActor")
+    if owner and owner:IsValid() and previewClass and owner:IsA(previewClass) then
+        pcall(function() owner:RefreshPattern() end)
+    elseif not WaCa.RebuildLook(comp) then
+        -- RefreshShape alone does not run the look build on an in-world cat (VM, 2026-10-25): only a fallback
+        pcall(function() comp:RefreshShape() end)
+    end
+end
+
+-- the player's cats that need a build with the current look: all of them when the look changed, else the ones that
+-- were never built with it (a pawn whose first build came before it was known as the player's)
+local function rebuildCats(all)
+    for _, comp in ipairs(WaCa.PlayerCats(Creator.IsOpen())) do
+        local id = comp:GetFullName()
+        if all or builtWithLook[id] == nil then
+            builtWithLook[id] = nil
+            log("look: rebuilding %s", id:match("([^.:]+%.[^.:]+)$") or id)
+            rebuild(comp)
+            if not builtWithLook[id] then builtWithLook[id] = false end     -- built, but without a look (none set)
         end
+    end
+end
+
+-- the look changed (or the set of player cats did): fresh look, fresh answers, the player's cats rebuilt
+local function lookChanged()
+    lookCache = nil
+    forgetPlayerCats()
+    rebuildCats(true)
+end
+table.insert(onSlotChanged, function() lookCache, builtWithLook = nil, {} end)
+
+-- the player's cats after a change in the game (a screen, a spawn): the ini may have been edited, the creator may have
+-- opened or closed, a new pawn may need its first build with the look
+local function applyAppearance()
+    local _, oldStamp = playerLook()
+    lookCache = nil
+    forgetPlayerCats()
+    local _, stamp = playerLook()
+    if stamp ~= oldStamp then
+        log("look changed: the player's cats are rebuilt")
+        rebuildCats(true)
+    else
+        rebuildCats(false)
     end
 end
 
 -- The game's procedural cats: doubled names fixed, pinned cats from config/roster.ini (roster.lua)
-local Roster = require("roster")
+Roster = require("roster")
 Roster.Init({
     WaCa = WaCa, log = log, modDir = modDir, modsDir = modsDir,
-    applyLook = function(cat, section) applyAppearanceTo(cat, (mergeLook(section))) end,
+    lookOf = function(section) return (mergeLook(section)) end,
 })
 table.insert(onSlotChanged, function() Roster.Run(true) end)
 
 -- The character creator: extra palette colours + the name field (creator.lua)
 Creator.Init({
     WaCa = WaCa, log = log, modDir = modDir, setSlotValue = setSlotValue, slotValue = slotValue,
-    refreshLook = function() applyAppearance(true) end,
+    refreshLook = lookChanged,
     writeSlot = function() slot.dirty = true; saveSlot() end,
     slotId = function() return slot.id end,
 })
 table.insert(onSlotChanged, Creator.OnSlotChanged)
-
--- straight after the game refreshes a cat's look
-for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponent:RefreshShape",
-                      "/Script/Wrc.GuiCatCustomActor:RefreshPattern", "/Script/Wrc.GuiCatCustomActor:RefreshShape",
-                      "/Script/Wrc.GuiCatCustomActor:SetCustomDataFromSave" }) do
-    pcall(RegisterHook, fn, function() end, function()
-        if not selfRefresh then requestRefresh(true) end
-    end)
-end
 
 -- Key aliases (config/keybinds.ini [KeyAliases] Key = OtherKey[, ...]): pressing Key also presses OtherKey. The game's
 -- menus read raw keys (SwtPlayerController.OnKeyPressed / OnKeyReleased) rather than bindings - many use BackSpace as
@@ -373,6 +421,9 @@ loadAliases()
 -- 2026-10-25). Presses come from the raw KeyDown event (the window's own key messages, before the game routes them -
 -- so a paused game or a key bound to nothing still counts). A target that is itself aliased is skipped (no loops).
 WaCa.On("KeyDown", function(_, name)
+    -- only in menus: in gameplay Escape is the game's pause key - a BackSpace with it reached the pause menu while it
+    -- was being built and crashed the game (VM, 2026-10-25)
+    if not aliases[name] or not require("menus").InMenu() then return end
     for _, target in ipairs(aliases[name] or {}) do
         if not aliases[target] then WaCa.Command("PressKey|" .. target) end
     end

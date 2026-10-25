@@ -446,25 +446,45 @@ end
 --   "<folder>"       a pattern pack: PNGs named after the part roles (Body.png, Tails_A.png, Ears_B.png,
 --                    Fur_Bony.png ...; Tails.png / Ears.png / Fur.png cover all variants of a part)
 -- Parts the source has no mask for keep the game's. Returns how many parts changed.
-function WaCa.SetCatMask(cat, maskSlot, source)
+-- one part's mask for a slot from a source (see SetCatMask); true when the source has one for this part
+function WaCa.SetPartMask(part, maskSlot, source)
     local param = WaCa.COAT_MASKS[maskSlot] or maskSlot
     local game = source:match("^game:(.+)$")
+    local role = WaCa.PartRole(part)
+    local tex
+    if role and game then
+        tex = WaCa.GameMask(game, role)
+    elseif role then
+        tex = WaCa.LoadTexture(source .. "/" .. role .. ".png")
+            or WaCa.LoadTexture(source .. "/" .. (role:match("^(%a+)") or role) .. ".png")
+    end
+    if not tex then return false end
+    WaCa.SetPartTexture(part, param, tex)
+    return true
+end
+
+function WaCa.SetCatMask(cat, maskSlot, source)
     local n = 0
     for _, part in ipairs(WaCa.CatParts(cat)) do
-        local role = WaCa.PartRole(part)
-        local tex
-        if role and game then
-            tex = WaCa.GameMask(game, role)
-        elseif role then
-            tex = WaCa.LoadTexture(source .. "/" .. role .. ".png")
-                or WaCa.LoadTexture(source .. "/" .. (role:match("^(%a+)") or role) .. ".png")
-        end
-        if tex then
-            WaCa.SetPartTexture(part, param, tex)
-            n = n + 1
-        end
+        if WaCa.SetPartMask(part, maskSlot, source) then n = n + 1 end
     end
     return n
+end
+
+-- the part's name (Body / Tail / Ears / Tufts) of one of a cat's mesh parts, by its full name, or nil
+function WaCa.PartNameOf(cat, partFullName)
+    for name, field in pairs(WaCa.PART_NAMES) do
+        local part = cat[field]
+        if part and part:IsValid() and part:GetFullName() == partFullName then return name, part end
+    end
+    return nil
+end
+
+-- the game builds a cat's whole look again from its own data (colours, patterns, markings - and, through the look
+-- hook, every mod's look on top); comp = a cat's look component. False without WaCa ModKit's native part.
+function WaCa.RebuildLook(comp)
+    if not WaCaNative_RebuildLook or not comp or not comp:IsValid() then return false end
+    return WaCaNative_RebuildLook(comp:GetAddress())
 end
 
 -- the parts by name, for per-part colours ("Tail.Fur = ..."): Body, Tail, Ears, Tufts (the fur cards)

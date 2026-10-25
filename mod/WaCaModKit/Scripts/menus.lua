@@ -8,10 +8,28 @@ local Menus = {}
 local WaCa, log, modDir
 local gameScreenClass
 
+-- Screens that stay up over gameplay without being menus: the HUDs and the overlays (online status / loading, the
+-- combat HUD, screen transitions) - only a popup they open counts. GuiScreenOnlineOver is up for a whole session:
+-- taken as a menu, the cursor never left menu mode in the world (no mouse look - operator 2026-10-25, VM-confirmed).
+local OVERLAY_CLASSES = { "/Script/SwtAdventure.GuiScreenOnlineOver", "/Script/Wrc.GuiHudCombatOver",
+                          "/Script/SwtEngine.ScreenTransitionOver" }
+local overlayClasses = nil
+
 local function isGameplay(screen)
     if gameScreenClass and gameScreenClass:IsValid() and screen:IsA(gameScreenClass) then return true end
+    if not overlayClasses then
+        overlayClasses = {}
+        for _, path in ipairs(OVERLAY_CLASSES) do
+            local c = StaticFindObject(path)
+            if c and c:IsValid() then table.insert(overlayClasses, c) end
+        end
+    end
+    for _, c in ipairs(overlayClasses) do
+        if screen:IsA(c) then return true end
+    end
     return screen:GetClass():GetFName():ToString():find("Hud", 1, true) ~= nil
 end
+
 
 -- true while a menu is showing, false in gameplay, nil while NO screen is up: the game tears one screen down a frame
 -- or two before it builds the next (operator's log 2026-10-25: hidden -> shown 40 ms apart on every creator step),
@@ -155,14 +173,32 @@ function Menus.Init(c)
     enabled = (mouse.MenuCursor or "1") ~= "0"
     gameplayCapture = tonumber(mouse.GameplayCapture or "") or gameplayCapture
     if not enabled then return end
-    WaCa.On("ScreenShown", function() update(nil, true) end)
-    WaCa.On("ScreenHidden", function(screen) update(screen, true) end)
-    WaCa.On("ScreenFocusIn", function() update(nil) end)
-    WaCa.On("ScreenFocusOut", function() update(nil) end)
+    -- Decided on the next tick, never inside the event: a screen is built inside the game's own input handling (the
+    -- pause menu inside SwtPlayerController.OnListenCommand), and changing the input mode there (focus, flushed keys)
+    -- pulled things from under the game - it crashed opening the pause menu (VM, 2026-10-25). One decision per tick,
+    -- however many screens changed.
+    local due, dueFull = false, false
+    local function later(full)
+        if full then dueFull = true end
+        if due then return end
+        due = true
+        ExecuteInGameThread(function()
+            local f = dueFull
+            due, dueFull = false, false
+            update(nil, f)
+        end)
+    end
+    WaCa.On("ScreenShown", function() later(true) end)
+    WaCa.On("ScreenHidden", function() later(true) end)
+    WaCa.On("ScreenFocusIn", function() later(false) end)
+    WaCa.On("ScreenFocusOut", function() later(false) end)
     -- after the game has seen the click (Slate's hover state is current then)
     WaCa.On("KeyDown", function(_, key)
         if key == "LeftMouseButton" then ExecuteInGameThread(clickHovered) end
     end)
 end
+
+-- true while a menu is up (the cursor shows): key aliases only apply then
+function Menus.InMenu() return shown == true end
 
 return Menus

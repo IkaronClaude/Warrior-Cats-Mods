@@ -41,6 +41,7 @@
 
 #include <windows.h>
 
+#include "appearance.h"
 #include "commands.h"
 #include "log.h"
 
@@ -216,6 +217,15 @@ int LuaDevDelegate(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
+// from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
+int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
+    auto* comp = reinterpret_cast<UObject*>(static_cast<uintptr_t>(lua.get_integer()));
+    void* data = comp ? comp->GetValuePtrByPropertyName(STR("CustomData")) : nullptr;
+    lua.set_bool(data && appearance::Rebuild(comp, data));
+    return 1;
+}
+
 int LuaCommand(const LuaMadeSimple::Lua& lua) {
     if (!lua.is_string()) lua.throw_error("WaCaNative_Command(text)");
     bool ok = commands::Run(Wide(std::string(lua.get_string())));
@@ -254,6 +264,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_Ready", &LuaReady);
     lua.register_function("WaCaNative_Command", &LuaCommand);
     lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
+    lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);
     g_states.push_back(std::move(state));
 }
 
@@ -267,6 +278,16 @@ void LuaStopping(LuaMadeSimple::Lua& lua) {
         g_states.erase(it);
         return;
     }
+}
+
+void EmitLook(void* component, void* part, const char* what) {
+    if (!OnGameThread() || g_states.empty()) return;
+    auto* comp = static_cast<UObject*>(component);
+    std::wstring partName = static_cast<UObject*>(part)->GetFullName();
+    int n = WideCharToMultiByte(CP_UTF8, 0, partName.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string utf8(n > 0 ? n - 1 : 0, '\0');
+    if (n > 1) WideCharToMultiByte(CP_UTF8, 0, partName.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+    for (size_t i = 0; i < g_states.size(); ++i) Deliver(*g_states[i], "CatLookPart", comp, {what, utf8});
 }
 
 void Emit(const char* event, std::initializer_list<std::string> args) {

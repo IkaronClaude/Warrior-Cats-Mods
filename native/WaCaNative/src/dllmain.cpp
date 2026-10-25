@@ -11,6 +11,7 @@
 #include <windows.h>
 
 #include "MinHook.h"
+#include "appearance.h"
 #include "bridge.h"
 #include "input.h"
 #include "keys.h"
@@ -55,6 +56,7 @@ public:
         input::Install(dir);
         text::Install(input::FNameCtor());
         ui::Init(input::FNameCtor());
+        appearance::Install();
     }
 
     auto on_unreal_init() -> void override { bridge::Install(); }
