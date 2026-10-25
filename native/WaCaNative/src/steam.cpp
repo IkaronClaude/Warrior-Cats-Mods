@@ -1,8 +1,8 @@
 // Steam's on-screen keyboard for text fields on a controller (the game's own steam_api64.dll, flat API):
-//   SteamKeyboard|<description>|<existing text>|<result file>
+//   SteamKeyboard|<description>|<existing text>
 // First the floating keyboard (Steam Deck / Big Picture), which types into the focused field as ordinary key presses;
-// when Steam refuses it, the full-screen one, whose text arrives with GamepadTextInputDismissed_t - written to the
-// result file ("1" + newline + the text when submitted, "0" when cancelled) for the Lua side to pick up.
+// when Steam refuses it, the full-screen one, whose text arrives with GamepadTextInputDismissed_t (on the game thread:
+// the engine runs Steam's callbacks there) - handed to Lua as the event SteamTextInput(submitted "1" / "0", text).
 #include "steam.h"
 
 #include <windows.h>
@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <string>
 
+#include "bridge.h"
 #include "log.h"
 
 namespace {
@@ -31,8 +32,6 @@ struct Api {
     TextFn text = nullptr;
     RegisterFn registerCallback = nullptr;
 } g_api;
-
-std::wstring g_resultPath;
 
 // steam_api's CCallbackBase, declared the same way so MSVC lays out the same vtable
 class CallbackBase {
@@ -59,13 +58,6 @@ std::string Utf8(const std::wstring& s) {
     return out;
 }
 
-void WriteResult(bool submitted, const std::string& text) {
-    FILE* f = nullptr;
-    if (_wfopen_s(&f, g_resultPath.c_str(), L"wb") != 0 || !f) return;
-    fprintf(f, "%d\n%s", submitted ? 1 : 0, text.c_str());
-    fclose(f);
-}
-
 class DismissedCallback : public CallbackBase {
 public:
     void Run(void* param) override {
@@ -77,7 +69,7 @@ public:
             if (g_api.text(g_api.utils(), text.data(), n + 1)) text.resize(strlen(text.c_str()));
             else text.clear();
         }
-        WriteResult(d->submitted, text);
+        bridge::Emit("SteamTextInput", {d->submitted ? "1" : "0", text});
         logx::Line(L"[steam] keyboard closed (%s, %zu bytes)", d->submitted ? L"submitted" : L"cancelled", text.size());
     }
     void Run(void* param, bool, uint64_t) override { Run(param); }
@@ -109,13 +101,11 @@ bool Load() {
 
 namespace steam {
 
-void ShowKeyboard(const std::wstring& description, const std::wstring& existing, const std::wstring& resultPath) {
+void ShowKeyboard(const std::wstring& description, const std::wstring& existing) {
     if (!Load()) {
         logx::Line(L"[steam] keyboard: Steam is not running (no steam_api64 / SteamUtils)");
         return;
     }
-    g_resultPath = resultPath;
-    DeleteFileW(resultPath.c_str());
     void* utils = g_api.utils();
     // floating, single line (k_EFloatingGamepadTextInputModeModeSingleLine), no field rectangle
     if (g_api.floating && g_api.floating(utils, 0, 0, 0, 0, 0)) {

@@ -1,6 +1,8 @@
 -- The mouse cursor in menus: the game hides it everywhere (a console-style UI); it shows while any menu is up and
--- hides again in gameplay (mouse look). A "menu" = any screen showing that is not the gameplay screen or a HUD, or a
--- popup on the gameplay screen (the pause menu, the map, ...). config/keybinds.ini [Mouse] MenuCursor = 0 turns it off.
+-- hides again in gameplay (mouse look). A "menu" = any screen up that is not the gameplay screen or a HUD, or a popup
+-- on the gameplay screen (the pause menu, the map, ...). Decided whenever a screen comes or goes (the ScreenShown /
+-- ScreenHidden events) and when keyboard focus moves between screens. config/keybinds.ini [Mouse] MenuCursor = 0
+-- turns it off.
 local Menus = {}
 
 local WaCa, log, modDir
@@ -11,14 +13,15 @@ local function isGameplay(screen)
     return screen:GetClass():GetFName():ToString():find("Hud", 1, true) ~= nil
 end
 
--- true while a menu is showing
-local function menuShowing()
+-- true while a menu is showing; leaving = a screen being torn down (ScreenHidden: it still counts as in the viewport)
+local function menuShowing(leaving)
     gameScreenClass = gameScreenClass or StaticFindObject("/Script/SwtEngine.GuiScreenGame")
+    local leavingName = leaving and leaving:GetFullName()
     for _, s in ipairs(FindAllOf("SwtScreen") or {}) do
-        if s:IsValid() and s:IsInViewport() then
+        if s:IsValid() and s:IsInViewport() and s:GetFullName() ~= leavingName then
             if not isGameplay(s) then return true end
             local popup = s.CurrentPopup
-            if popup and popup:IsValid() then return true end
+            if popup and popup:IsValid() and popup:GetFullName() ~= leavingName then return true end
         end
     end
     return false
@@ -60,9 +63,10 @@ local function applyCursor(c, want, transition)
     if not ok0 then log("mouse cursor: capture mode: %s", tostring(err0)) end
 end
 
-function Menus.Tick()
+-- the cursor for the screens up now (a screen's own Construct may have changed the input mode: re-asserted each time)
+local function update(leaving)
     if not enabled then return end
-    local want = menuShowing()
+    local want = menuShowing(leaving)
     local transition = want ~= shown
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
         if c:IsValid() and c.Player and c.Player:IsValid() then applyCursor(c, want, transition) end
@@ -78,6 +82,11 @@ function Menus.Init(c)
     local ini = WaCa.ReadIni(modDir .. "/config/keybinds.ini")
     local mouse = ini and ini["Mouse"] or {}
     enabled = (mouse.MenuCursor or "1") ~= "0"
+    if not enabled then return end
+    WaCa.On("ScreenShown", function() update(nil) end)
+    WaCa.On("ScreenHidden", function(screen) update(screen) end)
+    WaCa.On("ScreenFocusIn", function() update(nil) end)
+    WaCa.On("ScreenFocusOut", function() update(nil) end)
 end
 
 return Menus

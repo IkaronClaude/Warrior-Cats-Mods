@@ -132,35 +132,42 @@ local function pin(d, section, label)
     return label
 end
 
--- copy the pinned / fixed values onto a spawned NPC's own data (it was copied from the generator at spawn)
-local function syncSpawned(sections)
-    for _, comp in ipairs(FindAllOf("SwtAdventureCustomizableMeshComponent") or {}) do
-        if comp:IsValid() then
-            local d = comp.CustomData
-            local prefixId, suffixId = str(d.PrefixNameId), str(d.SuffixNameId)
-            local key = prefixId .. suffixId
-            local changed = false
-            if renamed[key] then
-                d.SuffixNameId = renamed[key]
-                key = prefixId .. renamed[key]
-                changed = true
-            end
-            local section = pinnedLooks[key]
-            if section then
-                for _, k in ipairs(section.__order) do
-                    if fieldSet[k] and k ~= "PrefixNameId" and k ~= "SuffixNameId" then
-                        local v = section[k]
-                        local cur = d[k]
-                        if type(cur) == "boolean" then v = (v == "true" or v == "1")
-                        elseif type(cur) == "number" then v = tonumber(v) end
-                        if v ~= nil and cur ~= v then pcall(function() d[k] = v end) changed = true end
-                    end
-                end
-                applyLook(comp, section)
-            end
-            if changed then pcall(function() comp:RefreshShape() end) end
-        end
+-- copy the pinned / fixed values onto one spawned NPC's own data (it was copied from the generator at spawn)
+local function syncCat(comp)
+    if not comp or not comp:IsValid() then return end
+    local d = comp.CustomData
+    local prefixId, suffixId = str(d.PrefixNameId), str(d.SuffixNameId)
+    local key = prefixId .. suffixId
+    local changed = false
+    if renamed[key] then
+        d.SuffixNameId = renamed[key]
+        key = prefixId .. renamed[key]
+        changed = true
     end
+    local section = pinnedLooks[key]
+    if section then
+        for _, k in ipairs(section.__order) do
+            if fieldSet[k] and k ~= "PrefixNameId" and k ~= "SuffixNameId" then
+                local v = section[k]
+                local cur = d[k]
+                if type(cur) == "boolean" then v = (v == "true" or v == "1")
+                elseif type(cur) == "number" then v = tonumber(v) end
+                if v ~= nil and cur ~= v then pcall(function() d[k] = v end) changed = true end
+            end
+        end
+        applyLook(comp, section)
+    end
+    if changed then pcall(function() comp:RefreshShape() end) end
+end
+
+-- every cat already in the world (after the generator ran: the ones spawned before it)
+local function syncSpawned()
+    for _, comp in ipairs(FindAllOf("SwtAdventureCustomizableMeshComponent") or {}) do syncCat(comp) end
+end
+
+-- a cat began play (the CatSpawned event): its own copy of the data gets the pinned / fixed values
+function Roster.SyncCat(comp)
+    syncCat(comp)
 end
 
 local lastStamp = nil

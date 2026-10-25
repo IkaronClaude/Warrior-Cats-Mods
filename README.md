@@ -80,6 +80,17 @@ WaCa.WriteIni(file, data)
 ```
 Menu keys from code: `WaCa.SetUIKey("Button_B", "Escape")` (replaces the key) or `WaCa.SetUIIcon("Button_B", "Escape")` (icon only).
 
+Events: react to the game instead of polling it. Handlers run on the game thread.
+```lua
+WaCa.On("ScreenShown", function(screen) ... end)     -- also ScreenHidden, ScreenFocusIn / ScreenFocusOut, CatSpawned
+WaCa.Watch("ReceiveBeginPlay", "/Script/Engine.Pawn", "PawnSpawned")   -- any UFunction by name, Blueprint events too
+WaCa.On("PawnSpawned", function(pawn) ... end)
+WaCa.Ready()                                          -- the LAST line of your main.lua
+```
+Events are held back until `WaCa.Ready()`. Then `Started` fires, and the screens already up arrive as `ScreenShown`.
+Don't run Lua off the game thread in a mod that uses events (`LoopAsync` / `ExecuteAsync`): two threads in one Lua
+state corrupt it.
+
 Content without code: a look is an ini file (`WaCaModKit/looks/*.ini`, or `Look = YourMod/looks/X.ini`; with
 `Row = Pattern` / `Row = Markings` it is offered as one of that row's shapes, see `looks/Colourpoint.ini`); a pattern
 pack is a folder of PNG masks (`WaCaModKit/patterns/README.txt`).
@@ -88,14 +99,20 @@ All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset
 entries in it too: `STR_CAT_NAME<n><suffix id>`.
 
 ## How it works
-- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) loads the mod: Lua scripts plus a small native DLL.
-- `native/` (WaCaNative) finds the game's code by byte signatures and detours it with MinHook. For key bindings, it
-  rewrites the game's natively built default bindings before they're installed, so rebinding is real, not layered on
-  top.
-- The DLL loads as a UE4SS C++ mod, but needs no UE4SS SDK.
+- [UE4SS](https://github.com/UE4SS-RE/RE-UE4SS) loads the mod: Lua scripts plus a native DLL (a UE4SS C++ mod).
+- Everything is event-driven, with no timers or polling. The DLL turns UE4SS's own ProcessEvent callbacks into events
+  for every Lua mod (`WaCa.On`), so Blueprint events Lua's `RegisterHook` can't reach (a screen's
+  `Construct` / `Destruct`) work too. It gives Lua real functions (`WaCaNative_*`) for its native commands.
+- For game code UE4SS has no hook for, `native/` finds the function by byte signature and detours it with MinHook.
+  For key bindings, it rewrites the game's natively built default bindings before they're installed, so rebinding is
+  real, not layered on top.
 
 ## Building
-- `native\build.bat`: needs Visual Studio's C++ tools; produces `native\out\main.dll`.
+- `native\build.bat`: produces `native\out\main.dll`. It builds against the UE4SS SDK: a RE-UE4SS source checkout
+  (with submodules) at the commit of the UE4SS release we ship, in `tools\bin\src\RE-UE4SS` or `WACA_UE4SS_DIR`.
+  Needs Visual Studio's C++ tools and Rust. UE4SS's Unreal submodule is private: it needs a GitHub account linked to
+  Epic Games. The release workflow uses the secret `UE4SS_SOURCE_TOKEN` for it. The first build takes about
+  10 minutes.
 - `tools\package.ps1`: builds `dist\WaCaModKit-<version>.zip`. Needs UE4SS extracted into `tools\bin\ue4ss`.
 - `tools/AssetDump`: a headless CUE4Parse reader for the game's paks (for research; output stays out of git).
 

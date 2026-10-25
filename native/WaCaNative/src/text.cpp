@@ -2,11 +2,7 @@
 // Gameplay/Strings/NonAsset/Strings_<LANG>.csv) at runtime. Cat names are entries too (STR_CAT_NAME<n><suffix id>,
 // e.g. STR_CAT_NAME1_PAW = "Woodpaw"), so this is what free-form names are built on - and any other text fix.
 //
-// Lua talks to this module through the engine itself: it asks the string table for a key that starts with "WACA:"
-// (KismetStringTableLibrary.GetTableEntrySourceString). Every lookup by an FString key builds an FTextKey first; the
-// detour on that constructor sees the command on the game thread, runs it, and lets the (missing) lookup carry on.
-//   WACA:SetText|<key>|<text>
-//   WACA:SetUIKey|<DataTable address hex>|<row>|<key>[|<icon texture object path>]   (ui.cpp)
+// Lua calls it through WaCaNative.Command("SetText|<key>|<text>") (commands.cpp).
 #include "text.h"
 
 #include <windows.h>
@@ -14,13 +10,9 @@
 #include <string>
 #include <vector>
 
-#include "MinHook.h"
 #include "log.h"
 #include "scan.h"
 #include "ue.h"
-#include "ui.h"
-#include "dev.h"
-#include "steam.h"
 
 namespace {
 
@@ -29,7 +21,7 @@ namespace {
 // native thunk calls them back to back (2026-10-24 build, at 0x144366A93):
 //   +0x00 FStringTableRegistry::Get()                                       0x141A13A40
 //   +0x0F FStringTableRegistry::FindStringTable(out ptr, FName TableId)     0x141A11F00
-//   +0x25 FTextKey::FTextKey(const FString&)                                0x141A01690 (detoured: the command channel)
+//   +0x25 FTextKey::FTextKey(const FString&)                                0x141A01690
 //   +0x35 FStringTable::GetSourceString(const FTextKey&, FString& Out)      0x141A17E90
 constexpr const char* kGetEntrySourceThunkSig =
     "E8 ?? ?? ?? ?? 4C 8B C3 48 8D 55 F0 48 8B C8 E8 ?? ?? ?? ?? 48 8B 5D F0 48 85 DB 74 1D 48 8D 55 E0 48 8D 4D 28 E8 "
@@ -47,7 +39,7 @@ using MapFindFn = uint8_t*(__fastcall*)(void* map, const uint32_t* key);
 // FString::operator=(const FString&): GetSourceString's copy of the entry (+0x58); the engine (re)allocates
 using StringAssignFn = ue::FString*(__fastcall*)(ue::FString* self, const ue::FString* other);
 
-TextKeyCtorFn g_textKeyOrig = nullptr;
+TextKeyCtorFn g_textKeyCtor = nullptr;
 RegistryGetFn g_registryGet = nullptr;
 FindTableFn g_findTable = nullptr;
 GetSourceStringFn g_getSource = nullptr;
@@ -55,18 +47,6 @@ MapFindFn g_mapFind = nullptr;
 StringAssignFn g_assign = nullptr;
 FNameCtorFn g_fnameCtor = nullptr;
 ue::FName g_tableId{};
-
-// an engine-allocated FString: borrow the engine's own buffer from GetSourceString's copy, so the game can free it
-std::wstring Arg(const std::wstring& s, size_t i) {
-    size_t start = 0;
-    for (size_t k = 0; k < i; ++k) {
-        start = s.find(L'|', start);
-        if (start == std::wstring::npos) return L"";
-        ++start;
-    }
-    size_t end = s.find(L'|', start);
-    return s.substr(start, end == std::wstring::npos ? std::wstring::npos : end - start);
-}
 
 void DumpEntry(uint8_t* entry) {
     for (int off = 0; off < 0x60; off += 8) {
@@ -80,6 +60,10 @@ void DumpEntry(uint8_t* entry) {
     }
 }
 
+}  // namespace
+
+namespace text {
+
 void SetText(const std::wstring& key, const std::wstring& text) {
     // FNames only exist once the engine is up: UE4SS starts C++ mods before that, so the table's name is made here
     if (g_tableId.ComparisonIndex == 0) g_fnameCtor(&g_tableId, L"SwtStrings", 1);
@@ -91,10 +75,10 @@ void SetText(const std::wstring& key, const std::wstring& text) {
         return;
     }
     auto* t = static_cast<uint8_t*>(table.Object);
-    // the key as an FTextKey (through the original constructor, not the detour)
+    // the key as an FTextKey
     ue::FString keyStr{const_cast<wchar_t*>(key.c_str()), static_cast<int32_t>(key.size() + 1), static_cast<int32_t>(key.size() + 1)};
     uint32_t textKey = 0;
-    g_textKeyOrig(&textKey, &keyStr);
+    g_textKeyCtor(&textKey, &keyStr);
     ue::FString current;
     bool found = g_getSource(t, &textKey, &current);
     logx::Line(L"[text] SetText %s -> '%s' (now '%s', found %d)", key.c_str(), text.c_str(), current.c_str(), found);
@@ -113,27 +97,6 @@ void SetText(const std::wstring& key, const std::wstring& text) {
     (void)text;
 }
 
-void* __fastcall TextKeyCtorDetour(uint32_t* outKey, const ue::FString* str) {
-    if (str && str->Data && str->Num > 5 && wcsncmp(str->Data, L"WACA:", 5) == 0) {
-        std::wstring cmd(str->Data + 5);
-        auto verb = Arg(cmd, 0);
-        if (verb == L"SetText") SetText(Arg(cmd, 1), Arg(cmd, 2));
-        else if (verb == L"SetUIKey") ui::SetUIKey(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3), Arg(cmd, 4));
-        else if (verb == L"DevWatch") dev::Watch(Arg(cmd, 1), Arg(cmd, 2));
-        else if (verb == L"DevWatchRow") dev::Watch(ui::RowAddressHex(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3)), Arg(cmd, 4));
-        else if (verb == L"DevUnwatch") dev::Unwatch();
-        else if (verb == L"DevPressKey") dev::PressKey(Arg(cmd, 1));
-        else if (verb == L"DevStack") dev::Stack(Arg(cmd, 1));
-        else if (verb == L"SteamKeyboard") steam::ShowKeyboard(Arg(cmd, 1), Arg(cmd, 2), Arg(cmd, 3));
-        else logx::Line(L"[text] unknown command %s", cmd.c_str());
-    }
-    return g_textKeyOrig(outKey, str);
-}
-
-}  // namespace
-
-namespace text {
-
 bool Install(void* fnameCtor) {
     g_fnameCtor = reinterpret_cast<FNameCtorFn>(fnameCtor);
     auto thunk = scan::Find(kGetEntrySourceThunkSig);
@@ -145,7 +108,7 @@ bool Install(void* fnameCtor) {
     uint8_t* c = *thunk;
     g_registryGet = reinterpret_cast<RegistryGetFn>(scan::RelTarget(c));
     g_findTable = reinterpret_cast<FindTableFn>(scan::RelTarget(c + 15));
-    uint8_t* ctor = scan::RelTarget(c + 0x25);
+    g_textKeyCtor = reinterpret_cast<TextKeyCtorFn>(scan::RelTarget(c + 0x25));
     g_getSource = reinterpret_cast<GetSourceStringFn>(scan::RelTarget(c + 0x35));
     auto* gs = reinterpret_cast<uint8_t*>(g_getSource);
     if (gs[0x31] != 0xE8) {
@@ -158,11 +121,6 @@ bool Install(void* fnameCtor) {
     }
     g_mapFind = reinterpret_cast<MapFindFn>(scan::RelTarget(gs + 0x31));
     g_assign = reinterpret_cast<StringAssignFn>(scan::RelTarget(gs + 0x58));
-    if (MH_CreateHook(ctor, reinterpret_cast<void*>(&TextKeyCtorDetour), reinterpret_cast<void**>(&g_textKeyOrig)) != MH_OK ||
-        MH_EnableHook(ctor) != MH_OK) {
-        logx::Line(L"[text] could not hook FTextKey(FString)");
-        return false;
-    }
     logx::Line(L"[text] text overrides active (registry %p, FindStringTable %p, GetSourceString %p)", g_registryGet, g_findTable, g_getSource);
     return true;
 }

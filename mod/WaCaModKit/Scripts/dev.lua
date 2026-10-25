@@ -15,8 +15,9 @@ local function trace(label)
     WaCa.Command("DevStack|" .. label)
 end
 
+-- once the game's tables are loaded (main.lua: with the game's text)
 local watched = false
-function Dev.Tick()
+function Dev.OnGameReady()
     if cfg.MenuKeyTrace ~= "1" or watched then return end
     local t = StaticFindObject(WaCa.UI_KEYS_TABLE)
     if not t or not t:IsValid() then return end

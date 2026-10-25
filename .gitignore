@@ -40,3 +40,4 @@ native/build/
 native/out/
 dist/
 tools/__pycache__/
+native/build.log

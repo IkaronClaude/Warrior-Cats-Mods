@@ -149,3 +149,34 @@ UE4SS builds from source on this VM and a C++ mod built against it loads in the 
   "[HelloMod] unreal init" 4 s after the mod started.
 - This unblocks the native half of the creator redesign: UDataTable rows (AddRow failed from Lua with
   "ICppStructOps::Copy unavailable") and ProcessEvent / object-notification hooks without our own MinHook detours.
+
+## Event-driven foundation (0.6.0, 2026-10-25)
+The mod no longer polls. Both Lua loops (300 ms creator/menu, 2 s everything else) are gone; every reaction is to an
+event.
+- **Native event bus** (`native/WaCaNative/src/bridge.cpp`): WaCaNative is now a real UE4SS C++ mod (CppUserModBase,
+  built against the SDK at the shipped commit). UE4SS's own ProcessEvent pre/post callbacks feed "watches"
+  (function name + class + event name + pre/post). Matching on the function NAME is what reaches Blueprint events:
+  a widget's Construct / Destruct is implemented per WBP class, so there is no single UFunction for RegisterHook.
+- **Lua bridge only through UE4SS's exported API.** The raw Lua C API is static inside UE4SS.dll and NOT exported;
+  LuaMadeSimple and `LuaType::auto_construct_object` are. Events run on a thread made with `Lua::new_thread()`
+  (UE4SS's `process_lua_function` looks the calling lua_State up in its own map; a bare lua_newthread would break
+  method calls on objects). Globals per mod: `WaCaNative_Watch / _Ready / _Command`; events call the mod's
+  `WaCaNative_OnEvent`.
+- **Threads:** `on_lua_start` fires BEFORE main.lua, which runs on UE4SS's loader thread while the game thread is
+  live. So a mod's events are held until it calls `WaCa.Ready()` (last line of main.lua); then `Started` is delivered
+  on the game thread and WaCa.lua replays ScreenShown for the screens already up. The game thread is found with a
+  one-shot engine-tick callback; events from any other thread are dropped.
+- **Built-in events** (WaCa.On): ScreenShown / ScreenHidden (SwtScreen Construct post / Destruct pre),
+  ScreenFocusIn / ScreenFocusOut (OnAddedToFocusPath / OnRemovedFromFocusPath: the name box taking / losing the
+  keyboard), CatSpawned (ReceiveBeginPlay on SwtAdventureCharacter / SwtAdventureQuestActor /
+  WrcCatSkeletalMeshWithCustomization), SteamTextInput (native, from the Steam callback), Started.
+- The fake string-table command channel ("WACA:" keys through an FTextKey detour) is gone: `WaCaNative_Command`.
+- Headless proof (2026-10-25): the intro logos screen arrived via the Started replay; the name screen flow
+  (Enter on the list -> FocusIn -> focus away -> "name done" -> Destruct -> "creator closed") ran entirely on events,
+  in both Lua mods. NOT yet seen on a GPU: CatSpawned in real gameplay, the cursor staying right without the old
+  per-tick re-assert, Steam keyboards.
+- Gotchas: `project(UE4SS)` caches `UE4SS_SOURCE_DIR` (pointing at its UE4SS/ subfolder) - our own variable is
+  `WACA_UE4SS_DIR`, or the second configure adds the wrong folder ("Unknown CMake command organize_targets"). The DLL
+  now uses the dynamic CRT (/MD) like UE4SS.
+- CI: the release workflow clones RE-UE4SS at 8333063 with submodules; needs the repository secret
+  `UE4SS_SOURCE_TOKEN` (an Epic-linked account's token). Not set yet: a v0.6.0 tag would fail until it is.

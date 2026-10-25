@@ -1,7 +1,7 @@
 -- WaCa ModKit (Lua half). Key bindings live in the native half (config/keybinds.ini); this script applies
 -- config/text.ini (text overrides), config/names.ini (your cat's free-form name) and config/appearance.ini (colours
 -- and pattern packs).
-local VERSION = "0.5.5"
+local VERSION = "0.6.0"
 local WaCa = require("WaCa")
 
 local modDir = debug.getinfo(1, "S").source:match("^@(.+)[/\\]Scripts[/\\]main%.lua$") or "."
@@ -342,7 +342,9 @@ table.insert(onSlotChanged, Creator.OnSlotChanged)
 for _, fn in ipairs({ "/Script/SwtAdventure.SwtAdventureCustomizableMeshComponent:RefreshShape",
                       "/Script/Wrc.GuiCatCustomActor:RefreshPattern", "/Script/Wrc.GuiCatCustomActor:RefreshShape",
                       "/Script/Wrc.GuiCatCustomActor:SetCustomDataFromSave" }) do
-    pcall(RegisterHook, fn, function() end, function() ExecuteInGameThread(function() applyAppearance(true) end) end)
+    pcall(RegisterHook, fn, function() end, function()
+        ExecuteInGameThread(function() applyAppearance(true); applyName() end)
+    end)
 end
 
 -- Key aliases (config/keybinds.ini [KeyAliases] Key = OtherKey[, ...]): pressing Key also presses OtherKey. The game's
@@ -395,40 +397,49 @@ local function applyUIKeys()
     log("%d menu keys, %d menu icons set", keys and #keys.__order or 0, icons and #icons.__order or 0)
 end
 
--- Every loop runs ON THE GAME THREAD (LoopInGameThreadWithDelay). LoopAsync runs its callback on a worker thread with
--- the same Lua state the game-thread hooks use; the two at once corrupted Lua's tables and crashed the game inside
--- the Lua VM (operator 2026-10-25: after a while cycling patterns in the creator; reproduced headless with F6 x 75).
+-- Everything below reacts to the game (WaCa.On events, hooks) - nothing runs on a timer. Handlers run on the game
+-- thread; no Lua may run off it in this mod (LoopAsync on a worker thread next to the game-thread hooks corrupted Lua's
+-- tables and crashed the game in 0.5.3).
 local Menus = require("menus")
 Menus.Init({ WaCa = WaCa, log = log, modDir = modDir })
 local Dev = require("dev")
 Dev.Init({ WaCa = WaCa, log = log, modDir = modDir })
 
-LoopInGameThreadWithDelay(300, function()
-    local ok, err = pcall(Creator.FastTick)
-    if not ok then log("creator tick: %s", tostring(err)) end
-    ok, err = pcall(Menus.Tick)
-    if not ok then log("menu tick: %s", tostring(err)) end
-end)
-
--- wait for the game's text, then apply; the name is checked every few seconds (it changes with your rank)
+-- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false
-local function slowTick()
-    if not WaCa.IsTextReady() then return end
-    if not textApplied then
-        textApplied = true
-        applyTextOverrides()
-        applyUIKeys()
-    end
+local function gameReady()
+    if textApplied or not WaCa.IsTextReady() then return end
+    textApplied = true
+    applyTextOverrides()
+    applyUIKeys()
+    Dev.OnGameReady()
+end
+
+-- the player's cat as it is now: a pending creation settled, the name (it changes with your rank - the ceremony is a
+-- screen) and the look applied
+local function refreshPlayer()
     checkSlot()
-    Dev.Tick()
-    Creator.Tick()
     local cat = playerCustomData()
     if cat then Creator.OnPlayerCat(cat) end
     applyName()
     applyAppearance(false)
-    Roster.Run(false)
 end
-LoopInGameThreadWithDelay(2000, function()
-    local ok, err = pcall(slowTick)
-    if not ok then log("tick: %s", tostring(err)) end
-end)
+
+local function guarded(label, fn)
+    return function(...)
+        local ok, err = pcall(fn, ...)
+        if not ok then log("%s: %s", label, tostring(err)) end
+    end
+end
+
+WaCa.On("ScreenShown", guarded("screen shown", function()
+    gameReady()
+    refreshPlayer()
+end))
+WaCa.On("ScreenHidden", guarded("screen hidden", refreshPlayer))
+WaCa.On("CatSpawned", guarded("cat spawned", function(actor)
+    Roster.SyncCat(WaCa.CatComponent(actor))
+    refreshPlayer()
+end))
+
+WaCa.Ready()

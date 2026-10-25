@@ -66,24 +66,45 @@ local function nearestVanilla(arr, count, c)
     return best
 end
 
--- the instance of a screen class that is showing (or, with anyInstance, the newest one). Never FindFirstOf: leaving a
--- screen and coming back makes a new instance, and the old hidden one stays findable until garbage collection runs
--- (about a minute) - the WaCa panel vanished for that long (operator 2026-10-25).
-local function shownScreen(cls, anyInstance)
-    local last
-    for _, s in ipairs(FindAllOf(cls) or {}) do
-        if s:IsValid() then
-            if s:IsInViewport() then return s end
-            last = s
-        end
+-- The screens that are up, by class name -> { full name, ... } (newest last), kept from the ScreenShown / ScreenHidden
+-- events. A screen is known by its full name (unique per instance): leaving a screen and coming back makes a new
+-- instance while the old one stays findable until garbage collection (about a minute), and a Lua wrapper of a freed
+-- widget crashed the game when called (operator 2026-10-25) - so screens are looked up again by name when needed.
+local shown = {}
+local classes = {}                -- native class name -> UClass (the screens are WBP_* subclasses of these)
+
+local function nativeClass(name)
+    local c = classes[name]
+    if c and c:IsValid() then return c end
+    for _, module in ipairs({ "Wrc", "SwtEngine", "SwtAdventure" }) do
+        c = StaticFindObject("/Script/" .. module .. "." .. name)
+        if c and c:IsValid() then classes[name] = c return c end
     end
-    return anyInstance and last or nil
+    return nil
+end
+
+local function screenId(screen) return screen:GetFullName() end
+
+-- the instance of a screen class that is up (the newest), or nil; anyInstance: also one that was built but is not up
+-- (headless tests attach the panel to the real customisation screen, which can't be shown outside the creator flow)
+local function shownScreen(cls, anyInstance)
+    local list = shown[cls]
+    for i = #(list or {}), 1, -1 do
+        local s = StaticFindObject((list[i]:gsub("^%S+ ", "")))
+        if s and s:IsValid() then return s end
+    end
+    if anyInstance then
+        local last
+        for _, s in ipairs(FindAllOf(cls) or {}) do if s:IsValid() then last = s end end
+        return last
+    end
+    return nil
 end
 Creator.ShownScreen = shownScreen
 
 local function creatorOpen()
     for _, cls in ipairs(CREATOR_SCREENS) do
-        if shownScreen(cls) then return true end
+        if shown[cls] and #shown[cls] > 0 then return true end
     end
     return false
 end
@@ -143,7 +164,6 @@ end
 -- Widgets are never held across ticks: the game destroys and rebuilds screens (a new one can land at the same address),
 -- and a call on a stale Lua wrapper of a freed object crashed the game (operator 2026-10-25, after a long time in the
 -- creator). A screen is known by its full name (unique per instance), our widgets are found again by name in its tree.
-local function screenId(screen) return screen:GetFullName() end
 local function treePath(screen) return (screen.WidgetTree:GetFullName():gsub("^%S+ ", "")) end
 local function child(tree, name)
     local o = StaticFindObject(tree .. "." .. name)
@@ -166,7 +186,7 @@ end
 
 local creatorCfg, creatorCfgTime = {}, -1
 local function cfgValue(key)
-    if os.time() - creatorCfgTime >= 5 then          -- the panel polls often: re-read creator.ini every few seconds
+    if os.time() - creatorCfgTime >= 5 then          -- read on use, cached a few seconds (edits apply without a restart)
         local ini = WaCa.ReadIni(modDir .. "/config/creator.ini") or {}
         creatorCfg, creatorCfgTime = ini["Creator"] or {}, os.time()
     end
@@ -228,12 +248,12 @@ end
 local function focusBox(withController)
     local box = nameBox()
     if not box then return end
+    name.wantFocus = true          -- the focus-in event that follows is the box's (HasKeyboardFocus can lag behind it)
     pcall(function() box:SetKeyboardFocus() end)
-    name.focused = true
     if withController then
-        name.steamWait = ctx.modDir .. "/steamtext.result"
+        name.steamWait = true      -- the full-screen keyboard's answer arrives as the SteamTextInput event
         local existing = box:GetText():ToString():gsub("|", "")
-        WaCa.Command("SteamKeyboard|" .. name.spec.hint .. "|" .. existing .. "|" .. name.steamWait)
+        WaCa.Command("SteamKeyboard|" .. name.spec.hint .. "|" .. existing)
     end
     log("name screen: typing in the name box%s", withController and " (Steam keyboard)" or "")
 end
@@ -307,46 +327,65 @@ local function storeTyped(box)
     end
 end
 
-local function updateNameScreen()
-    local screen, spec
+-- the name screen spec of a screen, or nil
+local function nameSpec(screen)
     for _, sp in ipairs(NAME_SCREENS) do
-        screen = shownScreen(sp.cls)
-        if screen then spec = sp break end
+        local cls = nativeClass(sp.cls)
+        if cls and screen:IsA(cls) then return sp end
     end
-    if not screen then
-        if name then releaseConfirm(); name = nil end      -- left the screen (back, or on): the game's confirm back
-        return
+    return nil
+end
+
+-- the name screen whose box we manage, when it is this screen
+local function ourNameScreen(screen)
+    return name and name.screen == screenId(screen) and nameBox() or nil
+end
+
+local function nameScreenShown(screen)
+    local spec = nameSpec(screen)
+    if not spec then return end
+    local ok, err = pcall(setupNameScreen, screen, spec)
+    if not ok then log("name screen: %s", tostring(err)) end
+end
+
+-- the screen goes (back, or on): the last typing is kept, the game's confirm comes back
+local function nameScreenHidden(screen)
+    local box = ourNameScreen(screen)
+    if box then storeTyped(box) end
+    if name and name.screen == screenId(screen) then
+        releaseConfirm()
+        name = nil
     end
-    local box = name and name.screen == screenId(screen) and nameBox() or nil
-    if not box then
-        local ok, err = pcall(setupNameScreen, screen, spec)
-        if not ok then log("name screen: %s", tostring(err)) end
-        return
-    end
+end
+
+-- keyboard focus entered / left the name screen's widgets: the box took the keyboard / let it go (Enter in it = on to
+-- the next screen; our leave keys = back to the list)
+local function nameFocusIn(screen)
+    local box = ourNameScreen(screen)
+    if not box then return end
+    if name.wantFocus or box:HasKeyboardFocus() then name.focused = true end    -- ours, or a click into the box
+    name.wantFocus = nil
+end
+
+local function nameFocusOut(screen)
+    local box = ourNameScreen(screen)
+    if not box then return end
     storeTyped(box)
-    -- Steam's full-screen keyboard answered
-    if name.steamWait then
-        local f = io.open(name.steamWait, "rb")
-        if f then
-            local submitted = f:read("l")
-            local text = f:read("a") or ""
-            f:close()
-            os.remove(name.steamWait)
-            name.steamWait = nil
-            if submitted == "1" then
-                box:SetText(FText(text))
-                storeTyped(box)
-                goOn(screen)
-                return
-            end
-        end
-    end
-    -- the box let go of the keyboard: confirmed in it (Enter) = on to the next screen; our leave keys = back to the list
-    local focused = box:HasKeyboardFocus()
-    if name.focused and not focused then
-        name.focused = false
-        if name.leaving then name.leaving = false else goOn(screen) end
-    end
+    if not name.focused then return end
+    name.focused = false
+    if name.leaving then name.leaving = false else goOn(screen) end
+end
+
+-- Steam's full-screen keyboard answered
+local function steamText(submitted, text)
+    if not name or not name.steamWait then return end
+    name.steamWait = nil
+    local screen = shownScreen(name.spec.cls)
+    local box = screen and ourNameScreen(screen)
+    if not box or submitted ~= "1" then return end
+    box:SetText(FText(text or ""))
+    storeTyped(box)
+    goOn(screen)
 end
 
 -- a key on the name screen (the raw key hook): the game's confirm on the list = into the box; a leave key = out
@@ -354,7 +393,7 @@ function Creator.NameKey(key)
     if not name or not shownScreen(name.spec.cls) then return end
     local box = nameBox()
     if not box then return end
-    local inBox = box:HasKeyboardFocus()
+    local inBox = name.focused or box:HasKeyboardFocus()
     local gamepad = key:find("^Gamepad") ~= nil
     if not inBox and name.confirmKeys and name.confirmKeys[key] then
         focusBox(gamepad)
@@ -396,6 +435,8 @@ function Creator.PendingName()
     return pending and pending.Name and pending.Name.Prefix or nil
 end
 
+-- a creator screen came or went (ScreenShown / ScreenHidden, the screen list already updated): the creation starts,
+-- its fingerprints follow the look, and it closes with the look the preview has at that moment
 local function trackCreation()
     local open = creatorOpen()
     if open then
@@ -408,6 +449,8 @@ local function trackCreation()
         pending.prints = {}                  -- the CURRENT look only: an earlier choice must not match later
         previewFingerprints(pending.prints)
     elseif pending and not pending.closedAt then
+        pending.prints = {}
+        previewFingerprints(pending.prints)  -- the last screen is still being torn down: the preview holds the final look
         pending.closedAt = os.time()
         log("character creator closed (creation pending until the new cat shows up)")
     end
@@ -604,23 +647,30 @@ local function panelAttached(screen)
     return parent and parent:IsValid() and root and root:IsValid() and parent:GetFullName() == root:GetFullName()
 end
 
-local function updatePanel()
-    local screen = panelHost()
-    if not screen then
-        -- the screen went away: backed out of (BackSpace / Escape just before) = its WaCa choices are dropped, like the
-        -- game drops its own; confirmed = they stay
-        if panel and panel.backAt and os.time() - panel.backAt <= 3 and pending and panel.snapshot then
-            pending.Appearance = copySection(panel.snapshot)
-            log("customisation screen: backed out - WaCa choices reverted")
-            ctx.refreshLook()
-        end
-        if panel then panel.backAt = nil end
-        return
-    end
+-- the panel on its screen (added, or added again when the screen dropped it)
+local function ensurePanel(screen)
+    if not screen or not (pending or attachHidden()) then return end
     if not panel or panel.screen ~= screenId(screen) or not panelAttached(screen) then
         local ok, err = pcall(setupPanel, screen)
         if not ok then log("customisation screen: %s", tostring(err)) panel = nil end
     end
+end
+
+local function isPanelScreen(screen)
+    local cls = nativeClass(panelScreen())
+    return cls and screen:IsA(cls)
+end
+
+-- the panel's screen goes: backed out of (BackSpace / Escape just before) = its WaCa choices are dropped, like the game
+-- drops its own; confirmed = they stay
+local function panelHidden(screen)
+    if not panel or panel.screen ~= screenId(screen) then return end
+    if panel.backAt and os.time() - panel.backAt <= 3 and pending and panel.snapshot then
+        pending.Appearance = copySection(panel.snapshot)
+        log("customisation screen: backed out - WaCa choices reverted")
+        ctx.refreshLook()
+    end
+    panel.backAt = nil
 end
 
 -- clicks (a left click while one of our arrows is hovered) and F5 / F6 / F7
@@ -642,22 +692,63 @@ local function onKey(name)
     end
 end
 
--- the name screen, polled often (typing then confirming quickly must not lose the last letters)
-function Creator.FastTick()
-    updateNameScreen()
-    if pending or attachHidden() then updatePanel() end
+-- the screens we care about that this screen is (native class names)
+local function trackedAs(screen)
+    local out = {}
+    local names = { panelScreen() }
+    for _, n in ipairs(CREATOR_SCREENS) do table.insert(names, n) end
+    for _, sp in ipairs(NAME_SCREENS) do table.insert(names, sp.cls) end
+    for _, n in ipairs(names) do
+        local cls = nativeClass(n)
+        if cls and screen:IsA(cls) then out[n] = true end
+    end
+    return out
 end
 
-function Creator.Tick()
-    extendPalettes()
+local function onScreenShown(screen)
+    extendPalettes()                         -- the GUI manager exists once screens show
+    local id = screenId(screen)
+    for n in pairs(trackedAs(screen)) do
+        shown[n] = shown[n] or {}
+        table.insert(shown[n], id)
+    end
     trackCreation()
     sanitize()
-    updateNameScreen()
+    nameScreenShown(screen)
+    if isPanelScreen(screen) then ensurePanel(screen) end
+    if attachHidden() then ensurePanel(shownScreen(panelScreen(), true)) end
+end
+
+local function onScreenHidden(screen)
+    local id = screenId(screen)
+    nameScreenHidden(screen)
+    panelHidden(screen)
+    for n in pairs(trackedAs(screen)) do
+        local list = shown[n] or {}
+        for i = #list, 1, -1 do if list[i] == id then table.remove(list, i) end end
+    end
+    trackCreation()
 end
 
 function Creator.Init(c)
     ctx = c
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
+    WaCa.On("ScreenShown", onScreenShown)
+    WaCa.On("ScreenHidden", onScreenHidden)
+    WaCa.On("ScreenFocusIn", nameFocusIn)
+    WaCa.On("ScreenFocusOut", nameFocusOut)
+    WaCa.On("SteamTextInput", function(_, submitted, text) steamText(submitted, text) end)
+    -- after a menu command on the panel's screen (it may have rebuilt its content and dropped our widgets)
+    pcall(RegisterHook, "/Script/SwtEngine.SwtScreen:OnListenCommand", function() end, function(self)
+        local screen = self:get()
+        if screen and screen:IsValid() and isPanelScreen(screen) then
+            local id = screenId(screen)
+            ExecuteInGameThread(function()
+                local s = StaticFindObject((id:gsub("^%S+ ", "")))
+                if s and s:IsValid() then ensurePanel(s) end
+            end)
+        end
+    end)
     pcall(RegisterHook, "/Script/Wrc.GuiPopupColorPicker:OnGridIdColorChanged", function() end, function()
         ExecuteInGameThread(sanitize)
     end)

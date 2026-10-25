@@ -29,12 +29,9 @@ function WaCa.IsTextReady()
     return WaCa.GetText("STR_WINDOW_TITLE_BAR") ~= ""
 end
 
--- replace the text of a key ("|" is not allowed in either). The native side receives it through the engine's own
--- string-table lookup (the "WACA:" key prefix), on the game thread.
+-- replace the text of a key ("|" is not allowed in either); applied by the native part at once
 function WaCa.SetText(key, text)
-    local l = lib()
-    if not l or not l:IsValid() then return false end
-    l:GetTableEntrySourceString(FName(TABLE), "WACA:SetText|" .. key .. "|" .. text)
+    if not WaCa.Command("SetText|" .. key .. "|" .. text) then return false end
     return WaCa.GetText(key) == text
 end
 
@@ -70,12 +67,103 @@ WaCa.CAT_DATA_FIELDS = {
     "AccesoryHeadVar", "AccesoryBodyVar", "ScarEyeId", "ScarEarId", "ScarBodyId", "ScarChestId",
 }
 
--- send a command to WaCa ModKit's native part (through the string-table lookup channel, on the game thread)
+-- send a command to WaCa ModKit's native part ("Verb|arg|arg..."); false when the native part is missing or the verb
+-- is unknown
 function WaCa.Command(cmd)
-    local l = lib()
-    if not l or not l:IsValid() then return false end
-    l:GetTableEntrySourceString(FName(TABLE), "WACA:" .. cmd)
+    if not WaCaNative_Command then return false end
+    return WaCaNative_Command(cmd)
+end
+
+---------------------------------------------------------------------------------------------------------------------
+-- Events: the game tells the mod when something happens - nothing polls. The native part turns UE4SS's ProcessEvent
+-- callbacks into events (any UFunction by name, Blueprint events included) and adds its own; handlers run on the game
+-- thread.
+--     WaCa.On("ScreenShown", function(screen) ... end)           a game screen / popup entered the viewport
+--     WaCa.Watch("ReceiveBeginPlay", "/Script/Engine.Pawn", "PawnSpawned")   your own event from any function
+--     WaCa.Ready()          LAST line of your main.lua: events are delivered from then on
+-- Built-in events (watched as soon as someone listens):
+--     ScreenShown(screen) / ScreenHidden(screen)    a USwtScreen (screens and popups) built / torn down: the widget's
+--                                                   Construct / Destruct (hidden fires while it is still valid)
+--     ScreenFocusIn(screen) / ScreenFocusOut(screen) keyboard focus entered / left the screen's widgets (a text box in
+--                                                   it took / lost the keyboard: typing, Enter, focus moved away)
+--     SteamTextInput(nil, submitted "1"/"0", text)   Steam's full-screen keyboard closed (WaCa.Command SteamKeyboard)
+--     Started(nil)                                  the first event after WaCa.Ready(), on the game thread; the
+--                                                   screens already up arrive as ScreenShown just before it
+-- Don't run Lua off the game thread in a mod that uses events (LoopAsync / ExecuteAsync): two OS threads in one Lua
+-- state corrupt it.
+--     CatSpawned(actor)                             a cat actor began play: the player's / an NPC's pawn, a quest
+--                                                   actor, a cutscene cat
+local BUILTIN = {
+    ScreenShown = { { "Construct", "/Script/SwtEngine.SwtScreen", "post" } },
+    ScreenHidden = { { "Destruct", "/Script/SwtEngine.SwtScreen", "pre" } },
+    ScreenFocusIn = { { "OnAddedToFocusPath", "/Script/SwtEngine.SwtScreen", "post" } },
+    ScreenFocusOut = { { "OnRemovedFromFocusPath", "/Script/SwtEngine.SwtScreen", "post" } },
+    CatSpawned = {
+        { "ReceiveBeginPlay", "/Script/SwtAdventure.SwtAdventureCharacter", "post" },
+        { "ReceiveBeginPlay", "/Script/SwtAdventure.SwtAdventureQuestActor", "post" },
+        { "ReceiveBeginPlay", "/Script/Wrc.WrcCatSkeletalMeshWithCustomization", "post" },
+    },
+}
+local handlers = {}           -- event -> { fn, ... }
+local watched = {}            -- "function|class|event" -> true once its native watch exists
+
+local function dispatch(event, ...)
+    local list = handlers[event]
+    if not list then return end
+    for i = 1, #list do
+        local ok, err = pcall(list[i], ...)
+        if not ok then print(string.format("[WaCa] %s handler: %s\n", event, tostring(err))) end
+    end
+end
+
+-- called by the native part for every event this mod's state watches
+function WaCaNative_OnEvent(event, object, ...)
+    if event == "Started" then
+        -- the first event after WaCa.Ready(): the screens already up were shown before this mod listened - replay them
+        if handlers["ScreenShown"] then
+            for _, s in ipairs(FindAllOf("SwtScreen") or {}) do
+                if s:IsValid() and s:IsInViewport() then dispatch("ScreenShown", s) end
+            end
+        end
+    end
+    dispatch(event, object, ...)
+end
+
+-- watch a UFunction (by name, on objects of a class) as an event; when = "pre" (before it runs) or "post" (default)
+function WaCa.Watch(functionName, classPath, event, when)
+    local id = functionName .. "|" .. classPath .. "|" .. event
+    if watched[id] then return true end
+    if not WaCaNative_Watch then return false end
+    WaCaNative_Watch(functionName, classPath, event, when or "post")
+    watched[id] = true
     return true
+end
+
+-- listen to an event (built-in, watched, or raised with WaCa.Emit)
+function WaCa.On(event, fn)
+    handlers[event] = handlers[event] or {}
+    table.insert(handlers[event], fn)
+    for _, w in ipairs(BUILTIN[event] or {}) do WaCa.Watch(w[1], w[2], event, w[3]) end
+end
+
+-- the cat look component of an actor (pawn, quest actor, cutscene cat, creator preview), or nil
+local meshCompClass = nil
+function WaCa.CatComponent(actor)
+    if not actor or not actor:IsValid() then return nil end
+    meshCompClass = meshCompClass or StaticFindObject("/Script/SwtAdventure.SwtAdventureCustomizableMeshComponent")
+    local ok, comp = pcall(function() return actor:GetComponentByClass(meshCompClass) end)
+    if ok and comp and comp:IsValid() then return comp end
+    return nil
+end
+
+-- raise an event from Lua (to this mod's listeners, at once)
+function WaCa.Emit(event, ...)
+    dispatch(event, ...)
+end
+
+-- the mod's main.lua is done: events may arrive from now on (they are held back while it runs on UE4SS's loader thread)
+function WaCa.Ready()
+    if WaCaNative_Ready then WaCaNative_Ready() end
 end
 
 -- the menus' keyboard keys + hint icons: rows of UXD/Buttons/DT_GamepadButtonsKeyboard, keyed by command name

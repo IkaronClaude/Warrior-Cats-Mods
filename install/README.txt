@@ -11,7 +11,7 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.5.5)
+WHAT IT DOES (0.6.0)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
 
   In the character creator:
@@ -28,6 +28,8 @@ WHAT IT DOES (0.5.5)
 
   Everywhere:
 
+  - Reacts to the game the moment something happens (a screen opens, a cat appears) instead of checking every
+    few seconds: names, looks and the menu cursor are right at once.
   - The mouse cursor shows in menus.
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
   - Mouse look: the camera follows the mouse (sensitivity in keybinds.ini).

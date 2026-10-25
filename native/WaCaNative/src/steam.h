@@ -3,5 +3,5 @@
 
 // Steam's on-screen keyboard (see steam.cpp)
 namespace steam {
-void ShowKeyboard(const std::wstring& description, const std::wstring& existing, const std::wstring& resultPath);
+void ShowKeyboard(const std::wstring& description, const std::wstring& existing);
 }

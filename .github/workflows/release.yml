@@ -35,6 +35,23 @@ jobs:
           Invoke-WebRequest $url -OutFile ue4ss.zip
           Expand-Archive ue4ss.zip -DestinationPath tools/bin/ue4ss -Force
 
+      # The native DLL is a UE4SS C++ mod: it builds against UE4SS's source at the commit of the release above. Its
+      # Unreal submodule (Re-UE4SS/UEPseudo) is private - the repository secret UE4SS_SOURCE_TOKEN must be a GitHub
+      # token (contents: read) of an account linked to Epic Games that can see it.
+      - name: UE4SS source (the C++ mod SDK)
+        shell: pwsh
+        env:
+          UE4SS_SOURCE_TOKEN: ${{ secrets.UE4SS_SOURCE_TOKEN }}
+        run: |
+          if (-not $env:UE4SS_SOURCE_TOKEN) { throw "The secret UE4SS_SOURCE_TOKEN is missing (see the comment above this step)" }
+          $auth = "https://x-access-token:$($env:UE4SS_SOURCE_TOKEN)@github.com/"
+          git config --global url."$auth".insteadOf "git@github.com:"
+          git config --global --add url."$auth".insteadOf "https://github.com/"
+          git clone --filter=blob:none https://github.com/UE4SS-RE/RE-UE4SS.git tools/bin/src/RE-UE4SS
+          git -C tools/bin/src/RE-UE4SS checkout 8333063
+          git -C tools/bin/src/RE-UE4SS submodule update --init --recursive
+          if ($LASTEXITCODE -ne 0) { throw "submodules failed (is the token's account linked to Epic Games?)" }
+
       - name: Native DLL
         shell: cmd
         run: native\build.bat
