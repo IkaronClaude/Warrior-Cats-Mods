@@ -622,15 +622,18 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (on spawn - a ReceiveBeginPlay watch on BP_Exploration_Character_Base_C - and on a season change); an absent
         one is hidden, collision off, its AI's brain stopped - NOT destroyed (the generator would respawn it). Offline
         test (400 stub creatures): leaf-bare hides ~40% mice / ~80% squirrels, all back in greenleaf.
-        NOT VM-CHECKED. Open: patrol hauls / fresh-kill pile by season (needs the patrol system - 15), world events
+        VM 2026-10-27: leaf-bare start -> 35 of 148 creatures away, hourly turnover running, snow falling (shot),
+        hunting x0.54, stable. Open: patrol hauls / fresh-kill pile by season (needs the patrol system - 15), world events
         (poisoned river = no fish).
 - [ ] **23. Random prey spawns.** Prey spawns at random times in random places (within each species' habitat: fish
       in water, birds in trees / open ground, voles in undergrowth ...), not at fixed points. Find the game's prey
       spawner first (the hunting / prey AI found under P0).
       BUILT 2026-10-27 (random TIMES): preyworld.lua - every in-game hour (daynight HourChanged) PreyTurnover (0.2) of
-        the creatures roll again against the season's share, so prey comes and goes during the day. Random PLACES:
-        next - move an away creature to a random point in another generator's AreaComponent box of its kind before it
-        comes back (needs a VM check that a moved creature's AI / pounce still work).
+        the creatures roll again against the season's share, so prey comes and goes during the day. Random PLACES
+        (PreyRandomPlaces = 1): a creature coming back appears at a random point of its nearest generator's
+        AreaComponent box, dropped from 1.5 m above. VM: 24 came back elsewhere in 3 min, none fell through the world
+        (no height jumps > 3 m in 8 checks), stable. Open: a moved prey's pounce in real play (operator); habitat per
+        species (fish only at water ...) - today a creature stays in its own generator's area, which is its habitat.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - On a timer step per in-game hour, pick a generator in the cat's area and spawn one prey of its kind at a random
         point of its habitat (fish only at fishing spots) - the generator's own spawn function if reflected, else

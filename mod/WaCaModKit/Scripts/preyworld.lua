@@ -6,7 +6,8 @@
 -- touched and its AI rests - never destroyed, so the generators don't respawn it over and over - and comes back
 -- when a later season's roll has it about. Prey also comes and goes during the day (tickets.md 23, the "random times"
 -- part): every in-game hour a share of the creatures (PreyTurnover) roll again, so a spot empty in the morning may
--- have a mouse by noon.
+-- have a mouse by noon - and a creature coming back appears at a random point of its home generator's area
+-- (PreyRandomPlaces), not where it vanished.
 local PreyWorld = {}
 
 local WaCa, log, Weather
@@ -15,6 +16,8 @@ local kinds                      -- ESwtQuestCharacterType value -> kind name (W
 local rolled = {}                -- creature full name -> { season = s, about = bool }
 local hidden = 0
 local turnover = 0               -- share of creatures re-rolled each in-game hour
+local randomPlaces = false      -- a creature coming back appears somewhere else in its area (PreyRandomPlaces)
+local moved = 0
 
 local function kindNames()
     if kinds then return kinds end
@@ -45,6 +48,27 @@ local function setAbout(creature, about)
     end)
 end
 
+-- a random point in the area of the generator nearest to the creature (its home: generators keep their prey near),
+-- dropped from a little above so it lands on the ground
+local function newPlace(creature)
+    local at = creature:K2_GetActorLocation()
+    local best, bestD
+    for _, g in ipairs(FindAllOf("BP_Enemy_Generator_C") or {}) do
+        if g:IsValid() then
+            local p = g:K2_GetActorLocation()
+            local d = (p.X - at.X) ^ 2 + (p.Y - at.Y) ^ 2
+            if not bestD or d < bestD then best, bestD = g, d end
+        end
+    end
+    if not best then return end
+    local area = best.AreaComponent
+    local c, e = area:K2_GetComponentLocation(), area:GetScaledBoxExtent()
+    local x = c.X + (math.random() * 2 - 1) * e.X
+    local y = c.Y + (math.random() * 2 - 1) * e.Y
+    creature:K2_SetActorLocation({ X = x, Y = y, Z = math.max(at.Z, c.Z) + 150 }, false, {}, true)
+    moved = moved + 1
+end
+
 -- roll (once per season) whether this creature is about, and show / hide it
 local function apply(creature, reroll)
     local season = Weather.Season()
@@ -59,6 +83,7 @@ local function apply(creature, reroll)
     local was = r == nil or r.about
     rolled[key] = { season = season, about = about }
     if about ~= was then
+        if about and randomPlaces then pcall(newPlace, creature) end
         setAbout(creature, about)
         hidden = hidden + (about and -1 or 1)
     end
@@ -72,7 +97,7 @@ local function applyAll(why, share)
             if ok then n = n + 1 end
         end
     end
-    log("prey: %s - %d creatures checked, %d of them away this season", why, n, hidden)
+    log("prey: %s - %d creatures checked, %d of them away this season (%d came back elsewhere so far)", why, n, hidden, moved)
 end
 
 function PreyWorld.Init(c)
@@ -80,6 +105,7 @@ function PreyWorld.Init(c)
     local ini = WaCa.ReadIni(c.modDir .. "/config/weather.ini") or {}
     if ((ini["Seasons"] or {}).On or "0") ~= "1" then return end
     turnover = math.max(0, math.min(1, tonumber((ini["Seasons"] or {}).PreyTurnover or "") or 0.2))
+    randomPlaces = ((ini["Seasons"] or {}).PreyRandomPlaces or "1") == "1"
     local any = false
     for section, sec in pairs(ini) do
         local season = section:match("^Season%.(.+)$")
