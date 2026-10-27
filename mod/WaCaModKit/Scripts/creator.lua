@@ -28,6 +28,7 @@ local vanillaCount = {}          -- palette -> the game's own colour count (befo
 local extended = false
 
 local pending = nil              -- { Name = {...}, Appearance = {...}, print, closedAt } while creating
+local gridRows                   -- the WaCa rows in the creator grids (with GRID_KINDS, below)
 local CREATOR_SCREENS = { "GuiScreenSelectClan", "GuiScreenCustomization", "GuiScreenSelectTraits", "GuiScreenSelectName" }
 
 local function hex(c) return string.format("#%02X%02X%02X", c.R, c.G, c.B) end
@@ -748,13 +749,31 @@ local function setupPanel(screen)
     local snapshot = panel and panel.screen == screenId(screen) and panel.snapshot
         or (pending and copySection(pending.Appearance))
     panel = { screen = screenId(screen), tree = treePath(screen), rows = {}, snapshot = snapshot }
-    at(text("WaCaPanelTitle", "WaCa ModKit"), -1150, 200, 1000, 80)
     local look = pending and pending.Appearance or {}
     local rows = {}
+    -- What the game's own grids already offer is not repeated here: WaCa pattern / markings looks are entries of
+    -- those grids (gridRows), and the game's shapes are its grids too - offered here across rows (a marking as the
+    -- pattern shape) only with creator.ini PanelShapes = 1. What's left: pattern packs and whole-look presets. With
+    -- nothing left, there is no panel.
+    local inGrid = {}
+    for _, state in pairs(gridRows) do
+        for _, e in ipairs(state.entries) do inGrid["look:" .. e.look] = true end
+    end
+    local crossShapes = cfgValue("PanelShapes") == "1"
     for _, r in ipairs(ROWS) do
-        local choices = choicesFor(r.key)
+        local choices = {}
+        for _, c in ipairs(choicesFor(r.key)) do
+            local v = c.value and tostring(c.value) or ""
+            if not inGrid[v] and (crossShapes or not v:match("^game:")) then table.insert(choices, c) end
+        end
         if #choices > 1 then table.insert(rows, { r = r, choices = choices }) end     -- a row with no choices: hidden
     end
+    if #rows == 0 then
+        log("customisation screen: no WaCa panel (the game's grids offer every WaCa choice)")
+        panel = { screen = screenId(screen), tree = treePath(screen), rows = {}, snapshot = snapshot, empty = true }
+        return
+    end
+    at(text("WaCaPanelTitle", "WaCa ModKit"), -1150, 200, 1000, 80)
     for i, e in ipairs(rows) do
         local r = e.r
         local row = { n = i, key = r.key, fkey = r.fkey, choices = e.choices, index = 1 }
@@ -786,7 +805,7 @@ end
 -- the panel on its screen (added, or added again when the screen dropped it)
 local function ensurePanel(screen)
     if not screen or not (pending or attachHidden()) then return end
-    if not panel or panel.screen ~= screenId(screen) or not panelAttached(screen) then
+    if not panel or panel.screen ~= screenId(screen) or not (panel.empty or panelAttached(screen)) then
         local ok, err = pcall(setupPanel, screen)
         if not ok then log("customisation screen: %s", tostring(err)) panel = nil end
     end
@@ -841,6 +860,8 @@ local function trackedAs(screen)
     return out
 end
 
+local labelGridItems       -- (defined with the grid entries below)
+
 local function onScreenShown(screen)
     extendPalettes()                         -- the GUI manager exists once screens show
     local id = screenId(screen)
@@ -851,6 +872,8 @@ local function onScreenShown(screen)
     trackCreation()
     sanitize()
     nameScreenShown(screen)
+    local customization = nativeClass("GuiScreenCustomization")
+    if customization and screen:IsA(customization) then labelGridItems(screen) end
     if isPanelScreen(screen) then ensurePanel(screen) end
     if attachHidden() then ensurePanel(shownScreen(panelScreen(), true)) end
 end
@@ -884,11 +907,13 @@ end
 -- OnGriIdItemChanged - the cat's data can't tell (a copied row has the fallback's type).
 local GRID_KINDS = {
     Pattern = { table = "/Game/Gameplay/DataTables/Customization/DT_Patterns.DT_Patterns", typeField = "PatternType",
-                enum = "EPatternType", maskKey = "PatternMask", panel = "/Script/Wrc.GuiCustomizationPatternPanel" },
+                enum = "EPatternType", maskKey = "PatternMask", panel = "/Script/Wrc.GuiCustomizationPatternPanel",
+                panelField = "mcGuiPatternPanel", ready = "ReadyPatterns" },
     Markings = { table = "/Game/Gameplay/DataTables/Customization/DT_Markings.DT_Markings", typeField = "MarkingType",
-                 enum = "EMarkingType", maskKey = "MarkingsMask", panel = "/Script/Wrc.GuiCustomizationMarkingsPanel" },
+                 enum = "EMarkingType", maskKey = "MarkingsMask", panel = "/Script/Wrc.GuiCustomizationMarkingsPanel",
+                 panelField = "mcGuiMarkingsPanel", ready = "ReadyMarkings" },
 }
-local gridRows = {}       -- kind -> { vanilla = n, entries = { {look, fallback} ... } in the order added }
+gridRows = {}             -- kind -> { vanilla = n, entries = { {look, fallback} ... } in the order added }
 
 local function tableRows(t)
     local names, data = {}, {}
@@ -960,6 +985,32 @@ local function gridPosition(grid)
     return position
 end
 
+-- The game labels its grid items by position ("Pattern 1".."Pattern 23" - the WaCa item would read "Pattern 23" too):
+-- once the customisation screen has filled its grids, the WaCa items get their look's label. Items without a name
+-- text (the markings grid's) are left as they are.
+labelGridItems = function(screen)
+    for kind, k in pairs(GRID_KINDS) do
+        local state = gridRows[kind]
+        if state and #state.entries > 0 then
+            pcall(function()
+                local grid = screen[k.panelField].mcGuiGrid
+                local ready = FindFirstOf("WrcGuiManager")[k.ready]
+                local offset = #grid.Items - #ready
+                for i = 1, #ready do
+                    local entry = ready[i] >= state.vanilla and state.entries[ready[i] - state.vanilla + 1]
+                    local item = entry and grid.Items[offset + i]
+                    if item and item:IsValid() then
+                        local ok = pcall(function() item.mcGuiTextName:SetText(FText(lookLabel(entry.look))) end)
+                        local now = "?"
+                        pcall(function() now = item.mcGuiTextName:GetText():ToString() end)
+                        log("creator grid: %s item %d labelled %s (%s)", kind, offset + i, now, ok and "set" or "no name text")
+                    end
+                end
+            end)
+        end
+    end
+end
+
 local function onGridChanged(kind, panel)
     local state = gridRows[kind]
     local grid
@@ -1025,6 +1076,9 @@ function Creator.Init(c)
     WaCa.On("SteamTextInput", function(_, submitted, text) steamText(submitted, text) end)
     -- WaCa looks in the game's own pattern / markings grids (rows added once the game is up)
     WaCa.On("Started", addGridRows)
+    -- loaded into a running game (a reload): the tables are there already, and the screens replayed as ScreenShown
+    -- come BEFORE Started - so the rows are registered now (adding them again is harmless: an existing row is reused)
+    if StaticFindObject(GRID_KINDS.Pattern.table) then pcall(addGridRows) end
     for kind, k in pairs(GRID_KINDS) do
         local event = "WaCaGrid" .. kind
         WaCa.Watch("OnGriIdItemChanged", k.panel, event, "post")

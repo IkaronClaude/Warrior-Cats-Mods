@@ -55,7 +55,8 @@ game data in this repo.
     and rebuilt the preview cats with the WaCa look. Mapping = grid position -> ReadyPatterns index -> row.
     MARKINGS too: their fill (0x1418C33D0) adds 3 game items AHEAD of the ReadyMarkings loop; mapping = position -
     (items - indices). VM: the last markings item -> "Markings entry 23 chosen = TestMitts (the cat keeps
-    MarkingIdx 3)". OPEN: a label / icon for the WaCa items (the game labels them "Pattern N").
+    MarkingIdx 3)". Labels: the WaCa pattern item is relabelled with its look's Label ("Colourpoint" instead of
+    "Pattern 23"; VM read back 20 s later). Markings items have no name text. OPEN: an icon (IconHelper).
   - The customisation crash on the VM: AGuiScreenBasePreview's setup (0x141915150) takes the first
     GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
     there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
@@ -63,7 +64,9 @@ game data in this repo.
   - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
         the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
   - [ ] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
-  - [ ] Then: drop the WaCa side panel.
+  - [x] Then: drop the WaCa side panel - DONE 2026-10-27: the panel only offers what the grids can't (pattern packs,
+        whole-look presets; game shapes across rows with creator.ini PanelShapes = 1); with the default config
+        there is no panel (VM: "no WaCa panel (the game's grids offer every WaCa choice)").
 - [ ] P1 mouse look feel (operator): the camera clamps the mouse axis to the stick range and runs it through the stick
   curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
   Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
