@@ -451,6 +451,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         spread out, so a pair activity never finds a partner in place. NEXT for pairs: the partner walks over first
         (an AI move to the first cat + its move-completed event, then both play) - activities.lua picks partners
         within 600 only, so PlayFight effectively never runs until then.
+        BUILT (same day): the partner (nearest idle clanmate within PairRadius 2500 - the world's closest idle pair
+        was 1701 apart) walks over with one AI move; ONE callback after distance / MaxWalkSpeed + 1 s checks the gap
+        (<= 300 -> both face + play; else logged "didn't get to"). VM: the move started but covered 57 of 1701 units
+        in 27 s wall time - UNRESOLVED whether the VM's 0.3 fps (game time far behind the wall-time delay) or the
+        cat's behaviour tree overriding the move. To settle in real play (operator) or with game-time delays.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
