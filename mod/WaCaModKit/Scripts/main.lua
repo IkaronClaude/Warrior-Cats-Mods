@@ -486,6 +486,8 @@ local Menus = require("menus")
 Menus.Init({ WaCa = WaCa, log = log, modDir = modDir })
 local Dev = require("dev")
 Dev.Init({ WaCa = WaCa, log = log, modDir = modDir })
+-- more graphics settings (config/graphics.ini)
+require("graphics").Init({ WaCa = WaCa, log = log, modDir = modDir })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

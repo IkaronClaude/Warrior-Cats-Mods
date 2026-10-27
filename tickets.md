@@ -119,7 +119,8 @@ game data in this repo.
   (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
   DONE too: scan::Reaches - each look primitive must be reachable from the full build within 2 calls (chained
   unwind bodies included) or it is NOT hooked; same check in the tool. VM: 3 of 3 "confirmed" at runtime.
-- [~] P2 a click skips the splash: menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
+- [x] P2 a click skips the splash - VERIFIED 2026-10-27 on the REAL splash: a click -> "click on the splash - pressing
+  Enter" -> the main menu. menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
   with the game's own WBP_GuiScreenSplash put on screen: the click logged "click on the splash - pressing Enter".
   Left: the operator sees the real splash continue.
 - [x] Per-save sidecar: the write path end to end. FOUND + FIXED a real bug: the game saves through the native
@@ -308,8 +309,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       OPEN: the operator's visual check of the Colourpoint look (tune its ini); eye colour (atlas-based, M_Characters_Eyes);
       an in-game colour wheel UI (needs the editor - now installing 5.7.4); a real colourpoint mask pack (generated
       from the meshes on the player's PC - no game-derived art in the repo).
-- [ ] **18. More graphics options.** The current ones are very lackluster; expose the engine's scalability groups +
-      extras.
+- [x] **18. More graphics options.** DONE 2026-10-27: config/graphics.ini - [Scalability] the engine's groups (sg.*),
+      [CVars] any console variable (motion blur, DoF, fringe, screen %, t.MaxFPS listed), applied through
+      ExecuteConsoleCommand at start and after the game's options popup closes. VM: read back sg.ShadowQuality 0,
+      r.MotionBlurQuality 0, r.ScreenPercentage 50 (the VM's own setting would give 25). An in-game menu for them =
+      with the keybind menu (19a).
 
 - [ ] **26. Prey scent / visual trails** (operator 2026-10-25: "sick for future work", like The Isle). Prey leaves
       trails - scent you detect (a sense / sniff mode) and visual signs (tracks, disturbed undergrowth) - that you can
