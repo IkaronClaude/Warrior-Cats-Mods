@@ -59,8 +59,15 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   icon over the prey. Every roll is in WaCaNative.log (`[hunt] landed on ...`).
 - **Day / night cycle** (experimental, off by default, `config/daynight.ini [DayNight] On = 1`): the sun crosses the
   sky, the light dims at night and the game's own night look blends in - a full day takes `DayMinutes` real minutes
-  (24 by default). The time of day is kept with your save (`KeepTime`); `BedHour` ends each day (counts the days
-  for later features).
+  (24 by default). The time of day is kept with your save (`KeepTime`); `BedHour` ends each day (midnight if
+  empty; counts the days for seasons and later features).
+- **Seasons and weather** (experimental, off by default, `config/weather.ini [Seasons] On = 1`): newleaf, greenleaf,
+  leaf-fall and leaf-bare follow the days of your save (`DaysPerSeason`, counted by the day / night cycle - without
+  it the season stays `StartSeason`). Each season has its own day length, light and sunlight tint, and makes hunting
+  and fishing easier or harder (leaf-bare x0.6 hunting). Weather comes in spells of a few in-game hours rolled from
+  the season's chances: overcast, rain and snow darken the light, thicken the fog and change the chances (rain:
+  hunting x0.8, fishing x1.2). Kept with your save. Rain / snow particles and sound need an effect asset (`Effect`,
+  `Sound`) - until one ships, rain is the darker, foggy look only.
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.

@@ -8,7 +8,8 @@ local Hunting = {}
 
 local WaCa, log, modDir
 local cfg = { flee = false, distance = 2500, speed = 1.0 }
-local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {}, rank = nil, ifUnknown = nil, exp = true }
+local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {}, rank = nil, ifUnknown = nil, exp = true,
+                 world = 1 }      -- world: the season's x the weather's factor (weather.lua WorldFactors)
 local hooked, huntHooked = false, false
 local boosted = {}               -- prey -> its speed was raised once
 
@@ -70,8 +71,14 @@ local function factorList()
     return table.concat(out, ",")
 end
 
-local function sendChance()
+-- the cat's base chance now: its rank's x the season and weather (nil while the rank isn't known)
+local function baseChance()
     local base = chance.ranks[chance.rank or chance.ifUnknown or ""]
+    return base and base * chance.world
+end
+
+local function sendChance()
+    local base = baseChance()
     local on = chance.on and base ~= nil
     WaCa.Command(string.format("HuntRoll|%s|%s|%s|%s", on and "1" or "0", tostring(base or 100), tostring(chance.critMiss),
         factorList()))
@@ -82,7 +89,7 @@ end
 -- CanvasEnemyInstaKill of the prey's level-warning widget (WBP_GuiLevelWarning, inside the widget its widget
 -- component shows), so a text added INTO that canvas shows exactly when the icon does. Same number the roll uses.
 local function chanceFor(kindValue)
-    local base = chance.ranks[chance.rank or chance.ifUnknown or ""]
+    local base = baseChance()
     if not base then return nil end
     local factor
     for name, value in pairs(preyKinds()) do
@@ -254,6 +261,14 @@ function Hunting.Init(c)
     end)
     WaCa.Watch("Construct", "/Game/Art/UXD/Blueprints/Controls/gui_actor_widgets/WBP_GuiLevelWarning.WBP_GuiLevelWarning_C", "WaCaPreyMarker", "post")
     WaCa.On("WaCaPreyMarker", labelSoon)
+    -- seasons / weather (weather.lua): leaf-bare and rain make hunting harder
+    WaCa.On("WorldFactors", function(hunt)
+        if chance.world == hunt then return end
+        chance.world = hunt
+        log("hunting: season and weather x%.2f", hunt)
+        sendChance()
+        labelSoon()
+    end)
     -- the cat's rank as the game saved it (WrcGame.json GameplayProgression.Rank): read on the first save of a character
     -- (the game saves right after loading one) and whenever the game saves a new rank (context "SavePlayerRank")
     local rankSlot

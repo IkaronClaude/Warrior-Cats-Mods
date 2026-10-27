@@ -1,6 +1,6 @@
 -- Fishing (tickets.md 9b, operator 2026-10-27): walking up to a fishing spot startles the fish - they're gone (the
 -- spot's hint hidden, its interaction off) for StartleSeconds; once the cat has stood still on the spot that long,
--- they swim back and bite with Chance % (x the clan's factor - RiverClan 1.5): a bite re-enables the game's own catch,
+-- they swim back and bite with Chance % (x the clan's factor - RiverClan 1.5 - and the season's / weather's): a bite re-enables the game's own catch,
 -- no bite = another wait. config/hunting.ini [Fishing].
 -- The spot's own interaction can't be watched (a teleported or walking cat raises no event the mod can see), so each
 -- spot gets one of the game's own movement-modifier trigger boxes (its Blueprint, BP_MovementModifier_*, flag None =
@@ -9,7 +9,7 @@
 local Fishing = {}
 
 local WaCa, log, modDir
-local cfg = { on = false, startle = 5, chance = 40, moving = 25, clans = {} }
+local cfg = { on = false, startle = 5, chance = 40, moving = 25, clans = {}, world = 1 }   -- world: weather.lua
 local spots = {}                 -- area full name -> { spot = spot path, inside = bool, gen = n, state = "here" / "gone" }
 local hooked = false
 
@@ -61,7 +61,7 @@ local function waitForFish(entry)
             return
         end
         local factor = cfg.clans[clan() or ""] or 1.0
-        local pct = math.min(100, cfg.chance * factor)
+        local pct = math.min(100, cfg.chance * factor * cfg.world)
         local roll = math.random() * 100
         if roll < pct then
             setFish(entry, true)
@@ -142,6 +142,8 @@ function Fishing.Init(c)
     end
     log("fishing: %s", cfg.on and "on" or "off")
     if not cfg.on then return end
+    -- seasons / weather (weather.lua): fish bite better in the rain, worse in leaf-bare
+    WaCa.On("WorldFactors", function(_, fish) cfg.world = fish end)
     if not hooked then
         hooked = true
         -- the spots' trigger boxes report through areas.cpp (AreaOverlap: area, actor, "1" / "0", flag)

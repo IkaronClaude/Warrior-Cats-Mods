@@ -3,16 +3,21 @@
 -- light's intensity (dimmed to NightLight at midnight) and the game's own night look (the sky's
 -- "PostProcess-night", blended in by weight). config/daynight.ini. One scheduled step every UpdateSeconds while the
 -- gameplay HUD is up (an animation step, not a state poll); the sky's own values at the start are the day's.
+-- Other modules change the look on top through DayNight.SetLook (weather, seasons) - also with the cycle off.
 local DayNight = {}
 
 local WaCa, log, modDir
 local cfg = { on = false, dayMinutes = 24, startHour = 8, sunHeight = 60, nightLight = 0.15, nightLook = 1.0, step = 2,
               keep = true, bedHour = nil }
-local day = 1                    -- days passed in this save (counted at BedHour, kept with the hour)
+local day = 1                    -- days passed in this save (counted at BedHour - or midnight without one - kept with the hour)
 local restoredFor                -- the save slot whose hour was restored
 local hour
-local base                       -- the sky's own values, read once: { sun intensity, sky light intensity, sun yaw }
+local base                       -- the sky's own values: sun / sky light intensity, sun yaw, fog, sun colour (+ which sky)
 local running, generation = false, 0
+-- other modules' changes to the look (weather, seasons): source -> { light, sky, fog = multipliers, color = {R,G,B}
+-- multiplier, dayMinutes / nightLight = overrides of the config's }. Applied on top of the cycle, and alone when the
+-- cycle is off (the sky's own look then, only dimmed / tinted).
+local looks = {}
 
 local function sky()
     for _, s in ipairs(FindAllOf("BP_DayNightSky_C") or {}) do
@@ -20,49 +25,103 @@ local function sky()
     end
 end
 
+-- all looks combined: multipliers multiplied, overrides from the last source that sets one
+local function combined()
+    local c = { light = 1, sky = 1, fog = 1, color = { 1, 1, 1 } }
+    for _, l in pairs(looks) do
+        c.light = c.light * (l.light or 1)
+        c.sky = c.sky * (l.sky or 1)
+        c.fog = c.fog * (l.fog or 1)
+        if l.color then for i = 1, 3 do c.color[i] = c.color[i] * l.color[i] end end
+        c.dayMinutes = l.dayMinutes or c.dayMinutes
+        c.nightLight = l.nightLight or c.nightLight
+    end
+    return c
+end
+
 -- 0 at noon, 1 at midnight, smooth (the sun's elevation curve)
 local function nightFactor(h)
     return (1 + math.cos((h - 0) / 24 * 2 * math.pi)) / 2      -- 1 at 0:00, 0 at 12:00
 end
 
+-- the sky's own values, once per sky (a new world brings a new sky - never re-read our own changes as the base)
+local function readBase(s)
+    local owner = s:GetFullName()
+    if base and base.owner == owner then return true end
+    return pcall(function()
+        local dl = s.DirectionalLight
+        local col = dl.LightColor
+        base = { sun = dl.Intensity, sky = s.SkyLight.Intensity, yaw = dl.RelativeRotation.Yaw,
+                 fog = s.ExponentialHeightFog.FogDensity, color = { col.R / 255, col.G / 255, col.B / 255 }, owner = owner }
+        log("daynight: the sky's day light: sun %.1f, sky light %.1f, fog %.3f", base.sun, base.sky, base.fog)
+    end)
+end
+
 local function apply(s)
-    local n = nightFactor(hour)
-    local light = cfg.nightLight + (1 - cfg.nightLight) * (1 - n)
-    local elevation = cfg.sunHeight * math.sin((hour - 6) / 12 * math.pi)      -- up 6:00-18:00, under the horizon at night
+    local look = combined()
+    local light, n = 1, 0
+    if cfg.on then
+        n = nightFactor(hour)
+        local nightLight = look.nightLight or cfg.nightLight
+        light = nightLight + (1 - nightLight) * (1 - n)
+        local elevation = cfg.sunHeight * math.sin((hour - 6) / 12 * math.pi)      -- up 6:00-18:00, under the horizon at night
+        -- (this build's FRotator names its first field "pitch", lower case - a "Pitch" key is silently dropped)
+        s.DirectionalLight:K2_SetRelativeRotation({ pitch = -math.max(5, elevation), Yaw = base.yaw + (hour - 12) * 15, Roll = 0 },
+            false, {}, true)
+        local night = s["PostProcess-night"]
+        night.bEnabled = n * cfg.nightLook > 0.01
+        night.BlendWeight = n * cfg.nightLook
+    end
     local dl = s.DirectionalLight
-    -- (this build's FRotator names its first field "pitch", lower case - a "Pitch" key is silently dropped)
-    dl:K2_SetRelativeRotation({ pitch = -math.max(5, elevation), Yaw = base.yaw + (hour - 12) * 15, Roll = 0 }, false, {}, true)
-    dl:SetIntensity(base.sun * light)
-    s.SkyLight:SetIntensity(base.sky * light)
-    local night = s["PostProcess-night"]
-    night.bEnabled = n * cfg.nightLook > 0.01
-    night.BlendWeight = n * cfg.nightLook
+    dl:SetIntensity(base.sun * light * look.light)
+    s.SkyLight:SetIntensity(base.sky * light * look.sky)
+    s.ExponentialHeightFog:SetFogDensity(base.fog * look.fog)
+    dl:SetLightColor({ R = math.min(1, base.color[1] * look.color[1]), G = math.min(1, base.color[2] * look.color[2]),
+        B = math.min(1, base.color[3] * look.color[3]), A = 1 }, true)
+end
+
+local function refresh()
+    local ok, err = pcall(function()
+        local s = sky()
+        if s and readBase(s) then apply(s) end
+    end)
+    if not ok then log("daynight: failed (%s)", tostring(err)) end
+end
+
+-- source's change to the look (nil = none): { light = x, sky = x, fog = x, color = {r, g, b}, dayMinutes = m,
+-- nightLight = f } - applied at once while the gameplay HUD is up
+function DayNight.SetLook(source, look)
+    looks[source] = look
+    if running or not cfg.on then refresh() end
+end
+
+local function dayMinutes()
+    return combined().dayMinutes or cfg.dayMinutes
 end
 
 local function step(gen)
     ExecuteInGameThreadWithDelay(math.floor(cfg.step * 1000), function()
         if gen ~= generation or not running then return end
         local before = hour
-        hour = (hour + cfg.step / (cfg.dayMinutes * 60) * 24) % 24
-        -- the day ends at BedHour: DayEnded(nil, day) for other modules (exhaustion, pacing, day scripts)
-        local crossed = false
-        if not cfg.bedHour then crossed = false
-        elseif hour >= before then crossed = before < cfg.bedHour and hour >= cfg.bedHour           -- the same day
-        else crossed = before < cfg.bedHour or hour >= cfg.bedHour end                       -- past midnight
-        if cfg.bedHour and crossed then
-            log("daynight: day %d is over (%02d:00)", day, cfg.bedHour)
+        hour = (hour + cfg.step / (dayMinutes() * 60) * 24) % 24
+        -- the day ends at BedHour (midnight without one): DayEnded(day), then DayStarted(day + 1), for other modules
+        -- (exhaustion, pacing, seasons, day scripts)
+        local endAt = cfg.bedHour or 0
+        local crossed
+        if hour >= before then crossed = before < endAt and hour >= endAt           -- the same day
+        else crossed = before < endAt or hour >= endAt end                     -- past midnight
+        if crossed then
+            log("daynight: day %d is over (%02d:00)", day, endAt)
             WaCa.Emit("DayEnded", day)
             day = day + 1
+            WaCa.Emit("DayStarted", day)
         end
-        local ok, err = pcall(function()
-            local s = sky()
-            if s then apply(s) end
-        end)
-        if not ok then log("daynight: failed (%s)", tostring(err)) end
+        refresh()
         local whole = math.floor(hour)
         if whole ~= DayNight.lastHour then
             DayNight.lastHour = whole
             log("daynight: %02d:00", whole)
+            WaCa.Emit("HourChanged", whole, day)
         end
         step(gen)
     end)
@@ -86,6 +145,7 @@ local function restore()
         hour = tonumber(t.Hour) % 24
         day = math.max(1, math.floor(tonumber(t.Day or "") or 1))
         log("daynight: back to day %d, %02d:%02d (as saved)", day, math.floor(hour), math.floor(hour % 1 * 60))
+        WaCa.Emit("DayRestored", day)
     end
 end
 local function keep()
@@ -95,6 +155,8 @@ local function keep()
     WaCa.WriteIni(path, { Time = { Hour = string.format("%.3f", hour), Day = tostring(day), __order = { "Hour", "Day" } },
         __order = { "Time" } }, "; WaCa ModKit - this save's time of day (daynight.ini KeepTime)")
 end
+
+local function isHud(screen) return screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") ~= nil end
 
 function DayNight.Init(c)
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
@@ -111,31 +173,31 @@ function DayNight.Init(c)
     cfg.keep = (d.KeepTime or "1") ~= "0"
     cfg.bedHour = tonumber(d.BedHour or "")
     log("daynight: %s (a day = %d min, starting %02d:00)", cfg.on and "on" or "off", cfg.dayMinutes, math.floor(hour))
-    if not cfg.on then return end
+    if not cfg.on then
+        -- no cycle: only other modules' looks, applied when the gameplay HUD shows (a new world's sky = a new base)
+        WaCa.On("ScreenShown", function(screen)
+            if isHud(screen) and next(looks) then refresh() end
+        end)
+        return
+    end
     WaCa.On("GameSaved", function()
         restore()
         keep()
     end)
     WaCa.On("ScreenShown", function(screen)
-        if running or not screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then return end
+        if running or not isHud(screen) then return end
         local s = sky()
         if not s then
             log("daynight: the world has no BP_DayNightSky - no cycle here")
             return
         end
-        if not base then
-            local ok = pcall(function()
-                base = { sun = s.DirectionalLight.Intensity, sky = s.SkyLight.Intensity, yaw = s.DirectionalLight.RelativeRotation.Yaw }
-            end)
-            if not ok then return end
-            log("daynight: the sky's day light: sun %.1f, sky light %.1f", base.sun, base.sky)
-        end
+        if not readBase(s) then return end
         running = true
         generation = generation + 1
         step(generation)
     end)
     WaCa.On("ScreenHidden", function(screen)
-        if screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then running = false end
+        if isHud(screen) then running = false end
     end)
 end
 
