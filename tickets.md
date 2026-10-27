@@ -259,6 +259,14 @@ game data in this repo.
         dimension tags flee, flee speed / distance.
       - Operator input wanted: which prey flee (all small? by tag), how far / fast, what happens to the encounter
         system for larger prey.
+      BUILT 2026-10-27 for AWrcPouncePrey (prey.cpp + hunting.lua + config/hunting.ini: Flee, FleeDistance,
+      FleeSpeed, ExcludeTags): the reaction (vtable +0x9F0) hooked from the first live prey, skipped for non-excluded
+      size tags; PreyFlee event -> AIBlueprintHelperLibrary.SimpleMoveToLocation away from the cat; the pounce still
+      catches it. NOT YET SEEN WORKING: no pounce prey spawned in the open world on the VM (0 live). The world has 168
+      generators - BP_Enemy_Generator_C x164 and BP_Boss_Generator_C x4, none of them pounce prey - so the animals
+      that CHARGE you may be the enemy encounters, not pounce prey. OPERATOR: which creatures charge you (pounce prey
+      during hunts, or the roaming enemies)? If the enemies: the same flee goes on their encounter start
+      (ASwtAdventureCharacter OnEncounterOverlap / EncounterActor).
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.

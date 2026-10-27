@@ -50,6 +50,7 @@
 
 #include "MinHook.h"
 #include "appearance.h"
+#include "prey.h"
 #include "commands.h"
 #include "tables.h"
 #include "log.h"
@@ -383,6 +384,20 @@ LONG CALLBACK WatchHandler(EXCEPTION_POINTERS* e) {
         // a leaf accessor (GetAxisValue) stops on its ret: the caller - the actual consumer - is at [rsp]
         if (*reinterpret_cast<uint8_t*>(rip) == 0xC3)
             where += L", returning to " + CodeOwner(*reinterpret_cast<uintptr_t*>(e->ContextRecord->Rsp));
+        // the callers (a write inside a generic helper - TArray growth - says little on its own): unwound from the
+        // faulting context through the exe's unwind data
+        CONTEXT c = *e->ContextRecord;
+        for (int frame = 0; frame < 5; ++frame) {
+            DWORD64 imageBase = 0;
+            auto* fn = RtlLookupFunctionEntry(c.Rip, &imageBase, nullptr);
+            if (!fn) break;
+            PVOID handlerData = nullptr;
+            DWORD64 establisher = 0;
+            RtlVirtualUnwind(UNW_FLAG_NHANDLER, imageBase, c.Rip, fn, &c, &handlerData, &establisher, nullptr);
+            std::wstring caller = CodeOwner(c.Rip);
+            if (caller.empty()) break;
+            where += L"\n      called from " + caller;
+        }
         logx::Line(L"[dev] watch: touched by the instruction before %s (thread %lu, hit %d)", where.c_str(), GetCurrentThreadId(), hit);
     }
     if (hit >= kWatchHits) {
@@ -495,6 +510,14 @@ int LuaDevTraceCommandAxis(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_HookPrey(a live prey's address) -> true / false: hooks the prey detection reaction from its vtable
+// (prey.cpp; once - later calls just report)
+int LuaHookPrey(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    lua.set_bool(prey::HookFrom(reinterpret_cast<void*>(addr)));
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -569,6 +592,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevWatchAxis", &LuaDevWatchAxis);
     lua.register_function("WaCaNative_DevWatchAddress", &LuaDevWatchAddress);
     lua.register_function("WaCaNative_DevReadFloats", &LuaDevReadFloats);
+    lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));
