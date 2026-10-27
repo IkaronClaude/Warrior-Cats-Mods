@@ -279,6 +279,19 @@ game data in this repo.
       is NOT this feature - switched OFF by default (hunting.ini Flee = 0, experimental). The real build: for prey
       CharacterTypes, no chase (detection / AI) and no fight on touch. OPERATOR DECISION NEEDED: what "catching" is
       without combat (instant catch on touch? a fresh-kill item? a short chase-pounce?), and whether rats stay hostile.
+      OPERATOR 2026-10-27: catch = instant on touch; rats stay hostile; pacing later; hunting = next. AND: "there
+      already exists a hunting mechanic plus icon for prey that can be instakilled" -> the roaming prey carry
+      USwtAdventurePreyComponent (VM: rabbit / mouse, bRequiresInteract, SneakAttackWalkOffset 200) - the catch IS
+      the game's instakill; nothing new needed for it.
+      TRACED: a prey's detection = its BP_Exploration_DetectionComponent's sphere overlap (the cat lands in
+      DetectedCharacters inside the engine's overlap processing, 0x141C3C920 <- 0x141C23E70) - the charge starts from
+      a Blueprint overlap reaction / the AI behaviour tree (roaming states Idle / Checking / Walking / Grazing /
+      Hunted, no flee state), not a native function. (After the test teleport the game went back to the main menu -
+      unexplained, mind it when testing.)
+      PLAN A (next, simple): for small-prey CharacterTypes (Mice / Squirrel / Rabbit / Bird + Weak*), switch off the
+      ENCOUNTER collision (OnEncounterOverlap) - a charging prey can't start a fight, and next to you the game's
+      instakill catches it. PLAN B (flee proper): also stop the chase - identify the behaviour tree's chase branch
+      (BT asset export) and send the prey away instead (SimpleMoveToLocation), re-issued when the tree retargets.
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
       PREPARED 2026-10-27: the fresh-kill pile exists natively - ASwtAdventureFreshKillPileActor with
       USwtAdventureFreshKillPileComponent (a USwtQuestResourceComponent: a quest resource value),
