@@ -447,6 +447,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         both. VM: Sit / Sniff / Nap on a clanmate, one at a time (busy tracked by the montage's own length - NPC cats
         ALWAYS run a montage of their own, so IsAnyMontagePlaying can't be used). NOT VERIFIED: a pair (PlayFight) -
         only one idle clanmate near the VM cat. NEXT: joinable activities + bond gain (the plan above).
+        PAIRS (VM 2026-10-27): 66 idle clanmates in the world, NO two within 500 units of each other - NPC cats stand
+        spread out, so a pair activity never finds a partner in place. NEXT for pairs: the partner walks over first
+        (an AI move to the first cat + its move-completed event, then both play) - activities.lua picks partners
+        within 600 only, so PlayFight effectively never runs until then.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
