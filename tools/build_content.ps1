@@ -4,13 +4,29 @@
 #   3. BuildCookRun (cook + IoStore)        the assets' chunk 7701 = its own container
 #   4. -> dist\content\WaCaModKit_P.pak/.utoc/.ucas  (installed into the game's Content\Paks\~mods)
 # Needs UE 5.7.4 (the game's version) - -Engine or $env:WACA_UE_DIR, default the Epic launcher's install folder.
-param([string]$Engine = $(if ($env:WACA_UE_DIR) { $env:WACA_UE_DIR } else { "C:\Program Files\Epic Games\UE_5.7" }))
+# Also needs the game (its renderer settings: -Game or $env:WACA_GAME_DIR) and .NET for tools\AssetDump.
+param([string]$Engine = $(if ($env:WACA_UE_DIR) { $env:WACA_UE_DIR } else { "C:\Program Files\Epic Games\UE_5.7" }),
+      [string]$Game = $(if ($env:WACA_GAME_DIR) { $env:WACA_GAME_DIR } else { "Z:\Warrior Cats Clans of the Forest" }))
 $ErrorActionPreference = "Stop"
 $root = Split-Path -Parent $PSScriptRoot
 $project = Join-Path $root "content\Wrc\Wrc.uproject"
 $saved = Join-Path $root "content\Wrc\Saved"
 $logs = Join-Path $saved "WaCaContentLogs"
 New-Item -ItemType Directory -Force $logs | Out-Null
+
+Write-Host "0/4 the game's renderer settings"
+# materials must be compiled under the game's renderer settings, or their shaders don't fit it (a GPU device crash
+# the moment one draws): its [/Script/Engine.RendererSettings] goes into the project's DefaultEngine.ini
+$gameIni = Join-Path $logs "GameDefaultEngine.ini"
+$ErrorActionPreference = "Continue"       # (its progress goes to stderr - Windows PowerShell would call that an error)
+dotnet run -c Release --project (Join-Path $root "tools\AssetDump") -- (Join-Path $Game "Wrc\Content\Paks") GAME_UE5_7 raw `
+    "Wrc/Config/DefaultEngine.ini" $gameIni *> (Join-Path $logs "assetdump.log")
+$ErrorActionPreference = "Stop"
+if (-not (Test-Path $gameIni)) { throw "couldn't read the game's DefaultEngine.ini from $Game (see $logs\assetdump.log)" }
+$section = [regex]::Match((Get-Content $gameIni -Raw), '(?ms)^\[/Script/Engine\.RendererSettings\]\r?\n.*?(?=^\[|\z)').Value
+if (-not $section) { throw "the game's DefaultEngine.ini has no [/Script/Engine.RendererSettings]" }
+$template = Get-Content (Join-Path $root "content\Wrc\Config\DefaultEngine.template.ini") -Raw
+Set-Content (Join-Path $root "content\Wrc\Config\DefaultEngine.ini") ($template + "`r`n; --- from the game ---`r`n" + $section) -Encoding utf8
 
 Write-Host "1/4 sources"
 python (Join-Path $root "content\scripts\make_sources.py")

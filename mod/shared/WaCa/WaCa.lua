@@ -502,6 +502,21 @@ function WaCa.SetPartTexture(part, param, texture)
     end
 end
 
+-- load an asset by its object path ("/Game/Mods/X/MyAsset.MyAsset"), also from a mod pak (nil when it doesn't
+-- exist). UE4SS's own LoadAsset only finds assets in the game's AssetRegistry - a mod pak's aren't in it - so this
+-- falls back to the engine's own load (KismetSystemLibrary LoadAsset_Blocking, through a soft object reference).
+function WaCa.LoadAsset(path)
+    local ok, asset = pcall(LoadAsset, path)
+    if ok and asset and asset:IsValid() then return asset end
+    local k = StaticFindObject("/Script/Engine.Default__KismetSystemLibrary")
+    local loaded
+    ok, loaded = pcall(function()
+        return k:LoadAsset_Blocking(k:Conv_SoftObjPathToSoftObjRef(k:MakeSoftObjectPath(path)))
+    end)
+    if ok and loaded and loaded:IsValid() then return loaded end
+    return nil
+end
+
 -- load a PNG / JPG / TGA from disk as a texture (cached by path; nil when it can't be read)
 -- (cached by the texture's object path, found again each time: a held object can be garbage-collected and a call on
 -- its stale wrapper crashes the game)

@@ -588,7 +588,20 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         weather.lua: a material Effect = 3 cylinder layers (EffectLayers) added to the cat as components; Niagara
         still supported. Pitfalls: Interchange import asserts headless unless Interchange.FeatureFlags.Import.
         SyncToBrowser 0; CameraDepthFade is a material function in UE5 (built from PixelDepth instead).
-        OPEN: (1) the in-game check (pak mounts from ~mods, the look, the sound) - VM blocked while Steam is busy;
+        IN-GAME (VM, 2026-10-27 evening): WORKS - the pak mounts from ~mods (an empty .pak is fine), the assets load,
+        the 3 rain layers draw around the cat (screenshots), the rain sound starts, no crash with the effect on.
+        Three bugs found + fixed on the way: (a) UE4SS's LoadAsset only finds AssetRegistry assets -> nil for any
+        mod pak: WaCa.LoadAsset falls back to KismetSystemLibrary LoadAsset_Blocking (soft ref) - a modder API now;
+        (b) "GPU Crash dump Triggered" seconds after loading the MESH: UE 5.7 imports meshes with Nanite ON - now off
+        (build_assets.py); (c) the content project now compiles under the game's own [/Script/Engine.RendererSettings]
+        (r.AllowStaticLighting=False, r.VirtualTextures ...), read from the player's paks by build_content.ps1 into
+        the generated DefaultEngine.ini (template committed, no game data in git).
+        The VM's "stuck at the logos" since this evening: the logo clips' media player never opens (not playing /
+        preparing / ready) - the test harness (VM only, unshipped) calls the screen's own OnVideoComplete for a clip
+        that doesn't play; not a mod issue. (My earlier "Steam is busy" guess was wrong: Steam was logged in fine.)
+        TUNING (operator): the default streaks are too thin / faint to see at the VM's 480x270; EffectParams in
+        weather.ini (Opacity, Width, Columns, Rows, Length, Speed, Density, Glow) tunes the look without a rebuild.
+        OPEN: (1) the look at a real resolution + the sound level (operator's PC);
         (2) the release CI has no Unreal - the pak must be built on the VM and shipped (operator's call: attach a
         separate content zip to the release, or a self-hosted runner).
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:

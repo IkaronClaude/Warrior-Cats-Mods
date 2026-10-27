@@ -38,7 +38,11 @@ local function readLook(sec)
              color = numbers(sec.Color), dayMinutes = tonumber(sec.DayMinutes or ""),
              nightLight = tonumber(sec.NightLight or ""), hunt = tonumber(sec.Hunt or "") or 1,
              fish = tonumber(sec.Fish or "") or 1, effect = sec.Effect ~= "" and sec.Effect or nil,
-             sound = sec.Sound ~= "" and sec.Sound or nil, chances = {} }
+             sound = sec.Sound ~= "" and sec.Sound or nil, params = (function()
+                 local out = {}
+                 for k, v in (sec.EffectParams or ""):gmatch("([%a]+)%s*=%s*([%-%d%.]+)") do out[k] = tonumber(v) end
+                 return next(out) and out or nil
+             end)(), chances = {} }
 end
 
 -- "Clear=50, Rain=25" -> { {name, weight}, ... } in order
@@ -117,8 +121,8 @@ end
 
 -- a material Effect: the weather drawn on open cylinders around the cat (EffectMesh, one per EffectLayers entry,
 -- radius x height), added to the cat as components - they follow it, keep their own rotation, never collide
-local function meshLayers(pawn, material)
-    local mesh = LoadAsset(cfg.effectMesh)
+local function meshLayers(pawn, material, params)
+    local mesh = WaCa.LoadAsset(cfg.effectMesh)
     if not mesh or not mesh:IsValid() then error("EffectMesh not loadable: " .. cfg.effectMesh) end
     local class = StaticFindObject("/Script/Engine.StaticMeshComponent")
     for _, layer in ipairs(cfg.layers) do
@@ -126,12 +130,17 @@ local function meshLayers(pawn, material)
             { Rotation = { X = 0, Y = 0, Z = 0, W = 1 }, Translation = { X = 0, Y = 0, Z = layer[2] * 0.25 },
               Scale3D = { X = layer[1] / 100, Y = layer[1] / 100, Z = layer[2] / 200 } }, false)
         if comp and comp:IsValid() then
+            table.insert(effect.parts, comp)          -- first: a failing call below still leaves it to clean up
             comp:SetStaticMesh(mesh)
             comp:SetMaterial(0, material)
+            if params then
+                -- EffectParams: the material's look tuned from the ini (no pak rebuild)
+                local mid = comp:CreateDynamicMaterialInstance(0, material, FName("None"))
+                for name, value in pairs(params) do mid:SetScalarParameterValue(FName(name), value) end
+            end
             comp:SetCollisionEnabled(0)
             comp:SetCastShadow(false)
-            comp:SetUsingAbsoluteRotation(true)
-            table.insert(effect.parts, comp)
+            comp:SetAbsolute(false, true, false)      -- keeps its own rotation (the cat turning doesn't spin the rain)
         end
     end
 end
@@ -148,10 +157,10 @@ local function startEffect()
     effect.name = current
     if w.effect then
         local ok, err = pcall(function()
-            local asset = LoadAsset(w.effect)
+            local asset = WaCa.LoadAsset(w.effect)
             if not asset or not asset:IsValid() then error("not loadable: " .. w.effect) end
             if asset:GetClass():GetFName():ToString():find("Material") then
-                meshLayers(pawn, asset)
+                meshLayers(pawn, asset, w.params)
             else
                 local lib = StaticFindObject("/Script/Niagara.Default__NiagaraFunctionLibrary")
                 table.insert(effect.parts, lib:SpawnSystemAttached(asset, pawn.RootComponent, FName("None"),
@@ -163,7 +172,7 @@ local function startEffect()
     end
     if w.sound then
         local ok, err = pcall(function()
-            local sound = LoadAsset(w.sound)
+            local sound = WaCa.LoadAsset(w.sound)
             if not sound or not sound:IsValid() then error("not loadable: " .. w.sound) end
             local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
             effect.audio = gs:SpawnSound2D(pawn, sound, cfg.volume, 1.0, 0.0, nil, false, true)

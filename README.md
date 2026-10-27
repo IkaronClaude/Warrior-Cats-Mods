@@ -114,7 +114,11 @@ Other UE4SS Lua mods can use the shared API:
 local WaCa = require("WaCa")
 WaCa.SetText("STR_MAINMENU_PROPHECY_MODE", "Story Mode")   -- any game text, by its key
 print(WaCa.GetText("STR_CAT_NAME1_PAW"))                    -- "Woodpaw"
+local mi = WaCa.LoadAsset("/Game/Mods/MyMod/MI_Thing.MI_Thing")  -- also from your own pak in Paks\~mods
 ```
+(UE4SS's own `LoadAsset` only finds assets in the game's AssetRegistry, so it returns nil for anything in a mod pak;
+`WaCa.LoadAsset` falls back to the engine's own load.) Making a pak: see `tools\build_content.ps1` - cook in a project
+named `Wrc`, with the game's renderer settings, Nanite off on meshes, shader code not shared.
 Appearance from code (any cat's `SwtAdventureCustomizableMeshComponent`):
 ```lua
 WaCa.SetCatColor(cat, "Fur", WaCa.ParseColor("#EFE6D6"))

@@ -53,6 +53,16 @@ def import_file(filename, dest, name, options=None):
 
 # --- mesh + sound -------------------------------------------------------------------------------------------------
 mesh = import_file("SM_WaCaPrecipCylinder.obj", WEATHER, "SM_WaCaPrecipCylinder")
+# a plain mesh: no Nanite (UE 5.7 may turn it on for imports - loading it crashed the game's GPU device on the VM),
+# no collision, no distance field (it never casts or blocks anything)
+nanite = mesh.get_editor_property("nanite_settings")
+log("mesh Nanite was %s" % nanite.get_editor_property("enabled"))
+nanite.set_editor_property("enabled", False)
+mesh.set_editor_property("nanite_settings", nanite)
+mesh.set_editor_property("generate_mesh_distance_field", False) if hasattr(mesh, "generate_mesh_distance_field") else None
+body = mesh.get_editor_property("body_setup")
+if body:
+    body.set_editor_property("collision_trace_flag", unreal.CollisionTraceFlag.CTF_USE_SIMPLE_AS_COMPLEX)
 sound = import_file("SW_WaCaRainLoop.wav", WEATHER, "SW_WaCaRainLoop")
 sound.set_editor_property("looping", True)
 
