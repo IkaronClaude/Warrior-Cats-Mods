@@ -250,6 +250,13 @@ game data in this repo.
       the game's quest / cutscene / dialogue hooks.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
+      SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
+      - NOISE: during the "instakill cutscene" the cat can loudly walk through leaf litter and the prey doesn't notice
+        - it should notice and FLEE.
+      - SUCCESS CHANCE per hunt instead of a sure kill, by the cat (rank, or day): apprentice ~20%, warrior ~80%,
+        seasoned warrior / deputy 130% base. Prey difficulty multiplies it (rabbit x0.5). Always a 5% critical miss
+        (so the effective chance never exceeds 95%). A miss = the prey escapes (flees).
+      - Keep: catch = the game's instakill; rats stay hostile; pacing later.
       PREPARED 2026-10-27 (research, nothing built yet):
       - Prey = AWrcPouncePrey (ACharacter): PreyGenerator, ExplorationDetectionComponent (USwtAdventureDetection-
         Component: USphereComponent, Range EAdventureDetectionRange, DetectedCharacters, DetectionType),
