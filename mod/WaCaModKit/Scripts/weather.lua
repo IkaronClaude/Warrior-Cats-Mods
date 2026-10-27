@@ -10,11 +10,13 @@ local Weather = {}
 
 local WaCa, log, modDir, DayNight
 local cfg = { on = false, order = {}, start = 1, days = 7, minHours = 3, maxHours = 10, fade = 20,
-              seasons = {}, weathers = {} }
+              seasons = {}, weathers = {}, volume = 0.6,
+              effectMesh = "/Game/Mods/WaCa/Weather/SM_WaCaPrecipCylinder.SM_WaCaPrecipCylinder",
+              layers = { { 500, 1200 }, { 1100, 1800 }, { 2200, 2600 } } }
 local season, current, hoursLeft
 local restoredFor
 local shown = { look = nil, gen = 0 }            -- the look on screen now (faded towards the target)
-local effect = { name = nil }                    -- the playing weather effect / sound
+local effect = { name = nil, parts = {} }        -- the playing weather effect (components) / sound
 
 local function player()
     for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
@@ -99,19 +101,46 @@ local function fadeLook()
 end
 
 local function stopEffect()
-    pcall(function()
-        if effect.particles and effect.particles:IsValid() then effect.particles:DestroyComponent(effect.particles) end
-    end)
+    for _, part in ipairs(effect.parts or {}) do
+        pcall(function() if part:IsValid() then part:K2_DestroyComponent(part) end end)
+    end
     pcall(function()
         if effect.audio and effect.audio:IsValid() then effect.audio:FadeOut(3.0, 0.0, 0) end
     end)
-    effect.particles, effect.audio, effect.name = nil, nil, nil
+    effect.parts, effect.audio, effect.name = {}, nil, nil
 end
 
--- the weather's Effect (a Niagara system, attached to the player's cat) and Sound (2D, looping asset)
+local function alive()
+    for _, part in ipairs(effect.parts or {}) do if part:IsValid() then return true end end
+    return false
+end
+
+-- a material Effect: the weather drawn on open cylinders around the cat (EffectMesh, one per EffectLayers entry,
+-- radius x height), added to the cat as components - they follow it, keep their own rotation, never collide
+local function meshLayers(pawn, material)
+    local mesh = LoadAsset(cfg.effectMesh)
+    if not mesh or not mesh:IsValid() then error("EffectMesh not loadable: " .. cfg.effectMesh) end
+    local class = StaticFindObject("/Script/Engine.StaticMeshComponent")
+    for _, layer in ipairs(cfg.layers) do
+        local comp = pawn:AddComponentByClass(class, false,
+            { Rotation = { X = 0, Y = 0, Z = 0, W = 1 }, Translation = { X = 0, Y = 0, Z = layer[2] * 0.25 },
+              Scale3D = { X = layer[1] / 100, Y = layer[1] / 100, Z = layer[2] / 200 } }, false)
+        if comp and comp:IsValid() then
+            comp:SetStaticMesh(mesh)
+            comp:SetMaterial(0, material)
+            comp:SetCollisionEnabled(0)
+            comp:SetCastShadow(false)
+            comp:SetUsingAbsoluteRotation(true)
+            table.insert(effect.parts, comp)
+        end
+    end
+end
+
+-- the weather's Effect (a material -> mesh layers, or a Niagara system attached to the cat) and Sound (2D, a
+-- looping asset), from the WaCa content pak
 local function startEffect()
     local w = cfg.weathers[current] or {}
-    if effect.name == current and ((effect.particles and effect.particles:IsValid()) or not w.effect) then return end
+    if effect.name == current and (alive() or not w.effect) then return end
     stopEffect()
     if not w.effect and not w.sound then return end
     local pawn = player()
@@ -119,11 +148,16 @@ local function startEffect()
     effect.name = current
     if w.effect then
         local ok, err = pcall(function()
-            local system = LoadAsset(w.effect)
-            if not system or not system:IsValid() then error("not loadable: " .. w.effect) end
-            local lib = StaticFindObject("/Script/Niagara.Default__NiagaraFunctionLibrary")
-            effect.particles = lib:SpawnSystemAttached(system, pawn.RootComponent, FName("None"), { X = 0, Y = 0, Z = 0 },
-                { pitch = 0, Yaw = 0, Roll = 0 }, 0, false, true, 0, false)
+            local asset = LoadAsset(w.effect)
+            if not asset or not asset:IsValid() then error("not loadable: " .. w.effect) end
+            if asset:GetClass():GetFName():ToString():find("Material") then
+                meshLayers(pawn, asset)
+            else
+                local lib = StaticFindObject("/Script/Niagara.Default__NiagaraFunctionLibrary")
+                table.insert(effect.parts, lib:SpawnSystemAttached(asset, pawn.RootComponent, FName("None"),
+                    { X = 0, Y = 0, Z = 0 }, { pitch = 0, Yaw = 0, Roll = 0 }, 0, false, true, 0, false))
+            end
+            log("weather: %s effect on (%d parts)", current, #effect.parts)
         end)
         if not ok then log("weather: %s effect failed (%s)", current, tostring(err)) end
     end
@@ -132,8 +166,8 @@ local function startEffect()
             local sound = LoadAsset(w.sound)
             if not sound or not sound:IsValid() then error("not loadable: " .. w.sound) end
             local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
-            effect.audio = gs:SpawnSound2D(pawn, sound, 1.0, 1.0, 0.0, nil, false, true)
-            if effect.audio and effect.audio:IsValid() then effect.audio:FadeIn(3.0, 1.0, 0.0, 0) end
+            effect.audio = gs:SpawnSound2D(pawn, sound, cfg.volume, 1.0, 0.0, nil, false, true)
+            if effect.audio and effect.audio:IsValid() then effect.audio:FadeIn(3.0, cfg.volume, 0.0, 0) end
         end)
         if not ok then log("weather: %s sound failed (%s)", current, tostring(err)) end
     end
@@ -223,6 +257,12 @@ function Weather.Init(c)
     cfg.minHours = math.max(1, math.floor(tonumber(w.MinHours or "") or cfg.minHours))
     cfg.maxHours = math.max(cfg.minHours, math.floor(tonumber(w.MaxHours or "") or cfg.maxHours))
     cfg.fade = math.max(0, tonumber(w.FadeSeconds or "") or cfg.fade)
+    cfg.volume = tonumber(w.Volume or "") or cfg.volume
+    if (w.EffectMesh or "") ~= "" then cfg.effectMesh = w.EffectMesh end
+    if (w.EffectLayers or "") ~= "" then
+        cfg.layers = {}
+        for r, h in w.EffectLayers:gmatch("(%d+)%s*x%s*(%d+)") do table.insert(cfg.layers, { tonumber(r), tonumber(h) }) end
+    end
     for section, sec in pairs(ini) do
         local name = section:match("^Weather%.(.+)$")
         if name then cfg.weathers[name] = readLook(sec) end

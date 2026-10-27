@@ -47,8 +47,8 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: a day / night cycle - the sun moves, nights get dark, the time is kept with your
     save (daynight.ini On = 1).
   - Experimental, off by default: seasons and weather - newleaf to leaf-bare over the days of your save, overcast /
-    rain / snow spells that darken the light and change hunting and fishing (weather.ini [Seasons] On = 1; seasons
-    need the day / night cycle on).
+    rain / snow spells that darken the light and change hunting and fishing, with falling rain / snow and a rain
+    sound (weather.ini [Seasons] On = 1; seasons need the day / night cycle on).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then
     (activities.ini [Ambient] On = 1).
   - More graphics settings: config/graphics.ini (quality groups, motion blur, depth of field, frame cap ...).

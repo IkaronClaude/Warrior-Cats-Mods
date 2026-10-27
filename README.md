@@ -66,8 +66,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   it the season stays `StartSeason`). Each season has its own day length, light and sunlight tint, and makes hunting
   and fishing easier or harder (leaf-bare x0.6 hunting). Weather comes in spells of a few in-game hours rolled from
   the season's chances: overcast, rain and snow darken the light, thicken the fog and change the chances (rain:
-  hunting x0.8, fishing x1.2). Kept with your save. Rain / snow particles and sound need an effect asset (`Effect`,
-  `Sound`) - until one ships, rain is the darker, foggy look only.
+  hunting x0.8, fishing x1.2). Kept with your save. Rain and snow fall around your cat and rain has its sound - from
+  the mod's own content pak (`WaCaModKit_P` in `Wrc\Content\Paks\~mods`; `Effect`, `Sound`, `Volume` in the ini).
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.
@@ -169,6 +169,11 @@ entries in it too: `STR_CAT_NAME<n><suffix id>`.
   `python tools/ue4ss_release.py tools/bin/src/RE-UE4SS native/build/Game__Shipping__Win64/bin tools/bin/ue4ss`
   packages it from the UE4SS build `native\build.bat` made, with UE4SS's own packager (the release workflow does
   this; UE4SS's rolling experimental release doesn't keep old builds to download).
+- `tools\build_content.ps1`: builds the mod's content pak (`dist\content\WaCaModKit_P.pak/.utoc/.ucas`: the rain /
+  snow look and the rain sound) with Unreal Engine 5.7.4, headless: the sources are generated
+  (`content/scripts/make_sources.py`), the assets made by `content/scripts/build_assets.py` in the content project
+  `content/Wrc` (named like the game so the paths match), cooked into their own IoStore container. `package.ps1`
+  adds it to the release (installed into `Wrc\Content\Paks\~mods`).
 - `tools/check_hooks.py <unpacked exe>`: checks every native hook target against a game exe (run it on a game update
   before a release); the targets are read from the native sources.
 - `tools/AssetDump`: a headless CUE4Parse reader for the game's paks (for research; output stays out of git).

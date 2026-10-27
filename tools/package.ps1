@@ -28,6 +28,14 @@ New-Item -ItemType Directory -Force (Join-Path $mods "WaCaModKit\dlls") | Out-Nu
 Copy-Item (Join-Path $root "native\out\main.dll") (Join-Path $mods "WaCaModKit\dlls\main.dll")
 Copy-Item (Join-Path $root "LICENSE") (Join-Path $mods "WaCaModKit\LICENSE.txt") -ErrorAction SilentlyContinue
 
+# the content pak (tools\build_content.ps1), when built: the game mounts Content\Paks\~mods by itself
+$content = Join-Path $root "dist\content"
+if (Test-Path (Join-Path $content "WaCaModKit_P.utoc")) {
+    $paks = Join-Path $out "files\Wrc\Content\Paks\~mods"
+    New-Item -ItemType Directory -Force $paks | Out-Null
+    Copy-Item (Join-Path $content "WaCaModKit_P.*") $paks
+} else { Write-Host "no content pak (tools\build_content.ps1) - weather effects left out" }
+
 # installer + readme
 Copy-Item (Join-Path $root "install\*") $out
 $zip = Join-Path $root "dist\$name.zip"

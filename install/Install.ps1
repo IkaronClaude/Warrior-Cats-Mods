@@ -6,6 +6,7 @@ $ErrorActionPreference = "Stop"
 $AppId = "3960600"
 $Payload = Join-Path $PSScriptRoot "files"
 $Marker = "ue4ss\WaCaModKit.installed"
+$ContentPak = "WaCaModKit_P"           # the mod's own content (rain / snow), in Wrc\Content\Paks\~mods
 
 function Find-Game {
     $steam = (Get-ItemProperty "HKCU:\Software\Valve\Steam" -ErrorAction SilentlyContinue).SteamPath
@@ -53,6 +54,7 @@ if ($Uninstall) {
     }
     Remove-Item (Join-Path $Win64 "dwmapi.dll") -Force -ErrorAction SilentlyContinue
     Remove-Item (Join-Path $Win64 "ue4ss") -Recurse -Force
+    Remove-Item (Join-Path $GameDir "Wrc\Content\Paks\~mods\$ContentPak.*") -Force -ErrorAction SilentlyContinue
     Write-Host "WaCa ModKit and UE4SS removed. Your game files were never changed." -ForegroundColor Green
     exit 0
 }
@@ -64,6 +66,12 @@ $keep = $null
 if (Test-Path $cfg) { $keep = Join-Path $env:TEMP "WaCaModKit-config-$(Get-Random)"; Copy-Item $cfg $keep -Recurse }
 $oldMods = if (Test-Path $modsTxt) { Get-Content $modsTxt } else { @() }
 Copy-Item (Join-Path $Payload "Wrc\Binaries\Win64\*") $Win64 -Recurse -Force
+$paks = Join-Path $Payload "Wrc\Content\Paks\~mods"
+if (Test-Path $paks) {
+    $modPaks = Join-Path $GameDir "Wrc\Content\Paks\~mods"
+    New-Item -ItemType Directory -Force $modPaks | Out-Null
+    Copy-Item (Join-Path $paks "*") $modPaks -Force
+}
 if ($keep) {
     # an update: keep the player's settings, or start over from the new defaults (the old ones kept as a backup)
     $choice = if ($ResetConfig) { "r" } elseif ($KeepConfig) { "k" } else {
