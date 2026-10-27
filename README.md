@@ -16,10 +16,13 @@ asks whether to keep your settings or reset them to the new defaults (the old on
     box (`creator.ini NameBoxKeys`). The warrior ceremony gets the same box for your own warrior **suffix**.
   - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
     from `config/palette.ini`.
-  - **A WaCa panel** on the customisation screen: the *shape* of the pattern and of the markings from any of the
-    game's 23 patterns and 20 markings, WaCa shapes like **Colourpoint** (coloured with the game's pattern colour
-    picker), or a PNG pack - so two markings can be combined. Click the arrows, or press F6 / F7 ("No override" = the
-    game's own). Backing out of the screen (BackSpace / Escape) drops that screen's WaCa choices, like the game's.
+  - **WaCa shapes in the game's own grids**: looks like **Colourpoint** (coloured with the game's pattern colour
+    picker) are entries of the creator's pattern / markings grids, after the game's own - choose them like any other.
+    Look mods add theirs the same way (a `looks/` folder in the mod).
+  - **A WaCa panel** on the customisation screen only for what the grids can't offer: PNG packs, whole-look presets,
+    and (`creator.ini PanelShapes = 1`) any game pattern / marking as the shape of either row - so two markings can be
+    combined. Click the arrows, or press F5 / F6 / F7. With none of those configured there is no panel. Backing out
+    of the screen (BackSpace / Escape) drops that screen's WaCa choices, like the game's.
 - **Saved with your save, applied when you load it:** everything chosen goes into a small file next to the game's
   save (`WrcGame.<save>-<character slot>.WaCaModKit.ini`), written when the game saves. The game's own save only ever gets the game's
   own values (a custom colour is saved as the nearest game colour), so it stays loadable without the mod.

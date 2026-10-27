@@ -20,9 +20,10 @@ WHAT IT DOES (0.6.0)
     to type in the box (top right; Steam's keyboard on a controller), confirm again to go on. The warrior ceremony
     has the same box for your own warrior suffix.
   - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
-  - A WaCa panel on the customisation screen: the shape of the pattern / markings from any of the game's patterns
-    and markings, or "Colourpoint" (coloured with the game's pattern colour) - combine two markings. Click the arrows
-    or press F6 / F7. Backing out of the screen drops its WaCa choices.
+  - New shapes like "Colourpoint" right in the game's own pattern / markings grids (coloured with the game's
+    pattern colour). Look mods: drop the mod's folder into ue4ss/Mods.
+  - Optional WaCa panel (packs, presets, creator.ini PanelShapes = 1 to combine two markings): click the arrows or
+    press F5 / F6 / F7. Backing out of the screen drops its WaCa choices.
   These choices are saved next to your save (WrcGame.<save>-<character slot>.WaCaModKit.ini in the game's save folder) and come back
   when you load it. The game's own save stays loadable without the mod.
 
