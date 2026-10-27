@@ -408,6 +408,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       cat assigned yet, filled with a numeric default. Next: hook the role -> name resolution (find the data table the
       roles come from) and log every role resolved to a number / empty; needs a story save at that point (operator's
       save, or reach it on the VM).
+      FIXED 2026-10-27 (one class of it): the game's own English text MISSPELLS name placeholders - {THE WARROR
+      FATHER}, {Warrior father}, {THE MISTRUSTUL LEADER}, {THE MISTRUSTING LEADER}, {THE VENGEFUL WARRIOR}, {Player} -
+      so those names never get filled in. config/text.ini [Placeholders] WRONG = RIGHT; at load every string-table
+      line (GetKeysFromStringTable, 8901) holding {WRONG} is rewritten to {RIGHT} at runtime (no game text shipped).
+      VM: 6 lines fixed (TheUnchosenApprentice / Crowfeather / TheZealousWarrior / RiverClanQueen /
+      TheMistrustfulLeader / RiverClanApprentice). The "1's Prophecy" line itself isn't in Strings_EN.csv as worded -
+      the detector below still logs any other unfilled line in play. Not fixed: {THE TRAITOR} (likely a real
+      dynamic role - left as is). Every placeholder the text uses was counted (Strings_EN.csv: {THE WARRIOR FATHER}
+      186, {PLAYER} 170 ... down to these one-offs).
       2026-10-27: main.lua now checks every dialogue line once shown in full (QuestGiverWidget.OnTypewriterDone) and
       logs "dialogue: UNFILLED ..." with the dialogue node for a {placeholder} or a number before 's - any playthrough
       (the operator's included) names the broken line and its node.

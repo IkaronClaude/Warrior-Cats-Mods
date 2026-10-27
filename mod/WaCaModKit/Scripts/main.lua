@@ -20,6 +20,46 @@ local function applyTextOverrides()
     log("%d text overrides applied", n)
 end
 
+-- config/text.ini [Placeholders] WRONG = RIGHT: the game's own lines with a misspelled name placeholder ({THE WARROR
+-- FATHER}) never get the name filled in - every line holding {WRONG} gets {RIGHT} (the game's text is read and
+-- rewritten at runtime, nothing of it is shipped)
+local function applyPlaceholderFixes()
+    local ini = WaCa.ReadIni(modDir .. "/config/text.ini")
+    local section = ini and ini["Placeholders"]
+    if not section or #section.__order == 0 then
+        log("placeholder fixes: none configured")
+        return
+    end
+    local ok, keys = pcall(function()
+        return StaticFindObject("/Script/Engine.Default__KismetStringTableLibrary"):GetKeysFromStringTable(FName("SwtStrings"))
+    end)
+    if not ok or not keys then
+        log("placeholder fixes: the game's text keys can't be listed (%s)", tostring(keys))
+        return
+    end
+    local fixed = 0
+    for i = 1, #keys do
+        local k = keys[i]
+        local key = type(k) == "string" and k or (k.ToString and k:ToString()) or (k.get and k:get():ToString()) or tostring(k)
+        local text = WaCa.GetText(key)
+        if text:find("{", 1, true) then
+            local new = text
+            for _, wrong in ipairs(section.__order) do
+                new = new:gsub("{" .. wrong:gsub("%p", "%%%0") .. "}", "{" .. section[wrong]:gsub("%%", "%%%%") .. "}")
+            end
+            if new ~= text then
+                if WaCa.SetText(key, new) then
+                    fixed = fixed + 1
+                    log("placeholder fix: %s", key)
+                else
+                    log("placeholder fix %s did not apply", key)
+                end
+            end
+        end
+    end
+    log("placeholder fixes: %d lines of %d", fixed, #keys)
+end
+
 local Creator = require("creator")
 
 -- Per-save data: the active save slot's own name / look, in a sidecar next to the game's save
@@ -524,6 +564,7 @@ local function gameReady()
     if textApplied or not WaCa.IsTextReady() then return end
     textApplied = true
     applyTextOverrides()
+    applyPlaceholderFixes()
     applyUIKeys()
     Dev.OnGameReady()
 end

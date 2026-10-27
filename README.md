@@ -57,6 +57,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.
+- **Dialogue name fixes** (`config/text.ini [Placeholders]`): the game's own text misspells some name placeholders
+  (`{THE WARROR FATHER}`, `{THE MISTRUSTUL LEADER}` ...), so those lines never showed the cat's name - the mod
+  corrects them at load (6 lines; only the misspelled token is changed).
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera
