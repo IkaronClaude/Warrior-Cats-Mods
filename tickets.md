@@ -190,8 +190,14 @@ game data in this repo.
       DT_GamepadButtons* rows, the viewport capture mode) - the menu saves them to keybinds.ini, the one source. The
       raw KeyDown event only observes (aliases press real keys), so it stays compatible.
 - [~] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
-      2026-10-25: mouse CAMERA done (camera.cpp: yaw + pitch through the game's own turn / pitch steps, uncapped);
-      movement relative to the camera = next.
+      2026-10-25: mouse CAMERA done (camera.cpp: yaw + pitch through the game's own turn / pitch steps, uncapped).
+      2026-10-27: camera-relative MOVEMENT done: the game's movement already is camera-relative (0x1417A4940 moves
+      along the camera's forward / right on the ground), but its turn function added movement-right to the CAMERA
+      turn (tank feel). Now movement-right reads 0 for the turn function (dead-zone getter vtable +0x1000, hooked
+      from the live vtable; anchors: turn calls that slot, the getter reads the invert flag) - A / D strafe, only
+      the camera axis / mouse turns the camera. keybinds.ini [Mouse] CameraRelativeMove (default 1). VM: holding
+      D -> "movement-right 1.00 kept out of the camera turn". OPEN: the operator's feel check (does the cat turn to
+      face its strafe direction, or sidestep? both are the game's own animation choice).
 - [~] **3. Free-form name input.** (names.ini + the creator's name box done; operator checks open) The player types any name. Keep an auto-generated fallback name for online content
       (minor relevance); find what the online side reads.
       0.2 (2026-10-24): `config/names.ini` (Prefix / optional warrior Suffix) rewrites the string-table entry of the

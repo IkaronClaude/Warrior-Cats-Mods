@@ -46,6 +46,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Escape** pauses (instead of P), and goes back / closes in every menu (the character creator included) - BackSpace keeps working too; the menus show the Esc icon.
 - **Mouse look**: the camera turns directly with the mouse movement (no stick dead zone, curve or speed
   cap; `[Mouse] LookYaw` / `LookPitch` in `keybinds.ini`), the game's invert settings respected.
+- **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera
+  ("tank" controls); only the mouse / camera keys turn the camera. `[Mouse] CameraRelativeMove = 0` = the game's.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
   (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), key aliases in menus (`[KeyAliases]`) and in conversations (`[DialogueKeyAliases]`: Space advances dialogue). Every
   command and its default is listed inside. Gamepad bindings are untouched.

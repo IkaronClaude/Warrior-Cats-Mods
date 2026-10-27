@@ -185,6 +185,9 @@ function Menus.Init(c)
     gameplayCapture = tonumber(mouse.GameplayCapture or "") or gameplayCapture
     look.yaw = tonumber(mouse.LookYaw or "") or look.yaw
     look.pitch = tonumber(mouse.LookPitch or "") or look.pitch
+    -- right / left move the cat sideways relative to the camera (the game's own movement already is camera-relative;
+    -- only its camera turn from right / left goes) - 0 = the game's tank-style turning
+    WaCa.Command("CameraRelativeMove|" .. ((mouse.CameraRelativeMove or "1") == "0" and "0" or "1"))
     -- no menu cursor handling: nothing tells gameplay from menus, so mouse look is simply on
     if not enabled then Menus.MouseLook(true) return end
     -- Decided on the next tick, never inside the event: a screen is built inside the game's own input handling (the

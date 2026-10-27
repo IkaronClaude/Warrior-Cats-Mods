@@ -19,7 +19,9 @@
 #include "camera.h"
 
 #include <windows.h>
+#include <intrin.h>
 
+#include <algorithm>
 #include <atomic>
 #include <cmath>
 #include <cstdint>
@@ -51,6 +53,21 @@ bool g_pitchTried = false;
 std::atomic<bool> g_on{false};
 std::atomic<float> g_yawScale{0.f};
 std::atomic<float> g_pitchScale{0.f};
+
+// Camera-relative movement. The game already moves the cat relative to the camera (0x1417A4940: forward / right,
+// normalised, along the camera's forward projected on the ground), but its turn function adds movement-right to the
+// CAMERA turn - steering swings the camera round, so right / left circle instead of strafing ("tank" controls). On:
+// while the turn function runs, movement-right reads 0 for it - only the camera axis (stick / mouse) turns the
+// camera, and right / left move the cat sideways relative to it. Its getter: the dead-zone axis getter (vtable
+// +0x1000), hooked from the live vtable like the pitch one.
+using DeadZoneAxisFn = float(__fastcall*)(void* input, const uint8_t* command, float deadZone);
+DeadZoneAxisFn g_moveAxis = nullptr;
+bool g_moveTried = false;
+bool g_inTurn = false;
+std::atomic<bool> g_cameraRelative{false};
+constexpr int kDeadZoneGetterSlot = 0x1000;
+constexpr uint8_t kMoveRight = 61;
+void HookMoveAxis(void* input);
 
 // layout of the 2026-10-25 build (see the file comment)
 constexpr int kTurnSpeed = 0x1CC, kPitchSpeed = 0x1D0, kCurve = 0x1D4, kIdleTime = 0x220;
@@ -102,6 +119,23 @@ bool MouseDelta(float& dx, float& dy) {
 // flipped unless the player's "don't invert" flag is set).
 float __fastcall PitchAxisDetour(void* input, const uint8_t* command) {
     float v = g_pitchAxis(input, command);
+    // dev (WACA_TRACE_RAW=1): who reads which raw axis - each new (caller, command) once, as an exe address (for
+    // finding where movement is applied: camera-relative movement, tickets.md 19b)
+    static const bool trace = [] {
+        wchar_t on[4] = {};
+        return GetEnvironmentVariableW(L"WACA_TRACE_RAW", on, 4) && on[0] == L'1';
+    }();
+    if (trace && command) {
+        static std::vector<std::pair<uintptr_t, int>> seen;
+        auto ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
+        auto key = std::make_pair(ret, static_cast<int>(*command));
+        if (seen.size() < 64 && std::find(seen.begin(), seen.end(), key) == seen.end()) {
+            seen.push_back(key);
+            auto base = reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
+            logx::Line(L"[camera] raw axis %d = %.3f read from 0x%llX", key.second, v,
+                       static_cast<unsigned long long>(ret - base + 0x140000000ull));
+        }
+    }
     if (!g_on || input != g_frameInput || !g_frameComponent || !command || *command != kCameraUp || g_frameDt <= 0.f)
         return v;
     float dx = 0.f, dy = 0.f;
@@ -147,6 +181,7 @@ void HookPitchAxis(void* input) {
 
 void __fastcall UpdateDetour(void* component, void* input, float dt) {
     if (!g_pitchTried && input) HookPitchAxis(input);
+    if (!g_moveTried && input) HookMoveAxis(input);
     g_frameComponent = component;
     g_frameInput = input;
     g_frameDt = dt;
@@ -160,8 +195,36 @@ void __fastcall UpdateDetour(void* component, void* input, float dt) {
 }
 
 // the game's turn (stick) + the mouse's yaw in turn units: the caller multiplies by turn speed * dt
+float __fastcall MoveAxisDetour(void* input, const uint8_t* command, float deadZone) {
+    float v = g_moveAxis(input, command, deadZone);
+    if (!(g_inTurn && g_cameraRelative && command && *command == kMoveRight)) return v;
+    static bool reported = false;
+    if (v != 0.f && !reported) {
+        reported = true;
+        logx::Line(L"[camera] movement-right %.2f kept out of the camera turn (camera-relative movement)", v);
+    }
+    return 0.f;
+}
+
+// the dead-zone getter, from the live vtable (anchored: the turn function calls that slot - checked at Install -
+// and the getter reads the yaw invert flag, cmp byte ptr [rdi+8B3h], 0)
+void HookMoveAxis(void* input) {
+    g_moveTried = true;
+    auto* fn = (*reinterpret_cast<uint8_t***>(input))[kDeadZoneGetterSlot / 8];
+    if (!scan::BodyContains(fn, "80 BF B3 08 00 00 00", 1)) {
+        logx::Line(L"[camera] dead-zone axis getter at %p doesn't read the invert flag - camera-relative movement OFF", fn);
+        return;
+    }
+    bool ok = MH_CreateHook(fn, reinterpret_cast<void*>(&MoveAxisDetour), reinterpret_cast<void**>(&g_moveAxis)) == MH_OK &&
+              MH_EnableHook(fn) == MH_OK;
+    logx::Line(L"[camera] dead-zone axis getter at %p (confirmed: reads the invert flag)%s", fn, ok ? L"" : L" - could not hook");
+}
+
 float __fastcall TurnDetour(void* component, float deadZone) {
+    // camera-relative movement: movement-right doesn't turn the camera (see g_cameraRelative)
+    g_inTurn = true;
     float turn = g_turn(component, deadZone);
+    g_inTurn = false;
     if (!g_on || !component || !g_frameInput || g_frameDt <= 0.f) return turn;
     float dx = 0.f, dy = 0.f;
     if (!MouseDelta(dx, dy) || dx == 0.f) return turn;
@@ -204,11 +267,20 @@ void Install() {
         logx::Line(L"[camera] turn function: no single callee of the update asks for the camera-right axis - mouse look OFF");
         return;
     }
+    if (!scan::BodyContains(turn, "FF 90 00 10 00 00", 2)) {           // call qword ptr [rax + 1000h]: its axes
+        logx::Line(L"[camera] turn at %p doesn't call the axis getter slot - camera-relative movement OFF", turn);
+        g_moveTried = true;
+    }
     bool ok = MH_CreateHook(update, reinterpret_cast<void*>(&UpdateDetour), reinterpret_cast<void**>(&g_update)) == MH_OK &&
               MH_CreateHook(turn, reinterpret_cast<void*>(&TurnDetour), reinterpret_cast<void**>(&g_turn)) == MH_OK &&
               MH_EnableHook(update) == MH_OK && MH_EnableHook(turn) == MH_OK;
     logx::Line(L"[camera] update at %p, turn at %p (confirmed: update asks for the camera axes, turn is its camera-right "
                L"callee)%s", update, turn, ok ? L"" : L" - could not hook");
+}
+
+void SetCameraRelativeMove(bool on) {
+    if (g_cameraRelative.exchange(on) != on)
+        logx::Line(L"[camera] camera-relative movement %s", on ? L"on (right / left move sideways, only the camera axis turns the camera)" : L"off (the game's: right / left turn the camera)");
 }
 
 void SetMouseLook(bool on, float yawScale, float pitchScale) {
