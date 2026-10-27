@@ -127,6 +127,21 @@ local function step(gen)
     end)
 end
 
+-- an intentional time skip (tickets.md 20): `days` days pass, the new day starts at `toHour` (default StartHour).
+-- Emits TimeSkipped(days, fromDay, toDay), then DayStarted(toDay) - the season, weather and prey follow. Returns
+-- false when the cycle is off (no day count to move).
+function DayNight.Skip(days, toHour)
+    if not cfg.on or not days or days < 1 then return false end
+    local from = day
+    day = day + math.floor(days)
+    hour = (toHour or cfg.startHour) % 24
+    log("daynight: %d day(s) pass - day %d -> %d, %02d:00", days, from, day, math.floor(hour))
+    WaCa.Emit("TimeSkipped", math.floor(days), from, day)
+    WaCa.Emit("DayStarted", day)
+    if running then refresh() end
+    return true
+end
+
 -- the hour now (0-24), or nil when the cycle is off - for other modules (day scripts, pacing)
 function DayNight.Hour() return cfg.on and hour or nil end
 -- the day number of this save (1 = the first), or nil when the cycle is off

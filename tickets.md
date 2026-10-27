@@ -545,6 +545,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       days / duties served (with 15 / 25). Needs: the target pace per rank.
 - [ ] **20. Intentional time skips.** Time passes on screen and on purpose ("a moon passes", with what happened in it),
       never implied by a story jump. A skip is a world event the other systems react to (season, prey, ages, ranks).
+      BUILT 2026-10-27 (experimental, timeskip.ini On = 0 by default): DayNight.Skip(days, hour) moves the save's day
+        count and emits TimeSkipped + DayStarted (season, weather, prey follow); timeskip.lua shows the card on the
+        game's own WBP_GuiPopupCenterMessage (text set AFTER AddToViewport - its construct fills a string-table key),
+        rest key F9 (RestDays; only in the world: not in a menu, the cat present). VM: F9 -> "A quarter moon passes.
+        It is Leaf-fall." on screen, the season / weather / prey moved on, day 1 -> 8 -> 15 (leaf-bare, snow).
+        Screenshots need "shot showui" - plain "shot" leaves ALL UI out (why the hunt label was "never seen").
+        Open: what happened during the skip (duties auto-resolved, the fresh-kill pile eaten, rank progress) once
+        those systems exist (15 / 25); a nicer card than the centre message (event cards, 17 + 10).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A skip = jump DayNight.Day() by N with a full-screen card ("A moon passes...") listing what happened (duties
         auto-resolved by standing, prey eaten from the pile, rank progress) - the card is one of the game's own

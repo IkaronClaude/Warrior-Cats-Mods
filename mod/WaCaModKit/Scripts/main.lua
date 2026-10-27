@@ -590,6 +590,8 @@ local Weather = require("weather")
 Weather.Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 -- prey follows the season (config/weather.ini [Season.*] Prey)
 require("preyworld").Init({ WaCa = WaCa, log = log, modDir = modDir, Weather = Weather })
+-- intentional time skips (config/timeskip.ini)
+require("timeskip").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Weather = Weather })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

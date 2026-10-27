@@ -71,6 +71,10 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   Prey follows the season (`[Season.*] Prey`): in leaf-bare only part of the mice, rabbits and birds are about and
   hardly any squirrels - the rest are away (hidden, never destroyed) until a later season; every in-game hour some
   prey comes and goes (`PreyTurnover`), turning up at a random spot of its area (`PreyRandomPlaces`).
+- **Time skips** (experimental, off by default, `config/timeskip.ini On = 1`, needs the day / night cycle): time passes
+  on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
+  card in the game's own style says so ("A quarter moon passes. It is leaf-bare.") and the season, weather and prey
+  move on with it. Day scripts and other modules can skip time too.
 - **Specialisation** (off by default, `config/roles.ini Role = Hunter / Tracker / Fighter`): from `MinRank` on your
   cat is better at some things and worse at others - Hunter catches more, Tracker fishes better and moves quieter
   (prey hears it for a shorter time after loud ground). Needs hunting by chance on. Add your own roles in the ini.
