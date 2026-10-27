@@ -112,6 +112,11 @@ game data in this repo.
   nearest quest giver (BP_Quest_Giver_Deputy_C), held E: QuestPlayerController.OnCanInteract never fired, no
   QuestGiverWidget. At 0.3 fps the walk barely moves and that NPC may have nothing to say - an operator press in
   play is the cheap check.
+  2026-10-27 (later): walked in for real - 300 units in front of the deputy, then held a movement key: the cat walks
+  (~30 units / wall s at 0.3 fps) but camera-relative, so W led away (1429) and S came to 203 then drifted to 607;
+  E there: no conversation. Steering the VM cat precisely needs the camera's actual yaw (the game camera ignores
+  SetControlRotation) - and that NPC may have nothing to say. Kept for the operator's one press in play (Space AND
+  now a left click, operator 2026-10-27).
 - [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
   (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
   layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
