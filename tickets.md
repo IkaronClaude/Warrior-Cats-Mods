@@ -361,6 +361,9 @@ game data in this repo.
         arrow keys (Player_Camera_Right) until within 15 degrees (it got to 5). With the mouse in view, 200 units in
         front of the crouched cat, the game still showed no instakill icon and Space gave no landing - the hunt
         needs more than position (the prey unaware / a real approach). Kept for the operator's play check.
+        The icon's meaning: WBP_GuiLevelWarning holds CanvasEnemyWeaker / Same / Stronger / Stronger2 / InstaKill -
+        a LEVEL-GAP marker (the instakill icon = far below the cat's level), shown only while the marker itself is up
+        (all 153 hidden at rest, VM). So the chance label appears exactly on the prey the game marks instakillable.
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.
