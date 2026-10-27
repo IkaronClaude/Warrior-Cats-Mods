@@ -93,27 +93,40 @@ local function armSpots()
     -- the game's own Blueprint of it (its overlap is bound there - a bare native one never reports), flag cleared
     local areaClass
     for _, a in ipairs(FindAllOf("SwtAdventureMovementModifierArea") or {}) do
-        if a:IsValid() and a:GetClass():GetFName():ToString():find("^BP_MovementModifier") then areaClass = a:GetClass() break end
+        -- always the same variant (the first found differed per run - Loud / Hiding / Invisible - and a run crashed)
+        if a:IsValid() and a:GetClass():GetFName():ToString():find("^BP_MovementModifier_Loud") then areaClass = a:GetClass() break end
     end
     if not areaClass then
         log("fishing: the game's movement-modifier areas aren't loaded - spots not armed")
         return
     end
-    local n = 0
+    -- one spot per half second (spawning them all at once, right as the world came up, crashed the game inside the
+    -- Blueprint's construction - FinishSpawningActor, VM 2026-10-27)
+    local list = {}
     for _, spot in ipairs(FindAllOf("BP_Interactable_Claw_FishingSpot_C") or {}) do
+        if spot:IsValid() then table.insert(list, pathOf(spot)) end
+    end
+    local n = 0
+    local function armOne(i)
+        if i > #list then
+            log("fishing: %d fishing spots armed (clan %s: x%.1f)", n, tostring(clan()), cfg.clans[clan() or ""] or 1.0)
+            return
+        end
         local ok, err = pcall(function()
-            if not spot:IsValid() then return end
+            local spot = StaticFindObject(list[i])
+            if not (spot and spot:IsValid()) then return end
             local p = spot:K2_GetActorLocation()
             local area = spot:GetWorld():SpawnActor(areaClass, p, { Pitch = 0, Yaw = 0, Roll = 0 })
             area.MovementFlag = 0
             area.TriggerBox:SetCollisionProfileName(FName("OverlapAllDynamic"), true)
             area.TriggerBox:SetBoxExtent({ X = cfg.radius, Y = cfg.radius, Z = 200 }, true)
-            spots[pathOf(area)] = { spot = pathOf(spot), inside = false, gen = 0, state = "here" }
+            spots[pathOf(area)] = { spot = list[i], inside = false, gen = 0, state = "here" }
             n = n + 1
         end)
         if not ok then log("fishing: a spot couldn't be armed (%s)", tostring(err)) end
+        ExecuteInGameThreadWithDelay(500, function() armOne(i + 1) end)
     end
-    log("fishing: %d fishing spots armed (clan %s: x%.1f)", n, tostring(clan()), cfg.clans[clan() or ""] or 1.0)
+    armOne(1)
 end
 
 function Fishing.Init(c)
@@ -154,7 +167,7 @@ function Fishing.Init(c)
             end
         end
         -- spawning from inside the screen's hook crashed the game once (VM): on the game thread's next tick instead
-        ExecuteInGameThreadWithDelay(2000, function()
+        ExecuteInGameThreadWithDelay(10000, function()
             local ok, err = pcall(armSpots)
             if not ok then log("fishing: arming failed (%s)", tostring(err)) end
         end)

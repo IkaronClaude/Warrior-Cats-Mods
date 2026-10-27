@@ -297,6 +297,11 @@ game data in this repo.
       checked offline + live) and emits AreaOverlap(area, actor, entering, flag) - hunting's loud ground uses it too
       (re-verified: "on loud ground" -> both landings heard). The live OnRankChanged RegisterHook is gone too (the
       save follows rank changes).
+      CRASH (same day, 3 runs): "reading 0x18c" right as the world came up - the stack's UFunction frame is
+      GameplayStatics:FinishSpawningActor = fishing's spawn (the "2 s later" deferral only hid it behind the last log
+      line), with the area class taken from whichever BP_MovementModifier_* FindAllOf returned first (it varied per
+      run). Now: always BP_MovementModifier_Loud_C, armed 10 s after the HUD, one spot per 0.5 s. Stability run: no
+      crash, 7 spots armed.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
