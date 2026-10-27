@@ -324,6 +324,13 @@ game data in this repo.
       -> no arrival events; reverted to the Blueprint version, off by default with a KNOWN ISSUE note in
       hunting.ini. Next: find the area Blueprint's construction crash (symbolise 0x143E1AB60 / 0x143E1CDA0 under
       FinishSpawningActor), or detour AActor::NotifyActorBeginOverlap on the TriggerBox (a virtual - find its slot).
+      ANALYSIS (same day): the crash is 0x143E1AE02 in 0x143E1AB60 (under GameplayStatics:FinishSpawningActor):
+      `call 0x143E241E0; movzx ecx, byte [rax+0x18C]` - 0x143E241E0 is a GetWorld-style accessor that returns NULL
+      when the object is a class default (RF 0x10) or its outer is flagged garbage (object-array flag bit 28) - i.e.
+      the spawned area's level / outer was being torn down (world-partition streaming) while the Blueprint was
+      constructed. Fix to try next: spawn into the fishing spot's OWN level only while that level is visible and
+      not unloading (spot:GetLevel(), skip spots whose level is going away), or arm a spot only when the cat comes
+      within streaming range of it (re-armed per streaming-in), instead of all 7 at world start.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
