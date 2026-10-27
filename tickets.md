@@ -414,7 +414,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       line (GetKeysFromStringTable, 8901) holding {WRONG} is rewritten to {RIGHT} at runtime (no game text shipped).
       VM: 6 lines fixed (TheUnchosenApprentice / Crowfeather / TheZealousWarrior / RiverClanQueen /
       TheMistrustfulLeader / RiverClanApprentice). The "1's Prophecy" line itself isn't in Strings_EN.csv as worded -
-      the detector below still logs any other unfilled line in play. Not fixed: {THE TRAITOR} (likely a real
+      the detector below still logs any other unfilled line in play.
+      Checked 2026-10-27: STR_CLAN_COMPLETION "{CLAN} Prophecy {N}%" renders correctly ("RiverClan Prophecy 56%" on Select
+      Your Cat, VM); no "{X}'s Prophecy" / "It seems that ... Prophecy" line exists in Strings_EN.csv. The reported line
+      must come from another source (a sequence subtitle / a DT text) - the in-play detector names it when seen. Not fixed: {THE TRAITOR} (likely a real
       dynamic role - left as is). Every placeholder the text uses was counted (Strings_EN.csv: {THE WARRIOR FATHER}
       186, {PLAYER} 170 ... down to these one-offs).
       2026-10-27: main.lua now checks every dialogue line once shown in full (QuestGiverWidget.OnTypewriterDone) and
