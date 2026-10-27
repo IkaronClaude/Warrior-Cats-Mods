@@ -548,6 +548,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (about 47 units / game s, not the 300 MaxWalkSpeed) and stopped there - path blocked / nav. Open: the walk
         speed and where camp cats stand in real play (the VM cat isn't in a camp; the closest idle pair was 1600-1800
         apart) - tune PairRadius in play.
+        Later (same day): BOTH cats now walk to the midpoint (AI paused on both). VM: 1701 -> 926 units, then stalled
+        -> gave up cleanly ("didn't get to", AI restarted). That pair is likely not reachable on foot; a nav-path
+        check (NavigationSystemV1.FindPathToLocationSynchronously) returns NOTHING from Lua - even for 300 units of
+        open ground - so partners stay chosen by straight-line distance and an unreachable walk gives up. The world's
+        idle clanmates near the VM cat stand 1700+ apart (6 pairs within 2500 of 66 idle) - a real camp is the test.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.

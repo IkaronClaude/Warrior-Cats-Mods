@@ -80,8 +80,12 @@ local function once()
         play(first)
         return
     end
-    -- a pair: the nearest other idle clanmate within PairRadius walks over (one AI move), and once it has had the
-    -- time to get there (its distance / walk speed, one callback - no watching), both face each other and play
+    -- a pair: the nearest other idle clanmate within PairRadius; BOTH walk to the point between them (one AI move
+    -- each - a single cat walking the whole way stopped short on the VM), and once they've had the time to get there
+    -- (half the distance / walk speed, in game time - one callback, re-checked while they're still closing in), both
+    -- face each other and play
+    -- the nearest other idle clanmate within PairRadius (a straight-line neighbour across an obstacle can't arrive:
+    -- the walk then stalls and the pair gives up below; the navigation path query returns nothing from Lua, VM)
     local partner, best
     local p = first:K2_GetActorLocation()
     for _, c in ipairs(cats) do
@@ -94,23 +98,34 @@ local function once()
     if not partner then return end                     -- nobody near enough to play with
     local q = partner:K2_GetActorLocation()
     local dist = math.sqrt(best)
-    local to = { X = p.X + (q.X - p.X) / dist * 120, Y = p.Y + (q.Y - p.Y) / dist * 120, Z = p.Z }
+    local mid = { X = (p.X + q.X) / 2, Y = (p.Y + q.Y) / 2, Z = (p.Z + q.Z) / 2 }
+    local ux, uy = (q.X - p.X) / dist, (q.Y - p.Y) / dist
+    local spots = { { X = mid.X - ux * 60, Y = mid.Y - uy * 60, Z = mid.Z }, { X = mid.X + ux * 60, Y = mid.Y + uy * 60, Z = mid.Z } }
     local speed = 300
     pcall(function() speed = math.max(50, partner.CharacterMovement.MaxWalkSpeed) end)
-    local wait = math.ceil(dist / speed) + 1
+    local wait = math.ceil(dist / 2 / speed) + 1
     for _, cat in ipairs({ first, partner }) do busyUntil[cat:GetFName():ToString()] = os.time() + wait + 2 end
-    -- its behaviour tree would override the walk (VM: 12 units in 5 game s): its AI logic pauses until the activity
-    -- is over (restarted after the montage, or when it doesn't arrive)
-    local brain
-    pcall(function() brain = partner:GetController().BrainComponent end)
-    if brain and brain:IsValid() then brain:StopLogic("WaCa activity") end
-    StaticFindObject("/Script/AIModule.Default__AIBlueprintHelperLibrary"):SimpleMoveToLocation(partner:GetController(), to)
-    local brainPath = brain and brain:IsValid() and brain:GetFullName():gsub("^%S+ ", "") or nil
-    local function resumeBrain()
-        local br = brainPath and StaticFindObject(brainPath)
-        if br and br:IsValid() then br:RestartLogic() end
+    -- their behaviour trees would override the walk (VM: 12 units in 5 game s): their AI logic pauses until the
+    -- activity is over (restarted after the montage, or when they don't meet)
+    local brains = {}
+    local helper = StaticFindObject("/Script/AIModule.Default__AIBlueprintHelperLibrary")
+    for i, cat in ipairs({ first, partner }) do
+        pcall(function()
+            local brain = cat:GetController().BrainComponent
+            if brain and brain:IsValid() then
+                brain:StopLogic("WaCa activity")
+                table.insert(brains, (brain:GetFullName():gsub("^%S+ ", "")))
+            end
+        end)
+        helper:SimpleMoveToLocation(cat:GetController(), spots[i])
     end
-    log("activities: %s walks over to %s (%.0f units) - %s", partner:GetFName():ToString(), first:GetFName():ToString(), dist, activity.name)
+    local function resumeBrain()
+        for _, path in ipairs(brains) do
+            local br = StaticFindObject(path)
+            if br and br:IsValid() then br:RestartLogic() end
+        end
+    end
+    log("activities: %s and %s walk to meet (%.0f units apart) - %s", first:GetFName():ToString(), partner:GetFName():ToString(), dist, activity.name)
     local a, b = first:GetFullName():gsub("^%S+ ", ""), partner:GetFullName():gsub("^%S+ ", "")
     -- the walk takes `wait` GAME seconds; the delay below is wall time, so a slow frame rate (game time behind) gets
     -- a follow-up check while the partner is still closing in - at most 4, never on a cat that stopped approaching
