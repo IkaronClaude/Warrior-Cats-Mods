@@ -52,7 +52,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Hunting by chance** (experimental, off by default, `config/hunting.ini [Chance] On = 1`): the prey instakill
   succeeds only by chance - your rank's chance (apprentice 20%, warrior 80%, deputy / leader 130%) x the prey's factor
   (rabbit 0.5), always at least a 5% critical miss. A miss and the prey gets away. Only prey kinds (`PreyKinds`) are
-  rolled - the sneak attack on cats stays the game's. Every roll is in WaCaNative.log (`[hunt] landed on ...`).
+  rolled - the sneak attack on cats stays the game's. A catch gives the EXP a fight against that prey gives (the game's
+  own combat EXP table; `Experience = 1`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera

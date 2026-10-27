@@ -78,22 +78,14 @@ local function sendChance()
     if chance.on and not base then log("hunting: the cat's rank isn't known yet - every hunt works as in the game") end
 end
 
--- EXP for a catch: what a fight against that prey gives - the game's own combat EXP table (CombatBaseExperience,
--- rows by prey kind name: BaseExperience), added the way the game adds EXP (native, level-ups included)
-local expTable
+-- EXP for a catch: what a fight against that prey gives - the game's own combat EXP table (the NonAsset CSV
+-- CombatBaseExperience, rows by prey kind name), as the tuning manager loaded it (read natively, hunt.cpp), added the
+-- way the game adds EXP (native, level-ups included)
 local function experienceFor(kindName)
-    if not (expTable and expTable:IsValid()) then
-        expTable = nil
-        for _, t in ipairs(FindAllOf("DataTable") or {}) do
-            if t:IsValid() and t:GetFName():ToString():find("CombatBaseExperience") then expTable = t break end
-        end
-    end
-    if not expTable then return nil end
-    local amount
-    expTable:ForEachRow(function(name, row)
-        if tostring(name) == kindName then amount = row.BaseExperience end
-    end)
-    return amount
+    local tm = FindFirstOf("WrcTuningManager")
+    if not (tm and tm:IsValid()) or not WaCaNative_CombatExperience then return nil end
+    local amount = WaCaNative_CombatExperience(tm:GetAddress(), kindName)
+    return amount >= 0 and amount or nil
 end
 
 function Hunting.GrantExperience(kindValue)
@@ -104,7 +96,7 @@ function Hunting.GrantExperience(kindValue)
     local amount = kindName and experienceFor(kindName)
     if not amount then
         log("hunting: no EXP for prey kind %s (the combat EXP table %s)", tostring(kindName or kindValue),
-            expTable and "has no row for it" or "isn't loaded")
+            "has no row for it or isn't loaded - WaCaNative.log says which")
         return
     end
     local ok, granted = pcall(function()

@@ -494,6 +494,19 @@ int LuaDevFindBinding(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// dev: a live object's vtable as an exe address (image base 0x140000000) - WaCaNative_DevVtable(object) -> integer
+int LuaDevVtable(const LuaMadeSimple::Lua& lua) {
+    auto object = static_cast<uintptr_t>(lua.get_integer());
+    auto base = reinterpret_cast<uintptr_t>(GetModuleHandleW(nullptr));
+    int64_t out = 0;
+    if (object && Readable(reinterpret_cast<void*>(object), 8)) {
+        auto vtable = *reinterpret_cast<uintptr_t*>(object);
+        if (vtable > base) out = static_cast<int64_t>(vtable - base + 0x140000000ull);
+    }
+    lua.set_integer(out);
+    return 1;
+}
+
 // dev: n int32s from an address - WaCaNative_DevReadInts(address, n) -> "v0 v1 ..." (unreflected fields)
 int LuaDevReadInts(const LuaMadeSimple::Lua& lua) {
     auto* p = reinterpret_cast<const int32_t*>(static_cast<uintptr_t>(lua.get_integer()));
@@ -609,6 +622,14 @@ int LuaAddExperience(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_CombatExperience(tuning manager address, enemy kind name) -> the EXP a fight against it gives, or -1
+int LuaCombatExperience(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    std::wstring kind = Wide(std::string(lua.get_string()));
+    lua.set_integer(hunt::CombatExperience(reinterpret_cast<void*>(addr), kind));
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -684,11 +705,13 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevWatchAddress", &LuaDevWatchAddress);
     lua.register_function("WaCaNative_DevReadFloats", &LuaDevReadFloats);
     lua.register_function("WaCaNative_DevVirtual", &LuaDevVirtual);
+    lua.register_function("WaCaNative_DevVtable", &LuaDevVtable);
     lua.register_function("WaCaNative_DevFindBinding", &LuaDevFindBinding);
     lua.register_function("WaCaNative_DevReadInts", &LuaDevReadInts);
     lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
     lua.register_function("WaCaNative_HookHunt", &LuaHookHunt);
     lua.register_function("WaCaNative_AddExperience", &LuaAddExperience);
+    lua.register_function("WaCaNative_CombatExperience", &LuaCombatExperience);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));

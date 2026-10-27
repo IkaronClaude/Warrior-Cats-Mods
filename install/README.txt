@@ -38,7 +38,7 @@ WHAT IT DOES (0.6.0)
   - A click continues the "press any key" title screen.
   - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
   - Experimental, off by default: hunting by chance - the prey instakill works only by chance, by your rank and the
-    prey (hunting.ini [Chance] On = 1).
+    prey (hunting.ini [Chance] On = 1); a catch gives the EXP the fight would have.
   - Experimental, off by default: pounce prey runs from your cat (hunting.ini Flee = 1).
   - More graphics settings: config/graphics.ini (quality groups, motion blur, depth of field, frame cap ...).
   - A / D strafe relative to the camera instead of turning it (keybinds.ini CameraRelativeMove = 0: the game's).

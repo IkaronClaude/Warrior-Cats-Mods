@@ -291,7 +291,11 @@ game data in this repo.
       - EXP (2026-10-27): the grant is built - hunt::AddExperience calls the level component's resource add-value
         (vtable +0x508 = 0x14165B460: scales by the EXP multiplier +0x114, current EXP +0x10C (396 = the save's),
         next-level threshold +0x110; anchors = those two field reads, once each) via WaCaNative_AddExperience; Lua
-        grants the prey kind's BaseExperience on HuntCaught ([Chance] Experience = 1). OPEN: the amounts table is
+        grants the prey kind's BaseExperience on HuntCaught ([Chance] Experience = 1). DONE 2026-10-27: the table
+        lives in the tuning manager (BP_WrcTuningManager_C on the game instance - found by vtable: its init, slot
+        +0x378, tail-calls the loader) as an unreflected TMap<FString, row> at +0x460 (0x28 elements; anchors: the
+        loader's lea rdx,[rbx+460h] + the map's shape). VM: rabbit +40, mouse +25 -> EXP 396 -> 461; a critical
+        miss rolled 100. (Old note: the amounts table is
         the NonAsset CSV Gameplay/DataTables/NonAsset/CombatBaseExperience.csv - NOT a loaded DataTable (no runtime
         object; the 34 combat DTs don't include it), read by code not yet found (no path string; the struct is
         SwtAdventureCombatBaseExperience). VM: 3 caught mice -> "no EXP ... table isn't loaded", EXP stayed 396.

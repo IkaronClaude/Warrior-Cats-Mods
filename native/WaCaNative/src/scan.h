@@ -171,9 +171,9 @@ inline bool BodyContains(uint8_t* fn, const char* pattern, int count) {
     return found >= count;
 }
 
-// the one function `fn` calls (E8, a function start) whose body holds `pattern` - a function with no string of its
-// own, anchored on an anchored caller plus what it does; none or several = null
-inline uint8_t* CalleeWhere(uint8_t* fn, const char* pattern) {
+// the one function `fn` calls (E8, a function start; with jumps also E9 tail calls) whose body holds `pattern` - a
+// function with no string of its own, anchored on an anchored caller plus what it does; none or several = null
+inline uint8_t* CalleeWhere(uint8_t* fn, const char* pattern, bool jumps = false) {
     DWORD64 imageBase = 0;
     auto* entry = fn ? RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(fn), &imageBase, nullptr) : nullptr;
     if (!entry) return nullptr;
@@ -185,7 +185,7 @@ inline uint8_t* CalleeWhere(uint8_t* fn, const char* pattern) {
     }
     uint8_t* found = nullptr;
     for (uint8_t* p = fn; p + 5 <= end; ++p) {
-        if (*p != 0xE8) continue;
+        if (*p != 0xE8 && !(jumps && *p == 0xE9)) continue;
         uint8_t* t = RelTarget(p);
         if (t == found || !RtlLookupFunctionEntry(reinterpret_cast<DWORD64>(t), &imageBase, nullptr) || FunctionStart(t) != t ||
             !BodyContains(t, pattern, 1))

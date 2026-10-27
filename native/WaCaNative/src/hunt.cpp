@@ -12,6 +12,11 @@
 // is its VIRTUAL vtable +0x508 (rcx = component, xmm1 = amount): it scales the amount by the EXP multiplier
 // (+0x114) and checks the current value (+0x10C) against the next level. Anchors: that function's body reads both
 // fields exactly once (movss xmm1, [rbx+10Ch] / mulss xmm6, [rbx+114h]).
+// The amounts: the game's NonAsset CSV CombatBaseExperience, loaded by the tuning manager (UWrcTuningManager, on the
+// game instance) into an unreflected TMap<FString, FSwtAdventureCombatBaseExperience> at +0x460 - elements of 0x28:
+// key FString, the row (vptr, BaseExperience, DifficultyOffset), hash links. Anchors: the manager's init (vtable
+// +0x378) tail-calls the loader that addresses +0x460 (lea rdx, [rbx+460h]); the map must have the shape (every key
+// a sane string, every row the same row type).
 #include "hunt.h"
 
 #include <windows.h>
@@ -106,10 +111,57 @@ void __fastcall LandedDetour(void* componentPtr, void* hit, void* characterPtr) 
 
 using AddValueFn = void(__fastcall*)(void* component, float amount);
 constexpr int kAddValueSlot = 0x508;
+constexpr int kTuningInitSlot = 0x378;
+constexpr size_t kExpMap = 0x460;
+
+struct ExpElement {
+    wchar_t* Key;
+    int32_t KeyNum;
+    int32_t KeyMax;
+    void* RowVtable;
+    int32_t BaseExperience;
+    int32_t DifficultyOffset;
+    int32_t HashNext;
+    int32_t HashIndex;
+};
+static_assert(sizeof(ExpElement) == 0x28, "the map's element");
 
 }  // namespace
 
 namespace hunt {
+
+int CombatExperience(void* tuningManager, const std::wstring& kind) {
+    if (!tuningManager) return -1;
+    static void* anchoredFor = nullptr;
+    if (anchoredFor != *reinterpret_cast<void**>(tuningManager)) {
+        auto* init = (*reinterpret_cast<uint8_t***>(tuningManager))[kTuningInitSlot / 8];
+        if (!scan::CalleeWhere(init, "48 8D 93 60 04 00 00", true)) {
+            logx::Line(L"[hunt] the tuning manager's init %p doesn't load +0x%zX - anchors disagree, no combat EXP table", init, kExpMap);
+            return -1;
+        }
+        anchoredFor = *reinterpret_cast<void**>(tuningManager);
+    }
+    struct Array {
+        ExpElement* Data;
+        int32_t Num;
+        int32_t Max;
+    };
+    auto* arr = reinterpret_cast<Array*>(static_cast<uint8_t*>(tuningManager) + kExpMap);
+    if (!arr->Data || arr->Num <= 0 || arr->Num > 1000 || arr->Max < arr->Num || IsBadReadPtr(arr->Data, sizeof(ExpElement) * arr->Num)) {
+        logx::Line(L"[hunt] the combat EXP table isn't loaded (or not where it was)");
+        return -1;
+    }
+    void* rowType = arr->Data[0].RowVtable;
+    for (int32_t i = 0; i < arr->Num; ++i) {
+        const ExpElement& e = arr->Data[i];
+        if (e.RowVtable != rowType || !e.Key || e.KeyNum <= 0 || e.KeyNum > 256 || IsBadReadPtr(e.Key, e.KeyNum * 2)) {
+            logx::Line(L"[hunt] the combat EXP table's element %d isn't a row - anchors disagree", i);
+            return -1;
+        }
+        if (_wcsicmp(e.Key, kind.c_str()) == 0) return e.BaseExperience;
+    }
+    return -1;
+}
 
 bool AddExperience(void* levelComponent, float amount) {
     if (!levelComponent) return false;
