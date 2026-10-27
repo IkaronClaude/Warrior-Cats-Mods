@@ -158,7 +158,10 @@ entries in it too: `STR_CAT_NAME<n><suffix id>`.
   Needs Visual Studio's C++ tools and Rust. UE4SS's Unreal submodule is private: it needs a GitHub account linked to
   Epic Games. The release workflow uses the secret `UE4SS_SOURCE_TOKEN` for it. The first build takes about
   10 minutes.
-- `tools\package.ps1`: builds `dist\WaCaModKit-<version>.zip`. Needs UE4SS extracted into `tools\bin\ue4ss`.
+- `tools\package.ps1`: builds `dist\WaCaModKit-<version>.zip`. Needs UE4SS extracted into `tools\bin\ue4ss`:
+  `python tools/ue4ss_release.py tools/bin/src/RE-UE4SS native/build/Game__Shipping__Win64/bin tools/bin/ue4ss`
+  packages it from the UE4SS build `native\build.bat` made, with UE4SS's own packager (the release workflow does
+  this; UE4SS's rolling experimental release doesn't keep old builds to download).
 - `tools/check_hooks.py <unpacked exe>`: checks every native hook target against a game exe (run it on a game update
   before a release); the targets are read from the native sources.
 - `tools/AssetDump`: a headless CUE4Parse reader for the game's paks (for research; output stays out of git).

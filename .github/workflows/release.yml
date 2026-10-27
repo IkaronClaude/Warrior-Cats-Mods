@@ -27,15 +27,7 @@ jobs:
           $v = if ("${{ github.ref_type }}" -eq "tag") { "${{ github.ref_name }}".TrimStart("v") } else { "${{ inputs.version }}" }
           "version=$v" >> $env:GITHUB_OUTPUT
 
-      - name: UE4SS (the release the mod is tested with)
-        shell: pwsh
-        run: |
-          $url = "https://github.com/UE4SS-RE/RE-UE4SS/releases/download/experimental-latest/UE4SS_v3.0.1-1181-g83330635.zip"
-          New-Item -ItemType Directory -Force tools/bin/ue4ss | Out-Null
-          Invoke-WebRequest $url -OutFile ue4ss.zip
-          Expand-Archive ue4ss.zip -DestinationPath tools/bin/ue4ss -Force
-
-      # The native DLL is a UE4SS C++ mod: it builds against UE4SS's source at the commit of the release above. Its
+      # The native DLL is a UE4SS C++ mod: it builds against UE4SS's source at the pinned commit (8333063). Its
       # Unreal submodule (Re-UE4SS/UEPseudo) is private - the repository secret UE4SS_SOURCE_TOKEN must be a GitHub
       # token (contents: read) of an account linked to Epic Games that can see it.
       - name: UE4SS source (the C++ mod SDK)
@@ -75,6 +67,12 @@ jobs:
       - name: Native DLL
         shell: cmd
         run: native\build.bat
+
+      # UE4SS itself, packaged from the same pinned build by UE4SS's own packager (its player zip's files and settings).
+      # Its rolling "experimental-latest" GitHub release replaces its zips, so the tested build can't be downloaded.
+      - name: UE4SS package
+        shell: pwsh
+        run: python tools/ue4ss_release.py tools/bin/src/RE-UE4SS native/build/Game__Shipping__Win64/bin tools/bin/ue4ss
 
       - name: Package
         shell: pwsh
