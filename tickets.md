@@ -252,6 +252,11 @@ game data in this repo.
       - Day 13: the next big story beat.
       This is the backbone 15 (clan-sim day) fills in from deputy rank on. Needs 4 (phases), 21 (season / weather) and
       the game's quest / cutscene / dialogue hooks.
+- [ ] **9b. Fishing (operator 2026-10-27).** Walking near a fishing spot startles the fish: they disappear for 5 s.
+      Stand still on the spot for 5 s and they swim again; then a catch is an X% chance (rolled like hunting). Clan
+      bonus: RiverClan +50% fishing chance (config: per-clan factors). Prep: find the game's fishing spot actor /
+      fish (CombatBaseExperience has a Fish row: 10 EXP; ESwtQuestCharacterType has fish kinds?), its interaction and
+      the fish visuals (to hide / show), the player's clan (save: Customization ClanType / EClanType).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
       SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
