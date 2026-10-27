@@ -44,3 +44,4 @@ native/build.log
 
 # generated WaCa content sources (content/scripts/make_sources.py)
 content/source/
+content/Wrc/Build/
