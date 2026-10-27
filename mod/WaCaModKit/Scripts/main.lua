@@ -586,7 +586,10 @@ require("activities").Init({ WaCa = WaCa, log = log, modDir = modDir })
 local DayNight = require("daynight")
 DayNight.Init({ WaCa = WaCa, log = log, modDir = modDir })
 -- seasons and weather (config/weather.ini)
-require("weather").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
+local Weather = require("weather")
+Weather.Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
+-- prey follows the season (config/weather.ini [Season.*] Prey)
+require("preyworld").Init({ WaCa = WaCa, log = log, modDir = modDir, Weather = Weather })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

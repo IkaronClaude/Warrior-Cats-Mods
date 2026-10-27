@@ -48,7 +48,8 @@ WHAT IT DOES (0.7.0)
     save (daynight.ini On = 1).
   - Experimental, off by default: seasons and weather - newleaf to leaf-bare over the days of your save, overcast /
     rain / snow spells that darken the light and change hunting and fishing, with falling rain / snow and a rain
-    sound (weather.ini [Seasons] On = 1; seasons need the day / night cycle on).
+    sound; fewer prey about in leaf-bare (weather.ini [Seasons] On = 1; seasons need the day / night cycle on).
+  - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then
     (activities.ini [Ambient] On = 1).
   - More graphics settings: config/graphics.ini (quality groups, motion blur, depth of field, frame cap ...).

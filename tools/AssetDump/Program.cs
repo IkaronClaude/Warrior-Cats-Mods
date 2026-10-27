@@ -52,7 +52,9 @@ switch (args[2])
     case "raw":         // AssetDump <paks> <EGame> raw <file path> <out file>: the file's bytes (ini, txt, ...)
         File.WriteAllBytes(args[4], provider.SaveAsset(args[3]));
         break;
-    case "names":
+    case "names":       // AssetDump <paks> <EGame> names <path part> <out file> [usmap]: every matching package's names
+        if (args.Length > 5)
+            provider.MappingsContainer = new FileUsmapTypeMappingsProvider(args[5]);
         using (var w = new StreamWriter(args[4]))
         {
             foreach (var path in provider.Files.Keys.Where(k => k.Contains(args[3], StringComparison.OrdinalIgnoreCase)

@@ -10,6 +10,8 @@ local WaCa, log, modDir
 local cfg = { flee = false, distance = 2500, speed = 1.0 }
 local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {}, rank = nil, ifUnknown = nil, exp = true,
                  world = 1 }      -- world: the season's x the weather's factor (weather.lua WorldFactors)
+-- the cat's specialisation (config/roles.ini, tickets.md 13): active from MinRank on
+local role = { name = nil, minRank = "Warrior", roles = {}, active = nil }
 local hooked, huntHooked = false, false
 local boosted = {}               -- prey -> its speed was raised once
 
@@ -72,9 +74,31 @@ local function factorList()
 end
 
 -- the cat's base chance now: its rank's x the season and weather (nil while the rank isn't known)
+local function roleOf(key)
+    local r = role.active and role.roles[role.active]
+    return (r and r[key]) or 1
+end
+
 local function baseChance()
     local base = chance.ranks[chance.rank or chance.ifUnknown or ""]
-    return base and base * chance.world
+    return base and base * chance.world * roleOf("hunt")
+end
+
+-- seconds after loud ground the prey still hears the cat (a Tracker moves quieter)
+local function noiseWindow() return chance.noise * roleOf("noise") end
+
+-- the specialisation applies once the cat's rank reaches MinRank (ranks by the game's own order, ECharacterRank)
+local function updateRole()
+    local ranks = rankValues()
+    local now = role.name and chance.rank and ranks[chance.rank] and ranks[role.minRank]
+        and ranks[chance.rank] >= ranks[role.minRank] and role.name or nil
+    if now == role.active then return end
+    role.active = now
+    if now then
+        log("hunting: your cat is a %s now (hunting x%.2f, fishing x%.2f, noise x%.2f)", now, roleOf("hunt"),
+            roleOf("fish"), roleOf("noise"))
+    end
+    WaCa.Emit("RoleFactors", roleOf("hunt"), roleOf("fish"))
 end
 
 local function sendChance()
@@ -186,6 +210,7 @@ function Hunting.SetRank(value)
             chance.rank = name
         end
     end
+    updateRole()
     sendChance()
     pcall(Hunting.LabelPrey)
 end
@@ -223,6 +248,21 @@ function Hunting.Init(c)
     end
     for name, v in pairs(ini["PreyFactor"] or {}) do
         if name ~= "__order" and tonumber(v) then chance.factors[name] = tonumber(v) end
+    end
+    -- the specialisation (roles.ini)
+    local roles = WaCa.ReadIni(modDir .. "/config/roles.ini") or {}
+    local sp = roles["Specialisation"] or {}
+    role.name = (sp.Role or "") ~= "" and sp.Role or nil
+    role.minRank = (sp.MinRank or "") ~= "" and sp.MinRank or role.minRank
+    for section, sec in pairs(roles) do
+        local name = section:match("^Role%.(.+)$")
+        if name then
+            role.roles[name] = { hunt = tonumber(sec.Hunt or ""), fish = tonumber(sec.Fish or ""), noise = tonumber(sec.Noise or "") }
+        end
+    end
+    if role.name and not role.roles[role.name] then
+        log("hunting: roles.ini Role = %s has no [Role.%s] section - no specialisation", role.name, role.name)
+        role.name = nil
     end
     log("hunting: by chance %s (critical miss %s%%, rank if unknown: %s)", chance.on and "on" or "off",
         tostring(chance.critMiss), tostring(chance.ifUnknown or "none"))
@@ -311,10 +351,10 @@ function Hunting.Init(c)
             if now == (inside[area] or false) then return end
             inside[area] = now
             loudAreas = math.max(0, loudAreas + (now and 1 or -1))
-            WaCa.Command(string.format("HuntLoud|%d|%s", loudAreas > 0 and 1 or 0, tostring(chance.noise)))
+            WaCa.Command(string.format("HuntLoud|%d|%s", loudAreas > 0 and 1 or 0, tostring(noiseWindow())))
             log("hunting: your cat is %s loud ground", loudAreas > 0 and "on" or "off")
         end)
-        WaCa.Command("HuntLoud|0|" .. tostring(chance.noise))
+        WaCa.Command("HuntLoud|0|" .. tostring(noiseWindow()))
         WaCa.On("ScreenShown", function(screen)
             if not screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then return end
             for _, area in ipairs(FindAllOf("SwtAdventureMovementModifierArea") or {}) do

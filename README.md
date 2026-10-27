@@ -68,6 +68,12 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   the season's chances: overcast, rain and snow darken the light, thicken the fog and change the chances (rain:
   hunting x0.8, fishing x1.2). Kept with your save. Rain and snow fall around your cat and rain has its sound - from
   the mod's own content pak (`WaCaModKit_P` in `Wrc\Content\Paks\~mods`; `Effect`, `Sound`, `Volume` in the ini).
+  Prey follows the season (`[Season.*] Prey`): in leaf-bare only part of the mice, rabbits and birds are about and
+  hardly any squirrels - the rest are away (hidden, never destroyed) until a later season; every in-game hour some
+  prey comes and goes (`PreyTurnover`).
+- **Specialisation** (off by default, `config/roles.ini Role = Hunter / Tracker / Fighter`): from `MinRank` on your
+  cat is better at some things and worse at others - Hunter catches more, Tracker fishes better and moves quieter
+  (prey hears it for a shorter time after loud ground). Needs hunting by chance on. Add your own roles in the ini.
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.

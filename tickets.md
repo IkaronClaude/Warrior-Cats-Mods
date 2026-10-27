@@ -570,6 +570,27 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         bare = 0.6 x chance, fewer prey), fishing chance, and the look (post-process tint per season).
       - Weather (rain) waits on a rain asset (mod pak); until then: overcast = darker light + fog (sky light /
         ExponentialHeightFog density - both on the sky actor).
+      BUILT 2026-10-27 (experimental, weather.ini [Seasons] On = 0 by default): weather.lua - seasons from the save's
+        day count (daynight now counts days at midnight without a BedHour, emits DayStarted / HourChanged), weather
+        spells (MinHours-MaxHours in-game hours) rolled from each season's chances, kept in a save sidecar. The look
+        goes through DayNight.SetLook (sun / sky light x, fog density x, sunlight tint, the season's DayMinutes /
+        NightLight), faded over FadeSeconds; works with the cycle off too (the sky's own look, dimmed / tinted).
+        Hunting (base chance x) and fishing (bite chance x) follow WorldFactors (season x weather). Effect / Sound
+        slots per weather (a Niagara system attached to the cat, a 2D looping sound) - empty until the content pak.
+        Offline logic test (lupa, 60 days): seasons turn every 7 days, Snow only in leaf-bare. NOT YET VM-CHECKED
+        (the VM's Steam was busy - the game stalled at the logos, with the stock UE4SS too).
+        CONTENT PAK BUILT (same day): tools/build_content.ps1 - UE 5.7.4 on the VM, fully headless (~1 min):
+        generated sources (an open cylinder .obj, a synthesized seamless rain loop .wav), assets made by
+        content/scripts/build_assets.py in the content project content/Wrc (M_WaCaPrecip = one Custom HLSL node:
+        falling streaks / flakes, depth + near-camera fade; MI_WaCaRain / MI_WaCaSnow; SW_WaCaRainLoop looping),
+        Label_WaCaContent -> chunk 7701 -> its own IoStore container (5 assets, 405 KB, shaders inline:
+        bShareMaterialShaderCode off) -> dist/content/WaCaModKit_P.* -> Paks/~mods (package.ps1 + installer).
+        weather.lua: a material Effect = 3 cylinder layers (EffectLayers) added to the cat as components; Niagara
+        still supported. Pitfalls: Interchange import asserts headless unless Interchange.FeatureFlags.Import.
+        SyncToBrowser 0; CameraDepthFade is a material function in UE5 (built from PixelDepth instead).
+        OPEN: (1) the in-game check (pak mounts from ~mods, the look, the sound) - VM blocked while Steam is busy;
+        (2) the release CI has no Unreal - the pak must be built on the VM and shipped (operator's call: attach a
+        separate content zip to the release, or a self-hosted runner).
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).
@@ -579,9 +600,24 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Prey counts per area follow the season + the fresh-kill pile: the enemy generators (BP_Enemy_Generator_C, 164)
         get their spawn tables / caps adjusted per season (find their spawn-table property on a live generator).
+      FOUND 2026-10-27 (paks, AssetDump): the 163 generators sit in L_General_Gameplay; each picks a combat setup TAG
+        per player clan x rank (ThunderClanCombatTags.ApprenticeSetup = Gameplay.Combat.Generator.Fixed.Mice.03 ...),
+        resolved by DT_Combat_Generator rows (323: GeneratorTag, NumParty, CharacterParty {kind, Level}) - the count
+        is baked per row (Mice.01/.02/.03 = parties of 1/2/3). No per-generator spawn cap is reflected.
+      BUILT 2026-10-27 (with weather.ini [Seasons] On): preyworld.lua - [Season.*] Prey = Mice=0.6, Squirrel=0.2 ...
+        = the share of each kind about that season (Weak* = its kind). Each roaming creature is rolled once per season
+        (on spawn - a ReceiveBeginPlay watch on BP_Exploration_Character_Base_C - and on a season change); an absent
+        one is hidden, collision off, its AI's brain stopped - NOT destroyed (the generator would respawn it). Offline
+        test (400 stub creatures): leaf-bare hides ~40% mice / ~80% squirrels, all back in greenleaf.
+        NOT VM-CHECKED. Open: patrol hauls / fresh-kill pile by season (needs the patrol system - 15), world events
+        (poisoned river = no fish).
 - [ ] **23. Random prey spawns.** Prey spawns at random times in random places (within each species' habitat: fish
       in water, birds in trees / open ground, voles in undergrowth ...), not at fixed points. Find the game's prey
       spawner first (the hunting / prey AI found under P0).
+      BUILT 2026-10-27 (random TIMES): preyworld.lua - every in-game hour (daynight HourChanged) PreyTurnover (0.2) of
+        the creatures roll again against the season's share, so prey comes and goes during the day. Random PLACES:
+        next - move an away creature to a random point in another generator's AreaComponent box of its kind before it
+        comes back (needs a VM check that a moved creature's AI / pounce still work).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - On a timer step per in-game hour, pick a generator in the cat's area and spawn one prey of its kind at a random
         point of its habitat (fish only at fishing spots) - the generator's own spawn function if reflected, else
@@ -693,6 +729,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - Specialisation = a role picked at warrior rank: Hunter (+15 hunt chance, -fight), Fighter (+combat damage,
         -hunt), Tracker (+fishing / scent, wider noise window for prey). Implemented as modifiers the existing
         systems read (hunting.ini factors, combat stats via the stats the save keeps). config: roles.ini.
+      BUILT 2026-10-27 (off by default): config/roles.ini [Specialisation] Role / MinRank (Warrior) + [Role.*] Hunt /
+        Fish / Noise multipliers; hunting.lua applies it once the saved rank reaches MinRank (ECharacterRank order):
+        hunt chance x Hunt, fishing bite x Fish (RoleFactors event), the loud-ground noise window x Noise. Hunter 1.15
+        hunt, Tracker 1.25 fish + 0.5 noise, Fighter 0.85 hunt. Open: Fighter's combat strength (hook the combat
+        stats), choosing the role in game (a rank-up dialogue / menu), the noise window refreshes at the next ground
+        change. Needs hunting.ini [Chance] On (the rank is read there).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
@@ -744,27 +786,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
-- [ ] **Release 0.7.0 - PREPARED (2026-10-27), waiting for the operator's go** (or: move v0.6.0 for the crash fix
-      alone - the operator's call: main also carries everything below, all new features OFF by default).
-      Steps once decided: VERSION in Scripts/main.lua -> "0.7.0"; tools/package.ps1; tag v0.7.0; push (the release
-      workflow attaches the zip). Draft notes:
-        WaCa ModKit 0.7.0
-        Fixes
-        - A crash at start-up (the mod's event watcher raced with mods loading) - fixed.
-        - Dialogue lines whose name placeholder the game misspells now show the name (6 lines).
-        - Space and a left click advance conversations (a click on answer choices just picks one).
-        - Left click interacts too (E still works).
-        New, experimental, off by default (each in its config file)
-        - Hunting by chance (hunting.ini [Chance]): the prey instakill succeeds by your rank's chance x the prey's
-          factor, with a 5% critical miss; the chance shows under the hunt icon; a catch gives the fight's EXP;
-          pouncing from loud leaf litter gets you heard.
-        - Fishing (hunting.ini [Fishing]): walking up startles the fish; keep still and they bite by chance
-          (RiverClan x1.5). Spots become active 30 s after you enter the world.
-        - Day / night cycle (daynight.ini): the sun moves, nights get dark, the time is kept with your save,
-          optional bedtime that counts the days.
-        - Clan activities (activities.ini): clanmates near you sit, nap, sniff and play-fight.
-
 ## Archive
+- [x] 2026-10-27 RELEASED 0.7.0 (operator go): hunting by chance, fishing, day / night, clan activities, dialogue
+      click / space, left-click interact, placeholder fixes, the start-up crash fix.
 - [x] 2026-10-27 CRASH FIX - the watch dispatcher (bridge.cpp OnProcessEvent): a start-up crash in main.dll+0xACDC
       (reading freed memory in the g_watches loop) - mods register / drop watches on UE4SS's mod thread while the game
       thread dispatches. Now the list is mutex-guarded (atomic count fast path), and events are delivered after the

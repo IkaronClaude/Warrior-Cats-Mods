@@ -9,7 +9,8 @@
 local Fishing = {}
 
 local WaCa, log, modDir
-local cfg = { on = false, startle = 5, chance = 40, moving = 25, clans = {}, world = 1 }   -- world: weather.lua
+local cfg = { on = false, startle = 5, chance = 40, moving = 25, clans = {}, world = 1, role = 1 }
+-- (world: season x weather, weather.lua; role: the cat's specialisation, roles.ini via hunting.lua)
 local spots = {}                 -- area full name -> { spot = spot path, inside = bool, gen = n, state = "here" / "gone" }
 local hooked = false
 
@@ -61,7 +62,7 @@ local function waitForFish(entry)
             return
         end
         local factor = cfg.clans[clan() or ""] or 1.0
-        local pct = math.min(100, cfg.chance * factor * cfg.world)
+        local pct = math.min(100, cfg.chance * factor * cfg.world * cfg.role)
         local roll = math.random() * 100
         if roll < pct then
             setFish(entry, true)
@@ -144,6 +145,7 @@ function Fishing.Init(c)
     if not cfg.on then return end
     -- seasons / weather (weather.lua): fish bite better in the rain, worse in leaf-bare
     WaCa.On("WorldFactors", function(_, fish) cfg.world = fish end)
+    WaCa.On("RoleFactors", function(_, fish) cfg.role = fish end)
     if not hooked then
         hooked = true
         -- the spots' trigger boxes report through areas.cpp (AreaOverlap: area, actor, "1" / "0", flag)
