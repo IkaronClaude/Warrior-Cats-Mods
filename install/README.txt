@@ -19,7 +19,7 @@ WHAT IT DOES (0.6.0)
     features keep); your typed name is what you see in the game. Confirm on the name list
     to type in the box (top right; Steam's keyboard on a controller), confirm again to go on. The warrior ceremony
     has the same box for your own warrior suffix.
-  - More colours in the game's colour pickers (fur, pattern, markings) - palette.ini.
+  - Your own colours: the game's colour pickers (fur, pattern, markings) get a box top right - type #RRGGBB, Enter.
   - New shapes like "Colourpoint" right in the game's own pattern / markings grids (coloured with the game's
     pattern colour). Look mods: drop the mod's folder into ue4ss/Mods.
   - Optional WaCa panel (packs, presets, creator.ini PanelShapes = 1 to combine two markings): click the arrows or

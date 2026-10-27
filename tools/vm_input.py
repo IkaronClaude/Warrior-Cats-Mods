@@ -5,6 +5,7 @@
   vm_input.py click <x> <y>              a left click at client coordinates
   vm_input.py move <x> <y>               a mouse move to client coordinates
   vm_input.py nudge <dx> <dy> [steps]     relative mouse motion via SendInput (raw input, like a real mouse)
+  vm_input.py wheel <x> <y> <notches>     mouse wheel at a client point (negative = down)
 
 Posts window messages to the game's top-level window (found by the game's process name), so it needs no focus and no
 interactive desktop."""
@@ -94,6 +95,23 @@ def main():
             inp = INPUT(0, MOUSEINPUT(dx, dy, 0, 0x0001, 0, 0))          # INPUT_MOUSE, MOUSEEVENTF_MOVE
             user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
             time.sleep(0.1)
+    elif cmd == "wheel":
+        # mouse wheel notches at a client point (SendInput, like a real wheel; negative = down)
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wt.LONG), ("dy", wt.LONG), ("mouseData", wt.DWORD), ("dwFlags", wt.DWORD),
+                        ("time", wt.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wt.DWORD), ("mi", MOUSEINPUT)]
+
+        user32.SetForegroundWindow(hwnd)
+        place_cursor(hwnd, int(sys.argv[2]), int(sys.argv[3]))
+        notches = int(sys.argv[4])
+        for _ in range(abs(notches)):
+            delta = (120 if notches > 0 else -120) & 0xFFFFFFFF
+            inp = INPUT(0, MOUSEINPUT(0, 0, delta, 0x0800, 0, 0))           # MOUSEEVENTF_WHEEL
+            user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+            time.sleep(0.6)
     elif cmd in ("keydown", "keyup"):
         vk = int(sys.argv[2], 16)
         down = 1 | (user32.MapVirtualKeyW(vk, 0) << 16)

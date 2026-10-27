@@ -63,14 +63,13 @@ game data in this repo.
     the screen's GriNav, so the creator always opens in the main menu level.
   - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
         the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
-  - [~] Custom colours: a colour wheel / hex entry (the palettes already take extra swatches from palette.ini).
-        2026-10-27, hex entry built (creator.lua): each palette gets a last "custom" swatch; choosing it in the game's
-        picker (UGuiPopupColorPicker) shows a hex box on the picker, Enter sets that swatch + stores the colour like
-        any extra swatch. VM-verified: picker detected, its palette from the colour panel's ControlSelected
-        ("FurColors"), every move reports the selected index (read off the preview cat - the game applies it live).
-        NEEDS THE OPERATOR: the fur picker shows 20 swatches (4 rows x 5) and arrow keys stop at row 4 - are the
-        swatches past 20 (game 21-25, palette.ini extras, the custom one) reachable at all (mouse wheel / scroll)?
-        If not, the custom colour needs another trigger (e.g. a key on the picker) - a UX call.
+  - [x] Custom colours - DONE 2026-10-27 (hex entry): the game's colour pickers get a hex box (top right) showing
+        the selected swatch's colour; #RRGGBB + Enter puts that exact colour in the look (the save keeps the selected
+        game colour); picking a swatch afterwards drops it (last choice wins). VM, real keys: box shown (#FBD5A7),
+        #3366CC typed -> cats rebuilt, swatch 12 picked -> typed colour dropped. FINDING: the pickers are a FIXED grid
+        (0x1418E90C0: 4 + flag rows x 5 - the flag most likely the DLC), nothing scrolls, so palette.ini's extra
+        swatches never showed (README corrected); more rows would expose the DLC row to non-owners - not done.
+        A colour WHEEL instead of the box = a UX extra, if wanted.
   - [x] Then: drop the WaCa side panel - DONE 2026-10-27: the panel only offers what the grids can't (pattern packs,
         whole-look presets; game shapes across rows with creator.ini PanelShapes = 1); with the default config
         there is no panel (VM: "no WaCa panel (the game's grids offer every WaCa choice)").

@@ -25,7 +25,6 @@ local PALETTES = {
     { field = "Pattern02ColorIdx", palette = "MarkingMaskColors", slot = "Markings", section = "Markings" },
 }
 local vanillaCount = {}          -- palette -> the game's own colour count (before ours)
-local customIndex = {}           -- palette -> the 0-based index of its custom (hex box) swatch, the last one
 local extended = false
 
 local pending = nil              -- { Name = {...}, Appearance = {...}, print, closedAt } while creating
@@ -49,9 +48,9 @@ local function extendPalettes()
             local h = text:match("^#?(%x%x%x%x%x%x)$")
             if h then table.insert(extras, "#" .. h:upper()) end
         end
-        -- already ours (a reload into a running game): the palette ends with our extras + the custom swatch
-        local tail = #extras + 1
-        local ours = #arr > tail
+        -- already ours (a reload into a running game): the palette ends with our extras
+        local tail = #extras
+        local ours = tail > 0 and #arr > tail
         for i, h in ipairs(extras) do
             if ours and hex(arr[#arr - tail + i]) ~= h then ours = false end
         end
@@ -62,13 +61,8 @@ local function extendPalettes()
             for _, h in ipairs(extras) do
                 arr[#arr + 1] = { R = tonumber(h:sub(2, 3), 16), G = tonumber(h:sub(4, 5), 16), B = tonumber(h:sub(6, 7), 16), A = 255 }
             end
-            -- the CUSTOM swatch, last: its colour is whatever the player types into the picker's hex box
-            -- (palette.ini [<slot>] Custom = the starting colour)
-            local start = (ini[p.section] and ini[p.section].Custom or ""):match("^#?(%x%x%x%x%x%x)$") or "FFFFFF"
-            arr[#arr + 1] = { R = tonumber(start:sub(1, 2), 16), G = tonumber(start:sub(3, 4), 16), B = tonumber(start:sub(5, 6), 16), A = 255 }
         end
-        customIndex[p.palette] = #arr - 1
-        log("palette %s: %d game colours + %d + the custom swatch%s", p.palette, vanillaCount[p.palette], #extras,
+        log("palette %s: %d game colours + %d%s", p.palette, vanillaCount[p.palette], #extras,
             ours and " (already there)" or "")
     end
     extended = true
@@ -1083,10 +1077,13 @@ local function onGridChanged(kind, panel)
 end
 
 ---------------------------------------------------------------------------------------------------------------------
--- The custom colour: each palette's last swatch is the player's own. Choosing it in the game's colour picker
--- (UGuiPopupColorPicker - its grid lists the palette, one item per colour) shows a hex box on the picker; Enter
--- in the box sets that swatch's colour, and it is stored like any extra swatch (the exact colour in the look, the
--- nearest game colour in the save - sanitize). Which palette the picker shows: the colour panel's selected control.
+-- Your own colour: the game's colour picker (UGuiPopupColorPicker) gets a hex box, showing the selected swatch's
+-- colour. Type #RRGGBB + Enter: that exact colour goes into the look (the cat keeps the selected game colour - what
+-- the save and other players get). Picking a swatch afterwards drops the typed colour: the last choice wins.
+-- Why a box and not swatches: the picker is a FIXED grid - 4 rows x 5 (5 rows when a flag, most likely the DLC, is
+-- set; 0x1418E90C0 initialises it with 4 + flag rows), nothing scrolls, so colours appended to the palette never show
+-- (VM 2026-10-27: keys, wheel, PageDown / End all stop at row 4). Adding rows would also show the DLC row to players
+-- who don't own it. Which palette the picker shows: the colour panel's selected control.
 local COLOUR_CONTROLS = { mcGuiOptionFurColor = "FurColors", mcGuiOptionPattern = "PatternMaskColors",
                           mcGuiOptionMarkings = "MarkingMaskColors" }
 local picker = nil               -- { id, palette, box } while a colour picker is up
@@ -1110,43 +1107,59 @@ local function hexBox()
     return box and box:IsValid() and box or nil
 end
 
-local function showHexBox(screen, palette)
+local function paletteEntry(palette)
+    for _, e in ipairs(PALETTES) do if e.palette == palette then return e end end
+end
+
+-- the colour the preview cat shows for that palette now: the typed one (the look), else its swatch
+local function currentColour(p)
+    local own = pending and pending.Appearance and pending.Appearance[p.slot]
+    if own and tostring(own):match("^#%x%x%x%x%x%x$") then return own end
+    for _, comp in ipairs(WaCa.PreviewCats()) do
+        local ok, c = pcall(function()
+            return FindFirstOf("SwtAdventureGuiManager")[p.palette][comp.CustomData[p.field] + 1]
+        end)
+        if ok and c then return hex(c) end
+    end
+    return "#FFFFFF"
+end
+
+local function showHexBox(screen, p)
     if hexBox() then return end
     local canvas = screen.WidgetTree.RootWidget
     if not canvas or not canvas:IsValid() or not canvas.AddChildToCanvas then return end
     local box = newWidget("EditableTextBox", screen.WidgetTree, "WaCaHexBox")
     pcall(function() box.ClearKeyboardFocusOnCommit = true end)
-    local arr = FindFirstOf("SwtAdventureGuiManager")[palette]
-    box:SetText(FText(hex(arr[customIndex[palette] + 1])))
+    box:SetText(FText(currentColour(p)))
     local slot = canvas:AddChildToCanvas(box)
     slot:SetAnchors({ Minimum = { X = 1, Y = 0 }, Maximum = { X = 1, Y = 0 } })
     slot:SetAlignment({ X = 1, Y = 0 })
     slot:SetPosition({ X = -80, Y = 150 })
     slot:SetSize({ X = 420, Y = 100 })
     picker.box = box:GetFullName():gsub("^%S+ ", "")
-    log("colour picker: custom %s swatch - hex box shown (type #RRGGBB, Enter)", palette)
+    log("colour picker: %s - hex box shown (type #RRGGBB, Enter)", p.palette)
 end
 
--- the picker's selection moved: the game has just put that colour on the preview cat, so the cat's colour index IS
--- the selected swatch (the picker's grid can't tell: it only keeps the visible swatches - 20 items for a 41-colour
--- palette, reused while scrolling; VM 2026-10-27). The custom swatch's index shows the box.
+-- the picker's selection moved: the game has just put that swatch on the preview cat (its colour index) - the last
+-- choice wins, so a typed colour for this slot goes, and the box shows the swatch's colour
 local function onPickerColour(screen)
     if not picker or not picker.palette then return end
-    local field
-    for _, e in ipairs(PALETTES) do if e.palette == picker.palette then field = e.field end end
+    local p = paletteEntry(picker.palette)
     for _, comp in ipairs(WaCa.PreviewCats()) do
-        local ok, idx = pcall(function() return comp.CustomData[field] end)
+        local ok, idx = pcall(function() return comp.CustomData[p.field] end)
         local key = comp:GetFullName()
         picker.last = picker.last or {}
-        if ok and idx ~= picker.last[key] then
-            picker.last[key] = idx
-            log("colour picker: %s colour %s selected%s", picker.palette, tostring(idx),
-                idx == customIndex[picker.palette] and " (the custom swatch)" or "")
+        if ok and picker.last[key] ~= nil and idx ~= picker.last[key] then
+            local own = pending and pending.Appearance and pending.Appearance[p.slot]
+            if own then
+                store("Appearance", p.slot, nil)
+                log("colour picker: %s swatch %s picked - the typed colour %s is dropped", p.slot, tostring(idx), tostring(own))
+                ctx.refreshLook()
+            end
+            local box = hexBox()
+            if box then box:SetText(FText(currentColour(p))) end
         end
-        if ok and idx == customIndex[picker.palette] then
-            showHexBox(screen, picker.palette)
-            return
-        end
+        if ok then picker.last[key] = idx end
     end
 end
 
@@ -1159,19 +1172,11 @@ local function hexCommitted()
         log("colour picker: '%s' is not a #RRGGBB colour", box:GetText():ToString())
         return
     end
-    local p
-    for _, e in ipairs(PALETTES) do if e.palette == picker.palette then p = e end end
-    local arr = FindFirstOf("SwtAdventureGuiManager")[picker.palette]
-    local c = { R = tonumber(h:sub(1, 2), 16), G = tonumber(h:sub(3, 4), 16), B = tonumber(h:sub(5, 6), 16), A = 255 }
-    arr[customIndex[picker.palette] + 1] = c
-    -- the swatch on screen too
-    pcall(function()
-        local screen = StaticFindObject(picker.id)
-        local item = screen.mcGuiGrid.Items[customIndex[picker.palette] + 1]
-        item.mcGuiColor:SetColorAndOpacity({ R = lin(c.R), G = lin(c.G), B = lin(c.B), A = 1 })
-    end)
-    store("Appearance", p.slot, hex(c))
-    log("custom %s colour %s typed", p.slot, hex(c))
+    local p = paletteEntry(picker.palette)
+    local typed = "#" .. h:upper()
+    if typed == currentColour(p) then return end
+    store("Appearance", p.slot, typed)
+    log("custom %s colour %s typed (the save keeps the selected game colour)", p.slot, typed)
     ctx.refreshLook()
 end
 
@@ -1190,8 +1195,16 @@ function Creator.Init(c)
         local cls = nativeClass("GuiPopupColorPicker")
         if cls and screen:IsA(cls) then
             extendPalettes()
-            picker = { id = screenId(screen), palette = pickerPalette() }
+            picker = { id = screenId(screen), palette = pickerPalette(), last = {} }
             log("colour picker: %s", tostring(picker.palette or "(not a fur / pattern / markings colour)"))
+            local p = picker.palette and paletteEntry(picker.palette)
+            if p then
+                for _, comp in ipairs(WaCa.PreviewCats()) do
+                    pcall(function() picker.last[comp:GetFullName()] = comp.CustomData[p.field] end)
+                end
+                local ok, err = pcall(showHexBox, screen, p)
+                if not ok then log("colour picker: no hex box (%s)", tostring(err)) end
+            end
         end
     end)
     WaCa.Watch("OnGridIdColorChanged", "/Script/Wrc.GuiPopupColorPicker", "WaCaPickerColour", "post")

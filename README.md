@@ -14,8 +14,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
     screen's flow: confirm (Enter / the gamepad's confirm button) on the name list moves into the box - Steam's
     on-screen keyboard opens on a controller - and confirming in the box goes on. Tab / the left stick click leave the
     box (`creator.ini NameBoxKeys`). The warrior ceremony gets the same box for your own warrior **suffix**.
-  - **More colours** in the game's own colour pickers (fur, pattern, markings): extra swatches after the game's 25,
-    from `config/palette.ini`.
+  - **Your own colours**: the game's colour pickers (fur, pattern, markings) get a hex box (top right) showing the
+    selected swatch's colour - type any `#RRGGBB` and press Enter. Picking a swatch afterwards goes back to the game's
+    colour. The save keeps the selected game colour; the exact one is in the WaCa file next to it.
   - **WaCa shapes in the game's own grids**: looks like **Colourpoint** (coloured with the game's pattern colour
     picker) are entries of the creator's pattern / markings grids, after the game's own - choose them like any other.
     Look mods add theirs the same way (a `looks/` folder in the mod).
