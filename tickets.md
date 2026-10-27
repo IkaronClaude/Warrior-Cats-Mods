@@ -263,6 +263,14 @@ game data in this repo.
       - EXP (operator 2026-10-27): a successful hunt gives the EXP a FIGHT against that prey would have given (the
         instakill currently skips it). Find the combat reward path (exp per CharacterType / the encounter's reward)
         and grant the same amount on a catch.
+        FOUND: the amounts are the game's own table Gameplay/DataTables/NonAsset/CombatBaseExperience.csv
+        (FSwtAdventureCombatBaseExperience: Enemy, BaseExperience, DifficultyOffset; rows = CharacterType names:
+        Mice 25, Squirrel 30, Rabbit 40, Bird 30, Rat 60, Weak* lower) - read it at runtime by the prey's
+        CharacterType name, no copies. The grant itself is native-only (no UFunction adds EXP) - trace the combat-end
+        path to it (FQuestExperienceStruct {Level, Experience, MaxExperience}; RankUp:OnLevelUp listens).
+      - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
+        upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
+        checks the scent / turns around more often.
       PREPARED 2026-10-27 (research, nothing built yet):
       - Prey = AWrcPouncePrey (ACharacter): PreyGenerator, ExplorationDetectionComponent (USwtAdventureDetection-
         Component: USphereComponent, Range EAdventureDetectionRange, DetectedCharacters, DetectionType),
