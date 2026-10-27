@@ -177,8 +177,8 @@ game data in this repo.
       - input bindings
       - graphics settings
       - save data (where the clan roster lives)
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Script the FModel-style export with tools/AssetDump for the listed asset folders into extracted/ (gitignored)
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Script the FModel-style export with tools/AssetDump for the listed asset folders into extracted/ (gitignored)
         and write a one-page map (what each blueprint / table controls) - no operator input needed, just time.
 
       Write the map into PROJECT_PLAN.md.
@@ -188,8 +188,8 @@ game data in this repo.
 - [ ] **Mod pipeline.** A skeleton UE project in the matching engine version (dummy classes from the header dump). Cook a
       test Blueprint mod and load it from a `~mods` pak (IoStore: retoc / ZenTools for repacking). Prove ONE change
       end to end, e.g. a string edit.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Install the matching UE version, generate dummy C++ classes from CXXHeaderDump, cook a test pak with one new
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Install the matching UE version, generate dummy C++ classes from CXXHeaderDump, cook a test pak with one new
         Niagara (rain) and load it via UE4SS's pak loading - unlocks rain + any custom content.
 - [x] **Deploy rule.** DONE: the release zip installs / uninstalls itself (Install.bat / Uninstall.bat); the Z:
       install is ours to modify (operator), backups as *.vmtest-backup / before overwriting. Installing a mod writes into the game folder on Z:. Agree with the operator where mods are
@@ -211,7 +211,7 @@ game data in this repo.
       roster (and other mods) are just data. Hook points: UWrcNPCGenerationManager (NPCClansData TMap<EGiverRole,
       FCatCustomDataList>, NarrativeCustomDataMap TMap<ENarrativeRole, FCatCustomData>), the generator's
       CSVs (NpcGenerator, CatSize, Scars, ForcedAppearance ...).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
       - = the roster.ini plan under 1 (role -> name + look over the generated cats).
 - [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
       that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
@@ -220,8 +220,8 @@ game data in this repo.
       just read and write the engine's own input mappings (UPlayerInput action / axis mappings, the menus'
       DT_GamepadButtons* rows, the viewport capture mode) - the menu saves them to keybinds.ini, the one source. The
       raw KeyDown event only observes (aliases press real keys), so it stays compatible.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Remaining: the on-screen key hints to follow keybinds.ini ([UIIcons] already covers menus; gameplay hints use
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Remaining: the on-screen key hints to follow keybinds.ini ([UIIcons] already covers menus; gameplay hints use
         the same icon table - extend the row list).
 - [~] **19b. PC controls: mouse.** Replace the tank-style arrow-key controls with mouse camera / movement.
       2026-10-25: mouse CAMERA done (camera.cpp: yaw + pitch through the game's own turn / pitch steps, uncapped).
@@ -244,6 +244,16 @@ game data in this repo.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - roster.ini per clan: role -> name + look (the existing name / look framework); applied when the clan is
         generated (the game's procedural roster) by replacing the generated cats' names / looks for those roles.
+      PREPARED 2026-10-27: the roster is SAVE DATA - <save>.<slot>.NPCData.NarrativeRoles (role -> "(Role, ClanType,
+      BodyValue, FaceValue, FurValue, EyeValue, WhiskerValue, TailIdx, EarIdx, FurColorIdx, Pattern01/02ColorIdx,
+      PatternIdx, MarkingIdx, EyeLeft/RightColorIdx, bOverrideColors, PrefixNameId, SuffixNameId)"), 28 roles on the
+      VM save; roles change rank with the story (RiverClanDeputy -> Elder). tools/roster_dump.py lists it (read-only).
+      BUILD STEPS (operator OK needed - it writes the save): 1) roster.ini [Role.<name>] with any of those fields;
+      2) on the character's first load (save-manager Load hook - saves.cpp already finds the save manager), rewrite
+      the matching NarrativeRoles entries in the loaded save object (in memory, before the clan spawns) - never the
+      file directly; 3) the game then saves it like its own data. Backup: the mod copies WrcGame.json/.sav to a
+      dated backup before the first rewrite. Alternative without touching the save: names via text.ini rows
+      (STR_CAT_NAME<n><suffix>) - already possible today.
 - [ ] **15. Clan-sim day.** Each day you get assignments based on the clan's needs: hunt, patrol, night watch, train
       with your mentor, train your apprentice, ... From deputy rank on, your job becomes ASSIGNING the day's duties
       (then joining whichever you want). This is the backbone that 4 / 6 / 7 / 8 / 14 / 17 plug into.
@@ -301,9 +311,9 @@ game data in this repo.
       - Day 13: the next big story beat.
       This is the backbone 15 (clan-sim day) fills in from deputy rank on. Needs 4 (phases), 21 (season / weather) and
       the game's quest / cutscene / dialogue hooks.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - days.ini / one file per story day: [Day.N] conditions (rank, duties done, previous choices) + the scenes to play
-        (the game's own sequence dialogues by tag - PlaySequenceDialogue, verified on the VM) + which quests unlock.
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - days.ini / one file per story day: [Day.N] conditions (rank, duties done, previous choices) + the scenes to play
+        (the game's own sequence dialogues by tag - PlaySequenceDialogue, verified on the VM) + which quests unlock.
         Driven by DayNight's DayEnded; the current day number lives in the save sidecar.
 - [ ] **9b. Fishing (operator 2026-10-27).** Walking near a fishing spot startles the fish: they disappear for 5 s.
       Stand still on the spot for 5 s and they swim again; then a catch is an X% chance (rolled like hunting). Clan
@@ -565,20 +575,20 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - seasons: leaf-bare = fewer spawns and smaller patrol hauls, especially of prey that hibernates (no / few
         hibernators at all in deep winter).
       - one prey table per species with season / event / weather modifiers (data, so mods can add prey and events).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Prey counts per area follow the season + the fresh-kill pile: the enemy generators (BP_Enemy_Generator_C, 164)
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Prey counts per area follow the season + the fresh-kill pile: the enemy generators (BP_Enemy_Generator_C, 164)
         get their spawn tables / caps adjusted per season (find their spawn-table property on a live generator).
 - [ ] **23. Random prey spawns.** Prey spawns at random times in random places (within each species' habitat: fish
       in water, birds in trees / open ground, voles in undergrowth ...), not at fixed points. Find the game's prey
       spawner first (the hunting / prey AI found under P0).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - On a timer step per in-game hour, pick a generator in the cat's area and spawn one prey of its kind at a random
-        point of its habitat (fish only at fishing spots) - the generator's own spawn function if reflected, else
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - On a timer step per in-game hour, pick a generator in the cat's area and spawn one prey of its kind at a random
+        point of its habitat (fish only at fishing spots) - the generator's own spawn function if reflected, else
         SpawnActor of its character class (spawn only 30 s+ after world load - the streaming crash lesson).
 - [ ] **24. (Bonus) StarClan guidance leads to prey.** The game's StarClan guidance feature points the player to
       these random prey spawns: hunting by following StarClan's lead. Find how the guidance feature picks its target.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Hook the game's StarClan guidance target (its quest-objective / scent-objective actors, e.g.
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Hook the game's StarClan guidance target (its quest-objective / scent-objective actors, e.g.
         BP_ScentObjectiveFish) and point it at the nearest prey of the kind the clan needs.
 
 - [ ] **Dialogue text bugs (operator, 2026-10-24).** Some lines show unfilled format arguments, e.g. "It seems that 1's
@@ -610,8 +620,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       2026-10-27: main.lua now checks every dialogue line once shown in full (QuestGiverWidget.OnTypewriterDone) and
       logs "dialogue: UNFILLED ..." with the dialogue node for a {placeholder} or a number before 's - any playthrough
       (the operator's included) names the broken line and its node.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Done part: misspelled placeholders fixed (text.ini [Placeholders]); the in-play detector names any other
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Done part: misspelled placeholders fixed (text.ini [Placeholders]); the in-play detector names any other
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
@@ -619,16 +629,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
       runner) and events at specific times of the day.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Event cards first: reuse PlaySequenceDialogue (a real conversation opened on the VM) for small scenes with
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Event cards first: reuse PlaySequenceDialogue (a real conversation opened on the VM) for small scenes with
         the involved cats; later real cinematics via the game's level sequences (LS_Cinematic_*) re-targeted.
 
       The FRAMEWORK is core; the story content that fills it is P3. Do it once the clan-sim day (15) exists.
 - [ ] **11. Clan cat interactivity.** Every cat repeats the same single line. Context lines (rank, relationship, time of
       day, current duty, recent events), plus interactions.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Context lines by rank / relationship / time of day: the game's own Strings_EN rows already exist per role
-        (QST_Story.Monologue.Filler.<Clan><Role>.*) - pick the line by context instead of the fixed one (hook the
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Context lines by rank / relationship / time of day: the game's own Strings_EN rows already exist per role
+        (QST_Story.Monologue.Filler.<Clan><Role>.*) - pick the line by context instead of the fixed one (hook the
         filler monologue choice), DayNight.Hour() for morning / night lines.
 - [ ] **5. Clan activities.** Sharing tongues, sharing stories: ambient camp life + player-joinable activities.
       PREPARED 2026-10-27: no native activity system (no sharing-tongues / grooming classes). Bonds exist: UBondDialogue,
@@ -692,7 +702,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       OPEN: the operator's visual check of the Colourpoint look (tune its ini); eye colour (atlas-based, M_Characters_Eyes);
       an in-game colour wheel UI (needs the editor - now installing 5.7.4); a real colourpoint mask pack (generated
       from the meshes on the player's PC - no game-derived art in the repo).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
       - More patterns / markings need new textures -> the mod pipeline (pak); colour wheel = the hex box (done).
 - [x] **18. More graphics options.** DONE 2026-10-27: config/graphics.ini - [Scalability] the engine's groups (sg.*),
       [CVars] any console variable (motion blur, DoF, fringe, screen %, t.MaxFPS listed), applied through
@@ -704,14 +714,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       trails - scent you detect (a sense / sniff mode) and visual signs (tracks, disturbed undergrowth) - that you can
       follow to the prey. Ties into 23 (random spawns: the trail is how you find them), 21 (rain washes scent out,
       snow keeps tracks) and 24 (StarClan guidance as an alternative lead).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Builds on 25: multi-day quest chains as day-script entries with their own state in the save sidecar.
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
@@ -720,17 +730,17 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
         override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.
 - [ ] **Story.** Pour the existing thin story into the new systems, then expand it toward the books (needs 15 + 17).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
       - After 15 + 25 exist: port the existing story beats into day scripts first (no new writing), then extend.
 - [ ] **12. Romance + kits (far future).** The friendship system already exists. Add a mate, kits of your own, watching
       them grow up. Maybe in a free-play mode after the story concludes.
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
         looks (the look framework) after N days (seasons).
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
-        (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
+        (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 - [ ] **Release 0.7.0 - PREPARED (2026-10-27), waiting for the operator's go** (or: move v0.6.0 for the crash fix
