@@ -266,6 +266,14 @@ game data in this repo.
       re-scheduled while it keeps still / moves - bounded). Catch = OnInteracted rolled like the hunt (native detour
       of the interactable's OnInteracted virtual, the hunt.cpp pattern) - chance from hunting.ini [Fishing] Chance +
       per-clan factor (RiverClan 1.5; the clan from the save's Customization ClanType); a miss skips the reward.
+      VM 2026-10-27: 7 fishing spots in the world (BP_Interactable_Claw_FishingSpot_C, interaction radius 75).
+      Cat teleported onto one: QuestPlayerController.OnCanInteract did NOT fire (UE4SS hook; its native body is
+      inlined into the thunk 0x14160D270 - reached through a delegate, if at all) -> the startle trigger needs another
+      proximity event. Candidates: the spot's InteractionComponent overlap (a native delegate - find its handler like
+      the prey's OnActorOverlapped), or the game's interaction prompt widget (InteractionWidget:SetInteract, a
+      UFunction - fires when the prompt shows). NEXT: hook InteractionWidget:SetInteract and walk onto a spot.
+      Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
+      the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
       SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
