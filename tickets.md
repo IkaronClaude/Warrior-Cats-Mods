@@ -26,7 +26,7 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
-- [ ] **P0 creator redesign: custom looks in the game's own creator UI** (operator 2026-10-25; merges the two creator
+- [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
   redesign tickets, the "creator finding" note and the old "Creator UI injection").
   - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
         CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
@@ -35,7 +35,7 @@ game data in this repo.
         offered and added as a grid row with its Fallback / Label (creator.ini AutoLooks; 2357c88). VM: a test mod's
         TestMitts.ini became DT_Markings row 21 "Test Mitts" next to Colourpoint. Colour indices: still only the
         palette.ini swatches.
-  - [~] Entries in the native pattern / marking grids. DONE so far: native row cloner (tables.cpp, d61c6fa), and at
+  - [x] Entries in the native pattern / marking grids (2026-10-27; left: a custom ICON needs an image asset - art). DONE so far: native row cloner (tables.cpp, d61c6fa), and at
         startup each offered pattern / markings look becomes a row of DT_Patterns / DT_Markings copied from its
         fallback's row (VM-verified: "WaCa_Colourpoint" added, copied from NewRow_11 = P13_Tabby, 24 rows). Choosing
         it (panel OnGriIdItemChanged + the grid's current item position) stores look:<Name> and keeps the fallback's
@@ -76,7 +76,7 @@ game data in this repo.
   - [x] Then: drop the WaCa side panel - DONE 2026-10-27: the panel only offers what the grids can't (pattern packs,
         whole-look presets; game shapes across rows with creator.ini PanelShapes = 1); with the default config
         there is no panel (VM: "no WaCa panel (the game's grids offer every WaCa choice)").
-- [ ] P1 mouse look feel (operator): the camera clamps the mouse axis to the stick range and runs it through the stick
+- [x] P1 mouse look feel (operator) - implemented 2026-10-25/27 (yaw + pitch + camera-relative movement); feel = operator check: the camera clamps the mouse axis to the stick range and runs it through the stick
   curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
   Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
   controller's WrcInputComponent has 4 at +0xE0 incl. Player_Camera_Up / _Right, value-only - nothing bound).
@@ -137,6 +137,9 @@ game data in this repo.
     game's patterns still work after it (the VM can't open that screen)
   - Space advances a conversation
   - a click on the splash ("press any key") continues
+  - the creator: WaCa patterns / markings in the game's grids (Colourpoint labelled), the hex box on the colour
+    picker, "Customise online cat" (F8), no side panel by default
+  - A / D strafing relative to the camera (CameraRelativeMove)
   - mouse look left / right: turns with the mouse at any speed, no stick cap; feel of LookYaw = 2.0; recentring
     while you hold the mouse still (the game's own behaviour)
 
