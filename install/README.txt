@@ -11,7 +11,7 @@ INSTALL
 UNINSTALL
   Double-click Uninstall.bat. Your game files are never modified; the mod only adds files.
 
-WHAT IT DOES (0.6.0)
+WHAT IT DOES (0.7.0)
   The settings files are in <game>\Wrc\Binaries\Win64\ue4ss\Mods\WaCaModKit\config\ (each explains itself inside).
 
   In the character creator:
