@@ -480,22 +480,31 @@ local function dialogueUp()
     end
     return nil
 end
--- answer choices on screen (mcButton1..4): a mouse click picks one itself - no extra Enter then
-local function choicesUp(w)
-    for i = 1, 4 do
-        local ok, up = pcall(function()
-            local b = w["mcButton" .. i]
-            return b and b:IsValid() and b:IsVisible()
-        end)
-        if ok and up then return true end
+-- a click advances only a line the game itself offers to advance - its "next" prompt (mcGuiNext) shown; answer
+-- choices without it are left to the click (it picks one). Shown = it and every container above it visible. (The
+-- answer buttons can't tell: a plain line shows button 1 too - VM 2026-10-27.)
+local function shown(widget)
+    local w, guard = widget, 0
+    while w and w:IsValid() and guard < 32 do
+        if not w:IsVisible() then return false end
+        local ok, parent = pcall(function() return w:GetParent() end)
+        w = ok and parent or nil
+        guard = guard + 1
     end
-    return false
+    return true
+end
+local function choicesUp(w)
+    local ok, next = pcall(function() return shown(w.mcGuiNext) end)
+    return not (ok and next)
 end
 WaCa.On("KeyDown", function(_, name)
     local targets = dialogueAliases[name]
     local widget = targets and dialogueUp()
     if not widget then return end
-    if name:find("MouseButton") and choicesUp(widget) then return end
+    if name:find("MouseButton") and choicesUp(widget) then
+        log("dialogue: %s on answer choices (no next prompt) - the click picks one itself", name)
+        return
+    end
     for _, target in ipairs(targets) do
         if not dialogueAliases[target] then
             log("dialogue: %s -> %s", name, target)

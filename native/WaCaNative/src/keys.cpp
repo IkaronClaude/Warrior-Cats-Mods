@@ -48,6 +48,13 @@ std::string KeyName(WPARAM vk) {
 }
 
 LRESULT WINAPI DispatchDetour(const MSG* msg) {
+    if (msg && msg->message >= WM_LBUTTONDOWN && msg->message <= WM_MBUTTONUP) {
+        static int seen = 0;
+        if (seen < 6) {
+            ++seen;
+            logx::Line(L"[keys] mouse message 0x%X to %p", msg->message, msg->hwnd);
+        }
+    }
     if (msg) {
         const char* mouse = nullptr;
         switch (msg->message) {

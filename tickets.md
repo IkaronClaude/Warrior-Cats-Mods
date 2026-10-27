@@ -103,7 +103,7 @@ game data in this repo.
   frame (restored after) - stick + mouse degrees exactly, inside the game's pitch limits. VM: delta 5.6 -> 8.4 deg,
   game alive. MouseX / MouseY are out of Player_Camera_* (photo mode keeps them). Left: [Mouse] GameplayCapture = 3
   (drag to look) isn't honoured by the native path; the on-screen feel = operator check.
-- [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
+- [x] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
   logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
   2026-10-27 (operator): a LEFT CLICK advances dialogue too ([DialogueKeyAliases] LeftMouseButton = Enter) - except while
@@ -117,6 +117,13 @@ game data in this repo.
   E there: no conversation. Steering the VM cat precisely needs the camera's actual yaw (the game camera ignores
   SetControlRotation) - and that NPC may have nothing to say. Kept for the operator's one press in play (Space AND
   now a left click, operator 2026-10-27).
+  DONE 2026-10-27 - VERIFIED IN A REAL CONVERSATION on the VM: started the game's way (the sequencer manager's
+  PlaySequenceDialogue with a tag from its own DT_QuestSequenceDialogues - "Unique2_RiverClan_TheVengefulRogue" with
+  the nearest NPC; WBP_QuestGiver_Dialogue2_C). Space -> "dialogue: SpaceBar -> Enter", the line advanced ("The walls
+  are closing in ..." -> "They've abandoned you ..."); a left click -> "LeftMouseButton -> Enter", advanced the same.
+  Found on the way: a plain line shows answer button 1 too, so "choices up" is now "the game's next prompt
+  (mcGuiNext) not shown" (visible up the parent chain); and a POSTED click never raised KeyDown on the VM until the
+  hook was checked - it does (0x201 seen); the earlier misses were the choices rule.
 - [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
   (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
   layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of

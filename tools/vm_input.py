@@ -2,7 +2,8 @@
 
   vm_input.py key <vk hex> [count]       a key press + release posted to the game window (e.g. 0D = Enter)
   vm_input.py keydown|keyup <vk hex>     hold / release a key (a held arrow key = a full stick axis)
-  vm_input.py click <x> <y>              a left click at client coordinates
+  vm_input.py click <x> <y>              a left click at client coordinates (posted)
+  vm_input.py realclick <x> <y>          a left click through SendInput (the real mouse path)
   vm_input.py move <x> <y>               a mouse move to client coordinates
   vm_input.py nudge <dx> <dy> [steps]     relative mouse motion via SendInput (raw input, like a real mouse)
   vm_input.py wheel <x> <y> <notches>     mouse wheel at a client point (negative = down)
@@ -112,6 +113,23 @@ def main():
             inp = INPUT(0, MOUSEINPUT(0, 0, delta, 0x0800, 0, 0))           # MOUSEEVENTF_WHEEL
             user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
             time.sleep(0.6)
+    elif cmd == "realclick":
+        # a left click through the system input queue (SendInput), the path a real mouse takes - a posted
+        # WM_LBUTTONDOWN never reaches the game's message dispatch
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wt.LONG), ("dy", wt.LONG), ("mouseData", wt.DWORD), ("dwFlags", wt.DWORD),
+                        ("time", wt.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wt.DWORD), ("mi", MOUSEINPUT)]
+
+        user32.SetForegroundWindow(hwnd)
+        place_cursor(hwnd, int(sys.argv[2]), int(sys.argv[3]))
+        time.sleep(0.1)
+        for flags in (0x0002, 0x0004):                                   # MOUSEEVENTF_LEFTDOWN, LEFTUP
+            inp = INPUT(0, MOUSEINPUT(0, 0, 0, flags, 0, 0))
+            user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+            time.sleep(0.3)
     elif cmd in ("keydown", "keyup"):
         vk = int(sys.argv[2], 16)
         down = 1 | (user32.MapVirtualKeyW(vk, 0) << 16)
