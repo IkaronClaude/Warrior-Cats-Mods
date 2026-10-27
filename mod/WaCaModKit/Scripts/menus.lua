@@ -11,8 +11,9 @@ local gameScreenClass
 -- Screens that stay up over gameplay without being menus: the HUDs and the overlays (online status / loading, the
 -- combat HUD, screen transitions) - only a popup they open counts. GuiScreenOnlineOver is up for a whole session:
 -- taken as a menu, the cursor never left menu mode in the world (no mouse look - operator 2026-10-25, VM-confirmed).
+-- The centre message (GuiPopupCenterMessage) is a text over gameplay too - the time-skip / scene cards use it.
 local OVERLAY_CLASSES = { "/Script/SwtAdventure.GuiScreenOnlineOver", "/Script/Wrc.GuiHudCombatOver",
-                          "/Script/SwtEngine.ScreenTransitionOver" }
+                          "/Script/SwtEngine.ScreenTransitionOver", "/Script/SwtAdventure.GuiPopupCenterMessage" }
 local overlayClasses = nil
 
 local function isGameplay(screen)

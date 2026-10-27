@@ -592,6 +592,8 @@ Weather.Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 require("preyworld").Init({ WaCa = WaCa, log = log, modDir = modDir, Weather = Weather })
 -- intentional time skips (config/timeskip.ini)
 require("timeskip").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Weather = Weather })
+-- scenes at given times (config/events.ini)
+require("events").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

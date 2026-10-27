@@ -75,6 +75,10 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
   card in the game's own style says so ("A quarter moon passes. It is leaf-bare.") and the season, weather and prey
   move on with it. Day scripts and other modules can skip time too.
+- **Scenes** (experimental, off by default, `config/events.ini`, needs the day / night cycle): things happen on screen
+  at a time of day - a card ("The full moon rises - the Gathering is tonight.") and / or one of the game's own
+  conversations with the nearest clanmate, on a day, every N days or daily, once or repeating (remembered with the
+  save). The conversation ids are listed in `config/events-dialogues.txt` the first time you're in the world.
 - **Specialisation** (off by default, `config/roles.ini Role = Hunter / Tracker / Fighter`): from `MinRank` on your
   cat is better at some things and worse at others - Hunter catches more, Tracker fishes better and moves quieter
   (prey hears it for a shorter time after loud ground), Fighter hits harder and takes less in fights (`Combat`,

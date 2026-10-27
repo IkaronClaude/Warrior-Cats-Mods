@@ -117,11 +117,19 @@ local function step(gen)
             WaCa.Emit("DayStarted", day)
         end
         refresh()
+        -- every whole hour crossed, also when one step jumps past several (slow frames, a long UpdateSeconds) - an
+        -- hour's scenes / weather countdown must not be skipped
         local whole = math.floor(hour)
-        if whole ~= DayNight.lastHour then
+        local last = DayNight.lastHour
+        if whole ~= last then
+            local h = last and (last + 1) % 24 or whole
+            for _ = 1, 24 do
+                log("daynight: %02d:00", h)
+                WaCa.Emit("HourChanged", h, day)
+                if h == whole then break end
+                h = (h + 1) % 24
+            end
             DayNight.lastHour = whole
-            log("daynight: %02d:00", whole)
-            WaCa.Emit("HourChanged", whole, day)
         end
         step(gen)
     end)
@@ -135,6 +143,7 @@ function DayNight.Skip(days, toHour)
     local from = day
     day = day + math.floor(days)
     hour = (toHour or cfg.startHour) % 24
+    DayNight.lastHour = math.floor(hour)          -- the skipped hours are not replayed one by one
     log("daynight: %d day(s) pass - day %d -> %d, %02d:00", days, from, day, math.floor(hour))
     WaCa.Emit("TimeSkipped", math.floor(days), from, day)
     WaCa.Emit("DayStarted", day)

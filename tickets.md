@@ -690,6 +690,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
       runner) and events at specific times of the day.
+      BUILT 2026-10-27 - the FRAMEWORK (experimental, events.ini On = 0): events.lua - [Event.<Name>] Hour, Day /
+        Every, Once, Card (the centre-message card), Dialogue (one of the game's SequenceDialogueIds, played with the
+        nearest clanmate via PlaySequenceDialogue); one-time scenes kept per save (sidecar); the 30 dialogue ids are
+        listed into config/events-dialogues.txt from the game's own table at the first world load. VM: card at 22:00,
+        then "Gameplay.Dialogue.Story.Monologue.Interaction.TheStarvingWarrior.Intro.2" opened the real conversation
+        (Chesnut, screenshot). Fixed on the way: (a) HourChanged skipped hours a long step jumped past (scenes /
+        weather countdowns lost) - now every crossed hour, and a time skip doesn't replay them; (b) the centre-message
+        card counted as a MENU (cursor shown, scenes gated) - it's an overlay now.
+        Open (content, operator): which scenes, when; a cutscene-grade scene (level sequences) later.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Event cards first: reuse PlaySequenceDialogue (a real conversation opened on the VM) for small scenes with
         the involved cats; later real cinematics via the game's level sequences (LS_Cinematic_*) re-targeted.
