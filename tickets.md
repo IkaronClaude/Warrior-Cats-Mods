@@ -408,6 +408,7 @@ game data in this repo.
         Last VM try: camera steered onto the mouse (6 degrees off) + its marker, level-warning widget, instakill
         canvas and widget component all forced visible, screenshot 8 s later - still nothing drawn: the game draws
         these markers by more than their visibility flags. The label's look is the operator's check in play.
+        Also tried: sense mode (Q held, the screen darkens) with the camera on the mouse - no marker, no landing.
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.
