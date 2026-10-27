@@ -245,6 +245,20 @@ game data in this repo.
       the game's quest / cutscene / dialogue hooks.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
+      PREPARED 2026-10-27 (research, nothing built yet):
+      - Prey = AWrcPouncePrey (ACharacter): PreyGenerator, ExplorationDetectionComponent (USwtAdventureDetection-
+        Component: USphereComponent, Range EAdventureDetectionRange, DetectedCharacters, DetectionType),
+        ExplorationPreyComponent (USwtAdventurePreyComponent: SneakAttackWalkOffset / Height, ActorsInPounceRange,
+        OnHuntedPounceReached, OnHunterLanded), DimensionsTag (size class -> "small prey").
+      - Detection: UFunction AWrcPouncePrey:OnCharacterDetected(detectedCharacter) - native; its exec thunk
+        (0x14186A250) calls the prey's VIRTUAL vtable +0x9F0 = the real reaction (the charge / encounter start).
+      - Plan: hook vtable +0x9F0 from a live prey (as camera.cpp hooks the axis getters; anchors: the thunk found by
+        UFunction name calls that slot - checkable offline like the save hook). For small prey (DimensionsTag), skip
+        the original and flee: AIController MoveToLocation / AddMovementInput away from the hunter, despawn past a
+        distance; the pounce (OnHuntedPounceReached / OnHunterLanded) stays the way to catch it. Config: which
+        dimension tags flee, flee speed / distance.
+      - Operator input wanted: which prey flee (all small? by tag), how far / fast, what happens to the encounter
+        system for larger prey.
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
