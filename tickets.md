@@ -317,6 +317,13 @@ game data in this repo.
       line), with the area class taken from whichever BP_MovementModifier_* FindAllOf returned first (it varied per
       run). Now: always BP_MovementModifier_Loud_C, armed 10 s after the HUD, one spot per 0.5 s. Stability run: no
       crash, 7 spots armed.
+      NOT SOLVED (same day, later): the Loud variant, one-by-one 10 s after the HUD, crashed again in
+      FinishSpawningActor (run 15:52) - the Blueprint's construction reads 0x18c sometimes (~1 in 5 runs). Tried
+      instead: the engine's native TriggerBox (spawns safely, overlaps the cat - IsOverlappingActor true) but its
+      ReceiveActorBegin/EndOverlap never reach a watch (no Blueprint implements them, so the engine skips the event)
+      -> no arrival events; reverted to the Blueprint version, off by default with a KNOWN ISSUE note in
+      hunting.ini. Next: find the area Blueprint's construction crash (symbolise 0x143E1AB60 / 0x143E1CDA0 under
+      FinishSpawningActor), or detour AActor::NotifyActorBeginOverlap on the TriggerBox (a virtual - find its slot).
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
