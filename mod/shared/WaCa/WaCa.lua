@@ -324,6 +324,99 @@ function WaCa.SaveDir()
     return (os.getenv("LOCALAPPDATA") or ".") .. "/Wrc/Saved/SaveGames"
 end
 
+-- a JSON file as Lua tables (objects -> tables by key, arrays -> 1-based tables, null -> nil), or nil
+function WaCa.ReadJson(path)
+    local f = io.open(path, "rb")
+    if not f then return nil end
+    local s = f:read("*a")
+    f:close()
+    local pos = 1
+    local value
+    local function skip() pos = s:find("[^ \t\r\n]", pos) or #s + 1 end
+    local escapes = { b = "\b", f = "\f", n = "\n", r = "\r", t = "\t", ['"'] = '"', ["\\"] = "\\", ["/"] = "/" }
+    local function str()
+        local out, i = {}, pos + 1
+        while true do
+            local c = s:sub(i, i)
+            if c == '"' then break end
+            if c == "\\" then
+                local e = s:sub(i + 1, i + 1)
+                if e == "u" then
+                    local code = tonumber(s:sub(i + 2, i + 5), 16) or 63
+                    table.insert(out, code < 128 and string.char(code) or utf8.char(code))
+                    i = i + 6
+                else
+                    table.insert(out, escapes[e] or e)
+                    i = i + 2
+                end
+            elseif c == "" then
+                error("unterminated string")
+            else
+                local j = s:find('["\\]', i) or #s + 1
+                table.insert(out, s:sub(i, j - 1))
+                i = j
+            end
+        end
+        pos = i + 1
+        return table.concat(out)
+    end
+    value = function()
+        skip()
+        local c = s:sub(pos, pos)
+        if c == "{" then
+            local t = {}
+            pos = pos + 1
+            skip()
+            if s:sub(pos, pos) == "}" then pos = pos + 1 return t end
+            while true do
+                skip()
+                local k = str()
+                skip()
+                pos = pos + 1                                  -- ':'
+                t[k] = value()
+                skip()
+                local d = s:sub(pos, pos)
+                pos = pos + 1
+                if d == "}" then return t end
+            end
+        elseif c == "[" then
+            local t = {}
+            pos = pos + 1
+            skip()
+            if s:sub(pos, pos) == "]" then pos = pos + 1 return t end
+            while true do
+                table.insert(t, value())
+                skip()
+                local d = s:sub(pos, pos)
+                pos = pos + 1
+                if d == "]" then return t end
+            end
+        elseif c == '"' then
+            return str()
+        elseif s:sub(pos, pos + 3) == "true" then pos = pos + 4 return true
+        elseif s:sub(pos, pos + 4) == "false" then pos = pos + 5 return false
+        elseif s:sub(pos, pos + 3) == "null" then pos = pos + 4 return nil
+        end
+        local num = s:match("^-?[%d.]+[eE]?[-+]?%d*", pos)
+        if not num or num == "" then error("bad JSON at " .. pos) end
+        pos = pos + #num
+        return tonumber(num)
+    end
+    local ok, result = pcall(value)
+    return ok and result or nil
+end
+
+-- the active character's progression as the game saved it (WrcGame.json: <save>.<character slot>.GameplayProgression -
+-- Level, Rank (ECharacterRank value), ...), or nil. As fresh as the game's last save.
+function WaCa.GameProgress()
+    local slot = WaCa.CurrentSlot()
+    if not slot then return nil end
+    local save, index = slot:match("^(.*)-(%d+)$")
+    local data = WaCa.ReadJson(WaCa.SaveDir() .. "/WrcGame.json")
+    local character = data and data[save] and data[save][index]
+    return character and character.GameplayProgression or nil
+end
+
 -- a mod's sidecar file for a slot (the active one when slot is nil)
 function WaCa.SlotFile(modName, slot)
     slot = slot or WaCa.CurrentSlot()

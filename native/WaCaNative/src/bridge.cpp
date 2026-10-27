@@ -51,6 +51,7 @@
 #include "MinHook.h"
 #include "appearance.h"
 #include "prey.h"
+#include "hunt.h"
 #include "commands.h"
 #include "tables.h"
 #include "log.h"
@@ -451,6 +452,62 @@ int LuaDevReadFloats(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// dev: where an object holds a multicast delegate bound to a function name - WaCaNative_DevFindBinding(object address,
+// object size, function name) -> "+0xOFF (bound object), ..." (a TArray of {weak object, FName} by shape, every
+// element's object alive)
+int LuaDevFindBinding(const LuaMadeSimple::Lua& lua) {
+    auto object = static_cast<uintptr_t>(lua.get_integer());
+    auto size = static_cast<uintptr_t>(lua.get_integer());
+    std::wstring want = Wide(std::string(lua.get_string()));
+    struct Binding {
+        FWeakObjectPtr Object;
+        uint32_t NameIndex;
+        uint32_t NameNumber;
+    };
+    struct Array {
+        Binding* Data;
+        int32_t Num;
+        int32_t Max;
+    };
+    std::wstring out;
+    for (uintptr_t off = 0x28; off + sizeof(Array) <= size; off += 8) {
+        auto* arr = reinterpret_cast<Array*>(object + off);
+        if (!Readable(arr, sizeof(Array)) || arr->Num <= 0 || arr->Num > 32 || arr->Max < arr->Num || arr->Max > 64) continue;
+        if (!Readable(arr->Data, sizeof(Binding) * arr->Num)) continue;
+        for (int32_t i = 0; i < arr->Num; ++i) {
+            if (arr->Data[i].NameIndex == 0 || arr->Data[i].NameIndex > 0x4000000) continue;
+            UObject* bound = arr->Data[i].Object.Get();
+            if (!bound) continue;
+            FName fn(arr->Data[i].NameIndex, arr->Data[i].NameNumber);
+            if (fn.ToString() != want) continue;
+            wchar_t buf[32];
+            swprintf_s(buf, L"+0x%llX ", static_cast<unsigned long long>(off));
+            if (!out.empty()) out += L", ";
+            out += buf + bound->GetName();
+        }
+    }
+    if (out.empty()) out = L"(none)";
+    int n = WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string utf8(n > 0 ? n - 1 : 0, '\0');
+    if (n > 1) WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+    lua.set_string(utf8);
+    return 1;
+}
+
+// dev: n int32s from an address - WaCaNative_DevReadInts(address, n) -> "v0 v1 ..." (unreflected fields)
+int LuaDevReadInts(const LuaMadeSimple::Lua& lua) {
+    auto* p = reinterpret_cast<const int32_t*>(static_cast<uintptr_t>(lua.get_integer()));
+    int n = static_cast<int>(lua.get_integer());
+    std::string out;
+    for (int i = 0; p && i < n && i < 128 && Readable(p + i, 4); ++i) {
+        char buf[24];
+        snprintf(buf, sizeof(buf), "%s%d", i ? " " : "", p[i]);
+        out += buf;
+    }
+    lua.set_string(out);
+    return 1;
+}
+
 // dev: a live object's virtual function - WaCaNative_DevVirtual(object address, vtable byte offset) -> its owner
 // ("module+offset", as the watch stacks print it)
 int LuaDevVirtual(const LuaMadeSimple::Lua& lua) {
@@ -537,6 +594,13 @@ int LuaHookPrey(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_HookHunt(a live USwtAdventurePreyComponent's address) -> true / false: hunting by chance (hunt.cpp)
+int LuaHookHunt(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    lua.set_bool(hunt::HookFrom(reinterpret_cast<void*>(addr)));
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -612,7 +676,10 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevWatchAddress", &LuaDevWatchAddress);
     lua.register_function("WaCaNative_DevReadFloats", &LuaDevReadFloats);
     lua.register_function("WaCaNative_DevVirtual", &LuaDevVirtual);
+    lua.register_function("WaCaNative_DevFindBinding", &LuaDevFindBinding);
+    lua.register_function("WaCaNative_DevReadInts", &LuaDevReadInts);
     lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
+    lua.register_function("WaCaNative_HookHunt", &LuaHookHunt);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));

@@ -280,6 +280,14 @@ game data in this repo.
         0.3 fps a 50 ms key tap falls inside one frame; a 6 s held Space didn't either. Unknown what the game needs
         (an on-screen prompt? approach by walking?). Operator: "Space once close enough; loud ground before that
         and it flees".
+      - BUILT 2026-10-27 (experimental, hunting.ini [Chance] On = 0 by default): hunt.cpp detours +0xAA0 (anchor
+        checked offline + live), rolls rank chance x prey factor (cap 100% - CriticalMiss); only [Chance] PreyKinds
+        (+ Weak*) are rolled - NPC cats carry the same component for the sneak attack and pass through. The rank comes
+        from the game's own save (WrcGame.json <save>.<slot>.GameplayProgression.Rank; re-read on GameSaved
+        "SavePlayerRank"); live OnRankChanged too. VM (hand-fired landings): Deputy -> mice 95%, rabbit 65%, 5 caught,
+        1 critical miss (rolled 96). NOT YET: a REAL pounce (VM can't trigger one), EXP on a catch, the noise check.
+        Level component (unreflected): +0x120 Level, +0x124 max level (20), +0x154.. stats; its resource SetValue
+        0x1416588A0 (virtual, clamps to max - no level-up) saves "Experience" - the add-with-level-up is still to find.
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
         checks the scent / turns around more often.

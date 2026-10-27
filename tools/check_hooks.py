@@ -275,6 +275,34 @@ for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
             print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {func:34} UFunction thunk + {pat}: {detail} '
                   f'({len(thunks)} "{func}" entries)   [{file}]')
 
+# UFunction + virtual-slot anchors (prey.cpp, hunt.cpp): the thunk must call the hooked vtable slot
+# (scan::BodyContains(thunk, "FF 90 <slot>", n)) - of the entries named <Func>, exactly one thunk holds it n times
+THUNK_BODY = re.compile(r'scan::BodyContains\(thunk, "([0-9A-Fa-f? ]+)", (\d+)\)')
+for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
+    file = os.path.basename(path)
+    text = open(path, encoding='utf-8').read()
+    funcs, bodies = UFUNC.findall(text), THUNK_BODY.findall(text)
+    if not funcs or not bodies:
+        continue
+    for func in funcs:
+        name_vas = {IB + a for a in find_ascii(func)}
+        thunks = set()
+        for va, size, ex in sections:
+            if ex:
+                continue
+            for off in range(va - va % 8, va + size - 16, 8):
+                if struct.unpack_from('<Q', image, off)[0] in name_vas:
+                    t = struct.unpack_from('<Q', image, off + 8)[0] - IB
+                    if 0 < t < len(image):
+                        thunks.add(t)
+        for pat, n in bodies:
+            matching = [t for t in thunks if primary_range(t) is not None and body_count(t, pat) == int(n)]
+            ok = len(matching) == 1
+            chain_failed += not ok
+            detail = ' '.join(f'thunk 0x{IB + t:X}' for t in matching) or 'no thunk holds it'
+            print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {func:34} UFunction thunk calls slot {pat} x{n}: {detail} '
+                  f'({len(thunks)} "{func}" entries)   [{file}]')
+
 print(f'\n{len(targets) - failed} of {len(targets)} hook targets resolve uniquely' +
       (f', {chain_failed} cross-check(s) failed' if chain_failed else '') +
       ('' if not failed and not chain_failed else ' - FIX BEFORE RELEASE'))
