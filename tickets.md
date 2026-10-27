@@ -345,6 +345,12 @@ game data in this repo.
       - SUCCESS CHANCE ON SCREEN (operator 2026-10-27): when the hunt icon (the instakill logo) shows over the prey,
         show the success chance as text under the logo (e.g. "65%") - the same number the roll will use (rank x
         prey factor, capped by the critical miss; "heard" on loud ground).
+        BUILT 2026-10-27: the icon is CanvasEnemyInstaKill in the prey's WBP_GuiLevelWarning (the mcGuiLevelWarning of
+        the widget its WidgetComponent shows); hunting.lua adds a TextBlock "WaCaHuntChance" INTO that canvas (so it
+        shows only with the icon), text = the roll's own chance; set when the world comes up, when new markers are
+        built (Construct of WBP_GuiLevelWarning_C, one pass per burst) and on a rank change. VM: "success chance
+        shown on 63 prey". NOT SEEN on screen yet (the VM camera / marker distance) - operator: does "65%" sit
+        nicely under the icon? (position: 4 px under the canvas bottom, centred, the default font).
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.

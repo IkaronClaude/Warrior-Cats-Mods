@@ -55,7 +55,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   (rabbit 0.5), always at least a 5% critical miss. A miss and the prey gets away. Only prey kinds (`PreyKinds`) are
   rolled - the sneak attack on cats stays the game's. A catch gives the EXP a fight against that prey gives (the game's
   own combat EXP table; `Experience = 1`). Landing from loud ground (the game's own noisy leaf litter) or just after
-  leaving it: the prey hears you and gets away (`Noise`, `NoiseWindow`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
+  leaving it: the prey hears you and gets away (`Noise`, `NoiseWindow`). The success chance shows under the game's hunt
+  icon over the prey. Every roll is in WaCaNative.log (`[hunt] landed on ...`).
 - **Day / night cycle** (experimental, off by default, `config/daynight.ini [DayNight] On = 1`): the sun crosses the
   sky, the light dims at night and the game's own night look blends in - a full day takes `DayMinutes` real minutes
   (24 by default), starting at `StartHour`.

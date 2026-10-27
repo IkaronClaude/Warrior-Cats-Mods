@@ -78,6 +78,67 @@ local function sendChance()
     if chance.on and not base then log("hunting: the cat's rank isn't known yet - every hunt works as in the game") end
 end
 
+-- The chance on screen (operator 2026-10-27): under the game's instakill icon over a prey - the icon is the
+-- CanvasEnemyInstaKill of the prey's level-warning widget (WBP_GuiLevelWarning, inside the widget its widget
+-- component shows), so a text added INTO that canvas shows exactly when the icon does. Same number the roll uses.
+local function chanceFor(kindValue)
+    local base = chance.ranks[chance.rank or chance.ifUnknown or ""]
+    if not base then return nil end
+    local factor
+    for name, value in pairs(preyKinds()) do
+        if value == kindValue then
+            local b = name:gsub("^Weak", "")
+            if chance.kinds[name] or chance.kinds[b] then factor = chance.factors[name] or chance.factors[b] or 1.0 end
+        end
+    end
+    if not factor then return nil end
+    return math.min(base * factor, 100 - chance.critMiss)
+end
+
+local widgetClass
+local function instaKillCanvas(character)
+    widgetClass = widgetClass or StaticFindObject("/Script/UMG.WidgetComponent")
+    local comps = character:K2_GetComponentsByClass(widgetClass)       -- (elements: RemoteUnrealParam - :get())
+    for i = 1, #comps do
+        local ok, canvas = pcall(function()
+            local uw = comps[i]:get().Widget
+            local lw = uw and uw:IsValid() and uw.mcGuiLevelWarning
+            if not (lw and lw:IsValid()) then return nil end
+            local c = StaticFindObject(lw.WidgetTree:GetFullName():gsub("^%S+ ", "") .. ".CanvasEnemyInstaKill")
+            return c and c:IsValid() and c or nil
+        end)
+        if ok and canvas then return canvas end
+    end
+end
+
+function Hunting.LabelPrey()
+    if not chance.on then return end
+    local n = 0
+    for _, ch in ipairs(FindAllOf("BP_Exploration_Character_Base_C") or {}) do
+        pcall(function()
+            if not ch:IsValid() then return end
+            local pct = chanceFor(ch.CharacterType)
+            if not pct then return end
+            local canvas = instaKillCanvas(ch)
+            if not canvas then return end
+            local tree = canvas:GetOuter()
+            local label = StaticFindObject(tree:GetFullName():gsub("^%S+ ", "") .. ".WaCaHuntChance")
+            if not (label and label:IsValid()) then
+                label = StaticConstructObject(StaticFindObject("/Script/UMG.TextBlock"), tree, FName("WaCaHuntChance"))
+                local slot = canvas:AddChildToCanvas(label)
+                slot:SetAnchors({ Minimum = { X = 0.5, Y = 1 }, Maximum = { X = 0.5, Y = 1 } })
+                slot:SetAlignment({ X = 0.5, Y = 0 })
+                slot:SetPosition({ X = 0, Y = 4 })
+                slot:SetAutoSize(true)
+                pcall(function() label:SetJustification(1) end)            -- centre
+            end
+            label:SetText(FText(string.format("%d%%", math.floor(pct + 0.5))))
+            n = n + 1
+        end)
+    end
+    if n > 0 then log("hunting: success chance shown on %d prey", n) end
+end
+
 -- EXP for a catch: what a fight against that prey gives - the game's own combat EXP table (the NonAsset CSV
 -- CombatBaseExperience, rows by prey kind name), as the tuning manager loaded it (read natively, hunt.cpp), added the
 -- way the game adds EXP (native, level-ups included)
@@ -119,6 +180,7 @@ function Hunting.SetRank(value)
         end
     end
     sendChance()
+    pcall(Hunting.LabelPrey)
 end
 
 function Hunting.Init(c)
@@ -175,6 +237,23 @@ function Hunting.Init(c)
     for _, comp in ipairs(FindAllOf("SwtAdventurePreyComponent") or {}) do
         if comp:IsValid() then hookFrom(comp) break end
     end
+    -- the chance under the icon: once the world is up, and again whenever new prey markers are built (respawns) -
+    -- one pass per burst of them
+    local labelPending = false
+    local function labelSoon()
+        if labelPending then return end
+        labelPending = true
+        ExecuteInGameThreadWithDelay(3000, function()
+            labelPending = false
+            local ok, err = pcall(Hunting.LabelPrey)
+            if not ok then log("hunting: labelling failed (%s)", tostring(err)) end
+        end)
+    end
+    WaCa.On("ScreenShown", function(screen)
+        if screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then labelSoon() end
+    end)
+    WaCa.Watch("Construct", "/Game/Art/UXD/Blueprints/Controls/gui_actor_widgets/WBP_GuiLevelWarning.WBP_GuiLevelWarning_C", "WaCaPreyMarker", "post")
+    WaCa.On("WaCaPreyMarker", labelSoon)
     -- the cat's rank as the game saved it (WrcGame.json GameplayProgression.Rank): read on the first save of a character
     -- (the game saves right after loading one) and whenever the game saves a new rank (context "SavePlayerRank")
     local rankSlot

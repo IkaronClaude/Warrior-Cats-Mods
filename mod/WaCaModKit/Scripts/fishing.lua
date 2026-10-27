@@ -167,7 +167,9 @@ function Fishing.Init(c)
             end
         end
         -- spawning from inside the screen's hook crashed the game once (VM): on the game thread's next tick instead
-        ExecuteInGameThreadWithDelay(10000, function()
+        -- 30 s in: every crash (4 runs) came 0-10 s after the HUD while the world was still streaming in, the game's
+        -- own GetWorld coming back null under FinishSpawningActor; 100 spawns 20 s in never crashed (VM stress test)
+        ExecuteInGameThreadWithDelay(30000, function()
             local ok, err = pcall(armSpots)
             if not ok then log("fishing: arming failed (%s)", tostring(err)) end
         end)
