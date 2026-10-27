@@ -463,6 +463,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - **Snow: low priority, minimal.** A proof of concept is enough (some snow piles here and there in leaf-bare).
       PREPARED 2026-10-27: no native weather / season classes; the sky is BP_DayNightSky's fixed looks (see 4). Rain =
       new (a Niagara system + wet materials / post-process); seasons = new state driving the look and 22 / 23.
+      TRIED 2026-10-27 (VM, with screenshots - Unreal's "shot" console command works offscreen, Saved/Screenshots):
+      the game ships NO rain effect. Candidates seen: NS_DropsFalling (User.Area, User.Color - a small drip; 4
+      copies above the cat with a big Area: nothing visible), M_PP_RainDrops (screen drops; added as a weighted
+      blendable on the active post-process: nothing visible), puddle decals, T_rain_ripples02, S_Cue_Wind. Real rain
+      = a NEW Niagara asset made in the Unreal editor and shipped in a mod pak (a content pipeline the mod doesn't
+      have yet) - the weather logic itself (when, how long, darker light via daynight) is easy on top of it.
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).
