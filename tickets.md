@@ -630,6 +630,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
 
 ## Archive
+- [x] 2026-10-27 CRASH FIX - the watch dispatcher (bridge.cpp OnProcessEvent): a start-up crash in main.dll+0xACDC
+      (reading freed memory in the g_watches loop) - mods register / drop watches on UE4SS's mod thread while the game
+      thread dispatches. Now the list is mutex-guarded (atomic count fast path), and events are delivered after the
+      lock (handlers may add watches). Was likely behind some "random" crashes at start-up too.
+
 - [x] 2026-10-25 Escape as menu back + pause close: raw KeyDown events (DispatchMessageW) + the Escape = BackSpace alias
       as a real key press, menus only. VM-verified: Escape opens the pause menu in gameplay and closes it; back in
       menus. (Replaces the Button_B watchpoint plan and the 0.3.1 / 0.5.3 [UIKeys] attempts.)

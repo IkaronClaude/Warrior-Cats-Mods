@@ -81,6 +81,11 @@ struct Watch {
 
 std::vector<std::unique_ptr<ModState>> g_states;
 std::vector<Watch> g_watches;
+// mods register / drop watches on UE4SS's mod thread (start-up, reloads) while the game thread dispatches - the list is
+// only touched under this lock, and events are delivered after it's released (a handler may add watches). A crash at
+// start-up (VM 2026-10-27: main.dll reading freed memory in this loop) came from that race.
+std::mutex g_watchesMutex;
+std::atomic<size_t> g_watchCount{0};     // g_watches.size(), for the lock-free "nothing watched" fast path
 std::atomic<bool> g_haveGameThread{false};
 std::atomic<bool> g_startPending{false};      // a mod became ready: deliver its "Started" on the game thread
 std::thread::id g_gameThread{};
@@ -144,20 +149,21 @@ void DeliverStarted() {
 void OnProcessEvent(bool post, UObject* context, UFunction* function) {
     if (!OnGameThread()) return;
     if (g_startPending.load(std::memory_order_relaxed)) DeliverStarted();
-    if (g_watches.empty() || !context || !function) return;
+    if (g_watchCount.load(std::memory_order_relaxed) == 0 || !context || !function) return;
     const FName name = function->GetNamePrivate();
-    // by index: a handler may add watches (the vector grows)
-    for (size_t i = 0; i < g_watches.size(); ++i) {
-        if (g_watches[i].post != post || !(g_watches[i].function == name)) continue;
-        if (!g_watches[i].cls) {
-            g_watches[i].cls = UObjectGlobals::StaticFindObject<UClass*>(nullptr, nullptr, g_watches[i].classPath.c_str());
-            if (!g_watches[i].cls) continue;
+    std::vector<std::pair<ModState*, std::string>> due;
+    {
+        std::lock_guard<std::mutex> lock(g_watchesMutex);
+        for (auto& w : g_watches) {
+            if (w.post != post || !(w.function == name)) continue;
+            if (!w.cls) {
+                w.cls = UObjectGlobals::StaticFindObject<UClass*>(nullptr, nullptr, w.classPath.c_str());
+                if (!w.cls) continue;
+            }
+            if (context->IsA(w.cls)) due.emplace_back(w.state, w.event);
         }
-        if (!context->IsA(g_watches[i].cls)) continue;
-        ModState* state = g_watches[i].state;
-        std::string event = g_watches[i].event;
-        Deliver(*state, event, context, {});
     }
+    for (auto& [state, event] : due) Deliver(*state, event, context, {});
 }
 
 // --- Lua functions (the calling Lua state is the argument; arguments are consumed from index 1) ---
@@ -177,7 +183,11 @@ int LuaWatch(const LuaMadeSimple::Lua& lua) {
     w.post = post;
     w.event = event;
     w.state = state;
-    g_watches.push_back(std::move(w));
+    {
+        std::lock_guard<std::mutex> lock(g_watchesMutex);
+        g_watches.push_back(std::move(w));
+        g_watchCount = g_watches.size();
+    }
     logx::Line(L"[bridge] %s: %s on %s (%s) -> %s", state->name.c_str(), function.c_str(), classPath.c_str(),
                post ? L"post" : L"pre", Wide(event).c_str());
     return 0;
@@ -731,7 +741,11 @@ void LuaStopping(LuaMadeSimple::Lua& lua) {
     for (auto it = g_states.begin(); it != g_states.end(); ++it) {
         if ((*it)->mod != mod) continue;
         ModState* s = it->get();
-        std::erase_if(g_watches, [s](const Watch& w) { return w.state == s; });
+        {
+            std::lock_guard<std::mutex> lock(g_watchesMutex);
+            std::erase_if(g_watches, [s](const Watch& w) { return w.state == s; });
+            g_watchCount = g_watches.size();
+        }
         logx::Line(L"[bridge] %s stopped", s->name.c_str());
         g_states.erase(it);
         return;
