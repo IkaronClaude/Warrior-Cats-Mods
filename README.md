@@ -68,8 +68,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   corrects them at load (6 lines; only the misspelled token is changed).
 - **Fishing** (experimental, off by default, `config/hunting.ini [Fishing] On = 1`): walking up to a fishing spot
   startles the fish - they're gone for a few seconds. Keep still on the spot and they come back and bite by chance
-  (`Chance`, x your clan's factor: RiverClan 1.5); a bite = the game's own catch is there. Known issue: setting up the
-  spots crashed the game in about 1 of 5 test runs - leave it off unless you're testing it.
+  (`Chance`, x your clan's factor: RiverClan 1.5); a bite = the game's own catch is there. Fishing spots become active 30 s
+  after you enter the world (setting them up earlier, while the world was still loading, could crash the game).
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera

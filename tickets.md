@@ -331,6 +331,9 @@ game data in this repo.
       constructed. Fix to try next: spawn into the fishing spot's OWN level only while that level is visible and
       not unloading (spot:GetLevel(), skip spots whose level is going away), or arm a spot only when the cat comes
       within streaming range of it (re-armed per streaming-in), instead of all 7 at world start.
+      FIXED (same day): a stress test spawned 100 of the same Blueprint 20 s after the HUD - no crash; all 4 crashes
+      had been 0-10 s after the HUD (world still streaming in). Spots now arm 30 s after the HUD; a full run with
+      fishing on: 7 spots armed, no crash.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
