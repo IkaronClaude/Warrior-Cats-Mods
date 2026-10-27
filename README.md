@@ -61,12 +61,15 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Dialogue name fixes** (`config/text.ini [Placeholders]`): the game's own text misspells some name placeholders
   (`{THE WARROR FATHER}`, `{THE MISTRUSTUL LEADER}` ...), so those lines never showed the cat's name - the mod
   corrects them at load (6 lines; only the misspelled token is changed).
+- **Fishing** (experimental, off by default, `config/hunting.ini [Fishing] On = 1`): walking up to a fishing spot
+  startles the fish - they're gone for a few seconds. Keep still on the spot and they come back and bite by chance
+  (`Chance`, x your clan's factor: RiverClan 1.5); a bite = the game's own catch is there.
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera
   ("tank" controls); only the mouse / camera keys turn the camera. `[Mouse] CameraRelativeMove = 0` = the game's.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
-  (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), key aliases in menus (`[KeyAliases]`) and in conversations (`[DialogueKeyAliases]`: Space advances dialogue). Every
+  (`[Actions]` / `[Axes]`), the menus' own keys and their icons (`[UIKeys]`), key aliases in menus (`[KeyAliases]`) and in conversations (`[DialogueKeyAliases]`: Space and a left click advance dialogue - a click on an answer choice just picks it). Every
   command and its default is listed inside. Gamepad bindings are untouched.
 
 - **Free-form name** for your cat: `config/names.ini` (`Prefix = Moss` gives Mosskit, Mosspaw, Moss<warrior suffix>;

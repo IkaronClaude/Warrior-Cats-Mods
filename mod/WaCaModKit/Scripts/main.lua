@@ -471,17 +471,31 @@ loadAliases()
 
 -- Dialogue keys ([DialogueKeyAliases] Key = OtherKey): while a conversation is on screen, pressing Key also presses
 -- OtherKey as a real key press - SpaceBar = Enter: Space advances / confirms dialogue like Enter does (operator
--- 2026-10-25). A conversation is the game's QuestGiverWidget (its "next" prompt is Button_Confirm = Enter); it is
+-- 2026-10-25; a left click too, operator 2026-10-27 - but not while answer choices show: the click picks one itself). A
+-- conversation is the game's QuestGiverWidget (its "next" prompt is Button_Confirm = Enter); it is
 -- looked up when such a key is pressed, not tracked.
 local function dialogueUp()
     for _, w in ipairs(FindAllOf("QuestGiverWidget") or {}) do
-        if w:IsValid() and w:IsInViewport() and w:IsVisible() then return true end
+        if w:IsValid() and w:IsInViewport() and w:IsVisible() then return w end
+    end
+    return nil
+end
+-- answer choices on screen (mcButton1..4): a mouse click picks one itself - no extra Enter then
+local function choicesUp(w)
+    for i = 1, 4 do
+        local ok, up = pcall(function()
+            local b = w["mcButton" .. i]
+            return b and b:IsValid() and b:IsVisible()
+        end)
+        if ok and up then return true end
     end
     return false
 end
 WaCa.On("KeyDown", function(_, name)
     local targets = dialogueAliases[name]
-    if not targets or not dialogueUp() then return end
+    local widget = targets and dialogueUp()
+    if not widget then return end
+    if name:find("MouseButton") and choicesUp(widget) then return end
     for _, target in ipairs(targets) do
         if not dialogueAliases[target] then
             log("dialogue: %s -> %s", name, target)
@@ -555,6 +569,8 @@ Dev.Init({ WaCa = WaCa, log = log, modDir = modDir })
 require("graphics").Init({ WaCa = WaCa, log = log, modDir = modDir })
 -- hunting by chance / prey flee (config/hunting.ini)
 require("hunting").Init({ WaCa = WaCa, log = log, modDir = modDir })
+-- fishing: startled fish, a bite by chance (config/hunting.ini [Fishing])
+require("fishing").Init({ WaCa = WaCa, log = log, modDir = modDir })
 -- clan activities: ambient camp life (config/activities.ini)
 require("activities").Init({ WaCa = WaCa, log = log, modDir = modDir })
 

@@ -106,6 +106,8 @@ game data in this repo.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
   logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
+  2026-10-27 (operator): a LEFT CLICK advances dialogue too ([DialogueKeyAliases] LeftMouseButton = Enter) - except while
+  answer choices show (QuestGiverWidget mcButton1..4 visible): the click picks the choice itself.
   2026-10-27: a VM real-conversation attempt failed to OPEN one - teleported 150 / walked in from 400 units to the
   nearest quest giver (BP_Quest_Giver_Deputy_C), held E: QuestPlayerController.OnCanInteract never fired, no
   QuestGiverWidget. At 0.3 fps the walk barely moves and that NPC may have nothing to say - an operator press in
@@ -276,6 +278,13 @@ game data in this repo.
       like the quest giver (Space-dialogue ticket), a teleported cat never becomes "can interact" on the VM. The game's
       interaction focus needs a real approach (not reproducible at 0.3 fps) - the startle trigger is the one open
       piece; the rest (hide hint, 5 s timers, roll, clan factor) is straightforward once it fires.
+      BUILT 2026-10-27 (fishing.lua, hunting.ini [Fishing] / [FishingClan], off by default): each spot gets a trigger
+      box of the game's own Blueprint movement-modifier class (flag cleared - a bare native one never reported), so
+      the cat entering / leaving a spot are overlap events. Moving in -> hint hidden + interaction off; after
+      StartleSeconds: left -> fish back; still -> bite roll (Chance x clan factor, clan read from the save:
+      RiverClan); no bite -> wait again. VM: 10 spots armed (RiverClan x1.5); moving arrival -> "startled and gone";
+      still arrival -> nothing; spawning inside the HUD hook crashed the game once -> now 2 s later on the game
+      thread. NOT YET SEEN: the bite roll after a startle.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're

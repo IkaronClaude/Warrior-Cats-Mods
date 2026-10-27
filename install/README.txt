@@ -34,12 +34,14 @@ WHAT IT DOES (0.6.0)
     few seconds: names, looks and the menu cursor are right at once.
   - The mouse cursor shows in menus.
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
-  - Space advances a conversation (Enter still works too).
+  - Space or a left click advances a conversation (Enter still works too).
   - A click continues the "press any key" title screen.
   - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
   - Experimental, off by default: hunting by chance - the prey instakill works only by chance, by your rank and the
     prey (hunting.ini [Chance] On = 1); a catch gives the EXP the fight would have; pouncing from loud ground (leaf litter) scares it off.
   - Dialogue lines whose name placeholder the game misspelled now show the name (text.ini [Placeholders]).
+  - Experimental, off by default: fishing - walking up startles the fish; keep still and they bite by chance,
+    RiverClan better at it (hunting.ini [Fishing] On = 1).
   - Experimental, off by default: pounce prey runs from your cat (hunting.ini Flee = 1).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then
     (activities.ini [Ambient] On = 1).
