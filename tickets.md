@@ -106,6 +106,10 @@ game data in this repo.
 - [~] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
   while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
   logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
+  2026-10-27: a VM real-conversation attempt failed to OPEN one - teleported 150 / walked in from 400 units to the
+  nearest quest giver (BP_Quest_Giver_Deputy_C), held E: QuestPlayerController.OnCanInteract never fired, no
+  QuestGiverWidget. At 0.3 fps the walk barely moves and that NPC may have nothing to say - an operator press in
+  play is the cheap check.
 - [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
   (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
   layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
