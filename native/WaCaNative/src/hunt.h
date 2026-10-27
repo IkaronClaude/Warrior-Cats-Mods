@@ -7,4 +7,7 @@ namespace hunt {
 bool HookFrom(void* preyComponent);
 // HuntRoll|<0/1>|<base chance %>|<critical miss %>|<CharacterType value>=<factor>,...
 void Configure(const std::wstring& command);
+// add EXP to a level component (USwtQuestLevelComponent, the player state's) the way the game does - its resource
+// "add value" virtual (level-ups included); false when the anchors disagree
+bool AddExperience(void* levelComponent, float amount);
 }

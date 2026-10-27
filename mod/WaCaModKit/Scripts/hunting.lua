@@ -8,7 +8,7 @@ local Hunting = {}
 
 local WaCa, log, modDir
 local cfg = { flee = false, distance = 2500, speed = 1.0 }
-local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {}, rank = nil, ifUnknown = nil }
+local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {}, rank = nil, ifUnknown = nil, exp = true }
 local hooked, huntHooked = false, false
 local boosted = {}               -- prey -> its speed was raised once
 
@@ -78,6 +78,46 @@ local function sendChance()
     if chance.on and not base then log("hunting: the cat's rank isn't known yet - every hunt works as in the game") end
 end
 
+-- EXP for a catch: what a fight against that prey gives - the game's own combat EXP table (CombatBaseExperience,
+-- rows by prey kind name: BaseExperience), added the way the game adds EXP (native, level-ups included)
+local expTable
+local function experienceFor(kindName)
+    if not (expTable and expTable:IsValid()) then
+        expTable = nil
+        for _, t in ipairs(FindAllOf("DataTable") or {}) do
+            if t:IsValid() and t:GetFName():ToString():find("CombatBaseExperience") then expTable = t break end
+        end
+    end
+    if not expTable then return nil end
+    local amount
+    expTable:ForEachRow(function(name, row)
+        if tostring(name) == kindName then amount = row.BaseExperience end
+    end)
+    return amount
+end
+
+function Hunting.GrantExperience(kindValue)
+    local kindName
+    for name, value in pairs(preyKinds()) do
+        if value == kindValue then kindName = name end
+    end
+    local amount = kindName and experienceFor(kindName)
+    if not amount then
+        log("hunting: no EXP for prey kind %s (the combat EXP table %s)", tostring(kindName or kindValue),
+            expTable and "has no row for it" or "isn't loaded")
+        return
+    end
+    local ok, granted = pcall(function()
+        for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
+            if c:IsValid() and c.Player and c.PlayerState and c.PlayerState:IsValid() then
+                return WaCaNative_AddExperience(c.PlayerState.LevelComponent:GetAddress(), amount)
+            end
+        end
+        return false
+    end)
+    log("hunting: +%d EXP for the %s (%s)", amount, kindName, ok and granted and "granted" or ("not granted: " .. tostring(granted)))
+end
+
 -- the cat's rank: the player state's OnRankChanged(newRank)
 function Hunting.SetRank(value)
     for name, v in pairs(rankValues()) do
@@ -114,6 +154,7 @@ function Hunting.Init(c)
     chance.critMiss = tonumber(ch.CriticalMiss or "") or chance.critMiss
     if (ch.RankIfUnknown or "") ~= "" then chance.ifUnknown = ch.RankIfUnknown end
     for kind in (ch.PreyKinds or ""):gmatch("[^,%s]+") do chance.kinds[kind] = true end
+    chance.exp = (ch.Experience or "1") ~= "0"
     for name, v in pairs(ini["RankChance"] or {}) do
         if name ~= "__order" and tonumber(v) then chance.ranks[name] = tonumber(v) end
     end
@@ -161,6 +202,7 @@ function Hunting.Init(c)
     end)
     WaCa.On("HuntCaught", function(_, prey, _, kind, pct)
         log("hunting: caught %s (chance %s%%)", pathOf(prey):match("[^.]+$"), pct)
+        if chance.exp then Hunting.GrantExperience(tonumber(kind)) end
     end)
     WaCa.On("HuntMissed", function(_, prey, _, kind, pct)
         log("hunting: missed %s (chance %s%%) - it got away", pathOf(prey):match("[^.]+$"), pct)

@@ -288,6 +288,15 @@ game data in this repo.
         1 critical miss (rolled 96). NOT YET: a REAL pounce (VM can't trigger one), EXP on a catch, the noise check.
         Level component (unreflected): +0x120 Level, +0x124 max level (20), +0x154.. stats; its resource SetValue
         0x1416588A0 (virtual, clamps to max - no level-up) saves "Experience" - the add-with-level-up is still to find.
+      - EXP (2026-10-27): the grant is built - hunt::AddExperience calls the level component's resource add-value
+        (vtable +0x508 = 0x14165B460: scales by the EXP multiplier +0x114, current EXP +0x10C (396 = the save's),
+        next-level threshold +0x110; anchors = those two field reads, once each) via WaCaNative_AddExperience; Lua
+        grants the prey kind's BaseExperience on HuntCaught ([Chance] Experience = 1). OPEN: the amounts table is
+        the NonAsset CSV Gameplay/DataTables/NonAsset/CombatBaseExperience.csv - NOT a loaded DataTable (no runtime
+        object; the 34 combat DTs don't include it), read by code not yet found (no path string; the struct is
+        SwtAdventureCombatBaseExperience). VM: 3 caught mice -> "no EXP ... table isn't loaded", EXP stayed 396.
+        Next: find the loader (the struct's StaticStruct users / a watch on +0x10C during a won fight) and read
+        the parsed rows from there - no copied numbers.
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
         checks the scent / turns around more often.

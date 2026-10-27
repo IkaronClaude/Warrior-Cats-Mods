@@ -601,6 +601,14 @@ int LuaHookHunt(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_AddExperience(level component address, amount) -> true / false: EXP the way the game adds it (hunt.cpp)
+int LuaAddExperience(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    auto amount = static_cast<float>(lua.get_number());
+    lua.set_bool(hunt::AddExperience(reinterpret_cast<void*>(addr), amount));
+    return 1;
+}
+
 // WaCaNative_RebuildLook(cat look component's address) -> true / false: the game builds that cat's whole look again
 // from its own data (appearance.cpp) - with the look hook, any WaCa look goes in with it
 int LuaRebuildLook(const LuaMadeSimple::Lua& lua) {
@@ -680,6 +688,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevReadInts", &LuaDevReadInts);
     lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
     lua.register_function("WaCaNative_HookHunt", &LuaHookHunt);
+    lua.register_function("WaCaNative_AddExperience", &LuaAddExperience);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
     g_states.push_back(std::move(state));

@@ -8,6 +8,10 @@
 // the component's VIRTUAL vtable +0xAA0 (rcx = component, rdx = &Hit, r8 = the cat) - hooked from a live component's
 // vtable. Anchor: the thunk (from the UFunction by name) calls exactly that slot (call qword ptr [rax+0AA0h]);
 // tools/check_hooks.py checks the same offline.
+// EXP for a catch (operator 2026-10-27, what the fight would have given): the level component's resource "add value"
+// is its VIRTUAL vtable +0x508 (rcx = component, xmm1 = amount): it scales the amount by the EXP multiplier
+// (+0x114) and checks the current value (+0x10C) against the next level. Anchors: that function's body reads both
+// fields exactly once (movss xmm1, [rbx+10Ch] / mulss xmm6, [rbx+114h]).
 #include "hunt.h"
 
 #include <windows.h>
@@ -100,9 +104,28 @@ void __fastcall LandedDetour(void* componentPtr, void* hit, void* characterPtr) 
     if (caught) g_landed(componentPtr, hit, characterPtr);
 }
 
+using AddValueFn = void(__fastcall*)(void* component, float amount);
+constexpr int kAddValueSlot = 0x508;
+
 }  // namespace
 
 namespace hunt {
+
+bool AddExperience(void* levelComponent, float amount) {
+    if (!levelComponent) return false;
+    auto* fn = (*reinterpret_cast<uint8_t***>(levelComponent))[kAddValueSlot / 8];
+    static uint8_t* checked = nullptr;
+    if (fn != checked) {
+        if (!scan::BodyContains(fn, "F3 0F 10 8B 0C 01 00 00", 1) || !scan::BodyContains(fn, "F3 0F 59 B3 14 01 00 00", 1)) {
+            logx::Line(L"[hunt] the level component's slot +0x%X (%p) isn't its add-value - anchors disagree, no EXP", kAddValueSlot, fn);
+            return false;
+        }
+        checked = fn;
+    }
+    reinterpret_cast<AddValueFn>(fn)(levelComponent, amount);
+    logx::Line(L"[hunt] +%.0f EXP", amount);
+    return true;
+}
 
 bool HookFrom(void* preyComponent) {
     if (g_tried || !preyComponent) return g_landed != nullptr;
