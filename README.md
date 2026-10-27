@@ -53,7 +53,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   succeeds only by chance - your rank's chance (apprentice 20%, warrior 80%, deputy / leader 130%) x the prey's factor
   (rabbit 0.5), always at least a 5% critical miss. A miss and the prey gets away. Only prey kinds (`PreyKinds`) are
   rolled - the sneak attack on cats stays the game's. A catch gives the EXP a fight against that prey gives (the game's
-  own combat EXP table; `Experience = 1`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
+  own combat EXP table; `Experience = 1`). Landing from loud ground (the game's own noisy leaf litter) or just after
+  leaving it: the prey hears you and gets away (`Noise`, `NoiseWindow`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.

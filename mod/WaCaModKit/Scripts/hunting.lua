@@ -147,6 +147,8 @@ function Hunting.Init(c)
     if (ch.RankIfUnknown or "") ~= "" then chance.ifUnknown = ch.RankIfUnknown end
     for kind in (ch.PreyKinds or ""):gmatch("[^,%s]+") do chance.kinds[kind] = true end
     chance.exp = (ch.Experience or "1") ~= "0"
+    chance.noise = tonumber(ch.NoiseWindow or "") or 3
+    if (ch.Noise or "1") == "0" then chance.noise = 0 end
     for name, v in pairs(ini["RankChance"] or {}) do
         if name ~= "__order" and tonumber(v) then chance.ranks[name] = tonumber(v) end
     end
@@ -197,8 +199,43 @@ function Hunting.Init(c)
         if chance.exp then Hunting.GrantExperience(tonumber(kind)) end
     end)
     WaCa.On("HuntMissed", function(_, prey, _, kind, pct)
-        log("hunting: missed %s (chance %s%%) - it got away", pathOf(prey):match("[^.]+$"), pct)
+        if pct == "heard" then
+            log("hunting: %s heard your cat on loud ground - it got away", pathOf(prey):match("[^.]+$"))
+        else
+            log("hunting: missed %s (chance %s%%) - it got away", pathOf(prey):match("[^.]+$"), pct)
+        end
     end)
+    -- loud ground (the game's Loud movement areas - leaf litter): the cat on it, or just off it, is heard
+    if chance.noise > 0 then
+        local loudAreas = 0
+        -- (a hook's parameters are only valid during the hook: read them there, act on plain values afterwards)
+        local function onArea(entering, otherName)
+            local pawn
+            for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
+                if c:IsValid() and c.Player and c.Pawn and c.Pawn:IsValid() then pawn = c.Pawn end
+            end
+            if not (pawn and otherName == pawn:GetFullName()) then return end
+            loudAreas = math.max(0, loudAreas + (entering and 1 or -1))
+            WaCa.Command(string.format("HuntLoud|%d|%s", loudAreas > 0 and 1 or 0, tostring(chance.noise)))
+            log("hunting: your cat is %s loud ground", loudAreas > 0 and "on" or "off")
+        end
+        local function hook(entering)
+            return function(area, _, other)
+                local loud, name = false, nil
+                pcall(function()
+                    loud = area:get().MovementFlag & 32 ~= 0
+                    local o = other:get()
+                    if loud and o and o:IsValid() then name = o:GetFullName() end
+                end)
+                if loud and name then ExecuteInGameThread(function() onArea(entering, name) end) end
+            end
+        end
+        WaCa.Command("HuntLoud|0|" .. tostring(chance.noise))
+        pcall(function()
+            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapBegin", hook(true))
+            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapEnd", hook(false))
+        end)
+    end
 end
 
 return Hunting

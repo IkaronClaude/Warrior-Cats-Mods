@@ -38,7 +38,7 @@ WHAT IT DOES (0.6.0)
   - A click continues the "press any key" title screen.
   - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
   - Experimental, off by default: hunting by chance - the prey instakill works only by chance, by your rank and the
-    prey (hunting.ini [Chance] On = 1); a catch gives the EXP the fight would have.
+    prey (hunting.ini [Chance] On = 1); a catch gives the EXP the fight would have; pouncing from loud ground (leaf litter) scares it off.
   - Dialogue lines whose name placeholder the game misspelled now show the name (text.ini [Placeholders]).
   - Experimental, off by default: pounce prey runs from your cat (hunting.ini Flee = 1).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then

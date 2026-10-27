@@ -328,6 +328,16 @@ game data in this repo.
         detection is crouch / presence based (OnCrouch). OPERATOR: what exactly makes it loud - the footstep SOUND
         on leaves, or not crouching / moving fast during the approach? With that, the rule hooks the approach
         (bRequiresInteract interaction -> OnHunterLanded) and fails the roll when it applies.
+        CORRECTED + BUILT 2026-10-27: the game HAS ground types - its own (EAdventurePhysicalFloorType: Grass, Dirt,
+        Wood, DeepWater, Water, TileRoof, Rocks, DryLeafs, Mud, Metal; the step cue S_Cue_cat_step switches on
+        StepType; BP_AnimStepNotify = USwtAdventureStepModifierNotifyState) - not engine surface names. And the
+        game's NOISE system: ASwtAdventureMovementModifierArea trigger boxes give EAdventureMovementFlag Loud (32) -
+        12 BP_MovementModifier_Loud_C in the world (+29 Hiding); also ApproachingSneakVictim (4096) = the instakill
+        approach. Rule: hunting.lua tracks the cat entering / leaving Loud areas (their overlap UFunctions; params read
+        INSIDE the hook - deferring them crashed the game on world load) -> HuntLoud; hunt.cpp: a landing while on loud
+        ground or within NoiseWindow (3 s) of leaving it = heard, the prey escapes, no roll. hunting.ini Noise /
+        NoiseWindow. VM: cat moved into BP_MovementModifier_Loud_C_2 -> "on loud ground"; 2 mouse landings -> both
+        heard. Possible refinement: also DryLeafs floor steps outside the Loud areas (the step notify).
       PREPARED 2026-10-27 (research, nothing built yet):
       - Prey = AWrcPouncePrey (ACharacter): PreyGenerator, ExplorationDetectionComponent (USwtAdventureDetection-
         Component: USphereComponent, Range EAdventureDetectionRange, DetectedCharacters, DetectionType),

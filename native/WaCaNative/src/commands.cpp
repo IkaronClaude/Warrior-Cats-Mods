@@ -8,6 +8,7 @@
 //   MouseLook|<0/1>|<yaw degrees per mouse unit>|<pitch degrees per mouse unit>   mouse look on / off (camera.cpp)
 //   CameraRelativeMove|<0/1>                         right / left strafe instead of turning the camera (camera.cpp)
 //   PreyFlee|<0/1>|<size tags that keep the game's reaction>   prey run instead of reacting (prey.cpp)
+//   HuntLoud|<0/1>|<window s>   the cat on / off loud ground (hunt.cpp)
 //   HuntRoll|<0/1>|<base chance %>|<critical miss %>|<CharacterType value>=<factor>,...   (hunt.cpp)
 #include "commands.h"
 
@@ -49,6 +50,7 @@ bool Run(const std::wstring& cmd) {
     else if (verb == L"DevStack") dev::Stack(Arg(cmd, 1));
     else if (verb == L"SteamKeyboard") steam::ShowKeyboard(Arg(cmd, 1), Arg(cmd, 2));
     else if (verb == L"HuntRoll") hunt::Configure(cmd);
+    else if (verb == L"HuntLoud") hunt::SetLoud(Arg(cmd, 1) == L"1", std::wcstod(Arg(cmd, 2).c_str(), nullptr));
     else if (verb == L"PreyFlee") prey::Configure(Arg(cmd, 1) == L"1", Arg(cmd, 2));
     else if (verb == L"CameraRelativeMove") camera::SetCameraRelativeMove(Arg(cmd, 1) == L"1");
     else if (verb == L"MouseLook") camera::SetMouseLook(Arg(cmd, 1) == L"1", std::wcstof(Arg(cmd, 2).c_str(), nullptr),
