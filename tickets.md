@@ -220,6 +220,11 @@ game data in this repo.
       worse at hunting / fighting), sleep resets it. A day has three phases, the natural split points for duties:
       **morning** (dawn patrol, morning hunt), **afternoon**, **evening / night** (evening patrol, night watch).
       Sleeping skips to the next phase / day. The phases are what the day scripts (25) schedule against.
+      PREPARED 2026-10-27: there is NO day / night cycle in the game - BP_DayNightSky (Art/Environment/Tools/Sky)
+      only switches fixed looks (TestDay / TestNight / TestThunderClan ... / StartCinematicNight; StartIn* flags;
+      a post-process per look: neutralday, night, each clan, moonpool). A cycle = new: turn its DirectionalLight /
+      SunDiscDirection over time and blend PostProcess-neutralday <-> PostProcess-night (+ SkyLight, fog). Needs: the
+      day length, what ends a day (exhaustion), what happens at night.
 - [ ] **25. Story as days (day scripts).** Operator 2026-10-25: the story is defined in DAYS, as data, which keeps it
       organised. Each day defines:
       - per phase (morning / afternoon / evening): cutscenes, the main story quest if any, where you may go
@@ -275,13 +280,24 @@ game data in this repo.
       CharacterTypes, no chase (detection / AI) and no fight on touch. OPERATOR DECISION NEEDED: what "catching" is
       without combat (instant catch on touch? a fresh-kill item? a short chase-pounce?), and whether rats stay hostile.
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
+      PREPARED 2026-10-27: the fresh-kill pile exists natively - ASwtAdventureFreshKillPileActor with
+      USwtAdventureFreshKillPileComponent (a USwtQuestResourceComponent: a quest resource value),
+      USwtAdventureGainFreshKillEffect, UGuiPopupFreshKill, UAdventureDialogueActionFreshKillPile. Pile needs = that
+      resource; prey = combat characters by type (Mice / Squirrel / Rabbit / Bird / Rat, see 9). Needs: the mission
+      goals.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
+      PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
+      - a patrol = a temporary party + a route. Needs: patrol goals / events.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
 - [ ] **14. Pacing.** Progression must come from time + duties + training, not "3 hunts until deputy". No old deputy
       getting canned for "not doing enough" at your own ceremony. Ceremonies need proper preconditions.
 
 Living world (operator 2026-10-25: "that, plus the other planned features, will make the world feel properly REAL and
 lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
+      PREPARED 2026-10-27: rank-ups are URankUp objectives - RequiredLevel (player level) + Objectives (quests) - and
+      UQuestObjectiveRankUpTask (Rank, Tasks; the rank-up sequence). So "3 hunts until deputy" = those objective
+      lists / levels in the quest data. Pacing hooks: raise RequiredLevel / add objectives (data), or gate rank-ups on
+      days / duties served (with 15 / 25). Needs: the target pace per rank.
 - [ ] **20. Intentional time skips.** Time passes on screen and on purpose ("a moon passes", with what happened in it),
       never implied by a story jump. A skip is a world event the other systems react to (season, prey, ages, ranks).
 - [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
@@ -291,6 +307,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - **Rain: very important.** Full rain (visuals, sound, wet ground) and its effects on prey / scent / patrols.
       - Sun / clear and the season's light: the baseline.
       - **Snow: low priority, minimal.** A proof of concept is enough (some snow piles here and there in leaf-bare).
+      PREPARED 2026-10-27: no native weather / season classes; the sky is BP_DayNightSky's fixed looks (see 4). Rain =
+      new (a Niagara system + wet materials / post-process); seasons = new state driving the look and 22 / 23.
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).
@@ -331,6 +349,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **11. Clan cat interactivity.** Every cat repeats the same single line. Context lines (rank, relationship, time of
       day, current duty, recent events), plus interactions.
 - [ ] **5. Clan activities.** Sharing tongues, sharing stories: ambient camp life + player-joinable activities.
+      PREPARED 2026-10-27: no native activity system (no sharing-tongues / grooming classes). Bonds exist: UBondDialogue,
+      UQuestDialogueActionResolveBondAnswer (the friendship system the bond level-up UI shows). Activities = new
+      (animations + a bond gain through that dialogue action). Needs: which activities, with whom, their effect.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
