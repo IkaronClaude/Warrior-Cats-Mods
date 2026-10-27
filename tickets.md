@@ -257,6 +257,15 @@ game data in this repo.
       bonus: RiverClan +50% fishing chance (config: per-clan factors). Prep: find the game's fishing spot actor /
       fish (CombatBaseExperience has a Fish row: 10 EXP; ESwtQuestCharacterType has fish kinds?), its interaction and
       the fish visuals (to hide / show), the player's clan (save: Customization ClanType / EClanType).
+      PREPARED 2026-10-27: the spot = BP_Interactable_Claw_FishingSpot (Gameplay/Blueprints/WorldElements/
+      Interactables): components InteractionComponent (SwtQuestInteractSphereComponent), EffectComponent (the reward -
+      BP_InteractableReward_Container_Fish), NS_PickUp_Hint (the visible "fish here" sparkle), MoveTo; BP event
+      OnInteracted. PLAN: startle = the cat enters the spot's sphere while moving (velocity > threshold) -> hide the
+      hint + block the interaction (SwtAdventureInteractableActor ResetInteractable / the sphere's collision) for 5 s
+      (one delayed callback); re-armed only after the cat stood still 5 s on it (velocity check at that one callback,
+      re-scheduled while it keeps still / moves - bounded). Catch = OnInteracted rolled like the hunt (native detour
+      of the interactable's OnInteracted virtual, the hunt.cpp pattern) - chance from hunting.ini [Fishing] Chance +
+      per-clan factor (RiverClan 1.5; the clan from the save's Customization ClanType); a miss skips the reward.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
       SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
