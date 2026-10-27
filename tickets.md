@@ -272,6 +272,10 @@ game data in this repo.
       proximity event. Candidates: the spot's InteractionComponent overlap (a native delegate - find its handler like
       the prey's OnActorOverlapped), or the game's interaction prompt widget (InteractionWidget:SetInteract, a
       UFunction - fires when the prompt shows). NEXT: hook InteractionWidget:SetInteract and walk onto a spot.
+      Tried same day: InteractionWidget:SetInteract doesn't fire either when the cat is teleported off / onto a spot -
+      like the quest giver (Space-dialogue ticket), a teleported cat never becomes "can interact" on the VM. The game's
+      interaction focus needs a real approach (not reproducible at 0.3 fps) - the startle trigger is the one open
+      piece; the rest (hide hint, 5 s timers, roll, clan factor) is straightforward once it fires.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
