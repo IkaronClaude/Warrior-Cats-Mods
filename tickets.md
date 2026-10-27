@@ -167,7 +167,7 @@ game data in this repo.
 - [x] **Engine version + toolchain.** DONE: UE 5.7.4 (PROJECT_PLAN.md; AssetDump EGame GAME_UE5_7, UE4SS 3.0.1). Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
       wrapped (`.bind` section). Hints: pak v12, utoc v8, so 5.4 or later. Get FModel to browse the paks, plus a
       `.usmap` mappings file (UE4SS dumper or community). Record versions + download sources in PROJECT_PLAN.md.
-- [ ] **Asset map.** Extract (FModel export, into gitignored `extracted/`) and map how these work:
+- [x] **Asset map.** DONE 2026-10-27: docs/ASSET_MAP.md (every listed area; the roster lives in the save - NPCData.NarrativeRoles). Extract (FModel export, into gitignored `extracted/`) and map how these work:
       - the clan-cat generator
       - dialogue / quest data (DataTables, string tables, `.locres`)
       - the day structure
