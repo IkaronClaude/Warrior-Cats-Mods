@@ -131,23 +131,15 @@ function Fishing.Init(c)
     if not cfg.on then return end
     if not hooked then
         hooked = true
-        -- (a hook's parameters are only valid during the hook: read them there)
-        local function hook(entering)
-            return function(area, _, other)
-                local a, o
-                pcall(function()
-                    local ar = area:get()
-                    if ar.MovementFlag ~= 0 then return end
-                    a = pathOf(ar)
-                    local ot = other:get()
-                    if ot and ot:IsValid() then o = ot:GetFullName() end
-                end)
-                if a and o then ExecuteInGameThread(function() onArea(entering, a, o) end) end
-            end
-        end
-        pcall(function()
-            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapBegin", hook(true))
-            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapEnd", hook(false))
+        -- the spots' trigger boxes report through areas.cpp (AreaOverlap: area, actor, "1" / "0", flag)
+        WaCa.On("AreaOverlap", function(_, area, other, entering, flag)
+            if tonumber(flag) ~= 0 then return end
+            local path = area:gsub("^%S+ ", "")
+            local entry = spots[path]
+            local pawn = player()
+            if not (entry and pawn) then return end
+            local now = entering == "1"
+            if now ~= entry.inside then onArea(now, path, other) end
         end)
     end
     -- the spots exist once the world is up (the gameplay HUD)
@@ -155,6 +147,12 @@ function Fishing.Init(c)
     WaCa.On("ScreenShown", function(screen)
         if armed or not screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then return end
         armed = true
+        for _, area in ipairs(FindAllOf("SwtAdventureMovementModifierArea") or {}) do
+            if area:IsValid() then
+                if WaCaNative_HookAreas then WaCaNative_HookAreas(area:GetAddress()) end
+                break
+            end
+        end
         -- spawning from inside the screen's hook crashed the game once (VM): on the game thread's next tick instead
         ExecuteInGameThreadWithDelay(2000, function()
             local ok, err = pcall(armSpots)

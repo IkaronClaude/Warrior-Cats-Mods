@@ -34,7 +34,8 @@ add_library(WaCaNative SHARED
     WaCaNative/src/camera.cpp
     WaCaNative/src/saves.cpp
     WaCaNative/src/prey.cpp
-    WaCaNative/src/hunt.cpp)
+    WaCaNative/src/hunt.cpp
+    WaCaNative/src/areas.cpp)
 target_link_libraries(WaCaNative PRIVATE minhook UE4SS dxgi dxguid)
 target_compile_definitions(WaCaNative PRIVATE WIN32_LEAN_AND_MEAN NOMINMAX)
 set_target_properties(WaCaNative PROPERTIES OUTPUT_NAME main)

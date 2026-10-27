@@ -284,7 +284,14 @@ game data in this repo.
       StartleSeconds: left -> fish back; still -> bite roll (Chance x clan factor, clan read from the save:
       RiverClan); no bite -> wait again. VM: 10 spots armed (RiverClan x1.5); moving arrival -> "startled and gone";
       still arrival -> nothing; spawning inside the HUD hook crashed the game once -> now 2 s later on the game
-      thread. NOT YET SEEN: the bite roll after a startle.
+      thread. DONE 2026-10-27: the whole flow on the VM - moving arrival -> "startled and gone"; 5 s later still ->
+      "swim back but don't bite (chance 60%, rolled 72)" -> next round "back and biting (chance 60%, rolled 9)"
+      (RiverClan 40 x 1.5). Two crash fixes on the way: UE4SS's native RegisterHook on the areas' overlap
+      UFunctions crashed the game on world load (twice, same stack) and those calls never pass ProcessEvent (a
+      WaCa.Watch saw nothing) -> areas.cpp detours the areas' overlap virtuals (+0x760 begin / +0x768 end, anchors
+      checked offline + live) and emits AreaOverlap(area, actor, entering, flag) - hunting's loud ground uses it too
+      (re-verified: "on loud ground" -> both landings heard). The live OnRankChanged RegisterHook is gone too (the
+      save follows rank changes).
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're

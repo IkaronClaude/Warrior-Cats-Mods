@@ -52,6 +52,7 @@
 #include "appearance.h"
 #include "prey.h"
 #include "hunt.h"
+#include "areas.h"
 #include "commands.h"
 #include "tables.h"
 #include "log.h"
@@ -622,6 +623,13 @@ int LuaAddExperience(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_HookAreas(a live movement-modifier area's address) -> true / false: AreaOverlap events (areas.cpp)
+int LuaHookAreas(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    lua.set_bool(areas::HookFrom(reinterpret_cast<void*>(addr)));
+    return 1;
+}
+
 // WaCaNative_CombatExperience(tuning manager address, enemy kind name) -> the EXP a fight against it gives, or -1
 int LuaCombatExperience(const LuaMadeSimple::Lua& lua) {
     auto addr = static_cast<uintptr_t>(lua.get_integer());
@@ -710,6 +718,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevReadInts", &LuaDevReadInts);
     lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
     lua.register_function("WaCaNative_HookHunt", &LuaHookHunt);
+    lua.register_function("WaCaNative_HookAreas", &LuaHookAreas);
     lua.register_function("WaCaNative_AddExperience", &LuaAddExperience);
     lua.register_function("WaCaNative_CombatExperience", &LuaCombatExperience);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);

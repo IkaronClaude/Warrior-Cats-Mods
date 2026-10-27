@@ -277,14 +277,16 @@ for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
 
 # UFunction + virtual-slot anchors (prey.cpp, hunt.cpp): the thunk must call the hooked vtable slot
 # (scan::BodyContains(thunk, "FF 90 <slot>", n)) - of the entries named <Func>, exactly one thunk holds it n times
-THUNK_BODY = re.compile(r'scan::BodyContains\(thunk, "([0-9A-Fa-f? ]+)", (\d+)\)')
+THUNK_BODY = re.compile(r'scan::BodyContains\(\w*[Tt]hunk, "([0-9A-Fa-f? ]+)", (\d+)\)')
 for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
     file = os.path.basename(path)
     text = open(path, encoding='utf-8').read()
     funcs, bodies = UFUNC.findall(text), THUNK_BODY.findall(text)
     if not funcs or not bodies:
         continue
-    for func in funcs:
+    # several UFunctions in one file (areas.cpp): the n-th function goes with the n-th thunk pattern
+    paired = len(funcs) == len(bodies) and len(funcs) > 1
+    for fi, func in enumerate(funcs):
         name_vas = {IB + a for a in find_ascii(func)}
         thunks = set()
         for va, size, ex in sections:
@@ -295,7 +297,7 @@ for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
                     t = struct.unpack_from('<Q', image, off + 8)[0] - IB
                     if 0 < t < len(image):
                         thunks.add(t)
-        for pat, n in bodies:
+        for pat, n in ([bodies[fi]] if paired else bodies):
             matching = [t for t in thunks if primary_range(t) is not None and body_count(t, pat) == int(n)]
             ok = len(matching) == 1
             chain_failed += not ok

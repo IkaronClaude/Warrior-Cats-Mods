@@ -187,13 +187,8 @@ function Hunting.Init(c)
             Hunting.SetRank(math.floor(progress.Rank))
         end
     end)
-    -- live too (a watched event carries no parameters - the rank needs the UFunction hook's)
-    pcall(function()
-        RegisterHook("/Script/Wrc.WrcPlayerState:OnRankChanged", function(_, newRank)
-            local v = newRank:get()
-            ExecuteInGameThread(function() Hunting.SetRank(v) end)
-        end)
-    end)
+    -- (no live OnRankChanged hook: UE4SS's native RegisterHook on overlap UFunctions crashed the game - the save's
+    -- "SavePlayerRank" above follows every rank change anyway)
     WaCa.On("HuntCaught", function(_, prey, _, kind, pct)
         log("hunting: caught %s (chance %s%%)", pathOf(prey):match("[^.]+$"), pct)
         if chance.exp then Hunting.GrantExperience(tonumber(kind)) end
@@ -208,32 +203,32 @@ function Hunting.Init(c)
     -- loud ground (the game's Loud movement areas - leaf litter): the cat on it, or just off it, is heard
     if chance.noise > 0 then
         local loudAreas = 0
-        -- (a hook's parameters are only valid during the hook: read them there, act on plain values afterwards)
-        local function onArea(entering, otherName)
+        -- the areas' overlaps come from areas.cpp (AreaOverlap: area, actor, "1" / "0", flag) - their UFunctions never
+        -- pass through ProcessEvent and UE4SS's RegisterHook on them crashed the game (VM)
+        local inside = {}
+        WaCa.On("AreaOverlap", function(_, area, other, entering, flag)
+            if (tonumber(flag) or 0) & 32 == 0 then return end
             local pawn
             for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
                 if c:IsValid() and c.Player and c.Pawn and c.Pawn:IsValid() then pawn = c.Pawn end
             end
-            if not (pawn and otherName == pawn:GetFullName()) then return end
-            loudAreas = math.max(0, loudAreas + (entering and 1 or -1))
+            if not (pawn and other == pawn:GetFullName()) then return end
+            local now = entering == "1"
+            if now == (inside[area] or false) then return end
+            inside[area] = now
+            loudAreas = math.max(0, loudAreas + (now and 1 or -1))
             WaCa.Command(string.format("HuntLoud|%d|%s", loudAreas > 0 and 1 or 0, tostring(chance.noise)))
             log("hunting: your cat is %s loud ground", loudAreas > 0 and "on" or "off")
-        end
-        local function hook(entering)
-            return function(area, _, other)
-                local loud, name = false, nil
-                pcall(function()
-                    loud = area:get().MovementFlag & 32 ~= 0
-                    local o = other:get()
-                    if loud and o and o:IsValid() then name = o:GetFullName() end
-                end)
-                if loud and name then ExecuteInGameThread(function() onArea(entering, name) end) end
-            end
-        end
+        end)
         WaCa.Command("HuntLoud|0|" .. tostring(chance.noise))
-        pcall(function()
-            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapBegin", hook(true))
-            RegisterHook("/Script/SwtAdventure.SwtAdventureMovementModifierArea:OnActorOverlapEnd", hook(false))
+        WaCa.On("ScreenShown", function(screen)
+            if not screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then return end
+            for _, area in ipairs(FindAllOf("SwtAdventureMovementModifierArea") or {}) do
+                if area:IsValid() then
+                    if WaCaNative_HookAreas then WaCaNative_HookAreas(area:GetAddress()) end
+                    break
+                end
+            end
         end)
     end
 end

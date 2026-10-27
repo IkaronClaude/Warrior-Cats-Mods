@@ -35,6 +35,7 @@ WHAT IT DOES (0.6.0)
   - The mouse cursor shows in menus.
   - Escape instead of P to pause; Escape also goes back / closes in every menu (BackSpace still works too).
   - Space or a left click advances a conversation (Enter still works too).
+  - Left click interacts too (E still works).
   - A click continues the "press any key" title screen.
   - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
   - Experimental, off by default: hunting by chance - the prey instakill works only by chance, by your rank and the
