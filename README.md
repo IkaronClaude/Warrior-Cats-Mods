@@ -70,7 +70,7 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   the mod's own content pak (`WaCaModKit_P` in `Wrc\Content\Paks\~mods`; `Effect`, `Sound`, `Volume` in the ini).
   Prey follows the season (`[Season.*] Prey`): in leaf-bare only part of the mice, rabbits and birds are about and
   hardly any squirrels - the rest are away (hidden, never destroyed) until a later season; every in-game hour some
-  prey comes and goes (`PreyTurnover`).
+  prey comes and goes (`PreyTurnover`), turning up at a random spot of its area (`PreyRandomPlaces`).
 - **Specialisation** (off by default, `config/roles.ini Role = Hunter / Tracker / Fighter`): from `MinRank` on your
   cat is better at some things and worse at others - Hunter catches more, Tracker fishes better and moves quieter
   (prey hears it for a shorter time after loud ground). Needs hunting by chance on. Add your own roles in the ini.
