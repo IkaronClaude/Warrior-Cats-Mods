@@ -59,7 +59,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   icon over the prey. Every roll is in WaCaNative.log (`[hunt] landed on ...`).
 - **Day / night cycle** (experimental, off by default, `config/daynight.ini [DayNight] On = 1`): the sun crosses the
   sky, the light dims at night and the game's own night look blends in - a full day takes `DayMinutes` real minutes
-  (24 by default), starting at `StartHour`.
+  (24 by default). The time of day is kept with your save (`KeepTime`); `BedHour` ends each day (counts the days
+  for later features).
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.

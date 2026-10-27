@@ -251,6 +251,11 @@ game data in this repo.
       (09:00), intensity and night look follow (0.83 -> 0.17). Found: this build's FRotator field is "pitch" (lower
       case) - a { Pitch = } table silently keeps 0 (activities / fishing fixed too). OPEN for the operator: day
       length, what ends a day / exhaustion, whether the hour persists in the save (now: StartHour each session).
+      PREPARED (same day): KeepTime = 1 keeps the hour + a day count in a sidecar written when the game saves,
+      restored on load (VM: "back to day 1, 20:00 (as saved)"); BedHour ends each day: log + WaCa event
+      DayEnded(nil, day) + day count (VM, 1-minute days, bedtime 22: "day 1 is over", "day 2 is over");
+      DayNight.Hour() / DayNight.Day() for other modules. Exhaustion / pacing can hang on DayEnded - the operator
+      only picks the numbers (DayMinutes, BedHour) and what a day's end does.
 - [ ] **25. Story as days (day scripts).** Operator 2026-10-25: the story is defined in DAYS, as data, which keeps it
       organised. Each day defines:
       - per phase (morning / afternoon / evening): cutscenes, the main story quest if any, where you may go
@@ -638,6 +643,26 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **12. Romance + kits (far future).** The friendship system already exists. Add a mate, kits of your own, watching
       them grow up. Maybe in a free-play mode after the story concludes.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
+
+- [ ] **Release 0.7.0 - PREPARED (2026-10-27), waiting for the operator's go** (or: move v0.6.0 for the crash fix
+      alone - the operator's call: main also carries everything below, all new features OFF by default).
+      Steps once decided: VERSION in Scripts/main.lua -> "0.7.0"; tools/package.ps1; tag v0.7.0; push (the release
+      workflow attaches the zip). Draft notes:
+        WaCa ModKit 0.7.0
+        Fixes
+        - A crash at start-up (the mod's event watcher raced with mods loading) - fixed.
+        - Dialogue lines whose name placeholder the game misspells now show the name (6 lines).
+        - Space and a left click advance conversations (a click on answer choices just picks one).
+        - Left click interacts too (E still works).
+        New, experimental, off by default (each in its config file)
+        - Hunting by chance (hunting.ini [Chance]): the prey instakill succeeds by your rank's chance x the prey's
+          factor, with a 5% critical miss; the chance shows under the hunt icon; a catch gives the fight's EXP;
+          pouncing from loud leaf litter gets you heard.
+        - Fishing (hunting.ini [Fishing]): walking up startles the fish; keep still and they bite by chance
+          (RiverClan x1.5). Spots become active 30 s after you enter the world.
+        - Day / night cycle (daynight.ini): the sun moves, nights get dark, the time is kept with your save,
+          optional bedtime that counts the days.
+        - Clan activities (activities.ini): clanmates near you sit, nap, sniff and play-fight.
 
 ## Archive
 - [x] 2026-10-27 CRASH FIX - the watch dispatcher (bridge.cpp OnProcessEvent): a start-up crash in main.dll+0xACDC

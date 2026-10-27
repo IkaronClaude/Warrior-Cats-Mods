@@ -6,7 +6,10 @@
 local DayNight = {}
 
 local WaCa, log, modDir
-local cfg = { on = false, dayMinutes = 24, startHour = 8, sunHeight = 60, nightLight = 0.15, nightLook = 1.0, step = 2 }
+local cfg = { on = false, dayMinutes = 24, startHour = 8, sunHeight = 60, nightLight = 0.15, nightLook = 1.0, step = 2,
+              keep = true, bedHour = nil }
+local day = 1                    -- days passed in this save (counted at BedHour, kept with the hour)
+local restoredFor                -- the save slot whose hour was restored
 local hour
 local base                       -- the sky's own values, read once: { sun intensity, sky light intensity, sun yaw }
 local running, generation = false, 0
@@ -39,7 +42,18 @@ end
 local function step(gen)
     ExecuteInGameThreadWithDelay(math.floor(cfg.step * 1000), function()
         if gen ~= generation or not running then return end
+        local before = hour
         hour = (hour + cfg.step / (cfg.dayMinutes * 60) * 24) % 24
+        -- the day ends at BedHour: DayEnded(nil, day) for other modules (exhaustion, pacing, day scripts)
+        local crossed = false
+        if not cfg.bedHour then crossed = false
+        elseif hour >= before then crossed = before < cfg.bedHour and hour >= cfg.bedHour           -- the same day
+        else crossed = before < cfg.bedHour or hour >= cfg.bedHour end                       -- past midnight
+        if cfg.bedHour and crossed then
+            log("daynight: day %d is over (%02d:00)", day, cfg.bedHour)
+            WaCa.Emit("DayEnded", day)
+            day = day + 1
+        end
         local ok, err = pcall(function()
             local s = sky()
             if s then apply(s) end
@@ -56,6 +70,31 @@ end
 
 -- the hour now (0-24), or nil when the cycle is off - for other modules (day scripts, pacing)
 function DayNight.Hour() return cfg.on and hour or nil end
+-- the day number of this save (1 = the first), or nil when the cycle is off
+function DayNight.Day() return cfg.on and day or nil end
+
+-- KeepTime: the hour and the day count live with the save (a sidecar next to it, written when the GAME saves - like
+-- the game's own progress), restored on the first save after loading a character
+local function sidecar() return WaCa.SlotFile("WaCaDayNight") end
+local function restore()
+    local slotNow = WaCa.CurrentSlot()
+    if not cfg.keep or not slotNow or restoredFor == slotNow then return end
+    restoredFor = slotNow
+    local data = WaCa.ReadIni(sidecar() or "") or {}
+    local t = data["Time"] or {}
+    if tonumber(t.Hour or "") then
+        hour = tonumber(t.Hour) % 24
+        day = math.max(1, math.floor(tonumber(t.Day or "") or 1))
+        log("daynight: back to day %d, %02d:%02d (as saved)", day, math.floor(hour), math.floor(hour % 1 * 60))
+    end
+end
+local function keep()
+    if not cfg.keep then return end
+    local path = sidecar()
+    if not path then return end
+    WaCa.WriteIni(path, { Time = { Hour = string.format("%.3f", hour), Day = tostring(day), __order = { "Hour", "Day" } },
+        __order = { "Time" } }, "; WaCa ModKit - this save's time of day (daynight.ini KeepTime)")
+end
 
 function DayNight.Init(c)
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
@@ -69,8 +108,14 @@ function DayNight.Init(c)
     cfg.nightLook = tonumber(d.NightLook or "") or cfg.nightLook
     cfg.step = math.max(0.5, tonumber(d.UpdateSeconds or "") or cfg.step)
     hour = cfg.startHour % 24
+    cfg.keep = (d.KeepTime or "1") ~= "0"
+    cfg.bedHour = tonumber(d.BedHour or "")
     log("daynight: %s (a day = %d min, starting %02d:00)", cfg.on and "on" or "off", cfg.dayMinutes, math.floor(hour))
     if not cfg.on then return end
+    WaCa.On("GameSaved", function()
+        restore()
+        keep()
+    end)
     WaCa.On("ScreenShown", function(screen)
         if running or not screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then return end
         local s = sky()
