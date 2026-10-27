@@ -37,7 +37,7 @@ WHAT IT DOES (0.6.0)
   - Space advances a conversation (Enter still works too).
   - A click continues the "press any key" title screen.
   - Mouse look: the camera turns exactly with the mouse (LookYaw / LookPitch in keybinds.ini).
-  - Prey runs from your cat instead of charging (hunting.ini).
+  - Experimental: pounce prey runs from your cat instead of reacting (hunting.ini Flee = 0 turns it off).
   - More graphics settings: config/graphics.ini (quality groups, motion blur, depth of field, frame cap ...).
   - A / D strafe relative to the camera instead of turning it (keybinds.ini CameraRelativeMove = 0: the game's).
   - Rebind any keyboard/mouse key: keybinds.ini (all commands and the game's defaults are listed inside).

@@ -49,8 +49,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **More graphics settings** (`config/graphics.ini`): the engine's scalability groups (shadows, effects, foliage,
   view distance ... 0 low - 4 cinematic) and any console variable (motion blur, depth of field, render resolution,
   frame cap ...). Applied at start and again after you close the game's own options.
-- **Prey flee** (`config/hunting.ini`): prey that notices your cat runs away instead of charging - pounce on it
-  before it's gone (`Flee = 0` = the game's).
+- **Prey flee** (experimental, `config/hunting.ini`): pounce prey that notices your cat runs away instead of
+  reacting - pounce on it before it's gone (`Flee = 0` = the game's). Not yet seen in play.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera
   ("tank" controls); only the mouse / camera keys turn the camera. `[Mouse] CameraRelativeMove = 0` = the game's.
 - **Rebind any keyboard/mouse key** in `ue4ss/Mods/WaCaModKit/config/keybinds.ini`: gameplay commands
