@@ -342,6 +342,9 @@ game data in this repo.
         seasoned warrior / deputy 130% base. Prey difficulty multiplies it (rabbit x0.5). Always a 5% critical miss
         (so the effective chance never exceeds 95%). A miss = the prey escapes (flees).
       - Keep: catch = the game's instakill; rats stay hostile; pacing later.
+      - SUCCESS CHANCE ON SCREEN (operator 2026-10-27): when the hunt icon (the instakill logo) shows over the prey,
+        show the success chance as text under the logo (e.g. "65%") - the same number the roll will use (rank x
+        prey factor, capped by the critical miss; "heard" on loud ground).
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.
