@@ -304,6 +304,12 @@ game data in this repo.
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
         checks the scent / turns around more often.
+      - NOISE (operator: "in the instakill cutscene the cat can loudly walk through leaf litter - should make it
+        flee"): FOUND 2026-10-27 - the game defines NO physical surface types (Wrc/Config/DefaultEngine.ini has no
+        PhysicalSurfaces; nothing reads a surface type), so "loud ground" is not a surface system to hook. Prey
+        detection is crouch / presence based (OnCrouch). OPERATOR: what exactly makes it loud - the footstep SOUND
+        on leaves, or not crouching / moving fast during the approach? With that, the rule hooks the approach
+        (bRequiresInteract interaction -> OnHunterLanded) and fails the roll when it applies.
       PREPARED 2026-10-27 (research, nothing built yet):
       - Prey = AWrcPouncePrey (ACharacter): PreyGenerator, ExplorationDetectionComponent (USwtAdventureDetection-
         Component: USphereComponent, Range EAdventureDetectionRange, DetectedCharacters, DetectionType),
@@ -419,6 +425,22 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       PREPARED 2026-10-27: no native activity system (no sharing-tongues / grooming classes). Bonds exist: UBondDialogue,
       UQuestDialogueActionResolveBondAnswer (the friendship system the bond level-up UI shows). Activities = new
       (animations + a bond gain through that dialogue action). Needs: which activities, with whom, their effect.
+      PLAN 2026-10-27 (implementable; operator only tunes the list):
+      - ANIMATIONS the game ships (cat montages): AM_Interact_Sleep_1/2/3, AM_CatMaster_SimpleSit,
+        AM_Interact_Play / AM_Interact_Play_Toy, AM_Interact_Sniffing, AM_SC_Wrestle (+ A_CatMaster_SC_Wrestle),
+        AM_Interact_Sharpen, AM_Interact_Dig. NO grooming / tongue-sharing animation - "sharing tongues" = SimpleSit
+        + Sniffing side by side until an animation exists (or a WaCa look-at pose).
+      - AMBIENT (no input): camp NPC cats (BP_Exploration_Character_Base_C with CharacterType Cat inside the camp area)
+        pick an activity from config/activities.ini on a timer EVENT (one ExecuteInGameThreadWithDelay per cat, no
+        tick): Character:PlayAnimMontage(montage) - pairs face each other first (K2_SetActorRotation).
+      - JOINABLE: near a clanmate playing one (distance check on the key press only) the interact key joins: the
+        player plays the same montage facing them; on its end -> bond gain through the game's bond system (the save's
+        Bonding nodes / UQuestDialogueActionResolveBondAnswer - find its native add-bond the way AddExperience was
+        found) and a small fresh effect (rested = stamina, play = EXP), all from activities.ini.
+      - activities.ini: [Activity.<Name>] Montage = ..., Pair = 1, Where = Camp, Weight = ..., Bond = +n,
+        Duration = s - the operator tweaks which / how often / rewards.
+      - NOT YET VERIFIED: PlayAnimMontage on an NPC whose AI is running (it may be overridden by the behaviour tree's
+        own montages - then pause its brain while it plays).
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
