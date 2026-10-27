@@ -357,6 +357,10 @@ game data in this repo.
         VM tries to SEE it (twice): the cat put 250 units behind a mouse + its icon forced visible + screenshots - the
         game camera ignores SetControlRotation, the mouse stays a dot at the frame's edge and its marker doesn't
         render at that distance. Seeing it needs the camera steered (mouse look) - a check for the operator's eyes.
+        Later: the camera CAN be steered on the VM - read PlayerCameraManager.CameraCachePrivate.POV, hold the
+        arrow keys (Player_Camera_Right) until within 15 degrees (it got to 5). With the mouse in view, 200 units in
+        front of the crouched cat, the game still showed no instakill icon and Space gave no landing - the hunt
+        needs more than position (the prey unaware / a real approach). Kept for the operator's play check.
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.
