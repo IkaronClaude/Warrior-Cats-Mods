@@ -42,7 +42,7 @@ WHAT IT DOES (0.6.0)
     prey (hunting.ini [Chance] On = 1); a catch gives the EXP the fight would have; pouncing from loud ground (leaf litter) scares it off.
   - Dialogue lines whose name placeholder the game misspelled now show the name (text.ini [Placeholders]).
   - Experimental, off by default: fishing - walking up startles the fish; keep still and they bite by chance,
-    RiverClan better at it (hunting.ini [Fishing] On = 1).
+    RiverClan better at it (hunting.ini [Fishing] On = 1). Known issue: can crash on entering the world - test only.
   - Experimental, off by default: pounce prey runs from your cat (hunting.ini Flee = 1).
   - Experimental, off by default: a day / night cycle - the sun moves, nights get dark (daynight.ini On = 1).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then
