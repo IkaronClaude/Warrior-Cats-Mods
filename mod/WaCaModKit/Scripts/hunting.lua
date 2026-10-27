@@ -95,10 +95,12 @@ local function updateRole()
     if now == role.active then return end
     role.active = now
     if now then
-        log("hunting: your cat is a %s now (hunting x%.2f, fishing x%.2f, noise x%.2f)", now, roleOf("hunt"),
-            roleOf("fish"), roleOf("noise"))
+        log("hunting: your cat is a %s now (hunting x%.2f, fishing x%.2f, noise x%.2f, damage dealt x%.2f, taken x%.2f)",
+            now, roleOf("hunt"), roleOf("fish"), roleOf("noise"), roleOf("combat"), roleOf("guard"))
     end
     WaCa.Emit("RoleFactors", roleOf("hunt"), roleOf("fish"))
+    -- combat: damage your cat deals / takes in the game's fights (combat.cpp)
+    WaCa.Command(string.format("CombatScale|%s|%s", tostring(roleOf("combat")), tostring(roleOf("guard"))))
 end
 
 local function sendChance()
@@ -257,7 +259,8 @@ function Hunting.Init(c)
     for section, sec in pairs(roles) do
         local name = section:match("^Role%.(.+)$")
         if name then
-            role.roles[name] = { hunt = tonumber(sec.Hunt or ""), fish = tonumber(sec.Fish or ""), noise = tonumber(sec.Noise or "") }
+            role.roles[name] = { hunt = tonumber(sec.Hunt or ""), fish = tonumber(sec.Fish or ""), noise = tonumber(sec.Noise or ""),
+                                 combat = tonumber(sec.Combat or ""), guard = tonumber(sec.Guard or "") }
         end
     end
     if role.name and not role.roles[role.name] then

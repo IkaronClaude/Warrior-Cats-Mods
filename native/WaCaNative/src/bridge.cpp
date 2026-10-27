@@ -53,6 +53,7 @@
 #include "prey.h"
 #include "hunt.h"
 #include "areas.h"
+#include "combat.h"
 #include "commands.h"
 #include "tables.h"
 #include "log.h"
@@ -703,6 +704,7 @@ void Install() {
                                           {false, true, STR("WaCaModKit"), STR("EventsPre")});
     Hook::RegisterProcessEventPostCallback([](auto&, UObject* c, UFunction* f, void*) { OnProcessEvent(true, c, f); },
                                            {false, true, STR("WaCaModKit"), STR("EventsPost")});
+    combat::Install();
     logx::Line(L"[bridge] ProcessEvent callbacks installed");
 }
 

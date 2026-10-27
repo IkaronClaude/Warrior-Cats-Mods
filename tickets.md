@@ -756,9 +756,18 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       BUILT 2026-10-27 (off by default): config/roles.ini [Specialisation] Role / MinRank (Warrior) + [Role.*] Hunt /
         Fish / Noise multipliers; hunting.lua applies it once the saved rank reaches MinRank (ECharacterRank order):
         hunt chance x Hunt, fishing bite x Fish (RoleFactors event), the loud-ground noise window x Noise. Hunter 1.15
-        hunt, Tracker 1.25 fish + 0.5 noise, Fighter 0.85 hunt. Open: Fighter's combat strength (hook the combat
-        stats), choosing the role in game (a rank-up dialogue / menu), the noise window refreshes at the next ground
-        change. Needs hunting.ini [Chance] On (the rank is read there).
+        hunt, Tracker 1.25 fish + 0.5 noise, Fighter 0.85 hunt. Open: choosing the role in game (a rank-up dialogue /
+        menu), the noise window refreshes at the next ground change. Needs hunting.ini [Chance] On (the rank is read there).
+      COMBAT (2026-10-27): [Role.*] Combat / Guard = damage the player's cat deals / takes (Fighter 1.25 / 0.85).
+        combat.cpp: a ProcessEvent pre callback on ASwtAdventureCombatDirector::OnRegisterDamage(
+        FSwtAdventureReceiveDamageStruct) - every hit is queued through it - scales Damage before the director queues
+        it; attacker = CurrentTurnAttackCharacter, receiver = the struct's Character, the player's cat = the director's
+        MainPlayerCharacter (it IS in the combat party - VM). All offsets by reflection (VM: struct +0, Character +0,
+        Damage +12). VM: role on ("Fighter ... dealt x1.25, taken x0.85"), the hook resolved live in a real fight vs
+        two forest rats; a scaled HIT not yet seen - the VM (0.6 fps) can't play the attack minigame and the Rest
+        button pressed through the popup didn't take; a direct Lua call of OnRegisterDamage bypasses UE4SS's
+        ProcessEvent callbacks (not a valid test). OPERATOR: one real fight with Role = Fighter -> WaCaNative.log
+        "[combat] damage dealt / taken by your cat: X -> Y".
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",

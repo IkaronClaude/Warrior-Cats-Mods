@@ -77,7 +77,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   move on with it. Day scripts and other modules can skip time too.
 - **Specialisation** (off by default, `config/roles.ini Role = Hunter / Tracker / Fighter`): from `MinRank` on your
   cat is better at some things and worse at others - Hunter catches more, Tracker fishes better and moves quieter
-  (prey hears it for a shorter time after loud ground). Needs hunting by chance on. Add your own roles in the ini.
+  (prey hears it for a shorter time after loud ground), Fighter hits harder and takes less in fights (`Combat`,
+  `Guard`). Needs hunting by chance on. Add your own roles in the ini.
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.
