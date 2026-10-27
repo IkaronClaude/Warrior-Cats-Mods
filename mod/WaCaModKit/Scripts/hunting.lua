@@ -36,7 +36,7 @@ function Hunting.Init(c)
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
     local ini = WaCa.ReadIni(modDir .. "/config/hunting.ini") or {}
     local p = ini["Prey"] or {}
-    cfg.flee = (p.Flee or "1") ~= "0"
+    cfg.flee = (p.Flee or "0") == "1"
     cfg.distance = tonumber(p.FleeDistance or "") or cfg.distance
     cfg.speed = tonumber(p.FleeSpeed or "") or cfg.speed
     WaCa.Command("PreyFlee|" .. (cfg.flee and "1" or "0") .. "|" .. (p.ExcludeTags or ""))

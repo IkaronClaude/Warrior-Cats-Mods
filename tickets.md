@@ -267,6 +267,13 @@ game data in this repo.
       that CHARGE you may be the enemy encounters, not pounce prey. OPERATOR: which creatures charge you (pounce prey
       during hunts, or the roaming enemies)? If the enemies: the same flee goes on their encounter start
       (ASwtAdventureCharacter OnEncounterOverlap / EncounterActor).
+      ANSWERED (VM, 2026-10-27): the prey that charge you are COMBAT characters - BP_Exploration_Character_Base_C from
+      the 164 BP_Enemy_Generator_C, with ESwtQuestCharacterType Mice x25 / Squirrel x12 / Rabbit x14 / Bird x12 (+ Rat
+      x12, large enemies x7, cats x66 at one spot). Their chase = their AI (Blueprint behaviour tree), the fight =
+      OnEncounterOverlap (touching the cat). Pounce prey: 0 in the open world. So prey.cpp / hunting.lua (pounce prey)
+      is NOT this feature - switched OFF by default (hunting.ini Flee = 0, experimental). The real build: for prey
+      CharacterTypes, no chase (detection / AI) and no fight on touch. OPERATOR DECISION NEEDED: what "catching" is
+      without combat (instant catch on touch? a fresh-kill item? a short chase-pounce?), and whether rats stay hostile.
 - [ ] **8. Real hunting missions.** Hunting patrols with goals: fresh-kill pile needs, territory, seasons.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
