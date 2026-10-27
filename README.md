@@ -54,6 +54,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   (rabbit 0.5), always at least a 5% critical miss. A miss and the prey gets away. Only prey kinds (`PreyKinds`) are
   rolled - the sneak attack on cats stays the game's. A catch gives the EXP a fight against that prey gives (the game's
   own combat EXP table; `Experience = 1`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
+- **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
+  that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
+  activities, how often (`Every`) and how near (`Radius`) are in the ini.
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera

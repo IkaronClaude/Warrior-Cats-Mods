@@ -441,6 +441,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         Duration = s - the operator tweaks which / how often / rewards.
       - NOT YET VERIFIED: PlayAnimMontage on an NPC whose AI is running (it may be overridden by the behaviour tree's
         own montages - then pause its brain while it plays).
+      BUILT 2026-10-27 - AMBIENT (experimental, activities.ini [Ambient] On = 0 by default): activities.lua - every
+        Every s while the gameplay HUD is up, one clanmate (CharacterType Cat, within Radius, standing still, not busy
+        with an earlier activity) plays a weighted [Activity.*] montage; Pair = 1 activities face two cats and play on
+        both. VM: Sit / Sniff / Nap on a clanmate, one at a time (busy tracked by the montage's own length - NPC cats
+        ALWAYS run a montage of their own, so IsAnyMontagePlaying can't be used). NOT VERIFIED: a pair (PlayFight) -
+        only one idle clanmate near the VM cat. NEXT: joinable activities + bond gain (the plan above).
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
