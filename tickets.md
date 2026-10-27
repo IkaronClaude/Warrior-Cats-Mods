@@ -354,6 +354,9 @@ game data in this repo.
         built (Construct of WBP_GuiLevelWarning_C, one pass per burst) and on a rank change. VM: "success chance
         shown on 63 prey". NOT SEEN on screen yet (the VM camera / marker distance) - operator: does "65%" sit
         nicely under the icon? (position: 4 px under the canvas bottom, centred, the default font).
+        VM tries to SEE it (twice): the cat put 250 units behind a mouse + its icon forced visible + screenshots - the
+        game camera ignores SetControlRotation, the mouse stays a dot at the frame's edge and its marker doesn't
+        render at that distance. Seeing it needs the camera steered (mouse look) - a check for the operator's eyes.
       - FLEE / CHASE (operator 2026-10-27): the game has none today; a prey that flees and can be chased would be a
         cool addition but is FUTURE WORK. For now a miss / a noticed cat = the prey is no longer instakillable (the
         game's normal reaction), not a flee. prey.cpp / hunting.lua's pounce-prey flee stays off.
