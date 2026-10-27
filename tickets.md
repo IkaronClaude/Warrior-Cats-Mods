@@ -243,6 +243,14 @@ game data in this repo.
       a post-process per look: neutralday, night, each clan, moonpool). A cycle = new: turn its DirectionalLight /
       SunDiscDirection over time and blend PostProcess-neutralday <-> PostProcess-night (+ SkyLight, fog). Needs: the
       day length, what ends a day (exhaustion), what happens at night.
+      BUILT 2026-10-27 (daynight.lua + config/daynight.ini, off by default): the world's one BP_DayNightSky
+      (L_Lights) - its movable DirectionalLight (pitch = sun height, yaw = across the sky), sun + SkyLight intensity
+      dimmed to NightLight at midnight, the sky's own "PostProcess-night" blended in by weight; DayMinutes per day,
+      StartHour, one step per UpdateSeconds while the HUD is up. DayNight.Hour() for other modules (day scripts,
+      pacing, exhaustion). VM (2-minute day): 21:00 -> 09:00: sun pitch -5 (night floor) -> -12.5 (06:00) -> -40
+      (09:00), intensity and night look follow (0.83 -> 0.17). Found: this build's FRotator field is "pitch" (lower
+      case) - a { Pitch = } table silently keeps 0 (activities / fishing fixed too). OPEN for the operator: day
+      length, what ends a day / exhaustion, whether the hour persists in the save (now: StartHour each session).
 - [ ] **25. Story as days (day scripts).** Operator 2026-10-25: the story is defined in DAYS, as data, which keeps it
       organised. Each day defines:
       - per phase (morning / afternoon / evening): cutscenes, the main story quest if any, where you may go

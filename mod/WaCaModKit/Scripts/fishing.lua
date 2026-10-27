@@ -116,7 +116,7 @@ local function armSpots()
             local spot = StaticFindObject(list[i])
             if not (spot and spot:IsValid()) then return end
             local p = spot:K2_GetActorLocation()
-            local area = spot:GetWorld():SpawnActor(areaClass, p, { Pitch = 0, Yaw = 0, Roll = 0 })
+            local area = spot:GetWorld():SpawnActor(areaClass, p, { pitch = 0, Yaw = 0, Roll = 0 })
             area.MovementFlag = 0
             area.TriggerBox:SetCollisionProfileName(FName("OverlapAllDynamic"), true)
             area.TriggerBox:SetBoxExtent({ X = cfg.radius, Y = cfg.radius, Z = 200 }, true)

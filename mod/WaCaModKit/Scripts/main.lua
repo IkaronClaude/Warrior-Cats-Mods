@@ -582,6 +582,8 @@ require("hunting").Init({ WaCa = WaCa, log = log, modDir = modDir })
 require("fishing").Init({ WaCa = WaCa, log = log, modDir = modDir })
 -- clan activities: ambient camp life (config/activities.ini)
 require("activities").Init({ WaCa = WaCa, log = log, modDir = modDir })
+-- day / night cycle (config/daynight.ini)
+require("daynight").Init({ WaCa = WaCa, log = log, modDir = modDir })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

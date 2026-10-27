@@ -56,6 +56,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   rolled - the sneak attack on cats stays the game's. A catch gives the EXP a fight against that prey gives (the game's
   own combat EXP table; `Experience = 1`). Landing from loud ground (the game's own noisy leaf litter) or just after
   leaving it: the prey hears you and gets away (`Noise`, `NoiseWindow`). Every roll is in WaCaNative.log (`[hunt] landed on ...`).
+- **Day / night cycle** (experimental, off by default, `config/daynight.ini [DayNight] On = 1`): the sun crosses the
+  sky, the light dims at night and the game's own night look blends in - a full day takes `DayMinutes` real minutes
+  (24 by default), starting at `StartHour`.
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
   activities, how often (`Every`) and how near (`Radius`) are in the ini.

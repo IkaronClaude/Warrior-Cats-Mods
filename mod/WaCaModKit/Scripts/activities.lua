@@ -57,7 +57,7 @@ end
 local function face(a, b)
     local pa, pb = a:K2_GetActorLocation(), b:K2_GetActorLocation()
     local yaw = math.deg(math.atan(pb.Y - pa.Y, pb.X - pa.X))
-    a:K2_SetActorRotation({ Pitch = 0, Yaw = yaw, Roll = 0 }, false)
+    a:K2_SetActorRotation({ pitch = 0, Yaw = yaw, Roll = 0 }, false)
 end
 
 local function once()
