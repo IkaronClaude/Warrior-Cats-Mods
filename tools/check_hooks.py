@@ -236,6 +236,45 @@ for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
         print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {m.group(1):34} calls '
               f'{" ".join(hex(IB + h) for h in sorted(hits)) or "nothing"} holding {m.group(2)}   [{file}]')
 
+# UFunction anchors (saves.cpp): STR("/Script/<Module>.<Class>:<Func>") + a call-layout pattern (scan::Parse("..."))
+# - offline, the exec thunk comes from the exe's native function tables ({const char* name, thunk} pairs, which UE
+# registers per class): of every entry named <Func>, exactly one thunk may hold the pattern, and the call after it
+# must land on a function start (what saves.cpp checks at runtime through the UFunction).
+UFUNC = re.compile(r'STR\("/Script/[\w.]+:(\w+)"\)')
+PARSE = re.compile(r'scan::Parse\("([0-9A-Fa-f? ]+)"\)')
+for path in sorted(glob.glob(os.path.join(src_dir, '*.cpp'))):
+    file = os.path.basename(path)
+    text = open(path, encoding='utf-8').read()
+    funcs, pats = UFUNC.findall(text), PARSE.findall(text)
+    if not funcs or not pats:
+        continue
+    for func in funcs:
+        name_vas = {IB + a for a in find_ascii(func)}
+        thunks = set()
+        for va, size, ex in sections:
+            if ex:
+                continue
+            for off in range(va - va % 8, va + size - 16, 8):
+                if struct.unpack_from('<Q', image, off)[0] in name_vas:
+                    t = struct.unpack_from('<Q', image, off + 8)[0] - IB
+                    if 0 < t < len(image):
+                        thunks.add(t)
+        for pat in pats:
+            toks = pat.split()
+            matching = []
+            for t in thunks:
+                for p in range(t, t + 0x200):
+                    if all(image[p + k] == int(x, 16) for k, x in enumerate(toks)):
+                        if toks[-1].upper() == 'E8':
+                            target = (p + len(toks) - 1) + 5 + struct.unpack_from('<i', image, p + len(toks))[0]
+                            matching.append((t, target))
+                        break
+            ok = len(matching) == 1 and primary_range(matching[0][1]) is not None
+            chain_failed += not ok
+            detail = ' '.join(f'thunk 0x{IB + t:X} -> 0x{IB + c:X}' for t, c in matching) or 'no thunk holds it'
+            print(f'{"CONFIRMED" if ok else "ANCHORS DISAGREE":28} {func:34} UFunction thunk + {pat}: {detail} '
+                  f'({len(thunks)} "{func}" entries)   [{file}]')
+
 print(f'\n{len(targets) - failed} of {len(targets)} hook targets resolve uniquely' +
       (f', {chain_failed} cross-check(s) failed' if chain_failed else '') +
       ('' if not failed and not chain_failed else ' - FIX BEFORE RELEASE'))

@@ -450,6 +450,31 @@ WaCa.On("KeyDown", function(_, name)
     end
 end)
 
+-- Dialogue text check (tickets.md "Dialogue text bugs": "It seems that 1's Prophecy is true"): the game fills the
+-- role placeholders of its lines ({THE AGING LEADER}, {PLAYER} ...) from data, and some come out unfilled or as a
+-- number. Every line, once shown in full (the conversation widget's OnTypewriterDone), is checked for a placeholder
+-- left in braces or a bare number where a name goes ("1's"); a hit is logged with the dialogue node it came from,
+-- so the source line can be found and fixed (or patched with WaCa.SetText).
+WaCa.Watch("OnTypewriterDone", "/Script/SwtQuest.QuestGiverWidget", "WaCaDialogueLineShown", "post")
+WaCa.On("WaCaDialogueLineShown", function(widget)
+    local text, node = "", "?"
+    pcall(function()
+        local rich = widget.mcGuiTextParagraphRich
+        if rich and rich:IsValid() then text = rich:GetText():ToString() end
+        if text == "" then text = widget.mcGuiTextParagraph:GetText():ToString() end
+    end)
+    pcall(function()
+        local n = widget.CurrentDialogueNode
+        if n and n:IsValid() then node = n:GetFullName():gsub("^%S+ ", "") end
+    end)
+    local plain = text:gsub("<[^>]*>", "")           -- rich text markup out
+    local brace = plain:match("{[^}]*}")
+    local number = plain:match("%f[%w](%d+)'s%f[%W]")
+    if brace or number then
+        log("dialogue: UNFILLED %s in \"%s\" (node %s)", brace or (number .. "'s"), plain, node)
+    end
+end)
+
 -- An alias posts a REAL key press of its target to the game window (native PressKey): menus only react to real input
 -- - calling the controller's OnKeyPressed with the target never reached them (Escape did nothing, operator
 -- 2026-10-25). Presses come from the raw KeyDown event (the window's own key messages, before the game routes them -

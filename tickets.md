@@ -109,7 +109,8 @@ game data in this repo.
 - [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
   (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
   layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
-  them offline except the save hook's UFunction lookup (runtime only, logged at start-up). 5 of 5 + 6 cross-checks
+  them offline - the save hook too (2026-10-27: its thunk found in the exe's native function tables, the one "Save" entry
+  whose thunk holds the call layout). 5 of 5 + 6 cross-checks
   pass on the current exe. Original ticket: every hook target found by several independent means
   (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
   logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
@@ -287,6 +288,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       cat assigned yet, filled with a numeric default. Next: hook the role -> name resolution (find the data table the
       roles come from) and log every role resolved to a number / empty; needs a story save at that point (operator's
       save, or reach it on the VM).
+      2026-10-27: main.lua now checks every dialogue line once shown in full (QuestGiverWidget.OnTypewriterDone) and
+      logs "dialogue: UNFILLED ..." with the dialogue node for a {placeholder} or a number before 's - any playthrough
+      (the operator's included) names the broken line and its node.
 
 ## P2: Depth, presentation
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
