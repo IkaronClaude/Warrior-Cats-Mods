@@ -451,6 +451,25 @@ int LuaDevReadFloats(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// dev: a live object's virtual function - WaCaNative_DevVirtual(object address, vtable byte offset) -> its owner
+// ("module+offset", as the watch stacks print it)
+int LuaDevVirtual(const LuaMadeSimple::Lua& lua) {
+    auto object = static_cast<uintptr_t>(lua.get_integer());
+    auto offset = static_cast<uintptr_t>(lua.get_integer());
+    std::wstring out = L"(unreadable)";
+    if (object && Readable(reinterpret_cast<void*>(object), 8)) {
+        auto vtable = *reinterpret_cast<uintptr_t*>(object);
+        if (vtable && Readable(reinterpret_cast<void*>(vtable + offset), 8)) {
+            out = CodeOwner(*reinterpret_cast<uintptr_t*>(vtable + offset));
+        }
+    }
+    int n = WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, nullptr, 0, nullptr, nullptr);
+    std::string utf8(n > 0 ? n - 1 : 0, '\0');
+    if (n > 1) WideCharToMultiByte(CP_UTF8, 0, out.c_str(), -1, utf8.data(), n, nullptr, nullptr);
+    lua.set_string(utf8);
+    return 1;
+}
+
 // dev: the same watchpoint on any address - WaCaNative_DevWatchAddress(address, 4 or 8 bytes)
 int LuaDevWatchAddress(const LuaMadeSimple::Lua& lua) {
     auto target = static_cast<uintptr_t>(lua.get_integer());
@@ -592,6 +611,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_DevWatchAxis", &LuaDevWatchAxis);
     lua.register_function("WaCaNative_DevWatchAddress", &LuaDevWatchAddress);
     lua.register_function("WaCaNative_DevReadFloats", &LuaDevReadFloats);
+    lua.register_function("WaCaNative_DevVirtual", &LuaDevVirtual);
     lua.register_function("WaCaNative_HookPrey", &LuaHookPrey);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);

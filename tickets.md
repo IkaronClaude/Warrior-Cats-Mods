@@ -268,6 +268,18 @@ game data in this repo.
         Mice 25, Squirrel 30, Rabbit 40, Bird 30, Rat 60, Weak* lower) - read it at runtime by the prey's
         CharacterType name, no copies. The grant itself is native-only (no UFunction adds EXP) - trace the combat-end
         path to it (FQuestExperienceStruct {Level, Experience, MaxExperience}; RankUp:OnLevelUp listens).
+      - INSTAKILL CHAIN (traced 2026-10-27, exe of 2026-10-25): the roaming prey's USwtAdventurePreyComponent
+        (vtable from a live one, WaCaNative_DevVirtual): +0xAA0 OnHunterLanded 0x1417C97C0 = the cat LANDS on the
+        prey -> broadcasts the component's unreflected delegate at +0x5A8 (the hunted sequence) and, with
+        bRequiresInteract, drops the component from the cat's interactables (+0x770). +0xAA8 OnHuntedSequencerFinish
+        0x1417C9810 = the sequence ended (the kill's aftermath). +0xAB0 OnHuntedPounceReached 0x1417C9A60 = only
+        stops the hunter's movement when a pounce ends (not the kill). PLAN: detour +0xAA0 - roll the chance; a miss
+        skips the original (no sequence; the prey goes on as the game makes it); a hit runs it and later grants the
+        CombatBaseExperience EXP. Anchor: the OnHunterLanded thunk (UFunction) calls [rax+0xAA0].
+        VM: Space / E with the cat crouched 60 units behind a mouse (pounce range 1) did not start a pounce - at
+        0.3 fps a 50 ms key tap falls inside one frame; a 6 s held Space didn't either. Unknown what the game needs
+        (an on-screen prompt? approach by walking?). Operator: "Space once close enough; loud ground before that
+        and it flees".
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
         checks the scent / turns around more often.
