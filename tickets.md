@@ -230,9 +230,20 @@ game data in this repo.
       in-game text box at cat creation (UMG, or a runtime-built EditableTextBox from Lua).
 - [ ] **1. Canon clan roster.** Remove the procedural generation of the clan cats. Lock the roster to a specific point
       in the books' timeline (pick the book / moment with the operator).
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - roster.ini per clan: role -> name + look (the existing name / look framework); applied when the clan is
+        generated (the game's procedural roster) by replacing the generated cats' names / looks for those roles.
 - [ ] **15. Clan-sim day.** Each day you get assignments based on the clan's needs: hunt, patrol, night watch, train
       with your mentor, train your apprentice, ... From deputy rank on, your job becomes ASSIGNING the day's duties
       (then joining whichever you want). This is the backbone that 4 / 6 / 7 / 8 / 14 / 17 plug into.
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - A day = daynight.lua's day (DayEnded at BedHour). At dawn the deputy hands out 1-2 duties from the clan's
+        needs: fresh-kill pile low (USwtAdventureFreshKillPileComponent value) -> HUNT; border / rival tension ->
+        PATROL; apprentice rank -> TRAINING; random -> NIGHT WATCH / gather moss / visit elders.
+      - Duties are tracked by events the mod already sees: hunt = HuntCaught (n prey), patrol = AreaOverlap /
+        reaching marker points, training = a combat with the mentor (OnCombatStarted / Finished).
+      - At BedHour: done duties raise standing (a WaCa sidecar value per save; feeds 14 Pacing); skipped ones lower
+        it. config: duties.ini (duty weights, counts, standing per duty).
 - [ ] **4. Day / night cycle (Dredge-style, with exhaustion).** Operator 2026-10-25: like Dredge's day cycle, but the
       pressure is EXHAUSTION instead of spooky things - staying out late / doing too much tires your cat (slower,
       worse at hunting / fighting), sleep resets it. A day has three phases, the natural split points for duties:
@@ -486,7 +497,17 @@ game data in this repo.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
       PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
       - a patrol = a temporary party + a route. Needs: patrol goals / events.
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - A patrol duty picks 2 clanmates (idle, nearest - activities.lua already finds them) as a temporary party
+        (ASwtAdventureCharacter.Party) and 3-4 border points along the territory edge (the map's territory volumes;
+        fallback: points from config). The cats follow (AI move, brain paused as in activities pairs).
+      - At each point: scent-mark (a montage) and a small random event (rival scent -> an encounter, prey -> a hunt
+        chance, nothing). Done -> party dissolves, duty done.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - A training duty starts a combat with the mentor (the game's own combat, a friendly variant: no injuries);
+        win / lose both give EXP (CombatBaseExperience "Cat" row = 45) and a technique point; config: training.ini.
+      - Needs: how the game starts a sparring combat (Skirmish / DT_Combat_Skirmish already exists - reuse it).
 - [ ] **14. Pacing.** Progression must come from time + duties + training, not "3 hunts until deputy". No old deputy
       getting canned for "not doing enough" at your own ceremony. Ceremonies need proper preconditions.
 
@@ -498,6 +519,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       days / duties served (with 15 / 25). Needs: the target pace per rank.
 - [ ] **20. Intentional time skips.** Time passes on screen and on purpose ("a moon passes", with what happened in it),
       never implied by a story jump. A skip is a world event the other systems react to (season, prey, ages, ranks).
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - A skip = jump DayNight.Day() by N with a full-screen card ("A moon passes...") listing what happened (duties
+        auto-resolved by standing, prey eaten from the pile, rank progress) - the card is one of the game's own
+        popups re-texted (WaCa.SetText) to avoid new widgets.
 - [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
       intentional time skips, and weather within a season. Both are world state that prey, patrols, duties and visuals
       read. Find what the game already has (sky / lighting / any weather actors, the level's time-of-day setup) before
@@ -513,6 +538,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       blendable on the active post-process: nothing visible), puddle decals, T_rain_ripples02, S_Cue_Wind. Real rain
       = a NEW Niagara asset made in the Unreal editor and shipped in a mod pak (a content pipeline the mod doesn't
       have yet) - the weather logic itself (when, how long, darker light via daynight) is easy on top of it.
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - Season = days (DayNight.Day()): N days per season (default 7), stored in the save sidecar with the day.
+      - Season drives: day length (DayMinutes per season), night light, prey factors (hunting.ini per season: leaf-
+        bare = 0.6 x chance, fewer prey), fishing chance, and the look (post-process tint per season).
+      - Weather (rain) waits on a rain asset (mod pak); until then: overcast = darker light + fog (sky light /
+        ExponentialHeightFog density - both on the sky actor).
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).
@@ -612,6 +643,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         open ground - so partners stay chosen by straight-line distance and an unreachable walk gives up. The world's
         idle clanmates near the VM cat stand 1700+ apart (6 pairs within 2500 of 66 idle) - a real camp is the test.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - Specialisation = a role picked at warrior rank: Hunter (+15 hunt chance, -fight), Fighter (+combat damage,
+        -hunt), Tracker (+fishing / scent, wider noise window for prey). Implemented as modifiers the existing
+        systems read (hunting.ini factors, combat stats via the stats the save keeps). config: roles.ini.
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
@@ -639,6 +674,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
+      DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
+      - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
+        override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.
 - [ ] **Story.** Pour the existing thin story into the new systems, then expand it toward the books (needs 15 + 17).
 - [ ] **12. Romance + kits (far future).** The friendship system already exists. Add a mate, kits of your own, watching
       them grow up. Maybe in a free-play mode after the story concludes.
