@@ -472,6 +472,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (<= 300 -> both face + play; else logged "didn't get to"). VM: the move started but covered 57 of 1701 units
         in 27 s wall time - UNRESOLVED whether the VM's 0.3 fps (game time far behind the wall-time delay) or the
         cat's behaviour tree overriding the move. To settle in real play (operator) or with game-time delays.
+        SETTLED (same day): BOTH. (1) game time: at 0.3 fps 27 wall s = 5.6 game s - the check now follows GAME time
+        (GetTimeSeconds; re-checks while the partner is still closing in, at most 4). (2) the behaviour tree: with
+        the AI running the partner moved 12 units in 5 game s; its BrainComponent now StopLogic()s for the walk +
+        the activity and RestartLogic()s after (or when it gives up). VM: the partner then walked 1788 -> 1269 units
+        (about 47 units / game s, not the 300 MaxWalkSpeed) and stopped there - path blocked / nav. Open: the walk
+        speed and where camp cats stand in real play (the VM cat isn't in a camp; the closest idle pair was 1600-1800
+        apart) - tune PairRadius in play.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.

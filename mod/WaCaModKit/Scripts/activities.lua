@@ -99,17 +99,44 @@ local function once()
     pcall(function() speed = math.max(50, partner.CharacterMovement.MaxWalkSpeed) end)
     local wait = math.ceil(dist / speed) + 1
     for _, cat in ipairs({ first, partner }) do busyUntil[cat:GetFName():ToString()] = os.time() + wait + 2 end
+    -- its behaviour tree would override the walk (VM: 12 units in 5 game s): its AI logic pauses until the activity
+    -- is over (restarted after the montage, or when it doesn't arrive)
+    local brain
+    pcall(function() brain = partner:GetController().BrainComponent end)
+    if brain and brain:IsValid() then brain:StopLogic("WaCa activity") end
     StaticFindObject("/Script/AIModule.Default__AIBlueprintHelperLibrary"):SimpleMoveToLocation(partner:GetController(), to)
+    local brainPath = brain and brain:IsValid() and brain:GetFullName():gsub("^%S+ ", "") or nil
+    local function resumeBrain()
+        local br = brainPath and StaticFindObject(brainPath)
+        if br and br:IsValid() then br:RestartLogic() end
+    end
     log("activities: %s walks over to %s (%.0f units) - %s", partner:GetFName():ToString(), first:GetFName():ToString(), dist, activity.name)
     local a, b = first:GetFullName():gsub("^%S+ ", ""), partner:GetFullName():gsub("^%S+ ", "")
-    ExecuteInGameThreadWithDelay(wait * 1000, function()
+    -- the walk takes `wait` GAME seconds; the delay below is wall time, so a slow frame rate (game time behind) gets
+    -- a follow-up check while the partner is still closing in - at most 4, never on a cat that stopped approaching
+    local gs = StaticFindObject("/Script/Engine.Default__GameplayStatics")
+    local t0, w0 = gs:GetTimeSeconds(first), os.time()
+    local lastGap = dist
+    local function check(tries)
         local ok, err = pcall(function()
             local c1, c2 = StaticFindObject(a), StaticFindObject(b)
             if not (c1 and c1:IsValid() and c2 and c2:IsValid()) then return end
             local l1, l2 = c1:K2_GetActorLocation(), c2:K2_GetActorLocation()
             local gap = math.sqrt((l1.X - l2.X) ^ 2 + (l1.Y - l2.Y) ^ 2)
             if gap > 300 then
+                local gameElapsed = gs:GetTimeSeconds(c1) - t0
+                if tries < 4 and gap < lastGap - 10 then
+                    lastGap = gap
+                    -- the rest of the walk in game seconds, as wall time at the frame rate measured so far
+                    local wallPerGame = math.max(1, (os.time() - w0) / math.max(gameElapsed, 0.1))
+                    local delay = math.max(1, gap / speed + 1) * wallPerGame
+                    for _, cat in ipairs({ c1, c2 }) do busyUntil[cat:GetFName():ToString()] = os.time() + math.ceil(delay) + 2 end
+                    log("activities: %s still on its way (%.0f units, %.1f game s so far) - checking again in %.0f s", c2:GetFName():ToString(), gap, gameElapsed, delay)
+                    ExecuteInGameThreadWithDelay(math.floor(delay * 1000), function() check(tries + 1) end)
+                    return
+                end
                 log("activities: %s didn't get to %s (%.0f units apart) - no %s", c2:GetFName():ToString(), c1:GetFName():ToString(), gap, activity.name)
+                resumeBrain()
                 return
             end
             face(c1, c2)
@@ -117,9 +144,17 @@ local function once()
             play(c1)
             play(c2)
             log("activities: %s and %s - %s", c1:GetFName():ToString(), c2:GetFName():ToString(), activity.name)
+            -- its AI back once the montage is over (its length in game time = wall time at the measured rate)
+            local wallPerGame = math.max(1, (os.time() - w0) / math.max(gs:GetTimeSeconds(c1) - t0, 0.1))
+            local len = (busyUntil[c2:GetFName():ToString()] or os.time()) - os.time()
+            ExecuteInGameThreadWithDelay(math.floor(math.max(1, len) * wallPerGame * 1000), resumeBrain)
         end)
-        if not ok then log("activities: pair failed (%s)", tostring(err)) end
-    end)
+        if not ok then
+            log("activities: pair failed (%s)", tostring(err))
+            resumeBrain()
+        end
+    end
+    ExecuteInGameThreadWithDelay(wait * 1000, function() check(0) end)
 end
 
 local function schedule(gen)
