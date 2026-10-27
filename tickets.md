@@ -61,8 +61,11 @@ game data in this repo.
     GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
     there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
     the screen's GriNav, so the creator always opens in the main menu level.
-  - [ ] One checkbox "Customise online cat": unchecked = the online cat gets each custom look's fallback; checked =
-        the online cat is customised separately with the native UI (remembered across toggles), a preview switch.
+  - [x] One checkbox "Customise online cat" - DONE 2026-10-27: checkbox top right on the customisation screen (or
+        F8). On = the preview shows the online cat (no WaCa look: readAppearance -> empty) and the game's controls edit
+        only the game values (a WaCa grid entry gives the online cat its fallback, game shapes don't clear the WaCa
+        look, no hex box). Off = your cat with the WaCa look. Both kept across toggles. VM, real F8: ON -> preview
+        rebuilt bare, WaCa pattern chosen -> "online cat gets its fallback", F8 -> off -> WaCa look back.
   - [x] Custom colours - DONE 2026-10-27 (hex entry): the game's colour pickers get a hex box (top right) showing
         the selected swatch's colour; #RRGGBB + Enter puts that exact colour in the look (the save keeps the selected
         game colour); picking a swatch afterwards drops it (last choice wins). VM, real keys: box shown (#FBD5A7),

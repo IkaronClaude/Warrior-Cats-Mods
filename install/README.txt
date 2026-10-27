@@ -22,6 +22,7 @@ WHAT IT DOES (0.6.0)
   - Your own colours: the game's colour pickers (fur, pattern, markings) get a box top right - type #RRGGBB, Enter.
   - New shapes like "Colourpoint" right in the game's own pattern / markings grids (coloured with the game's
     pattern colour). Look mods: drop the mod's folder into ue4ss/Mods.
+  - "Customise online cat" (checkbox top right, or F8): edit what other players see, separately from your look.
   - Optional WaCa panel (packs, presets, creator.ini PanelShapes = 1 to combine two markings): click the arrows or
     press F5 / F6 / F7. Backing out of the screen drops its WaCa choices.
   These choices are saved next to your save (WrcGame.<save>-<character slot>.WaCaModKit.ini in the game's save folder) and come back

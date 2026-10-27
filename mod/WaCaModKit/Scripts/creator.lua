@@ -531,6 +531,12 @@ function Creator.PendingLook()
     return pending and (pending.Appearance or { __order = {} }) or nil
 end
 
+-- "Customise online cat" is on: the preview shows the online cat (the game's values only), and the game's own
+-- controls edit just that - the WaCa look stays as chosen, on top, for you
+function Creator.OnlinePreview()
+    return pending ~= nil and pending.online == true
+end
+
 ---------------------------------------------------------------------------------------------------------------------
 -- The WaCa panel on the customisation screen: a look preset, and the SHAPE of the pattern / markings from any of the
 -- game's patterns or markings (or a pattern pack) - two markings combined, a marking as the pattern ... Clicked with
@@ -872,6 +878,7 @@ local function trackedAs(screen)
 end
 
 local labelGridItems       -- (defined with the grid entries below)
+local addOnlineToggle      -- (the online cat checkbox, below)
 
 local function onScreenShown(screen)
     extendPalettes()                         -- the GUI manager exists once screens show
@@ -884,7 +891,13 @@ local function onScreenShown(screen)
     sanitize()
     nameScreenShown(screen)
     local customization = nativeClass("GuiScreenCustomization")
-    if customization and screen:IsA(customization) then labelGridItems(screen) end
+    if customization and screen:IsA(customization) then
+        labelGridItems(screen)
+        if pending then
+            local ok, err = pcall(addOnlineToggle, screen)
+            if not ok then log("customisation screen: no online cat checkbox (%s)", tostring(err)) end
+        end
+    end
     if isPanelScreen(screen) then ensurePanel(screen) end
     if attachHidden() then ensurePanel(shownScreen(panelScreen(), true)) end
 end
@@ -1057,7 +1070,18 @@ local function onGridChanged(kind, panel)
     local k = GRID_KINDS[kind]
     local entry = state.entries[index - state.vanilla + 1]
     local f = FALLBACK_FIELD[k.maskKey]
-    if index >= state.vanilla and entry then
+    if Creator.OnlinePreview() then
+        -- the online cat: game shapes only; the WaCa look (yours) stays as it is
+        if index >= state.vanilla then
+            for _, comp in ipairs(WaCa.PreviewCats()) do
+                local d = comp.CustomData
+                if entry and entry.fallback and d[f.field] and d[f.field] >= state.vanilla then d[f.field] = entry.fallback end
+            end
+            log("creator grid: online cat - %s entry %d is a WaCa shape: the online cat gets its fallback", kind, position)
+        else
+            log("creator grid: online cat - %s entry %d chosen (your WaCa look is kept)", kind, position)
+        end
+    elseif index >= state.vanilla and entry then
         store("Appearance", k.maskKey, "look:" .. entry.look)
         -- the cat's data: the fallback (the game may have stored our row's position)
         for _, comp in ipairs(WaCa.PreviewCats()) do
@@ -1143,7 +1167,7 @@ end
 -- the picker's selection moved: the game has just put that swatch on the preview cat (its colour index) - the last
 -- choice wins, so a typed colour for this slot goes, and the box shows the swatch's colour
 local function onPickerColour(screen)
-    if not picker or not picker.palette then return end
+    if not picker or not picker.palette or Creator.OnlinePreview() then return end
     local p = paletteEntry(picker.palette)
     for _, comp in ipairs(WaCa.PreviewCats()) do
         local ok, idx = pcall(function() return comp.CustomData[p.field] end)
@@ -1180,6 +1204,61 @@ local function hexCommitted()
     ctx.refreshLook()
 end
 
+---------------------------------------------------------------------------------------------------------------------
+-- "Customise online cat" (a checkbox on the customisation screen, or F8): on = the preview shows the cat as other
+-- players see it (the game's values only - no WaCa look) and the game's own controls edit just that; off = your cat,
+-- the WaCa look on top. Both are kept across toggles: the game's values are the online cat, the WaCa look is yours.
+-- Off by default: then each WaCa choice gives the online cat its fallback.
+local onlineToggle = nil         -- { box = widget path } on the customisation screen
+
+local function onlineBox()
+    local b = onlineToggle and StaticFindObject(onlineToggle.box)
+    return b and b:IsValid() and b or nil
+end
+
+local function setOnline(on)
+    if not pending or (pending.online == true) == on then return end
+    pending.online = on
+    local box = onlineBox()
+    if box then pcall(function() box:SetIsChecked(on) end) end
+    log("customise online cat: %s", on and "ON - the preview is the online cat (no WaCa look); game controls edit it"
+        or "off - your cat, with the WaCa look")
+    ctx.refreshLook()
+end
+
+addOnlineToggle = function(screen)
+    if onlineBox() then return end
+    local canvas = screen.WidgetTree.RootWidget
+    if not canvas or not canvas:IsValid() or not canvas.AddChildToCanvas then return end
+    local box = newWidget("CheckBox", screen.WidgetTree, "WaCaOnlineBox")
+    local label = newWidget("TextBlock", screen.WidgetTree, "WaCaOnlineLabel")
+    label:SetText(FText("Customise online cat (F8)"))
+    pcall(function() box:SetIsChecked(Creator.OnlinePreview()) end)
+    local function corner(widget, x, w)
+        local slot = canvas:AddChildToCanvas(widget)
+        slot:SetAnchors({ Minimum = { X = 1, Y = 0 }, Maximum = { X = 1, Y = 0 } })
+        slot:SetAlignment({ X = 1, Y = 0 })
+        slot:SetPosition({ X = x, Y = 60 })
+        slot:SetSize({ X = w, Y = 60 })
+    end
+    corner(box, -80, 60)
+    corner(label, -160, 560)
+    onlineToggle = { box = box:GetFullName():gsub("^%S+ ", "") }
+    log("customisation screen: online cat checkbox added (top right, F8)")
+end
+
+-- F8 flips it; a click is the checkbox's own (Slate toggles it) - read back on the next tick
+local function onlineKey(name)
+    if not pending then return end
+    if name == "F8" then
+        setOnline(not Creator.OnlinePreview())
+    elseif name == "LeftMouseButton" then
+        local box = onlineBox()
+        local ok, checked = pcall(function() return box and box:IsChecked() end)
+        if ok and box then setOnline(checked == true) end
+    end
+end
+
 function Creator.Init(c)
     ctx = c
     WaCa, log, modDir = c.WaCa, c.log, c.modDir
@@ -1197,7 +1276,7 @@ function Creator.Init(c)
             extendPalettes()
             picker = { id = screenId(screen), palette = pickerPalette(), last = {} }
             log("colour picker: %s", tostring(picker.palette or "(not a fur / pattern / markings colour)"))
-            local p = picker.palette and paletteEntry(picker.palette)
+            local p = picker.palette and not Creator.OnlinePreview() and paletteEntry(picker.palette)
             if p then
                 for _, comp in ipairs(WaCa.PreviewCats()) do
                     pcall(function() picker.last[comp:GetFullName()] = comp.CustomData[p.field] end)
@@ -1243,6 +1322,7 @@ function Creator.Init(c)
     -- commit the empty box
     WaCa.On("KeyDown", function(_, name)
         ExecuteInGameThread(function() Creator.NameKey(name) end)
+        if name == "F8" or name == "LeftMouseButton" then ExecuteInGameThread(function() onlineKey(name) end) end
         if name == "LeftMouseButton" or name == "F5" or name == "F6" or name == "F7" or name == "BackSpace" or name == "Escape" then
             ExecuteInGameThread(function() onKey(name) end)
         end

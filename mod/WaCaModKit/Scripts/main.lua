@@ -207,6 +207,8 @@ end
 
 
 local function readAppearance()
+    -- "Customise online cat" in the creator: the preview shows the cat as other players will see it - no WaCa look
+    if Creator.OnlinePreview() then return mergeLook({ __order = {} }) end
     -- while creating a cat, the look chosen in the creator; else the save slot's own look (its [Appearance] section),
     -- which replaces appearance.ini as a whole
     local own = Creator.PendingLook() or slot.data["Appearance"]

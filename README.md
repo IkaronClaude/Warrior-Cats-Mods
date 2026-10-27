@@ -20,6 +20,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   - **WaCa shapes in the game's own grids**: looks like **Colourpoint** (coloured with the game's pattern colour
     picker) are entries of the creator's pattern / markings grids, after the game's own - choose them like any other.
     Look mods add theirs the same way (a `looks/` folder in the mod).
+  - **Customise online cat** (checkbox top right, or F8): the preview shows the cat other players will see - the
+    game's values only - and the game's controls edit just that; off again, your WaCa look is back on top. Left off,
+    each WaCa choice gives the online cat its fallback.
   - **A WaCa panel** on the customisation screen only for what the grids can't offer: PNG packs, whole-look presets,
     and (`creator.ini PanelShapes = 1`) any game pattern / marking as the shape of either row - so two markings can be
     combined. Click the arrows, or press F5 / F6 / F7. With none of those configured there is no panel. Backing out
