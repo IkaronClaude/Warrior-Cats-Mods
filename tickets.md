@@ -866,6 +866,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (the spline / target it follows on the quest trail) - read them from the quest trail's NiagaraComponents in
         C++ next (Lua reads of those arrays crash UE4SS). STATUS: the trail is logically there (element + path + effect
         spawned), NOT visible yet - stays experimental, off by default.
+        VISIBLE (2026-10-28 04:00): NS_ScentTracking's user parameters (read from the asset) are Spline / SplineLength /
+        Code_TrailOpacity / Code_Color - it draws along a spline it's given; bound via SetVariableActor it still showed
+        nothing on the VM. A control run proved spawned Niagara renders on the VM (NS_GPE_PickUp_Hint /
+        NS_Scent_Hint_Item visible). So the trail you see = puffs of the game's NS_Scent_Hint_Item every Spacing cm
+        (250) from the cat to the prey for TrailSeconds: VM shot in sense mode, the cat 6 m before a mouse - a glowing
+        scent puff on the ground between them. The spline-bound NS_ScentTracking stays in as well (harmless).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.

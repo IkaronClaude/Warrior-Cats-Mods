@@ -101,7 +101,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   (`Chance`, x your clan's factor: RiverClan 1.5); a bite = the game's own catch is there. Fishing spots become active 30 s
   after you enter the world (setting them up earlier, while the world was still loading, could crash the game).
 - **Scent trails** (experimental, off by default, `config/hunting.ini [Scent] Trails = 1`): in sense mode (Q) a scent
-  trail leads from your cat to the prey the game marks nearby - the game's own quest-hint trail, fading after a while.
+  trail leads from your cat to the prey the game marks nearby - glowing scent puffs on the ground (the game's own scent
+  effect, every `Spacing` cm), fading after `TrailSeconds`.
 - **StarClan's guidance** (experimental, off by default, `config/hunting.ini [Guidance] On = 1`): in sense mode the
   game's own quest-guidance trail leads to a prey creature you can't see yet (1500-9000 cm away); it follows the prey
   and moves on to new prey every in-game hour and after a catch.
