@@ -52,6 +52,7 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: rest to let time pass (F9) - a quarter moon passes, the season moves on
     (timeskip.ini On = 1, needs the day / night cycle).
   - Experimental, off by default: scent trails to prey in sense mode (hunting.ini [Scent] Trails = 1).
+  - Experimental, off by default: StarClan's guidance leads you to prey in sense mode (hunting.ini [Guidance] On = 1).
   - Experimental, off by default: scenes at given times - a card or a conversation (events.ini On = 1).
   - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then

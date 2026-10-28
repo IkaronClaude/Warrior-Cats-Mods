@@ -96,6 +96,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   after you enter the world (setting them up earlier, while the world was still loading, could crash the game).
 - **Scent trails** (experimental, off by default, `config/hunting.ini [Scent] Trails = 1`): in sense mode (Q) a scent
   trail leads from your cat to the prey the game marks nearby - the game's own quest-hint trail, fading after a while.
+- **StarClan's guidance** (experimental, off by default, `config/hunting.ini [Guidance] On = 1`): in sense mode the
+  game's own quest-guidance trail leads to a prey creature you can't see yet (1500-9000 cm away); it follows the prey
+  and moves on to new prey every in-game hour and after a catch.
 - **Prey flee** (experimental, off by default, `config/hunting.ini Flee = 1`): pounce prey that notices your cat runs
   away instead of reacting. The open world's charging prey are different creatures - not covered yet.
 - **Camera-relative movement**: A / D move your cat sideways relative to the camera instead of turning the camera

@@ -648,6 +648,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         SpawnActor of its character class (spawn only 30 s+ after world load - the streaming crash lesson).
 - [ ] **24. (Bonus) StarClan guidance leads to prey.** The game's StarClan guidance feature points the player to
       these random prey spawns: hunting by following StarClan's lead. Find how the guidance feature picks its target.
+      BUILT 2026-10-28 (experimental, hunting.ini [Guidance] On = 0): the game's guidance = a POI hint area actor
+        (BP_POI_HintArea_Quest) at the objective, whose sense-tracked component makes the sense-mode trail (tracked
+        from far: a quest hint 7138 away was a candidate). guidance.lua spawns ONE per world (30 s after the HUD - the
+        streaming crash) and snaps it onto the nearest prey of PreyKinds between MinDistance and MaxDistance (it
+        follows the prey), re-targeted every in-game hour and after a catch. VM: "StarClan points to a Bird 2226
+        away"; in sense mode our hint area was a candidate with its tracker, exactly like the game's quest hint. The
+        trail's look on screen: the same as the game's quest guidance (neither drew visibly in the VM's camera view at
+        480x270 - check in play). Fixed: an hourly re-target could spawn it before the 30 s.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Hook the game's StarClan guidance target (its quest-objective / scent-objective actors, e.g.
         BP_ScentObjectiveFish) and point it at the nearest prey of the kind the clan needs.
