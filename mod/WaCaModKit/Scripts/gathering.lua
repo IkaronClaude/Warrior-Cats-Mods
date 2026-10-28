@@ -1,6 +1,6 @@
 -- Gatherings (tickets.md, operator 2026-10-28) - the GROUNDWORK the story builds on: every Every days (the story can
 -- move it: days.ini Gathering = Yes / No) the leader picks who goes; on that day the announcement comes when the
--- AnnounceThird begins, and the Gathering itself (or staying behind) when your cat is back in camp in the Third.
+-- AnnounceThird begins, and the Gathering itself (or staying behind) at the end of the Third (the task turned in).
 -- The pick: the story's (days.ini GatheringPick = Chosen / NotChosen) - else not while BanVar > 0 (a punishment:
 -- "Add: GatheringBan 1" in a scene; every Gathering that passes takes one off) or below MinRank - else by chance:
 -- Base % + PerStanding x your standing (duties.lua) + PerFavour x FavourVar (a story variable, e.g. LeaderFavour).
@@ -92,8 +92,8 @@ function Gathering.Init(c)
         for _, s in ipairs(chosen and cfg.scenes.Chosen or cfg.scenes.NotChosen) do table.insert(steps, s) end
         Events.Run(steps, continue, ctx)
     end)
-    -- the Gathering: back in camp in the Third (the clan loop's ClanBackInCamp hook) - there, or staying behind
-    Events.Hook("ClanBackInCamp", function(ctx, continue)
+    -- the Gathering: at the end of the Third (the clan loop's ClanThirdEnd hook) - there, or staying behind
+    Events.Hook("ClanThirdEnd", function(ctx, continue)
         local day = ctx and ctx.DAY
         if not (today and today.day == day and third(ctx) == cfg.third) or today.held then return continue() end
         today.held = true

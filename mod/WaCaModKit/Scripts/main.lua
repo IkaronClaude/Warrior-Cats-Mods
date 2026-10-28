@@ -645,7 +645,7 @@ require("exhaustion").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight =
 require("events").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 -- following: cats moving together - a modding tool (follow.lua)
 require("follow").Init({ WaCa = WaCa, log = log })
--- the clan loop: thirds, the deputy's tasks, back in camp, the clan's events (config/duties.ini, clanevents.ini)
+-- the clan loop: thirds, the deputy's tasks, their turn-ins, the clan's events (config/duties.ini, clanevents.ini)
 require("duties").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Events = require("events"),
     Days = require("days") })
 -- the clan's own patrols heading out together (config/patrols.ini)

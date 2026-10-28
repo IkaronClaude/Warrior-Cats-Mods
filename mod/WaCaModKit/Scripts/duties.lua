@@ -1,7 +1,8 @@
 -- THE CLAN LOOP (tickets.md 15 + "the clan loop", operator 2026-10-28): the clan's day in thirds - morning, noon,
 -- evening - each one the same loop:
 --   the third begins (its story beats: days.ini <Third>Start) -> the DEPUTY assigns a task -> you do it, exploring as
---   long as you like (a done task never sends you home) -> you RETURN TO CAMP -> the clan's event of that third, if any
+--   long as you like (a done task never sends you home) -> you TURN IT IN at its end point ([Task.<Kind>] TurnIn: a
+--   hunt at the fresh-kill pile, a patrol by reporting to the deputy, a spar is its own end) -> the clan's event of that third, if any
 --   (clan meetings, ceremonies ...; the evening: eating together, sharing tongues - clanevents.ini, and the story's
 --   beats: days.ini <Third>) -> the time moves on a full third -> the next assignment.
 -- After the evening: the night - sleep (the rest key) or the night watch (go to the guard spot at the camp entrance:
@@ -17,9 +18,10 @@
 --            <Third>Start, <Third> (beats), <Third>Duty, NightDuty. Steps = events.lua's scene steps (Card / Dialogue /
 --            Fade / Bond / Emit / Hook ...).
 --   blocking Lua hooks (events.lua Events.Hook(name, fn(ctx, continue))): the loop runs ClanThirdStart, ClanAssign,
---            ClanBackInCamp (after the third's events), ClanNight (the watch's cutscene) at those points - a mod's own cutscene / scene goes there.
+--            ClanThirdEnd (after the turn-in and the third's events), ClanNight (the watch's cutscene) at those points - a mod's own cutscene / scene goes there.
 --   events   WaCa.On: ClanThird(day, third), TaskAssigned(day, third, task), TaskDone(day, third, task),
---            BackInCamp(day, third), ClanNight(day, kind), DutiesJudged(day, done, missed, standing).
+--            TaskTurnedIn(day, third, task, how), ClanThirdEnded(day, third), CampEntered / CampLeft(day, third),
+--            ClanNight(day, kind), DutiesJudged(day, done, missed, standing).
 --   Lua      Duties.Now() -> { day, third, stage, task }, Duties.Plan(hunt, patrol, kinds), Duties.Standing().
 -- config/duties.ini, config/clanevents.ini.
 local Duties = {}
@@ -37,6 +39,7 @@ local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow 
               hours = { Morning = 8, Noon = 13, Evening = 19, Night = 23 },
               weights = { Morning = { Hunt = 2, Patrol = 2, Train = 1 }, Noon = { Hunt = 1, Patrol = 1, Train = 2 },
                           Evening = { Patrol = 2, Hunt = 1, Free = 1 }, Night = { Sleep = 3, NightWatch = 1 } },
+              turnIn = { Hunt = "Pile", Patrol = "Deputy", Free = "Deputy", Train = "None" },
               pileFactor = 3, campRadius = 3500, campMax = 6000, watchStanding = 1, stepEvery = 4,
               thirdScenes = {}, assignScenes = {}, watchScene = {}, clanEvents = {} }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
@@ -411,6 +414,7 @@ local function findCamp()
         h.x0, h.y0, h.x1, h.y1 = h.x0 - 1000, h.y0 - 1000, h.x1 + 1000, h.y1 + 1000
         camp.hull = h
         camp.inside = campInside(playerPos())
+        camp.stepInside = camp.inside
         log("duties: the camp is the game's zone %s (%s): %d areas, %d entrances, %.0f x %.0f m (by its %d %s); your cat is %s",
             best, tostring(camp.name), #camp.boxes, #camp.gates, (h.x1 - h.x0) / 100, (h.y1 - h.y0) / 100, count[best],
             why, camp.inside and "in it" or "out")
@@ -548,7 +552,7 @@ local function pickKind(name)
     return options[#options][1]
 end
 
-local taskDone, backInCamp, startThird
+local taskDone, thirdEnd, startThird
 
 local function cleanup(t)
     if t.ground then removeMarker(t.ground) end
@@ -665,7 +669,7 @@ local function assign()
     end, context())
 end
 
--- the task is done: the rest of the third is yours - back in camp (when you like) the clan's event comes
+-- the task is done: the rest of the third is yours - its turn-in (when you like) ends the third
 taskDone = function(t)
     if t.done and t.kind ~= "Free" and t.kind ~= "Hunt" then return end
     local first = not t.done
@@ -676,16 +680,30 @@ taskDone = function(t)
         WaCa.Emit("TaskDone", today.day, thirdName(), t.kind)
     end
     if today.task ~= t or today.stage ~= "task" then return end
-    today.stage = "return"
-    -- in camp already (training there, or out and back): straight on; else when you come back - no hurry
-    if camp.inside and (today.leftCamp or t.kind == "Train") then
-        backInCamp()
-    else
-        local after = { Hunt = "Hunting duty done - hunt on if you like, every catch still feeds the clan.",
-                        Patrol = "Patrol done - make your own way back, or explore on.", Train = "Training done.",
-                        Free = "The " .. thirdName():lower() .. " is yours." }
-        card((after[t.kind] or "Done.") .. " Come back to camp when you're ready.")
+    -- the task's END POINT (operator 2026-10-28: not just walking into camp): its turn-in ([Task.<Kind>] TurnIn) -
+    -- Pile = the catch onto the fresh-kill pile, Deputy = report to the deputy, None = done is the end (a spar)
+    local turnIn = cfg.turnIn[t.kind] or "None"
+    if turnIn == "None" then
+        today.stage = "turnin"
+        return thirdEnd()
     end
+    today.stage = "turnin"
+    today.turnIn = turnIn
+    local after = { Hunt = "Hunting duty done - hunt on if you like, every catch still feeds the clan.",
+                    Patrol = "Patrol done - make your own way back, or explore on.", Train = "Training done.",
+                    Free = "The " .. thirdName():lower() .. " is yours." }
+    local where = { Pile = "Bring your catch to the fresh-kill pile when you're back.",
+                    Deputy = "Report to the deputy when you're back." }
+    card((after[t.kind] or "Done.") .. " " .. (where[turnIn] or ""))
+end
+
+-- the turn-in happened: the third ends (Pile: the game's own contribution; Deputy: a talk with the deputy)
+local function turnedIn(how)
+    if not today or today.stage ~= "turnin" or today.turnIn ~= how then return false end
+    log("duties: %s turned in (%s)", NAMES[today.task and today.task.kind or "Free"] or "task", how)
+    WaCa.Emit("TaskTurnedIn", today.day, thirdName(), today.task and today.task.kind, how)
+    thirdEnd()
+    return true
 end
 
 -- the clan's events of a third: every [Event.*] of clanevents.ini whose When is this third, on its days, by chance
@@ -702,13 +720,13 @@ local function pickEvents(name, day)
     return out
 end
 
--- back in camp with the task done: the story's beats, the clan's events, then the next third
-backInCamp = function()
-    if not today or today.stage ~= "return" then return end
+-- the third's end (the task turned in): the story's beats, the clan's events, then the next third
+thirdEnd = function()
+    if not today or today.stage ~= "turnin" then return end
     today.stage = "event"
     local name = thirdName()
-    log("duties: back in camp - the %s's events", name:lower())
-    WaCa.Emit("BackInCamp", today.day, name)
+    log("duties: the %s's end - its events", name:lower())
+    WaCa.Emit("ClanThirdEnded", today.day, name)
     local steps = {}
     append(steps, Days and Days.Beats and Days.Beats(name))
     for _, e in ipairs(pickEvents(name, today.day)) do
@@ -717,7 +735,7 @@ backInCamp = function()
         if e.once then eventsDone[e.name] = true end
     end
     append(steps, cfg.thirdScenes[name] and cfg.thirdScenes[name].Event)
-    table.insert(steps, hook("ClanBackInCamp"))
+    table.insert(steps, hook("ClanThirdEnd"))
     local day = today
     Events.Run(steps, function()
         if today ~= day then return end
@@ -733,9 +751,8 @@ onCamp = function(entering)
     if entering ~= camp.inside then log("duties: your cat %s the camp", entering and "walks into" or "leaves") end
     camp.inside = entering
     if entering then camp.entry = playerPos() end
-    if not today then return end
-    if not entering then today.leftCamp = true return end
-    if today.stage == "return" then backInCamp() end
+    if today and not entering then today.leftCamp = true end
+    WaCa.Emit(entering and "CampEntered" or "CampLeft", today and today.day, today and thirdName())
 end
 
 -- a third begins: the clock moves on to it, its beats, then the deputy
@@ -814,9 +831,14 @@ end
 local function where()
     local p = playerPos()
     if not p then return end
-    if (camp.code and not camp.zoneSeen) or camp.center then
+    -- (always, next to the zone events: teleports - fast travel, respawns, cutscenes - cross no gate; VM: after a
+    -- teleport back into camp the zones alone never told. Each signal acts when ITS answer changes.)
+    if camp.code or camp.center then
         local inside = campInside(p)
-        if inside ~= camp.inside then onCamp(inside) end
+        if inside ~= camp.stepInside then
+            camp.stepInside = inside
+            if inside ~= camp.inside then onCamp(inside) end
+        end
     end
     local t = today and today.task
     if not t or t.done then return end
@@ -902,6 +924,10 @@ function Duties.Init(c)
         local steps = Events.Lines(ini["Assign." .. kind], "Step")
         if #steps > 0 then cfg.assignScenes[kind] = steps end
     end
+    for kind in pairs(KINDS) do
+        local tsec = ini["Task." .. kind]
+        if tsec and (tsec.TurnIn or "") ~= "" then cfg.turnIn[kind] = tsec.TurnIn end
+    end
     local w = ini["NightWatch"] or {}
     cfg.watchStanding = tonumber(w.Standing or "") or cfg.watchStanding
     cfg.watchScene = Events.Lines(w, "Step")
@@ -960,6 +986,17 @@ function Duties.Init(c)
             findCamp()
             if not today then newDay(DayNight.Day() or 1, "the session starts") end
         end)
+    end)
+    -- the turn-ins: the game's own fresh-kill contribution (its achievements manager hears of every one), and a talk
+    -- with the deputy (the dialogue screen's NpcRef is the cat talked to)
+    WaCa.Watch("OnContributeFreshKill", "/Script/Wrc.WrcAchievementsManager", "WaCaPileContribution", "post")
+    WaCa.On("WaCaPileContribution", function() turnedIn("Pile") end)
+    WaCa.On("ScreenShown", function(screen)
+        if not (today and today.stage == "turnin" and today.turnIn == "Deputy") then return end
+        local ok, npc = pcall(function() return screen.NpcRef end)
+        if not (ok and npc and npc:IsValid()) then return end
+        local role = npc.narrativeRole and roleName(npc.narrativeRole) or ""
+        if role:find("Deputy$") then turnedIn("Deputy") end
     end)
     WaCa.Watch("EndCombat", "/Script/SwtAdventure.SwtAdventureCombatManager", "WaCaFightEnd", "post")
     WaCa.On("WaCaFightEnd", function() fightOver() end)

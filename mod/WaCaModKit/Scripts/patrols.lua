@@ -8,7 +8,7 @@
 local Patrols = {}
 
 local WaCa, log, Duties, Follow, Lines
-local cfg = { on = false, chance = 50, size = 3, points = 2, roles = {}, leaderRole = nil, thirds = { Morning = true, Evening = true } }
+local cfg = { on = false, chance = 50, size = 3, points = 2, gather = 25000, roles = {}, leaderRole = nil, thirds = { Morning = true, Evening = true } }
 local out = {}            -- id -> { group, points, i, onBack }
 
 local function caseOn(on)
@@ -64,6 +64,7 @@ function Patrols.Init(c)
     cfg.chance = tonumber(p.Chance or "") or cfg.chance
     cfg.size = math.max(1, math.floor(tonumber(p.Size or "") or cfg.size))
     cfg.points = math.max(1, math.floor(tonumber(p.Points or "") or cfg.points))
+    cfg.gather = tonumber(p.GatherRadius or "") or cfg.gather
     cfg.leaderRole = (p.LeaderRole or "") ~= "" and p.LeaderRole or nil
     for role in (p.Roles or ""):gmatch("[^,%s]+") do table.insert(cfg.roles, role) end
     if (p.Thirds or "") ~= "" then
@@ -79,10 +80,14 @@ function Patrols.Init(c)
             log("patrols: no camp known yet - no patrol this %s", third:lower())
             return
         end
-        local cats = Follow.Nearest(cfg.size, 6000, camp.middle)
+        -- (the camp's own cats are story cats the game doesn't walk; the clanmates that walk are out in the territory -
+        -- VM: none within 60 m of the camp. The nearest within GatherRadius meet in camp first, then head out together.)
+        local cats = Follow.Nearest(cfg.size, cfg.gather, camp.middle)
         local points = Duties.BorderPoints(cfg.points, camp.middle)
+        if #points > 0 then table.insert(points, 1, camp.middle) end
         if #cats > 0 and #points > 0 then Patrols.Send(cats, points)
-        else log("patrols: no patrol this %s (%d cats in camp, %d border points)", third:lower(), #cats, #points) end
+        else log("patrols: no patrol this %s (%d clanmates within %d m, %d border points)", third:lower(), #cats,
+            cfg.gather / 100, #points) end
     end)
 end
 

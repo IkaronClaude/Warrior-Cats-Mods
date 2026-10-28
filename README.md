@@ -86,8 +86,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   cycle): the clan's day in thirds - morning, noon, evening - each the same loop: the deputy gives your cat a task
   (hunt N prey - every prey caught feeds the clan's pile, hunt on as long as you like; patrol N border points out in
   the territory, clanmates walk with you; training - a sparring fight with the clan's move teacher, the game's own
-  fight; or free time), you do it and explore as long as you like (a done task never sends you home), you come back
-  to camp (the camp = where the clan's story cats live), then the clan's event of that third, if any (a clan meeting,
+  fight; or free time), you do it and explore as long as you like (a done task never sends you home), you turn it in
+  at its end point (a hunt: the catch onto the fresh-kill pile; a patrol: report to the deputy - `[Task.<Kind>]
+  TurnIn`), then the clan's event of that third, if any (a clan meeting,
   the Gathering; in the evening eating together and sharing tongues - `clanevents.ini`), and the next third. The sky
   shows each third's hour - no wall clock, no race against the day. After the evening: sleep (the rest key) or the
   night watch (go to the camp's entrance - a short cutscene shows the night passing). At the day's end the tasks done
@@ -235,11 +236,11 @@ From Lua:
 ```lua
 local Events = require("events")                          -- inside WaCaModKit; other mods: the WaCa events below
 Events.Run({ "Card: The leader calls you.", "Dialogue: <id> @ Leader", "Bond: 2 @ Leader" }, function() ... end)
-Events.Hook("ClanBackInCamp", function(ctx, continue)     -- blocking: the loop waits for continue()
+Events.Hook("ClanThirdEnd", function(ctx, continue)       -- blocking: the loop waits for continue()
     -- your cutscene / scene for ctx.THIRD of day ctx.DAY ...
     continue()
 end)                                                      -- also ClanThirdStart, ClanAssign, ClanNight
-WaCa.On("TaskDone", function(day, third, task) ... end)  -- also ClanThird, TaskAssigned, BackInCamp, ClanNight, DutiesJudged
+WaCa.On("TaskDone", function(day, third, task) ... end)  -- also ClanThird, TaskAssigned, TaskTurnedIn, ClanThirdEnded, CampEntered / CampLeft, ClanNight, DutiesJudged
 Events.SetVar("LeaderFavour", Events.Var("LeaderFavour") + 3)     -- story variables; Events.Check("LeaderFavour >= 5")
 Events.Hook("GatheringStayBehind", function(ctx, continue) ... end) -- also GatheringAttend; WaCa.On("GatheringHeld", ...)
 local Follow = require("follow")                          -- cats moving together

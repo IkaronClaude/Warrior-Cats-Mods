@@ -214,7 +214,11 @@ game data in this repo.
         trigger - its QuestBoxTriggers are small quest / race boxes, EventOnActivate all 0) + CampRadius. Where the cat
         is comes from its own FOOTSTEPS (every StepEvery-th) and sense pulses - a trigger box spawned at the camp never
         reported (teleports, VM); boxes kept for patrol points / the teacher as a second signal.
-      - a done task never sends you home; Free: leave and come back; Train in camp counts at once.
+      - a done task never sends you home; its END POINT is a turn-in (operator 2026-10-28: "returning to camp
+        shouldn't immediately trigger things"): [Task.<Kind>] TurnIn = Pile (the catch onto the fresh-kill pile - the
+        game's UWrcAchievementsManager.OnContributeFreshKill) | Deputy (a talk with the deputy - the dialogue screen's
+        NpcRef has a ...Deputy role) | None (a spar ends itself). Defaults: Hunt Pile, Patrol Deputy, Free Deputy,
+        Train None. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
       - THE CAMPS (VM 2026-10-28, zones.json + tools/zone_map.py): every clan's camp is one of the game's zones -
         R-05 RiverClan Camp (3 areas, 2 gates, 46 x 90 m), S-08 ShadowClan Camp (2 / 1, 33 x 57 m), T-10 ThunderClan
         Camp (1 / 2, 40 x 40 m), W-04 WindClan Camp (2 / 1, 62 x 78 m); the code's letter = the clan's initial. Found
@@ -1020,6 +1024,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         game's own rank system is honoured.
       RESEARCH first: how generic clanmates get their names and name plates; whether we can place extra cats or only
       re-cast the ones the world spawns.
+- [ ] **Fresh kill without hunger** (operator 2026-10-28, future work): as the original hunger system goes, remove the
+      "putting fresh-kill on the pile" screen - or at least force depositing EVERYTHING in the inventory at the pile -
+      so every day is fresh. (The clan loop's hunt turn-in is the pile contribution: UWrcAchievementsManager
+      OnContributeFreshKill.)
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the

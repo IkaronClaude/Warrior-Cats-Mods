@@ -45,7 +45,7 @@ local function scenesOf(n, phase)
 end
 
 -- the clan loop's hook point (duties.lua): the story day's beats for a phase not seen yet on this story day - Morning /
--- Noon / Evening / Night (at that third's clan-event time, back in camp) and MorningStart / NoonStart / EveningStart /
+-- Noon / Evening / Night (at that third's end, after the task's turn-in) and MorningStart / NoonStart / EveningStart /
 -- NightStart (when the third begins, before the deputy) - marked seen
 function Days.Beats(phase)
     local out = {}
