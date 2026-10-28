@@ -643,6 +643,15 @@ int LuaAddBond(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_AddResource(a quest resource component's address, amount) -> its new value, or nil (hunt.cpp)
+int LuaAddResource(const LuaMadeSimple::Lua& lua) {
+    auto addr = static_cast<uintptr_t>(lua.get_integer());
+    auto amount = static_cast<float>(lua.get_number());
+    float now = 0;
+    if (hunt::AddResource(reinterpret_cast<void*>(addr), amount, &now)) lua.set_number(now); else lua.set_nil();
+    return 1;
+}
+
 // WaCaNative_HookAreas(a live movement-modifier area's address) -> true / false: AreaOverlap events (areas.cpp)
 int LuaHookAreas(const LuaMadeSimple::Lua& lua) {
     auto addr = static_cast<uintptr_t>(lua.get_integer());
@@ -742,6 +751,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_HookAreas", &LuaHookAreas);
     lua.register_function("WaCaNative_AddExperience", &LuaAddExperience);
     lua.register_function("WaCaNative_AddBond", &LuaAddBond);
+    lua.register_function("WaCaNative_AddResource", &LuaAddResource);
     lua.register_function("WaCaNative_CombatExperience", &LuaCombatExperience);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);

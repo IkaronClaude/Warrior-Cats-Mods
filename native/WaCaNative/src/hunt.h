@@ -12,6 +12,9 @@ void SetLoud(bool loud, double windowSeconds);
 // add EXP to a level component (USwtQuestLevelComponent, the player state's) the way the game does - its resource
 // "add value" virtual (level-ups included); false when the anchors disagree
 bool AddExperience(void* levelComponent, float amount);
+// add to any quest resource component (USwtQuestResourceComponent: the fresh-kill pile, level, health, stamina) the
+// game's way - its add-value virtual, checked per class against the anchors; *now = the value after (+0x10C)
+bool AddResource(void* component, float amount, float* now);
 // the EXP a fight against an enemy kind gives (the game's combat base experience table, as the tuning manager loaded
 // it), or -1
 int CombatExperience(void* tuningManager, const std::wstring& kind);

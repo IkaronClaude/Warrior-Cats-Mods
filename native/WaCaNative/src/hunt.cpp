@@ -185,18 +185,40 @@ int CombatExperience(void* tuningManager, const std::wstring& kind) {
     return -1;
 }
 
-bool AddExperience(void* levelComponent, float amount) {
-    if (!levelComponent) return false;
-    auto* fn = (*reinterpret_cast<uint8_t***>(levelComponent))[kAddValueSlot / 8];
-    static uint8_t* checked = nullptr;
-    if (fn != checked) {
-        if (!scan::BodyContains(fn, "F3 0F 10 8B 0C 01 00 00", 1) || !scan::BodyContains(fn, "F3 0F 59 B3 14 01 00 00", 1)) {
-            logx::Line(L"[hunt] the level component's slot +0x%X (%p) isn't its add-value - anchors disagree, no EXP", kAddValueSlot, fn);
-            return false;
+bool AddResource(void* component, float amount, float* now) {
+    if (!component) return false;
+    // every quest resource (level / EXP, the fresh-kill pile, health, stamina: USwtQuestResourceComponent) has the
+    // add-value at the same slot; each class's function there is checked once: it IS the anchored base add (reads the
+    // value +0x10C, scales by +0x114) or calls it directly (an override)
+    auto* fn = (*reinterpret_cast<uint8_t***>(component))[kAddValueSlot / 8];
+    static std::mutex checkedMutex;
+    static std::map<uint8_t*, bool> checked;
+    {
+        std::lock_guard<std::mutex> lock(checkedMutex);
+        auto it = checked.find(fn);
+        if (it == checked.end()) {
+            auto anchored = [](uint8_t* f) {
+                return f && scan::BodyContains(f, "F3 0F 10 8B 0C 01 00 00", 1) && scan::BodyContains(f, "F3 0F 59 B3 14 01 00 00", 1);
+            };
+            // the base add itself (the level component's slot), or a class's override around it (the fresh-kill pile's:
+            // milestone before / base add / milestone after - VM 2026-10-28) - one direct call into the anchored base
+            bool ok = anchored(fn) || anchored(scan::CalleeWhere(fn, "F3 0F 10 8B 0C 01 00 00"));
+            it = checked.emplace(fn, ok).first;
+            if (!ok) {
+                auto base = reinterpret_cast<uint8_t*>(GetModuleHandleW(nullptr));
+                logx::Line(L"[hunt] a resource's slot +0x%X (%p, exe VA 0x%llX) isn't the add-value - anchors disagree",
+                           kAddValueSlot, fn, static_cast<unsigned long long>(fn - base) + 0x140000000ull);
+            }
         }
-        checked = fn;
+        if (!it->second) return false;
     }
-    reinterpret_cast<AddValueFn>(fn)(levelComponent, amount);
+    reinterpret_cast<AddValueFn>(fn)(component, amount);
+    if (now) *now = *reinterpret_cast<float*>(static_cast<uint8_t*>(component) + 0x10C);
+    return true;
+}
+
+bool AddExperience(void* levelComponent, float amount) {
+    if (!AddResource(levelComponent, amount, nullptr)) return false;
     logx::Line(L"[hunt] +%.0f EXP", amount);
     return true;
 }

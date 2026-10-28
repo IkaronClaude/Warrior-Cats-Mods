@@ -79,7 +79,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   tires your cat a bit (more after `LateHour`), and so does every duty done; tired, it moves slower and hunts and
   fights worse, exhausted even more so. Resting (the time-skip key) resets it. Kept with your save.
 - **The clan's day: duties** (experimental, off by default, `config/duties.ini`, needs the day / night cycle): every
-  morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low),
+  morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low; a
+  hunting ground with prey of the season is marked, and a finished hunt feeds the clan's fresh-kill pile),
   patrol N border points (marked like StarClan's guidance); at the day's end the duties done raise your standing in
   the clan and the ones skipped lower it (kept with your save). From `MaxRank` (Deputy) on you get none.
 - **Time skips** (experimental, off by default, `config/timeskip.ini On = 1`, needs the day / night cycle): time passes

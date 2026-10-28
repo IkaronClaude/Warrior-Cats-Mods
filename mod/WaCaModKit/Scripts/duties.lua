@@ -10,7 +10,8 @@
 local Duties = {}
 
 local WaCa, log, DayNight
-local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow = 50, patrolPoints = 2,
+local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow = 50, patrolPoints = 2, pileReward = 10,
+              huntingGround = true,
               reach = 800, minDist = 2000, maxDist = 9000, standingDone = 2, standingMissed = -1, seconds = 7 }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
 local HINT = "/Game/Gameplay/Blueprints/WorldElements/POIHintArea/BP_POI_HintArea_Quest.BP_POI_HintArea_Quest_C"
@@ -85,6 +86,49 @@ local function patrolPoints(n)
     return out
 end
 
+-- the hunting ground for the day's hunt (tickets.md 8, hunting missions): a prey creature about 20-90 m away, its
+-- spot marked like the patrol points - the clan sends you where the prey is this season (preyworld.lua hides the
+-- rest), the sense trail shows the way
+local function huntingGround()
+    local p = pc() and pc().Pawn
+    if not p then return nil end
+    local at = p:K2_GetActorLocation()
+    local kinds = {}
+    pcall(function()
+        StaticFindObject("/Script/SwtQuest.ESwtQuestCharacterType"):ForEachName(function(n, v)
+            kinds[v] = (n:ToString():gsub("^.*::", ""):gsub("^Weak", ""))
+        end)
+    end)
+    local prey = { Mice = true, Squirrel = true, Rabbit = true, Bird = true }
+    local found = {}
+    for _, c in ipairs(FindAllOf("BP_Exploration_Character_Base_C") or {}) do
+        pcall(function()
+            if c:IsValid() and not c.bHidden and prey[kinds[c.CharacterType] or ""] then
+                local q = c:K2_GetActorLocation()
+                local d = math.sqrt((q.X - at.X) ^ 2 + (q.Y - at.Y) ^ 2)
+                if d >= cfg.minDist and d <= cfg.maxDist then table.insert(found, { q, kinds[c.CharacterType] }) end
+            end
+        end)
+    end
+    if #found == 0 then return nil end
+    local pick = found[math.random(#found)]
+    local point = { X = pick[1].X, Y = pick[1].Y, Z = pick[1].Z, kind = pick[2] }
+    pcall(function()
+        local marker = p:GetWorld():SpawnActor(WaCa.LoadAsset(HINT), point, { pitch = 0, Yaw = 0, Roll = 0 })
+        pcall(function() marker.SenseTrackedComponent.bTrackingEnabled = true end)
+        pcall(function() marker:OnQuestTracked(true, nil) end)
+        point.marker = (marker:GetFullName():gsub("^%S+ ", ""))
+    end)
+    return point
+end
+
+-- the clan's fresh-kill pile (its resource component, on the game state) - a finished hunt adds to it the game's way
+local function pileComponent()
+    for _, comp in ipairs(FindAllOf("SwtAdventureFreshKillPileComponent") or {}) do
+        if comp:IsValid() then return comp end
+    end
+end
+
 local function removeMarker(point)
     local m = point.marker and StaticFindObject(point.marker)
     if m and m:IsValid() then pcall(function() m:K2_DestroyActor() end) end
@@ -115,7 +159,10 @@ local function assign(day)
     local hunt = pile < cfg.pileLow and cfg.huntMax or math.random(cfg.huntMin, cfg.huntMax)
     local patrol = cfg.patrolPoints
     if plan then hunt, patrol = plan.hunt or hunt, plan.patrol or patrol end
-    if hunt > 0 then today.hunt = { need = hunt, got = 0 } end
+    if hunt > 0 then
+        today.hunt = { need = hunt, got = 0 }
+        if cfg.huntingGround then today.hunt.ground = huntingGround() end
+    end
     if patrol > 0 then today.patrol = patrolPoints(patrol) end
     if not today.hunt and not today.patrol then
         log("duties: day %d - no duties today", day)
@@ -123,7 +170,9 @@ local function assign(day)
         return
     end
     log("duties: day %d (fresh-kill pile %d) - %s", day, pile, summary())
-    card(string.format("Today's duties: %s.", summary()))
+    local ground = today.hunt and today.hunt.ground
+    card(string.format("Today's duties: %s.%s", summary(),
+        ground and string.format(" %s are about in the hunting ground the patrol marked.", ground.kind) or ""))
 end
 
 local function checkPatrol()
@@ -145,7 +194,18 @@ end
 local function verdict()
     if not today then return end
     local done, missed = 0, 0
-    if today.hunt then if today.hunt.got >= today.hunt.need then done = done + 1 else missed = missed + 1 end end
+    if today.hunt then
+        if today.hunt.ground then removeMarker(today.hunt.ground) end
+        if today.hunt.got >= today.hunt.need then
+            done = done + 1
+            -- the hunt's prey goes onto the clan's fresh-kill pile
+            local pile = pileComponent()
+            local now = pile and cfg.pileReward > 0 and WaCaNative_AddResource and WaCaNative_AddResource(pile:GetAddress(), cfg.pileReward)
+            if now then log("duties: the hunt fed the clan - fresh-kill pile +%d = %.0f", cfg.pileReward, now) end
+        else
+            missed = missed + 1
+        end
+    end
     if today.patrol then
         local all = true
         for _, pt in ipairs(today.patrol) do
@@ -179,6 +239,8 @@ function Duties.Init(c)
     cfg.huntMin = math.max(0, math.floor(tonumber(h.Min or "") or cfg.huntMin))
     cfg.huntMax = math.max(cfg.huntMin, math.floor(tonumber(h.Max or "") or cfg.huntMax))
     cfg.pileLow = tonumber(h.PileLow or "") or cfg.pileLow
+    cfg.pileReward = tonumber(h.PileReward or "") or cfg.pileReward
+    cfg.huntingGround = (h.HuntingGround or "1") ~= "0"
     local p = ini["Patrol"] or {}
     cfg.patrolPoints = math.max(0, math.floor(tonumber(p.Points or "") or cfg.patrolPoints))
     cfg.reach = tonumber(p.Reach or "") or cfg.reach

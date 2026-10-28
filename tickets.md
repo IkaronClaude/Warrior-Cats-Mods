@@ -546,6 +546,15 @@ game data in this repo.
       USwtAdventureGainFreshKillEffect, UGuiPopupFreshKill, UAdventureDialogueActionFreshKillPile. Pile needs = that
       resource; prey = combat characters by type (Mice / Squirrel / Rabbit / Bird / Rat, see 9). Needs: the mission
       goals.
+      BUILT 2026-10-28 (on the duties, duties.ini [Hunt]): the hunt duty is the mission - its size from the pile
+      (PileLow), a HUNTING GROUND marked (a prey creature of the season 20-90 m away, the guidance-style marker: sense
+      mode shows the way; HuntingGround = 1), and a finished hunt adds PileReward to the clan's fresh-kill pile the
+      game's own way: hunt::AddResource - any USwtQuestResourceComponent's add-value virtual +0x508. The level
+      component's slot IS the anchored base add (0x14165B460: reads +0x10C, scales by +0x114); the pile's slot is an
+      override (0x1417C1980: milestone before -> base add -> milestone after -> look update) - accepted because it
+      calls the anchored base directly (scan::CalleeWhere); anything else refused (it was, before the override was
+      understood). VM: the pile 95 + 5 -> 100 (WaCaNative_AddResource). The hunting-ground card: not seen yet (the
+      VM stalled in its menus that run). Territory / season: the prey there follows preyworld.lua (the season's).
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
       PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
       - a patrol = a temporary party + a route. Needs: patrol goals / events.
