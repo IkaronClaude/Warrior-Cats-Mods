@@ -89,7 +89,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   `Guard`). Needs hunting by chance on. Add your own roles in the ini.
 - **Clan activities** (experimental, off by default, `config/activities.ini [Ambient] On = 1`): clanmates near your cat
   that stand still now and then sit, nap, sniff around or play-fight in pairs - the game's own animations. Which
-  activities, how often (`Every`) and how near (`Radius`) are in the ini.
+  activities, how often (`Every`) and how near (`Radius`) are in the ini. **Joining** (`[Join] On = 1`): next to a
+  story cat (your mentor, the leader ...) press G and your cats spend time together; afterwards your bond with that
+  cat grows (`Bond` points, the game's own bonding - saved, ranks up like a good dialogue answer), once per cat and day.
 - **Dialogue name fixes** (`config/text.ini [Placeholders]`): the game's own text misspells some name placeholders
   (`{THE WARROR FATHER}`, `{THE MISTRUSTUL LEADER}` ...), so those lines never showed the cat's name - the mod
   corrects them at load (6 lines; only the misspelled token is changed). Also the rogue cat "Chesnut" is spelled

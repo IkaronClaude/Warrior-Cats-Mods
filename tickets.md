@@ -773,6 +773,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         check (NavigationSystemV1.FindPathToLocationSynchronously) returns NOTHING from Lua - even for 300 units of
         open ground - so partners stay chosen by straight-line distance and an unreachable walk gives up. The world's
         idle clanmates near the VM cat stand 1700+ apart (6 pairs within 2500 of 66 idle) - a real camp is the test.
+      BOND GAIN - BUILT + VM-VERIFIED 2026-10-28 (activities.ini [Join] On = 0 by default): the game's own
+        AddPersonalBonding (0x1416A0BD0 in this build) - a free function (cl = ENarrativeRole, edx = points) that adds,
+        sets through the progression's virtual +0x560 and saves with context "AddPersonalBonding". bonds.cpp finds it by
+        that string + prologue (check_hooks.py: OK, unique) and checks its body calls [rax+560h]; WaCaNative_AddBond.
+        Join: next to a story cat (AQuestBaseActor with narrativeRole) press G -> both play the Join montage (the NPC
+        through its mesh's anim instance) -> +Bond. VM: TheLoner 43 -> 45 in WrcGame.json, saved by the game
+        ("game saved (AddPersonalBonding)"). Open: joining the AMBIENT activities (they run on generic clanmates,
+        which have no bond), a nicer moment (camera, a line of dialogue).
       BOND GAIN - FOUND 2026-10-28 (the next step, an exe job like AddExperience): bonds are kept per narrative role
         (save: GameplayProgression.Bonding = { <role>: points, <clan>: points, Nodes = answered dialogue nodes }, e.g.
         TheRegretfulWarrior 97, RiverClan 102); at runtime that map is NOT reflected. The game changes it through (a) its

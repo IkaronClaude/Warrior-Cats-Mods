@@ -56,6 +56,8 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: more lines for clan cats, by time of day (lines.ini On = 1).
   - Experimental, off by default: scenes at given times - a card or a conversation (events.ini On = 1).
   - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
+  - Experimental, off by default: press G next to a story cat to spend time together - your bond grows
+    (activities.ini [Join] On = 1).
   - Experimental, off by default: clanmates near you sit, nap, sniff and play-fight now and then
     (activities.ini [Ambient] On = 1).
   - More graphics settings: config/graphics.ini (quality groups, motion blur, depth of field, frame cap ...).

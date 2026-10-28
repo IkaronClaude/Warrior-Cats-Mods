@@ -5,7 +5,7 @@
 -- it starts when the gameplay HUD comes and stops when it goes.
 local Activities = {}
 
-local WaCa, log, modDir
+local WaCa, log, modDir, DayNight
 local cfg = { on = false, every = 20, radius = 3000, pairRadius = 2500, list = {}, total = 0 }
 local running, generation = false, 0
 local busyUntil = {}             -- cat name -> os.time() its activity ends
@@ -181,9 +181,108 @@ local function schedule(gen)
     end)
 end
 
+-- JOINABLE (tickets.md 5): next to a story cat (a quest NPC with a narrative role - the cats the game keeps bonds
+-- with) the Join key makes both do an activity together; when it's over the bond grows the game's own way
+-- (WaCaNative_AddBond -> its AddPersonalBonding: saved, ranks up like a dialogue answer), at most PerDay times per
+-- cat and day. [Join] in activities.ini.
+local join = { on = false, key = "G", radius = 400, bond = 2, perDay = 1, montage = nil, done = {} }
+local roleNames
+
+local function roleName(value)
+    if not roleNames then
+        roleNames = {}
+        pcall(function()
+            StaticFindObject("/Script/SwtQuest.ENarrativeRole"):ForEachName(function(n, v) roleNames[v] = n:ToString():gsub("^.*::", "") end)
+        end)
+    end
+    return roleNames[value] or tostring(value)
+end
+
+-- the story cat nearest to the player's cat within Radius, and its role
+local function storyCatNear(pawn)
+    local at, best, bd = pawn:K2_GetActorLocation(), nil, nil
+    for _, a in ipairs(FindAllOf("QuestBaseActor") or {}) do
+        pcall(function()
+            if a:IsValid() and not a.bHidden and a.narrativeRole and a.narrativeRole > 0 then
+                local p = a:K2_GetActorLocation()
+                local d = math.sqrt((p.X - at.X) ^ 2 + (p.Y - at.Y) ^ 2)
+                if d <= join.radius and (not bd or d < bd) then best, bd = a, d end
+            end
+        end)
+    end
+    return best, bd
+end
+
+-- a montage on any cat: a character plays it itself, a quest NPC through its skeletal mesh's anim instance
+local function playOn(actor, montage)
+    local ok, len = pcall(function() return actor:PlayAnimMontage(montage, 1.0, FName("None")) end)
+    if ok and len and len > 0 then return len end
+    local skel = StaticFindObject("/Script/Engine.SkeletalMeshComponent")
+    local comps = actor:K2_GetComponentsByClass(skel)
+    for i = 1, #comps do
+        local c = comps[i]
+        c = (c.get and c:get()) or c
+        local inst = c:IsValid() and c:GetAnimInstance()
+        if inst and inst:IsValid() then
+            local l = inst:Montage_Play(montage, 1.0, 0, 0.0, true)
+            if l and l > 0 then return l end
+        end
+    end
+    return 0
+end
+
+local function joinNow()
+    local pawn = player()
+    if not pawn or require("menus").InMenu() then return end
+    local cat, dist = storyCatNear(pawn)
+    if not cat then
+        log("activities: no story cat close enough to join (within %d)", join.radius)
+        return
+    end
+    local role = cat.narrativeRole
+    local day = (DayNight and DayNight.Day()) or 0
+    local key = role .. "@" .. day
+    if (join.done[key] or 0) >= join.perDay then
+        log("activities: you've spent time with %s today already", roleName(role))
+        return
+    end
+    local montage = LoadAsset(join.montage) or WaCa.LoadAsset(join.montage)
+    if not montage then
+        log("activities: the join montage %s doesn't load", tostring(join.montage))
+        return
+    end
+    face(pawn, cat)
+    pcall(function() face(cat, pawn) end)
+    local len = math.max(playOn(pawn, montage), playOn(cat, montage), 2)
+    join.done[key] = (join.done[key] or 0) + 1
+    log("activities: your cat and %s (%.0f away) spend time together (%.1f s)", roleName(role), dist, len)
+    ExecuteInGameThreadWithDelay(math.floor(len * 1000), function()
+        local ok = WaCaNative_AddBond and WaCaNative_AddBond(role, join.bond)
+        log("activities: bond with %s %s%d%s", roleName(role), join.bond >= 0 and "+" or "", join.bond,
+            ok and "" or " - FAILED (the game's bonding function wasn't found)")
+    end)
+end
+
 function Activities.Init(c)
-    WaCa, log, modDir = c.WaCa, c.log, c.modDir
+    WaCa, log, modDir, DayNight = c.WaCa, c.log, c.modDir, c.DayNight
     local ini = WaCa.ReadIni(modDir .. "/config/activities.ini") or {}
+    local j = ini["Join"] or {}
+    join.on = (j.On or "0") == "1"
+    join.key = (j.Key or "") ~= "" and j.Key or join.key
+    join.radius = tonumber(j.Radius or "") or join.radius
+    join.bond = math.floor(tonumber(j.Bond or "") or join.bond)
+    join.perDay = math.max(1, math.floor(tonumber(j.PerDay or "") or join.perDay))
+    join.montage = (j.Montage or "") ~= "" and j.Montage or
+        "/Game/Art/Characters/CatMaster/Animations/Montages/AM_CatMaster_SimpleSit.AM_CatMaster_SimpleSit"
+    log("activities: joining %s (key %s, bond +%d, %d per cat and day)", join.on and "on" or "off", join.key, join.bond, join.perDay)
+    if join.on then
+        WaCa.On("KeyDown", function(_, name)
+            if tostring(name) == join.key then
+                local ok, err = pcall(joinNow)
+                if not ok then log("activities: joining failed (%s)", tostring(err)) end
+            end
+        end)
+    end
     local amb = ini["Ambient"] or {}
     cfg.on = (amb.On or "0") == "1"
     cfg.every = math.max(2, tonumber(amb.Every or "") or cfg.every)

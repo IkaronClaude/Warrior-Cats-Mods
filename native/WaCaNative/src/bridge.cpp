@@ -54,6 +54,7 @@
 #include "hunt.h"
 #include "areas.h"
 #include "combat.h"
+#include "bonds.h"
 #include "commands.h"
 #include "tables.h"
 #include "log.h"
@@ -634,6 +635,14 @@ int LuaAddExperience(const LuaMadeSimple::Lua& lua) {
     return 1;
 }
 
+// WaCaNative_AddBond(ENarrativeRole value, points) -> true / false: bond with a story cat, the game's way (bonds.cpp)
+int LuaAddBond(const LuaMadeSimple::Lua& lua) {
+    auto role = static_cast<uint8_t>(lua.get_integer());
+    auto amount = static_cast<int32_t>(lua.get_integer());
+    lua.set_bool(bonds::AddPersonal(role, amount));
+    return 1;
+}
+
 // WaCaNative_HookAreas(a live movement-modifier area's address) -> true / false: AreaOverlap events (areas.cpp)
 int LuaHookAreas(const LuaMadeSimple::Lua& lua) {
     auto addr = static_cast<uintptr_t>(lua.get_integer());
@@ -732,6 +741,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_HookHunt", &LuaHookHunt);
     lua.register_function("WaCaNative_HookAreas", &LuaHookAreas);
     lua.register_function("WaCaNative_AddExperience", &LuaAddExperience);
+    lua.register_function("WaCaNative_AddBond", &LuaAddBond);
     lua.register_function("WaCaNative_CombatExperience", &LuaCombatExperience);
     lua.register_function("WaCaNative_DevTraceCommandAxis", &LuaDevTraceCommandAxis);
     lua.register_function("WaCaNative_SetTableField", &LuaSetTableField);
