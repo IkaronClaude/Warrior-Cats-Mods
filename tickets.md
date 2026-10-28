@@ -54,6 +54,18 @@ game data in this repo.
     blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
   - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
 - [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
+- [ ] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28):
+  - Sharing tongues: 5-6 small circles of 2-3 cats each, spread over the camp.
+  - Sharing prey: groups of 2 or 3, sometimes a group of 4 around a big piece of prey.
+  - Who sits with whom follows like / dislike: two cats with tension (story tensions) never share tongues. The
+    leader only ever with its mate and/or the deputy. Apprentices most likely with apprentices. Mates together, etc.
+  - Needs: (1) each camp cat's identity - rank, clan, name (find it on the walking NPCs: CustomData /
+    narrativeRole / CurrentRank as on AQuestBaseActor; the game's NPC generation manager hands out roles + names);
+    (2) a cat-to-cat relationship table - the game only keeps the PLAYER's bond per story cat
+    (AddPersonalBonding), so ClanLife needs its own (ini: Mates, Tensions, Friends; story beats change it via a
+    step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
+    target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
+    group at a time. Your cat joins a group by its own bonds/rank.
 - [ ] **P2: the evening gathering - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
