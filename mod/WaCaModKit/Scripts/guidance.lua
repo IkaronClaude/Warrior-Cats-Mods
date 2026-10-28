@@ -3,11 +3,13 @@
 -- far away. Here one such hint area is spawned per world (30 s after it's up - spawning while it still streams in
 -- crashed the game, fishing) and attached to a prey creature: the nearest one of the wanted kinds between
 -- MinDistance and MaxDistance, so the trail leads to prey you can't see yet. It moves on to new prey every in-game
--- hour and after a catch. config/hunting.ini [Guidance].
+-- hour and after a catch. The game only draws trails it has paths for (its own quest targets), so at the start of a
+-- sense pulse StarClan's way is also shown as scent puffs (scent.lua) from the cat toward the prey - the first
+-- ShowLength cm. config/hunting.ini [Guidance].
 local Guidance = {}
 
 local WaCa, log
-local cfg = { on = false, kinds = {}, min = 1500, max = 9000 }
+local cfg = { on = false, kinds = {}, min = 1500, max = 9000, show = 2500 }
 local HINT = "/Game/Gameplay/Blueprints/WorldElements/POIHintArea/BP_POI_HintArea_Quest.BP_POI_HintArea_Quest_C"
 local hint                        -- the hint area's full name (held objects can go stale)
 local target                      -- the prey it's on (full name)
@@ -84,6 +86,7 @@ function Guidance.Init(c)
     cfg.on = (g.On or "0") == "1"
     cfg.min = tonumber(g.MinDistance or "") or cfg.min
     cfg.max = tonumber(g.MaxDistance or "") or cfg.max
+    cfg.show = tonumber(g.ShowLength or "") or cfg.show
     for kind in (g.PreyKinds or "Mice,Squirrel,Rabbit,Bird"):gmatch("[^,%s]+") do cfg.kinds[kind] = true end
     log("guidance: %s", cfg.on and "on" or "off")
     if not cfg.on then return end
@@ -97,6 +100,23 @@ function Guidance.Init(c)
         end)
     end)
     WaCa.On("HourChanged", function() if ready then retarget("a new hour") end end)
+    -- the way shown: puffs toward the prey when sense mode starts (its first BlendProgress; BlendsFinished = over)
+    local pulse = false
+    WaCa.Watch("BlendProgress", "/Script/SwtAdventure.SwtAdventureExplorationSenseComponent", "WaCaGuideTick", "post")
+    WaCa.Watch("BlendsFinished", "/Script/SwtAdventure.SwtAdventureExplorationSenseComponent", "WaCaGuideOver", "post")
+    WaCa.On("WaCaGuideOver", function() pulse = false end)
+    WaCa.On("WaCaGuideTick", function()
+        if pulse or not target then return end
+        pulse = true
+        pcall(function()
+            local prey = StaticFindObject((target:gsub("^%S+ ", "")))
+            local p = pawn()
+            if prey and prey:IsValid() and p then
+                local n = require("scent").Puffs(p:K2_GetActorLocation(), prey:K2_GetActorLocation(), cfg.show)
+                log("guidance: StarClan shows the way (%d puffs)", n)
+            end
+        end)
+    end)
     WaCa.On("HuntCaught", function(_, prey)
         if target and tostring(prey):find(target:gsub("^%S+ ", ""), 1, true) then retarget("its prey was caught") end
     end)

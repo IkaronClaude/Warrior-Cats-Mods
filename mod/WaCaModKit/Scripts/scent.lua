@@ -91,11 +91,17 @@ end
 
 -- the trail you can SEE: puffs of the game's scent hint effect (NS_Scent_Hint_Item - it renders on its own; the
 -- spline-bound NS_ScentTracking above stayed invisible on the VM) every Spacing cm from the cat to the prey
-local function puffs(a, b)
+local function puffs(a, b, maxLength)
     local system = WaCa.LoadAsset(cfg.puff)
     if not system then return 0 end
     local lib = StaticFindObject("/Script/Niagara.Default__NiagaraFunctionLibrary")
-    local steps = math.max(1, math.floor(math.sqrt((b.X - a.X) ^ 2 + (b.Y - a.Y) ^ 2) / cfg.spacing))
+    local dist = math.sqrt((b.X - a.X) ^ 2 + (b.Y - a.Y) ^ 2)
+    if maxLength and dist > maxLength then             -- only the first stretch: it shows the way, not the whole way
+        local f = maxLength / dist
+        b = { X = a.X + (b.X - a.X) * f, Y = a.Y + (b.Y - a.Y) * f, Z = a.Z + (b.Z - a.Z) * f }
+        dist = maxLength
+    end
+    local steps = math.max(1, math.floor(dist / cfg.spacing))
     local made = {}
     for i = 1, steps do
         local t = i / steps
@@ -114,6 +120,9 @@ local function puffs(a, b)
     end)
     return #made
 end
+
+-- scent puffs from a to b (at most maxLength cm of it) - also StarClan's guidance (guidance.lua) draws with these
+Scent.Puffs = function(a, b, maxLength) return puffs(a, b, maxLength) end
 
 -- lay a path (cat -> prey) into each prey trail element that has none
 local function layPaths()

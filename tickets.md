@@ -656,6 +656,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         away"; in sense mode our hint area was a candidate with its tracker, exactly like the game's quest hint. The
         trail's look on screen: the same as the game's quest guidance (neither drew visibly in the VM's camera view at
         480x270 - check in play). Fixed: an hourly re-target could spawn it before the 30 s.
+        VISIBLE WAY (2026-10-28): like the scent trail, the game draws trails only for its own quest targets - so at the
+        start of a sense pulse StarClan's way is also shown as scent puffs (Scent.Puffs, the effect seen on screen for
+        26) from the cat toward the prey, the first ShowLength cm (2500). VM: "StarClan shows the way (8 puffs)" with
+        the cat 20 m before the guided mouse (that frame was blocked by a rock - the puff effect itself is the one
+        confirmed visible).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Hook the game's StarClan guidance target (its quest-objective / scent-objective actors, e.g.
         BP_ScentObjectiveFish) and point it at the nearest prey of the kind the clan needs.
