@@ -66,6 +66,10 @@ game data in this repo.
     step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
     target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
     group at a time. Your cat joins a group by its own bonds/rank.
+  - NOT the same as the Gathering / clan meetings (operator 2026-10-28): those are announcements by the leader -
+    "speaker on stage": the leader up on its rock (Highrock / the Gathering's Great Rock), the clan an AUDIENCE in
+    rows/a fan facing it. The current Gather step (an arc facing one point) is the start of that audience layout -
+    reuse it there with the leader as the point, and build the evening's groups as a separate layout.
 - [ ] **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
