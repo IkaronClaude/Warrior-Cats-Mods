@@ -34,21 +34,37 @@ game data in this repo.
   - The day: morning / afternoon duties, the evening gathering staged (5 camp cats placed in a ring through a fade,
     poses, release - the camp cats are BP_Quest_Filler_C scenery, no controller), night: den sleep (My den / your rank's
     den by STR_DEN_* names; VM: walked into the warriors' den -> sleep pose, fade, day 2 at dawn). F9 off by default.
-    VISUALS of the gathering NOT seen (dark evening, offscreen camera) - the log only.
+    GATHERING REDONE + SEEN in daylight (VM 2026-10-28 evening, a dawn copy of the scene): the fillers were parked
+    by the game (38/41 bodies off) and moved quest actors never drew -> the camp's WALKING cats (game AI characters),
+    an arc in front of the camera (the camera sits ~1 m behind your cat - a ring hid them), movement held while
+    staged, released back to their own spots (the saved transform was a live view - nobody went back before). Shots:
+    5 clanmates sitting before Dapplepatch with the card; after: back 24-42 m away, walking on.
   - Deputy lines ([Talk]): VM with the game's dialogue widget + NpcRef = RiverClanDeputy: "free time turned in
-    (Deputy)" and the line swapped to the report text, restored on close. The Busy line not exercised.
+    (Deputy)" and the line swapped to the report text, restored on close. Busy (VM, during "hunt 2 prey"): "Shouldn't
+    you be out on your hunting? The clan is counting on you." - restored on close.
   - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
     conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
   - Lead mode: the meeting place marked; F there ends the third, F 594 away refused (VM).
   - Mouse (VM): hover selects via the game's own steps (main menu, Select Your Cat grid, clan crests via native rects,
     creator pattern / colour grids, pause menu); clicks = select + the real confirm key; footers by their key icon's
     command (Continue = Button_Y); creator 1 / 2 tabs; pause tabs on click only; map drag (held WASD) + wheel zoom
-    (held Up / Down). Map icon INFO: the game has none (its hover list is empty with only WaCa Core too; E = legend).
+    (held Up / Down). Map icon INFO (the game has none): pointing at an icon shows its name by the cursor - from the
+    map's own legend by texture, else the creature kind (VM: Player, Clan Outpost, Mice).
   - Name box: the screen maps Enter to its confirm commands itself (OnListenCommand 5 / 26 / 28 with the rows
     blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
   - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
-- [ ] **P2: Colourpoint needs its own grid icon** (a texture in the content pak) - with Tabby's it isn't found.
-- [ ] **P2: the evening gathering's look** - check it on the operator's PC (ring spacing, poses on the camp cats).
+- [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
+- [ ] **P2: the evening gathering - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
+  will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
+  the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
+  a DisableRequester on their USwtQuestHideByDistanceComponent); the rest are hidden by a 23 m hide sphere. Quest
+  actors teleported into a ring never drew (body "visible", never rendered) - so Gather now uses the walking camp cats
+  (ASwtAdventureWalkingNPC / BP_WalkingNPC_Character_Base_C, AIC_Wrc_WalkingNPC_Controller): moved in, the game shows
+  them at once and their AI resumes (paused while staged). NEXT: let them walk in instead of a fade-cut -
+  SimpleMoveToLocation did nothing while they were hidden/far (frozen out of range); try once in range, or drive the
+  game's own BT tasks (BTTask_NPCSplineWalking, ASwtQuestWalkingSplineActor, ASwtQuestNPCTargetPoint.WalkingSpline,
+  UQuestObjectiveTeleportNPCGiverTask + ASwtQuestNPCMoveObjectivePoint = the game's own "move a giver" step). Same
+  machinery serves the P1 walk quests (mentor walks you to the den).
 - [ ] **P1 (operator 2026-10-28): leading = MANAGING the clan** (deputy / leader). Each duty third marks the clan's
       meeting place, where you assign the tasks (first cut 2026-10-28: the marker + F there ends the third). Later a
       proper UI: clan cats with stats that make them better at patrols or hunting, you build parties and send them out,
