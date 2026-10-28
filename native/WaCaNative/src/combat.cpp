@@ -82,8 +82,8 @@ void OnPre(UObject* context, UFunction* function, void* parms) {
     if (!(function->GetNamePrivate() == g_layout.function) || !context->IsA(g_layout.director)) return;
     auto* hit = static_cast<uint8_t*>(parms) + g_layout.param;
     const bool miss = *reinterpret_cast<bool*>(hit + g_layout.missed);
-    auto** attacker = context->GetValuePtrByPropertyName<UObject*>(STR("CurrentTurnAttackCharacter"));
-    auto** player = context->GetValuePtrByPropertyName<UObject*>(STR("MainPlayerCharacter"));
+    auto** attacker = context->GetValuePtrByPropertyNameInChain<UObject*>(STR("CurrentTurnAttackCharacter"));
+    auto** player = context->GetValuePtrByPropertyNameInChain<UObject*>(STR("MainPlayerCharacter"));
     UObject* receiver = *reinterpret_cast<UObject**>(hit + g_layout.character);
     auto* amount = reinterpret_cast<int32_t*>(hit + g_layout.damage);
     static int seen = 0;

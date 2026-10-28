@@ -816,6 +816,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         MainPlayerCharacter. In those 15 hits the player's own cat neither hit (its attack minigame can't be played at
         0.6 fps) nor was hit (the rats chose the allies) - so a SCALED hit is still unseen; the log line shows it in
         the first real fight.
+        FIXED + VERIFIED (same night): the director in play is BP_CombatDirector_C (a Blueprint subclass) - the
+        property lookup must search the class CHAIN (GetValuePtrByPropertyNameInChain); with the plain lookup both
+        "attacker" and "player" were null, so nothing was ever scaled. VM after the fix, a real fight vs forest rats:
+        "[combat] damage taken by your cat: 8 -> 7 (x0.85)", "30 -> 26". Damage DEALT by the player's cat: the same
+        code path; not yet seen (its attacks didn't come up in the VM fights).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
