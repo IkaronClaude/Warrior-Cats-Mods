@@ -556,6 +556,12 @@ game data in this repo.
       understood). VM: the pile 95 + 5 -> 100 (WaCaNative_AddResource). The hunting-ground card: not seen yet (the
       VM stalled in its menus that run). Territory / season: the prey there follows preyworld.lua (the season's).
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
+      PREPARED 2026-10-28: the patrol DUTY exists (duties.lua: border points marked, checked on arrival). Missing:
+      clanmates walking WITH you. The party = ASwtAdventureCharacter.Party (TArray<ASwtAdventureCharacter*>, the
+      save's GameplayProgression.Party) - the game's own followers. Plan: for the patrol duty, add 1-2 nearby
+      clanmates to the player's Party (and remove them at the day's end), or move them along as activities.lua's
+      pair walk does (AI MoveTo, brain paused) toward each border point; border marking = a scent puff (Scent.Puffs)
+      + a card at each point. Needs the VM (whether Party accepts generic clanmates).
       PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
       - a patrol = a temporary party + a route. Needs: patrol goals / events.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
@@ -565,6 +571,15 @@ game data in this repo.
       - At each point: scent-mark (a montage) and a small random event (rival scent -> an encounter, prey -> a hunt
         chance, nothing). Done -> party dissolves, duty done.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
+      PREPARED 2026-10-28 (offline): the game HAS a training feature - the Training Grounds popup
+      (WBP_GuiPopupTrainingGrounds = UGuiPopupAvailableMoves: learn attack moves from cats - panels General /
+      Select / Completed, UGuiControlTrainingOptionCats 3 cats, 4 moves) + NPC training animations
+      (A_CatMaster_NPC_Training_Attack / Hit / Stance) + a sparring encounter row DT_Combat_Generator
+      "TrainingGrounds" (1 cat, OutOfClans, Tier4 AI, universal attacks 1/7/13/15) that no map places - started from
+      code / a quest effect (USwtAdventureStartCombatEffect: CombatTags per rank, applied natively). Plan: a Train
+      duty (duties.lua) = a sparring fight with the mentor: find the native "start combat by generator tag" the
+      effect ends in (like AddPersonalBonding - by its string / the effect's vtable) and call it with the
+      TrainingGrounds tag; win or lose -> EXP + bond with the mentor (bonds.cpp). Needs the VM.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A training duty starts a combat with the mentor (the game's own combat, a friendly variant: no injuries);
         win / lose both give EXP (CombatBaseExperience "Cat" row = 45) and a technique point; config: training.ini.
@@ -929,6 +944,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
+      PREPARED 2026-10-28 (offline): the stats are STORED in the save once the cat is made -
+        GameplayProgression.Stats = "(Prowess=165,Strength=135,Resilience=140,Instinct=145,Agility=135,Stamina=100)"
+        (+ Traits [{Type}]) - separate from the look (the cat's FCatCustomData: BodyValue, FaceValue, FurValue,
+        WhiskerValue, TailIdx, EarIdx ..., the look component's CustomData, already read natively in bridge.cpp). So
+        decoupling = a body / face override in appearance.ini ([Body] BodyValue / FaceValue / FurValue ...) applied to
+        the player's look component after the game builds it (like the colour / mask overrides) - the stored stats are
+        never touched, the creator's choice keeps setting them. NEXT (needs the VM): write those CustomData fields +
+        WaCa.RebuildLook, check the shape changes and the save's Stats don't.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
         override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.
@@ -941,6 +964,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
         looks (the look framework) after N days (seasons).
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
+      PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
+      physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
+      EAdventurePhysicalFloorType Water = 4 / DeepWater = 3 on UAdventurePhysicalMaterial.FloorType (+0xA8); the
+      step notify (USwtAdventureStepModifierNotifyState) already spawns the water-step Niagara on them. So "swim" =
+      WADE: on Water / DeepWater floors the cat slows (Speed registry with exhaustion: CustomTimeDilation) - maybe
+      RiverClan cats less. The floor: the player's CharacterMovement.CurrentFloor.HitResult.PhysMaterial.FloorType,
+      read per footstep - the step notify is ONE shared object per animation (a ProcessEvent watch can't tell whose
+      step), so it needs a native detour on its Notify virtual (MeshComp is a parameter). Needs the VM to build +
+      verify.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
