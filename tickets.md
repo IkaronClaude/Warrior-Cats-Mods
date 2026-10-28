@@ -241,6 +241,12 @@ game data in this repo.
       DEFERRED to their own mods (ROADMAP.md): story packs, cutscenes from text, the cast / ENarrativeRole, murmurings,
       apprentice duties, NPC jobs + patrol encounters, the party, the day-clock dial, fresh kill without hunger, story
       fixer. OPERATOR CHECKS LEFT: a real conversation turn-in with the deputy, a real pile deposit.
+      PILE ON THE VM (2026-10-28, tried, NOT possible): the camp's pile is a quest giver (BP_Quest_Giver_FreshKill_C,
+      RiverClan at -46119 3197; SwtAdventureFreshKillActor); its interaction is native (no UFunction - the class chain
+      has only widget / overlap events) and opens WBP_GuiScreenFreshkillPile (GuiPopupFreshKill) - built by hand it
+      stays empty (needs the native setup). E next to it does nothing on the VM (like NPC talk). The SwtAdventure
+      FreshKillPileComponent is on the GameState (data only). So the deposit -> OnContributeFreshKill -> TaskTurnedIn
+      Pile chain is verified only from OnContributeFreshKill on (VM full day); the screen part needs the operator.
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
