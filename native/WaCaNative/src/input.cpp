@@ -169,8 +169,31 @@ namespace input {
 
 void* FNameCtor() { return reinterpret_cast<void*>(g_fnameCtor); }
 
+// a UE4SS mod is on: its folder has enabled.txt, or mods.txt lists it as "Name : 1"
+bool ModEnabled(const std::wstring& modsDir, const std::wstring& name) {
+    std::error_code ec;
+    if (!std::filesystem::is_directory(modsDir + L"\\" + name, ec)) return false;
+    if (std::filesystem::exists(modsDir + L"\\" + name + L"\\enabled.txt", ec)) return true;
+    std::wifstream f(modsDir + L"\\mods.txt");
+    std::wstring line;
+    while (std::getline(f, line)) {
+        auto colon = line.find(L':');
+        if (colon == std::wstring::npos || Trim(line.substr(0, colon)) != name) continue;
+        return Trim(line.substr(colon + 1)) == L"1";
+    }
+    return false;
+}
+
 bool Install(const std::wstring& modDir) {
-    g_configPath = modDir + L"\\config\\keybinds.ini";
+    // The key bindings belong to the Keybinds & Mouse mod (WaCaKeybinds\config\keybinds.ini), read here because the
+    // game builds its bindings before any Lua runs. Without that mod (or with it off): the game's own bindings.
+    std::wstring modsDir = modDir.substr(0, modDir.find_last_of(L"\\/"));
+    if (ModEnabled(modsDir, L"WaCaKeybinds")) {
+        g_configPath = modsDir + L"\\WaCaKeybinds\\config\\keybinds.ini";
+    } else {
+        g_configPath = modDir + L"\\config\\keybinds.ini";            // (none shipped: the game's own bindings)
+        logx::Line(L"[input] the Keybinds & Mouse mod (WaCaKeybinds) is not installed / on - the game's own bindings");
+    }
     auto apply = scan::Find(kApplySig);
     auto ctor = scan::Find(kFNameCtorSig);
     auto toString = scan::Find(kFNameToStringSig);

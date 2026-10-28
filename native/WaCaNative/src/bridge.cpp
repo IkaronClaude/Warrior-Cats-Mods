@@ -47,6 +47,7 @@
 #include <algorithm>
 #include <atomic>
 #include <mutex>
+#include <map>
 #include <memory>
 #include <thread>
 #include <vector>
@@ -277,21 +278,39 @@ int LuaWatch(const LuaMadeSimple::Lua& lua) {
 // WaCaNative_Broadcast(event, payload) hands an event to EVERY OTHER mod's Lua state as
 // WaCaNative_OnEvent(event, nil, payload, fromMod) - the payload a JSON text (WaCa.lua encodes / decodes it; UObjects
 // don't cross states). The sender dispatches to itself in Lua. Game thread only (the states run there).
+// sticky events: the latest payload per event, for a mod that subscribes after it was sent
+// (WaCaNative_LastBroadcast(event) -> payload, sender | nil)
+std::map<std::string, std::pair<std::string, std::string>> g_sticky;
+
 int LuaBroadcast(const LuaMadeSimple::Lua& lua) {
     ModState* from = StateOf(lua);
-    if (!lua.is_string()) lua.throw_error("WaCaNative_Broadcast(event, payloadJson)");
+    if (!lua.is_string()) lua.throw_error("WaCaNative_Broadcast(event, payloadJson [, sticky])");
     std::string event(lua.get_string());
     std::string payload = lua.is_string() ? std::string(lua.get_string()) : std::string();
+    bool sticky = lua.is_bool() ? lua.get_bool() : false;
+    std::string sender = from ? Narrow(from->name) : std::string("?");
+    // (a sticky value is kept even when it can't be delivered yet: mods read it when they subscribe)
+    if (sticky) g_sticky[event] = {payload, sender};
     if (!OnGameThread()) {
-        logx::Line(L"[bridge] broadcast %s off the game thread - dropped", Wide(event).c_str());
+        logx::Line(L"[bridge] broadcast %s off the game thread - not delivered%s", Wide(event).c_str(),
+                   sticky ? L" (kept as sticky)" : L"");
         return 0;
     }
-    std::string sender = from ? Narrow(from->name) : std::string("?");
     for (size_t i = 0; i < g_states.size(); ++i) {
         if (g_states[i].get() == from) continue;
         Deliver(*g_states[i], event, nullptr, {payload, sender});
     }
     return 0;
+}
+
+int LuaLastBroadcast(const LuaMadeSimple::Lua& lua) {
+    if (!lua.is_string()) return 0;
+    std::string event(lua.get_string());
+    auto it = g_sticky.find(event);
+    if (it == g_sticky.end()) return 0;
+    lua.set_string(it->second.first);
+    lua.set_string(it->second.second);
+    return 2;
 }
 
 int LuaReady(const LuaMadeSimple::Lua& lua) {
@@ -808,7 +827,7 @@ int LuaCommand(const LuaMadeSimple::Lua& lua) {
 namespace bridge {
 
 void Install() {
-    Hook::FCallbackOptions once{true, true, STR("WaCaModKit"), STR("GameThread")};
+    Hook::FCallbackOptions once{true, true, STR("WaCaCore"), STR("GameThread")};
     auto id = Hook::RegisterEngineTickPreCallback(
         [](auto&, UEngine*, float, bool) {
             g_gameThread = std::this_thread::get_id();
@@ -818,9 +837,9 @@ void Install() {
         once);
     if (id == Hook::ERROR_ID) logx::Line(L"[bridge] no engine tick hook - events are OFF");
     Hook::RegisterProcessEventPreCallback([](auto&, UObject* c, UFunction* f, void* p) { OnProcessEvent(false, c, f, p); },
-                                          {false, true, STR("WaCaModKit"), STR("EventsPre")});
+                                          {false, true, STR("WaCaCore"), STR("EventsPre")});
     Hook::RegisterProcessEventPostCallback([](auto&, UObject* c, UFunction* f, void* p) { OnProcessEvent(true, c, f, p); },
-                                           {false, true, STR("WaCaModKit"), STR("EventsPost")});
+                                           {false, true, STR("WaCaCore"), STR("EventsPost")});
     combat::Install();
     logx::Line(L"[bridge] ProcessEvent callbacks installed");
 }
@@ -834,6 +853,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.register_function("WaCaNative_Watch", &LuaWatch);
     lua.register_function("WaCaNative_Ready", &LuaReady);
     lua.register_function("WaCaNative_Broadcast", &LuaBroadcast);
+    lua.register_function("WaCaNative_LastBroadcast", &LuaLastBroadcast);
     lua.register_function("WaCaNative_Command", &LuaCommand);
     lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
     lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);

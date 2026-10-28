@@ -1,5 +1,15 @@
 # WaCa ModKit
 
+> **WaCa ModKit has been split into separate mods (2026-10-28)** - each its own repository and Nexus Mods page:
+> [WaCa Core](https://github.com/IkaronClaude/WaCa-Core) (the base + API),
+> [WaCa Keybinds & Mouse](https://github.com/IkaronClaude/WaCa-KeybindsMouse),
+> [WaCa Looks](https://github.com/IkaronClaude/WaCa-Looks),
+> [WaCa Clan Life](https://github.com/IkaronClaude/WaCa-ClanLife),
+> [WaCa Hunting](https://github.com/IkaronClaude/WaCa-Hunting),
+> [WaCa Graphics](https://github.com/IkaronClaude/WaCa-Graphics).
+> This repository keeps the all-in-one ModKit's history (0.7 and older) and the research tools (asset dumps, exe
+> disassembly, camp maps, the VM test tooling). New work happens in the mods' own repositories.
+
 An open-source modding framework and fix pack for **Warrior Cats: Clans of the Forest** (Unreal Engine 5.7).
 
 **Players:** download the latest release zip, extract it, double-click `Install.bat` and start the game from Steam

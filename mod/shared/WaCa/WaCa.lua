@@ -309,8 +309,8 @@ end
 -- payload ("<mod>.<thing>" names, e.g. "clan.thirdStarted" { day = 3, third = "Morning" } - see the Core README).
 WaCa.EventFrom = nil
 
-function WaCa.Emit(event, ...)
-    dispatch(event, ...)
+-- sends an event to the other mods; sticky = the native side keeps it for mods that subscribe later
+local function broadcast(event, sticky, ...)
     if not WaCaNative_Broadcast then return end
     -- (the arguments one by one: a nil in the middle must stay a null, not end the list)
     local n = select("#", ...)
@@ -320,11 +320,38 @@ function WaCa.Emit(event, ...)
         if not ok or not e then return end          -- something that can't cross (a UObject): this mod only
         parts[i] = e
     end
-    WaCaNative_Broadcast(event, BROADCAST_MARK .. '{"n":' .. n .. ',"a":[' .. table.concat(parts, ",") .. "]}")
+    WaCaNative_Broadcast(event, BROADCAST_MARK .. '{"n":' .. n .. ',"a":[' .. table.concat(parts, ",") .. "]}", sticky)
 end
 
-function WaCa.Publish(topic, data) WaCa.Emit(topic, data) end
-function WaCa.Subscribe(topic, fn) WaCa.On(topic, function(data) fn(data, WaCa.EventFrom) end) end
+-- the latest value of each sticky topic published IN this mod (a later subscriber here gets it too)
+local stickyHere = {}
+
+function WaCa.Emit(event, ...)
+    dispatch(event, ...)
+    broadcast(event, false, ...)
+end
+
+-- Publish(topic, data [, sticky]): sticky = a STATE rather than a moment ("clan.third" = the third it is now): a mod
+-- that subscribes later - or starts after it was sent - still gets the latest one at once.
+function WaCa.Publish(topic, data, sticky)
+    if sticky then stickyHere[topic] = data end
+    dispatch(topic, data)
+    broadcast(topic, sticky == true, data)
+end
+
+function WaCa.Subscribe(topic, fn)
+    WaCa.On(topic, function(data) fn(data, WaCa.EventFrom) end)
+    -- the latest sticky value: this mod's own, else another mod's (kept by the native side)
+    if stickyHere[topic] ~= nil then
+        fn(stickyHere[topic], nil)
+    elseif WaCaNative_LastBroadcast then
+        local payload, from = WaCaNative_LastBroadcast(topic)
+        if payload then
+            local ok, msg = pcall(WaCa.JsonDecode, payload:sub(#BROADCAST_MARK + 1))
+            if ok and type(msg) == "table" and msg.a then fn(msg.a[1], from) end
+        end
+    end
+end
 
 -- a received cross-mod event (from WaCaNative_OnEvent): decoded and dispatched here only
 received = function(event, payload, from)
@@ -489,8 +516,8 @@ end
 function WaCa.ReadContent(basePath, name)
     local out = WaCa.ReadIni(basePath) or {}
     out.__order = out.__order or {}
-    for s, t in pairs(out) do if s ~= "__order" and type(t) == "table" then t.__mods = { "WaCaModKit" } end end
     local modsDir, own = basePath:match("^(.*)[/\\]([^/\\]+)[/\\]config[/\\][^/\\]+$")
+    for s, t in pairs(out) do if s ~= "__order" and type(t) == "table" then t.__mods = { own or "?" } end end
     if not modsDir then return out end
     for _, mod in ipairs(WaCa.EnabledMods(modsDir)) do
         local add = mod ~= own and WaCa.ReadIni(modsDir .. "/" .. mod .. "/content/" .. name .. ".ini")
@@ -920,5 +947,51 @@ function WaCa.PlayerCats(withPreview)
     end
     return out
 end
+
+-- --- menus vs gameplay (shared by every WaCa mod: the Keybinds & Mouse mod's cursor, the clan loop's pauses) ---
+-- A "menu" = any screen up that is not the gameplay screen or an overlay over gameplay (the HUDs, the online status,
+-- the combat HUD, screen transitions, the centre message), or a popup on the gameplay screen (the pause menu, the map).
+-- GuiScreenOnlineOver is up for a whole session: taken as a menu, the cursor never left menu mode in the world
+-- (operator 2026-10-25, VM-confirmed).
+local OVERLAY_CLASSES = { "/Script/SwtAdventure.GuiScreenOnlineOver", "/Script/Wrc.GuiHudCombatOver",
+                          "/Script/SwtEngine.ScreenTransitionOver", "/Script/SwtAdventure.GuiPopupCenterMessage" }
+local overlayClasses, gameScreenClass = nil, nil
+
+local function isGameplayScreen(screen)
+    gameScreenClass = gameScreenClass or StaticFindObject("/Script/SwtEngine.GuiScreenGame")
+    if gameScreenClass and gameScreenClass:IsValid() and screen:IsA(gameScreenClass) then return true end
+    if not overlayClasses then
+        overlayClasses = {}
+        for _, path in ipairs(OVERLAY_CLASSES) do
+            local c = StaticFindObject(path)
+            if c and c:IsValid() then table.insert(overlayClasses, c) end
+        end
+    end
+    for _, c in ipairs(overlayClasses) do
+        if screen:IsA(c) then return true end
+    end
+    return screen:GetClass():GetFName():ToString():find("Hud", 1, true) ~= nil
+end
+
+-- true while a menu is showing, false in gameplay, nil while NO screen is up (the game tears one screen down a frame
+-- or two before it builds the next - that gap is not gameplay). leaving = a screen being torn down (ScreenHidden: it
+-- still counts as in the viewport)
+function WaCa.MenuShowing(leaving)
+    local leavingName = leaving and leaving:GetFullName()
+    local any = false
+    for _, s in ipairs(FindAllOf("SwtScreen") or {}) do
+        if s:IsValid() and s:IsInViewport() and s:GetFullName() ~= leavingName then
+            any = true
+            if not isGameplayScreen(s) then return true end
+            local popup = s.CurrentPopup
+            if popup and popup:IsValid() and popup:GetFullName() ~= leavingName then return true end
+        end
+    end
+    if not any then return nil end
+    return false
+end
+
+-- a menu is up now (no screen at all = gameplay)
+function WaCa.InMenu() return WaCa.MenuShowing() == true end
 
 return WaCa

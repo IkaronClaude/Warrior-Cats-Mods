@@ -1,4 +1,4 @@
-// WaCaNative: the native half of WaCa ModKit, a UE4SS C++ mod (Mods/WaCaModKit/dlls/main.dll) built against the
+// WaCaNative: the native half of WaCa Core, a UE4SS C++ mod (Mods/WaCaCore/dlls/main.dll) built against the
 // UE4SS SDK. Two kinds of work:
 //  - the event bus (bridge.cpp): UE4SS's own ProcessEvent callbacks turned into events for every Lua mod, and the
 //    WaCaNative_* functions Lua calls - built on UE4SS's hooks, nothing of ours patched in
@@ -26,7 +26,7 @@ using namespace RC;
 
 namespace {
 
-// <...>\Mods\WaCaModKit (the DLL sits in its dlls\ folder)
+// <...>\Mods\WaCaCore (the DLL sits in its dlls\ folder)
 std::wstring ModDir() {
     HMODULE self = nullptr;
     GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
@@ -35,15 +35,15 @@ std::wstring ModDir() {
     GetModuleFileNameW(self, path, MAX_PATH);
     std::wstring p(path);
     p = p.substr(0, p.find_last_of(L"\\/"));          // ...\dlls
-    return p.substr(0, p.find_last_of(L"\\/"));       // ...\WaCaModKit
+    return p.substr(0, p.find_last_of(L"\\/"));       // ...\WaCaCore
 }
 
 class WaCaNative : public CppUserModBase {
 public:
     WaCaNative() {
-        ModName = STR("WaCaModKit");
-        ModVersion = STR("0.6.0");
-        ModDescription = STR("WaCa ModKit native half: event bus + game hooks");
+        ModName = STR("WaCaCore");
+        ModVersion = STR("1.0.0");
+        ModDescription = STR("WaCa Core: the shared native API (event bus, game hooks) for WaCa mods");
         ModAuthors = STR("WaCa ModKit");
         auto dir = ModDir();
         logx::Open(dir + L"\\WaCaNative.log");

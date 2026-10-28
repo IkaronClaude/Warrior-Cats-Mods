@@ -374,7 +374,7 @@ end
 
 -- the scenes due at this hour of this day
 local function due(hour, day)
-    if require("menus").InMenu() then return end
+    if WaCa.InMenu() then return end
     for _, e in ipairs(list) do
         local dayOk = (e.day and day == e.day) or (e.every and (day - (e.day or 1)) % e.every == 0 and day >= (e.day or 1))
             or (not e.day and not e.every)

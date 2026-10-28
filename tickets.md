@@ -1101,6 +1101,20 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       NEEDED: cross-state events in the bridge; story variables / scene runner as shared libs; per-package zips
       (Wrc/Binaries/Win64/ue4ss/Mods/<Mod>/ + enabled.txt, mods.txt line); Nexus page per part (requirements,
       tested game build + exe hash, Vortex untested, AI-code disclosure, permissions); package.ps1 per part.
+      DONE 2026-10-28: SPLIT into 6 local repos C:/Projects/WaCa-{Core,KeybindsMouse,Looks,ClanLife,Hunting,Graphics}
+      (git init, first commit; NO remotes - the operator creates IkaronClaude/WaCa-* on GitHub). Each: Mods/<Mod>/
+      (+ enabled.txt in the zip), README.md, NEXUS.md (paste-ready page: requirements, install, old-ModKit migration,
+      GitHub link TODOs, contributions welcome, AI disclosure, permissions, changelog), CONTRIBUTING.md, LICENSE,
+      tools/package.ps1 (zip from the game folder down, Windows tar - forward slashes), .github/workflows/release.yml.
+      Core = native/ + Mods/shared/WaCa + docs/API.md + docs/EVENTS.md + examples/HelloWaCa. Cross-mod events:
+      WaCaNative_Broadcast (JSON, sticky topics, WaCa.EventFrom). Speed of the cat: ONE owner (Core) for every mod's
+      SpeedFactor. Keybinds: native reads Mods/WaCaKeybinds/config/keybinds.ini when that mod is on. preyworld moved to
+      Clan Life (needs the season). Looks keeps the "WaCaModKit" sidecar name (old saves keep their looks).
+      VM-VERIFIED (split install from the zips): all 6 load; keybinds from WaCaKeybinds; cursor menu / gameplay;
+      Clan Life -> Hunting WorldFactors; SpeedFactor from another state applied (1 -> 0.5 -> 1); core.started sticky;
+      HelloWaCa's content/text.ini merged + its sidecar written; Core alone (see below).
+      OPEN: (1) the DLL under the NEXUS UE4SS download (same commit 8333063; ours is a from-source build) - needs the
+      operator's download; (2) MothColorPicker + Looks together; (3) Nexus link TODOs in NEXUS.md once pages exist.
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the

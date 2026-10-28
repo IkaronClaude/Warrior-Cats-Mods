@@ -113,7 +113,7 @@ void OnPre(UObject* context, UFunction* function, void* parms) {
 
 void Install() {
     Hook::RegisterProcessEventPreCallback([](auto&, UObject* c, UFunction* f, void* p) { OnPre(c, f, p); },
-                                          {false, true, STR("WaCaModKit"), STR("CombatScale")});
+                                          {false, true, STR("WaCaCore"), STR("CombatScale")});
 }
 
 void Configure(const std::wstring& command) {

@@ -233,7 +233,7 @@ end
 
 local function joinNow()
     local pawn = player()
-    if not pawn or require("menus").InMenu() then return end
+    if not pawn or WaCa.InMenu() then return end
     local cat, dist = storyCatNear(pawn)
     if not cat then
         log("activities: no story cat close enough to join (within %d)", join.radius)

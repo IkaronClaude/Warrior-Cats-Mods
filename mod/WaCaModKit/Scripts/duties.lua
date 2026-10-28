@@ -580,7 +580,7 @@ local function reached(t, what, i)
         for _, q in ipairs(t.points) do if not q.done then all = false end end
         if all then taskDone(t) else card(string.format("Border point checked - %s.", describe(t))) end
     elseif what == "teacher" then
-        if t.fighting or require("menus").InMenu() then return end
+        if t.fighting or WaCa.InMenu() then return end
         if startSpar(t) then
             t.fighting = true
             log("duties: sparring with %s", t.who)
