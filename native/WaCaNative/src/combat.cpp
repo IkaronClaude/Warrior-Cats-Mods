@@ -81,12 +81,21 @@ void OnPre(UObject* context, UFunction* function, void* parms) {
     if (!g_layout.ok && (g_layout.tried || !Resolve())) return;
     if (!(function->GetNamePrivate() == g_layout.function) || !context->IsA(g_layout.director)) return;
     auto* hit = static_cast<uint8_t*>(parms) + g_layout.param;
-    if (*reinterpret_cast<bool*>(hit + g_layout.missed)) return;
+    const bool miss = *reinterpret_cast<bool*>(hit + g_layout.missed);
     auto** attacker = context->GetValuePtrByPropertyName<UObject*>(STR("CurrentTurnAttackCharacter"));
     auto** player = context->GetValuePtrByPropertyName<UObject*>(STR("MainPlayerCharacter"));
-    if (!player || !*player) return;
     UObject* receiver = *reinterpret_cast<UObject**>(hit + g_layout.character);
     auto* amount = reinterpret_cast<int32_t*>(hit + g_layout.damage);
+    static int seen = 0;
+    if (seen < 30) {
+        // every hit's facts (the first 30 of a session): who hit whom, a miss, the damage - so a hit that isn't scaled
+        // shows why
+        ++seen;
+        logx::Line(L"[combat] hit: attacker is your cat %d, receiver is your cat %d, missed %d, damage %d",
+                   attacker && player && *attacker == *player ? 1 : 0, player && receiver == *player ? 1 : 0, miss ? 1 : 0,
+                   *amount);
+    }
+    if (miss || !player || !*player) return;
     double factor = 1.0;
     const wchar_t* who = nullptr;
     if (attacker && *attacker == *player && receiver != *player) { factor = dealt; who = L"dealt"; }

@@ -810,6 +810,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         button pressed through the popup didn't take; a direct Lua call of OnRegisterDamage bypasses UE4SS's
         ProcessEvent callbacks (not a valid test). OPERATOR: one real fight with Role = Fighter -> WaCaNative.log
         "[combat] damage dealt / taken by your cat: X -> Y".
+        VM 2026-10-28 (2 more fights vs forest rats, the combat menu driven with Enter): every hit passes the hook -
+        15 logged ("[combat] hit: attacker is your cat 0/1, receiver is your cat 0/1, missed, damage" - kept for the
+        first 30 hits per session), damage 10-114, layout right; a Lua watch saw one hit with attacker ==
+        MainPlayerCharacter. In those 15 hits the player's own cat neither hit (its attack minigame can't be played at
+        0.6 fps) nor was hit (the rats chose the allies) - so a SCALED hit is still unseen; the log line shows it in
+        the first real fight.
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
