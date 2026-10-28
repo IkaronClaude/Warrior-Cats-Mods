@@ -585,6 +585,15 @@ game data in this repo.
       duty (duties.lua) = a sparring fight with the mentor: find the native "start combat by generator tag" the
       effect ends in (like AddPersonalBonding - by its string / the effect's vtable) and call it with the
       TrainingGrounds tag; win or lose -> EXP + bond with the mentor (bonds.cpp). Needs the VM.
+      TRIED ON THE VM 2026-10-28 (no fight yet): (a) the nearest BP_Enemy_Generator_C with bUseQuestCombatTag +
+        QuestCombatTags = TrainingGrounds, then OnNotifyInitCombat() - no combat. (b) the combat-type route:
+        ESwtAdventureCombatType has TrainingGrounds = 5; USwtAdventureCombatBoxComponent {CombatType +0x568,
+        CombatTag +0x56C} starts combat in its OnBeginOverlap UFunction - the world map has NO combat boxes; one
+        constructed on the player pawn (StaticConstructObject) + OnBeginOverlap(box, pawn, capsule, 0, false, {})
+        runs without error but no combat follows (unregistered component / its owner checked?). NEXT: disassemble
+        that OnBeginOverlap (the class's natives table - the "OnBeginOverlap" string is shared between modules, the
+        SwtQuest table is at 0x149ad0b50, find SwtAdventure's) to see its checks and the combat-manager call it
+        ends in (USwtAdventureCombatManager, CombatClasses[5] = the training director) - then call that directly.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A training duty starts a combat with the mentor (the game's own combat, a friendly variant: no injuries);
         win / lose both give EXP (CombatBaseExperience "Cat" row = 45) and a technique point; config: training.ini.
