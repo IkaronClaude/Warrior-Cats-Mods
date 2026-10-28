@@ -99,41 +99,76 @@ local function dayMinutes()
     return combined().dayMinutes or cfg.dayMinutes
 end
 
+-- frozen time (tickets.md "Time freezes at story points"): source -> true; the clock stands still while any is set
+local freezes = {}
+local ticking = false              -- the clock's step chain is scheduled
+local function frozen() return next(freezes) ~= nil end
+
+-- the clock moves on by `hours`: the day's end (DayEnded / DayStarted), every whole hour crossed (HourChanged), the sky
+local function advance(hours)
+    local before = hour
+    hour = (hour + hours) % 24
+    -- the day ends at BedHour (midnight without one): DayEnded(day), then DayStarted(day + 1), for other modules
+    -- (exhaustion, pacing, seasons, day scripts)
+    local endAt = cfg.bedHour or 0
+    local crossed
+    if hour >= before then crossed = before < endAt and hour >= endAt           -- the same day
+    else crossed = before < endAt or hour >= endAt end                     -- past midnight
+    if crossed then
+        log("daynight: day %d is over (%02d:00)", day, endAt)
+        WaCa.Emit("DayEnded", day)
+        day = day + 1
+        WaCa.Emit("DayStarted", day)
+    end
+    refresh()
+    -- every whole hour crossed, also when one step jumps past several (slow frames, a long UpdateSeconds) - an
+    -- hour's scenes / weather countdown must not be skipped
+    local whole = math.floor(hour)
+    local last = DayNight.lastHour
+    if whole ~= last then
+        local h = last and (last + 1) % 24 or whole
+        for _ = 1, 24 do
+            log("daynight: %02d:00", h)
+            WaCa.Emit("HourChanged", h, day)
+            if h == whole then break end
+            h = (h + 1) % 24
+        end
+        DayNight.lastHour = whole
+    end
+end
+
+-- one step every UpdateSeconds while the gameplay HUD is up and time isn't frozen (frozen, the chain
+-- ends - nothing to animate - and starts again when the last freeze is lifted)
 local function step(gen)
+    ticking = true
     ExecuteInGameThreadWithDelay(math.floor(cfg.step * 1000), function()
-        if gen ~= generation or not running then return end
-        local before = hour
-        hour = (hour + cfg.step / (dayMinutes() * 60) * 24) % 24
-        -- the day ends at BedHour (midnight without one): DayEnded(day), then DayStarted(day + 1), for other modules
-        -- (exhaustion, pacing, seasons, day scripts)
-        local endAt = cfg.bedHour or 0
-        local crossed
-        if hour >= before then crossed = before < endAt and hour >= endAt           -- the same day
-        else crossed = before < endAt or hour >= endAt end                     -- past midnight
-        if crossed then
-            log("daynight: day %d is over (%02d:00)", day, endAt)
-            WaCa.Emit("DayEnded", day)
-            day = day + 1
-            WaCa.Emit("DayStarted", day)
+        if gen ~= generation or not running or frozen() then
+            if gen == generation then ticking = false end
+            return
         end
-        refresh()
-        -- every whole hour crossed, also when one step jumps past several (slow frames, a long UpdateSeconds) - an
-        -- hour's scenes / weather countdown must not be skipped
-        local whole = math.floor(hour)
-        local last = DayNight.lastHour
-        if whole ~= last then
-            local h = last and (last + 1) % 24 or whole
-            for _ = 1, 24 do
-                log("daynight: %02d:00", h)
-                WaCa.Emit("HourChanged", h, day)
-                if h == whole then break end
-                h = (h + 1) % 24
-            end
-            DayNight.lastHour = whole
-        end
+        advance(cfg.step / (dayMinutes() * 60) * 24)
         step(gen)
     end)
 end
+
+local function startClock()
+    if not running or ticking or frozen() then return end
+    generation = generation + 1
+    step(generation)
+end
+
+-- other modules stop the clock at story points (a scene, a ceremony - the clan sim decides which):
+-- DayNight.Freeze("story", true) ... DayNight.Freeze("story", false)
+function DayNight.Freeze(source, on)
+    local was = frozen()
+    freezes[source] = on and true or nil
+    if was ~= frozen() then
+        log("daynight: time %s (%s)", frozen() and "stands still" or "runs again", source)
+        WaCa.Emit("TimeFrozen", frozen(), source)
+        if not frozen() then startClock() end
+    end
+end
+function DayNight.Frozen() return frozen() end
 
 -- an intentional time skip (tickets.md 20): `days` days pass, the new day starts at `toHour` (default StartHour).
 -- Emits DayEnded(fromDay), TimeSkipped(days, fromDay, toDay), then DayStarted(toDay) - the season, weather and prey follow. Returns
@@ -218,8 +253,7 @@ function DayNight.Init(c)
         end
         if not readBase(s) then return end
         running = true
-        generation = generation + 1
-        step(generation)
+        startClock()
     end)
     WaCa.On("ScreenHidden", function(screen)
         if isHud(screen) then running = false end

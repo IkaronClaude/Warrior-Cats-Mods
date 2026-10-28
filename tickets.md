@@ -196,6 +196,19 @@ game data in this repo.
       installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
+- [ ] **Time freezes at story points** (operator 2026-10-28): questing must not happen under time pressure - while a
+      story point the day / night clock stands still. NOT "while a quest is active" (operator 2026-10-28: quests run
+      over action in the forest - that would make all exploration timeless). Which story points freeze = the clan
+      sim's call (15). Built so far: DayNight.Freeze(source, on) / DayNight.Frozen() + the TimeFrozen event; frozen,
+      the clock's step chain ends (no idle ticking) and restarts when the last freeze is lifted. Nothing sets it yet.
+- [ ] **Time follows effort, not the wall clock** (operator 2026-10-28: "bind time directly to cat exhaustion based on
+      the current activity's time slot (morning / afternoon / night)"). BLOCKED ON 15 (operator 2026-10-28: "a true
+      time of day cannot really be wired UNTIL we have the day/night clan sim"). Design kept for then (a first cut
+      was written and taken out again): the clock doesn't run on real time; exhaustion.lua emits Effort(points) for
+      footsteps (the CatStep watch wading.lua uses), catches (HuntCaught), fights (EndCombat) and duties; daynight
+      turns points into hours at a per-slot rate (Morning / Afternoon / Evening / Night, hours per point) through the
+      same advance(hours) the clock uses; the waking day stops at BedHour until the cat rests (the time-skip key);
+      PerHour tiredness off in that mode (it would feed itself); frozen time (story quests) moves nothing.
 - [~] **Procedural names: no doubled prefix / suffix** (done, operator check open) (operator 2026-10-25: "Blazeblaze"). The NPC name generator
       (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
       the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
