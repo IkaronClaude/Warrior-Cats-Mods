@@ -861,6 +861,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         in sense mode; the shot still shows no clear line (more particles at the prey) - NOT confirmed visually. Next:
         compare the element's spline meshes / Niagara with the quest trail's (reading RegisteredSplineVisualMeshes from
         Lua crashed UE4SS natively - do it in C++), or spawn the game's NS_ScentTracking along the path directly.
+        Tried the latter (same night): NS_ScentTracking spawned every Spacing cm along the path for TrailSeconds - no
+        error, but still nothing visible in the framed sense-mode shot. That system likely needs its user parameters
+        (the spline / target it follows on the quest trail) - read them from the quest trail's NiagaraComponents in
+        C++ next (Lua reads of those arrays crash UE4SS). STATUS: the trail is logically there (element + path + effect
+        spawned), NOT visible yet - stays experimental, off by default.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
