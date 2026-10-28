@@ -87,8 +87,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   (hunt N prey - every prey caught feeds the clan's pile, hunt on as long as you like; patrol N border points out in
   the territory, clanmates walk with you; training - a sparring fight with the clan's move teacher, the game's own
   fight; or free time), you do it and explore as long as you like (a done task never sends you home), you turn it in
-  at its end point (a hunt: the catch onto the fresh-kill pile; a patrol: report to the deputy - `[Task.<Kind>]
-  TurnIn`), then the clan's event of that third, if any (a clan meeting,
+  at its end point (a hunt: the catch onto the fresh-kill pile; a patrol: report to the deputy; training: talk to
+  your mentor back in camp - `[Task.<Kind>] TurnIn`), then the clan's event of that third, if any (a clan meeting,
   the Gathering; in the evening eating together and sharing tongues - `clanevents.ini`), and the next third. The sky
   shows each third's hour - no wall clock, no race against the day. After the evening: sleep (the rest key) or the
   night watch (go to the camp's entrance - a short cutscene shows the night passing). At the day's end the tasks done

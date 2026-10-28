@@ -217,8 +217,9 @@ game data in this repo.
       - a done task never sends you home; its END POINT is a turn-in (operator 2026-10-28: "returning to camp
         shouldn't immediately trigger things"): [Task.<Kind>] TurnIn = Pile (the catch onto the fresh-kill pile - the
         game's UWrcAchievementsManager.OnContributeFreshKill) | Deputy (a talk with the deputy - the dialogue screen's
-        NpcRef has a ...Deputy role) | None (a spar ends itself). Defaults: Hunt Pile, Patrol Deputy, Free Deputy,
-        Train None. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
+        NpcRef has a ...Deputy role) | Partner (talk to the cat the task was with - training: the mentor, back in camp;
+        operator) | any role (Leader, MedicineCat ...) | None. Defaults: Hunt Pile, Patrol Deputy, Free Deputy,
+        Train Partner. (The pile as an "end of afternoon" trigger: possible per task, not used - morning patrols.) Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
       - THE CAMPS (VM 2026-10-28, zones.json + tools/zone_map.py): every clan's camp is one of the game's zones -
         R-05 RiverClan Camp (3 areas, 2 gates, 46 x 90 m), S-08 ShadowClan Camp (2 / 1, 33 x 57 m), T-10 ThunderClan
         Camp (1 / 2, 40 x 40 m), W-04 WindClan Camp (2 / 1, 62 x 78 m); the code's letter = the clan's initial. Found

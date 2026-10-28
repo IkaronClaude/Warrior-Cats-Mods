@@ -39,7 +39,7 @@ local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow 
               hours = { Morning = 8, Noon = 13, Evening = 19, Night = 23 },
               weights = { Morning = { Hunt = 2, Patrol = 2, Train = 1 }, Noon = { Hunt = 1, Patrol = 1, Train = 2 },
                           Evening = { Patrol = 2, Hunt = 1, Free = 1 }, Night = { Sleep = 3, NightWatch = 1 } },
-              turnIn = { Hunt = "Pile", Patrol = "Deputy", Free = "Deputy", Train = "None" },
+              turnIn = { Hunt = "Pile", Patrol = "Deputy", Free = "Deputy", Train = "Partner" },
               pileFactor = 3, campRadius = 3500, campMax = 6000, watchStanding = 1, stepEvery = 4,
               thirdScenes = {}, assignScenes = {}, watchScene = {}, clanEvents = {} }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
@@ -681,7 +681,8 @@ taskDone = function(t)
     end
     if today.task ~= t or today.stage ~= "task" then return end
     -- the task's END POINT (operator 2026-10-28: not just walking into camp): its turn-in ([Task.<Kind>] TurnIn) -
-    -- Pile = the catch onto the fresh-kill pile, Deputy = report to the deputy, None = done is the end (a spar)
+    -- Pile = the catch onto the fresh-kill pile, Partner = talk to the cat the task was with (training: the mentor),
+    -- a role (Deputy, Leader, MedicineCat ...) = report to that cat, None = done is the end
     local turnIn = cfg.turnIn[t.kind] or "None"
     if turnIn == "None" then
         today.stage = "turnin"
@@ -693,11 +694,11 @@ taskDone = function(t)
                     Patrol = "Patrol done - make your own way back, or explore on.", Train = "Training done.",
                     Free = "The " .. thirdName():lower() .. " is yours." }
     local where = { Pile = "Bring your catch to the fresh-kill pile when you're back.",
-                    Deputy = "Report to the deputy when you're back." }
-    card((after[t.kind] or "Done.") .. " " .. (where[turnIn] or ""))
+                    Partner = "Talk to " .. (t.who or "them") .. " when you're both back in camp." }
+    card((after[t.kind] or "Done.") .. " " .. (where[turnIn] or ("Report to the " .. turnIn:lower() .. " when you're back.")))
 end
 
--- the turn-in happened: the third ends (Pile: the game's own contribution; Deputy: a talk with the deputy)
+-- the turn-in happened: the third ends (Pile: the game's own contribution; Partner / a role: a talk with that cat)
 local function turnedIn(how)
     if not today or today.stage ~= "turnin" or today.turnIn ~= how then return false end
     log("duties: %s turned in (%s)", NAMES[today.task and today.task.kind or "Free"] or "task", how)
@@ -992,11 +993,17 @@ function Duties.Init(c)
     WaCa.Watch("OnContributeFreshKill", "/Script/Wrc.WrcAchievementsManager", "WaCaPileContribution", "post")
     WaCa.On("WaCaPileContribution", function() turnedIn("Pile") end)
     WaCa.On("ScreenShown", function(screen)
-        if not (today and today.stage == "turnin" and today.turnIn == "Deputy") then return end
+        local how = today and today.stage == "turnin" and today.turnIn
+        if not how or how == "Pile" or how == "None" then return end
         local ok, npc = pcall(function() return screen.NpcRef end)
         if not (ok and npc and npc:IsValid()) then return end
-        local role = npc.narrativeRole and roleName(npc.narrativeRole) or ""
-        if role:find("Deputy$") then turnedIn("Deputy") end
+        local t = today.task
+        if how == "Partner" then
+            if t and t.path and pathOf(npc) == t.path then turnedIn("Partner") end
+        else
+            local role = npc.narrativeRole and roleName(npc.narrativeRole) or ""
+            if role:find(how .. "$") then turnedIn(how) end
+        end
     end)
     WaCa.Watch("EndCombat", "/Script/SwtAdventure.SwtAdventureCombatManager", "WaCaFightEnd", "post")
     WaCa.On("WaCaFightEnd", function() fightOver() end)
