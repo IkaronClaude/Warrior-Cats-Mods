@@ -31,10 +31,10 @@ game data in this repo.
     RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
     slot is Shared.General.CurrentCatSlot - CurrentSaveSlotIndex stayed 0, so a new cat read another cat's day, names,
     sidecars (VM: slot 8 cat now "-8", day 1).
-  - The day: morning / afternoon duties, the evening gathering staged (5 camp cats placed in a ring through a fade,
+  - The day: morning / afternoon duties, the evening in camp (sharing tongues) staged (5 camp cats placed in a ring through a fade,
     poses, release - the camp cats are BP_Quest_Filler_C scenery, no controller), night: den sleep (My den / your rank's
     den by STR_DEN_* names; VM: walked into the warriors' den -> sleep pose, fade, day 2 at dawn). F9 off by default.
-    GATHERING REDONE + SEEN in daylight (VM 2026-10-28 evening, a dawn copy of the scene): the fillers were parked
+    THE EVENING SCENE REDONE + SEEN in daylight (VM 2026-10-28 evening, a dawn copy of the scene): the fillers were parked
     by the game (38/41 bodies off) and moved quest actors never drew -> the camp's WALKING cats (game AI characters),
     an arc in front of the camera (the camera sits ~1 m behind your cat - a ring hid them), movement held while
     staged, released back to their own spots (the saved transform was a live view - nobody went back before). Shots:
@@ -66,7 +66,7 @@ game data in this repo.
     step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
     target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
     group at a time. Your cat joins a group by its own bonds/rank.
-- [ ] **P2: the evening gathering - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
+- [ ] **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
   a DisableRequester on their USwtQuestHideByDistanceComponent); the rest are hidden by a 23 m hide sphere. Quest
