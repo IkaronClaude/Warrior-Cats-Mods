@@ -1061,6 +1061,33 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       growl, surprise, sleep, play, dig, win / lose, tail pose ...); 246 cat animations (15 photo-mode poses, idles,
       sit / sleep in-out, walk incl. crouching / backwards, run, drink, play, Creating_Memories - likely eating /
       sharing tongues). First types to build: ceremony (RankUp re-cast), clan meeting (Prophecy re-cast), two-cat talk.
+- [ ] **Nexus Mods: release, reuse the UE4SS upload, split into parts, a base mod** (operator 2026-10-28). Research
+      (Nexus public GraphQL API, game id 10777, domain warriorcatsclansoftheforest - 6 mods on 2026-10-28):
+      - mod 2 "UE4SS For Warrior Cats - CotF" (CaptainJackalope): plain UE4SS v3.0.1-1181-g83330635 - THE SAME commit
+        our release builds from source - sample mods removed, "keep your existing setup, don't reinstall per mod".
+        -> ship MOD-ONLY packages that list it as the requirement (plus an optional all-in-one). OPEN: test that our
+        C++ mod (built against our from-source UE4SS.dll) loads under that package's UE4SS.dll (same commit; MSVC ABI
+        should match - verify on the VM with the operator's download; Nexus downloads need a login).
+      - mod 4 "MothColorPicker" 0.4.1 (frostforest7): an RGB/HSV wheel in the creator (fur, pattern, markings, left /
+        right eyes), saved when creation finishes; Full-Install / Mod-Only variants; MIT; AI code disclosed. OVERLAP
+        with our creator colours (palette.ini swatches, appearance.ini, the custom-swatch sanitize in creator.lua):
+        test both together; options - detect it and leave colours to it, or read its saved colours; take UI ideas.
+      - the other mods: small cheats (infinite health / stamina / sprint, no NPC pushback).
+      PROPOSED SPLIT (UE4SS mods are separate Lua states - parts talk through WaCa events, which the C++ bridge then
+      has to broadcast ACROSS states; shared libraries live in Mods/shared):
+      1. WaCa Core - the BASE MOD others build on: shared/WaCa (events / Watch, text, tables, LoadAsset, ReadContent /
+         EnabledMods, the SAVE SIDECAR API - one clean per-save store for every mod, story variables), the native
+         WaCaNative.dll (bridge, hooks: areas, combat, hunt, bonds, saves, input, render), the content-pak loader.
+      2. WaCa Clan Life (the story base - time of day is part of it, not split): daynight, weather + seasons (+ the
+         content pak's rain / snow), timeskip, exhaustion, the clan loop (duties), scenes (events), story days, clan
+         events, Gatherings, dialogue by days (lines), patrols, follow, activities.
+      3. WaCa Hunting & Fishing: hunting by chance, prey world / flee, fishing, scent / guidance, wading.
+      4. WaCa Looks: creator grid entries, appearance overrides, palettes, patterns / looks packs, names, rosters.
+      5. WaCa Keybinds: keybinds.ini / menu keys. 6. WaCa Graphics: graphics.ini.
+      7. CONTENT packs (no code): content/*.ini, looks/, patterns/ - the writers' path (stories, dialogue, events).
+      NEEDED: cross-state events in the bridge; story variables / scene runner as shared libs; per-package zips
+      (Wrc/Binaries/Win64/ue4ss/Mods/<Mod>/ + enabled.txt, mods.txt line); Nexus page per part (requirements,
+      tested game build + exe hash, Vortex untested, AI-code disclosure, permissions); package.ps1 per part.
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
