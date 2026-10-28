@@ -799,6 +799,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       trails - scent you detect (a sense / sniff mode) and visual signs (tracks, disturbed undergrowth) - that you can
       follow to the prey. Ties into 23 (random spawns: the trail is how you find them), 21 (rain washes scent out,
       snow keeps tracks) and 24 (StarClan guidance as an alternative lead).
+      FOUND + BUILT 2026-10-28 (experimental, hunting.ini [Scent] Trails = 0): the game HAS the machinery - every
+        roaming creature carries BP_SensedEnemy_TrackComponent (tracking on); sense mode (Q) collects nearby
+        candidates (VM: a quest hint area, a herb, a pouch, a prey 300 away) and spawns their TrackerElementClass -
+        BP_Sense_TrackerElement: NO path (bShowPath / bShowLinear / bUseSplineMesh off), only a target overlay. The
+        game's quest-hint trail is BP_POI_Hint_TrackerElement_Duration (all three on, NS_ScentTracking, a duration).
+        scent.lua swaps prey's TrackerElementClass to that trail class (world up + every creature spawn). The elements
+        are spawned natively (their BeginPlay / OnTrackStateChange never pass ProcessEvent - a property hook can't
+        work). VM: 63 prey switched; in sense mode a trail element spawned for the tracked prey. NOT yet seen on
+        screen (the prey was off-camera at 480x270) - check in real play; tune the sense range later (which prey count
+        as candidates is the game's own radius).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
