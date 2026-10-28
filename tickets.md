@@ -594,6 +594,18 @@ game data in this repo.
         that OnBeginOverlap (the class's natives table - the "OnBeginOverlap" string is shared between modules, the
         SwtQuest table is at 0x149ad0b50, find SwtAdventure's) to see its checks and the combat-manager call it
         ends in (USwtAdventureCombatManager, CombatClasses[5] = the training director) - then call that directly.
+      SOLVED + BUILT 2026-10-28: the handler (exe 0x1417E1370 = the box's vtable slot +0xA88, reached from the exec
+        0x1415FAE80; runtime base in the dump = 0x7FF66A4F0000) checks: OtherActor player-controlled (Pawn.Controller
+        +0x2E0), OtherComp == its CapsuleComponent (+0x340), a state flag ([+0x878]+0x110 bit 3) clear, and the box's
+        OWNER (+0xA8) != OtherActor - an owner that is a character becomes the opponent - then calls
+        0x141803400(player, opponent|null, CombatType, CombatTag). Every earlier try had built the box ON THE PLAYER.
+        A box made inside a clanmate (StaticConstructObject outer = the cat) + OnBeginOverlap -> the game's turn-based
+        fight opened on the VM (party vs "Tiger", Attack / Rest / Herbs / Flee).
+        The Train duty (duties.lua, duties.ini [Train] On = 1, MaxRank = Apprentice, Bond = 2): partner = the story cat
+        ...WarriorMoveLearn (the game has no mentor role), else the nearest clanmate; checked with the patrol (hourly /
+        sense pulse) within Reach; done at the fight's end (WBP_GuiHudCombatOver_C shown, or the combat manager's
+        EndCombat) -> WaCaNative_AddBond(role, Bond). VM: "duties: sparring with the clan's move teacher" -> the combat
+        popup. NOT yet seen: the fight's END being counted (the VM can't play the fight out - check in play).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A training duty starts a combat with the mentor (the game's own combat, a friendly variant: no injuries);
         win / lose both give EXP (CombatBaseExperience "Cat" row = 45) and a technique point; config: training.ini.

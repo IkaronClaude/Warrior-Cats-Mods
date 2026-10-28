@@ -3,6 +3,9 @@
 -- day's end the duties done raise your standing in the clan, the ones skipped lower it (kept with the save; the
 -- pacing ticket 14 reads it). Below MaxRank only (the deputy hands duties out, not gets them). config/duties.ini.
 --   Hunt: catch N prey (the HuntCaught event - hunting.ini [Chance] On).
+--   Train (tickets.md 6): a sparring fight with the clan's move teacher (the story cat ...WarriorMoveLearn - the game
+--     has no mentor role; else the nearest clanmate), for cats up to [Train] MaxRank: go to them, the fight starts
+--     (the game's own combat, the TrainingGrounds encounter), win or lose it counts and the bond with them grows.
 --   Patrol: check N border points - spots in the generators' areas 20-90 m away, marked like StarClan's guidance
 --     (a POI hint area: the trail in sense mode + scent puffs at each sense pulse); a point is checked when your cat
 --     comes within Reach of it (looked at every in-game hour and every sense pulse).
@@ -12,6 +15,8 @@ local Duties = {}
 local WaCa, log, DayNight
 local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow = 50, patrolPoints = 2, pileReward = 10,
               companions = 2, companionRadius = 3000,
+              train = true, trainMaxRank = "Apprentice", trainBond = 2,
+              trainTag = "Gameplay.Combat.Generator.Fixed.TrainingGrounds",
               huntingGround = true,
               reach = 800, minDist = 2000, maxDist = 9000, standingDone = 2, standingMissed = -1, seconds = 7 }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
@@ -42,14 +47,80 @@ local function card(text)
     end)
 end
 
-local function rankAllows()
-    local ranks = {}
+local function ranks()
+    local out = {}
     pcall(function()
-        StaticFindObject("/Script/SwtQuest.ECharacterRank"):ForEachName(function(n, v) ranks[n:ToString():gsub("^.*::", "")] = v end)
+        StaticFindObject("/Script/SwtQuest.ECharacterRank"):ForEachName(function(n, v) out[n:ToString():gsub("^.*::", "")] = v end)
     end)
     local p = WaCa.GameProgress()
-    local rank = p and tonumber(p.Rank)
-    return not (rank and ranks[cfg.maxRank] and rank >= ranks[cfg.maxRank])
+    return out, p and tonumber(p.Rank)
+end
+
+local function rankAllows()
+    local r, rank = ranks()
+    return not (rank and r[cfg.maxRank] and rank >= r[cfg.maxRank])
+end
+
+-- --- training: a sparring fight ---
+
+local roleNames
+local function roleName(v)
+    if not roleNames then
+        roleNames = {}
+        pcall(function()
+            StaticFindObject("/Script/SwtQuest.ENarrativeRole"):ForEachName(function(n, x) roleNames[x] = n:ToString():gsub("^.*::", "") end)
+        end)
+    end
+    return roleNames[v]
+end
+
+-- the sparring partner: the clan's move teacher (a story cat), else the nearest clanmate - its object path, its story
+-- role (for the bond; nil for a plain clanmate) and a name for the cards
+local function trainingPartner()
+    local p = pc() and pc().Pawn
+    if not p then return nil end
+    for _, a in ipairs(FindAllOf("QuestBaseActor") or {}) do
+        local found
+        pcall(function()
+            local name = a:IsValid() and not a.bHidden and a.narrativeRole and roleName(a.narrativeRole)
+            if name and name:find("WarriorMoveLearn$") then
+                found = { path = (a:GetFullName():gsub("^%S+ ", "")), role = a.narrativeRole, who = "the clan's move teacher" }
+            end
+        end)
+        if found then return found end
+    end
+    local at = p:K2_GetActorLocation()
+    local best, bd
+    for _, c in ipairs(FindAllOf("BP_Exploration_Character_Base_C") or {}) do
+        pcall(function()
+            if c:IsValid() and c.CharacterType == 1 and c:GetAddress() ~= p:GetAddress() then
+                local q = c:K2_GetActorLocation()
+                local d = (q.X - at.X) ^ 2 + (q.Y - at.Y) ^ 2
+                if not bd or d < bd then best, bd = c, d end
+            end
+        end)
+    end
+    return best and { path = (best:GetFullName():gsub("^%S+ ", "")), who = "a clanmate" } or nil
+end
+
+-- the fight, the game's own way: its combat boxes start one when the player's character overlaps them - the handler
+-- (SwtAdventureCombatBoxComponent::OnBeginOverlap, exe 0x1417E1370) checks the actor is player-controlled, the
+-- component is its capsule and the box's OWNER is not that actor (an owner that is a character is the opponent), then
+-- starts combat (0x141803400) with the box's CombatType + CombatTag. So: a box made inside the partner, TrainingGrounds
+-- (5) + the TrainingGrounds encounter, its overlap called for the player. VM 2026-10-28: the turn-based fight opens.
+local function startSpar(partner)
+    local p = pc() and pc().Pawn
+    local owner = StaticFindObject(partner.path)
+    if not (p and owner and owner:IsValid()) then return false end
+    local ok, err = pcall(function()
+        local box = StaticConstructObject(StaticFindObject("/Script/SwtAdventure.SwtAdventureCombatBoxComponent"), owner,
+            FName("WaCaSparBox"))
+        box.CombatType = 5
+        box.CombatTag = { TagName = FName(cfg.trainTag) }
+        box:OnBeginOverlap(box, p, p.CapsuleComponent, 0, false, {})
+    end)
+    if not ok then log("duties: the sparring fight didn't start: %s", tostring(err)) end
+    return ok
 end
 
 -- spots for the patrol: random points in the areas of the generators 20-90 m away (where the clan's prey and
@@ -193,6 +264,9 @@ local function summary()
         for _, pt in ipairs(today.patrol) do if pt.done then done = done + 1 end end
         table.insert(parts, string.format("patrol %d border points (%d)", #today.patrol, done))
     end
+    if today.train then
+        table.insert(parts, string.format("spar with %s (%s)", today.train.who, today.train.done and "done" or "not yet"))
+    end
     return table.concat(parts, ", ")
 end
 
@@ -217,7 +291,11 @@ local function assign(day)
         today.patrol = patrolPoints(patrol)
         today.companions = companionsJoin(cfg.companions)
     end
-    if not today.hunt and not today.patrol then
+    if cfg.train then
+        local r, rank = ranks()
+        if not (rank and r[cfg.trainMaxRank] and rank > r[cfg.trainMaxRank]) then today.train = trainingPartner() end
+    end
+    if not today.hunt and not today.patrol and not today.train then
         log("duties: day %d - no duties today", day)
         today = nil
         return
@@ -228,11 +306,35 @@ local function assign(day)
         ground and string.format(" %s are about in the hunting ground the patrol marked.", ground.kind) or ""))
 end
 
+local function checkTrain(at)
+    local t = today and today.train
+    if not t or t.done or t.fighting or require("menus").InMenu() then return end
+    local partner = StaticFindObject(t.path)
+    if not (partner and partner:IsValid()) then return end
+    local q = partner:K2_GetActorLocation()
+    if math.sqrt((q.X - at.X) ^ 2 + (q.Y - at.Y) ^ 2) > cfg.reach then return end
+    if startSpar(t) then
+        t.fighting = true
+        log("duties: sparring with %s", t.who)
+    end
+end
+
+-- the fight is over (its end screen): the training counts, win or lose, and the bond grows
+local function sparOver()
+    local t = today and today.train
+    if not (t and t.fighting) then return end
+    t.fighting, t.done = false, true
+    local bond = t.role and cfg.trainBond > 0 and WaCaNative_AddBond and WaCaNative_AddBond(t.role, cfg.trainBond)
+    log("duties: sparring done%s", bond and string.format(" - bond with %s +%d", t.who, cfg.trainBond) or "")
+    card(string.format("Training done - %s.", summary()))
+end
+
 local function checkPatrol()
-    if not (today and today.patrol) then return end
-    local p = pc() and pc().Pawn
+    local p = today and pc() and pc().Pawn
     if not p then return end
     local at = p:K2_GetActorLocation()
+    checkTrain(at)
+    if not today.patrol then return end
     for i, pt in ipairs(today.patrol) do
         if not pt.done and math.sqrt((pt.X - at.X) ^ 2 + (pt.Y - at.Y) ^ 2) <= cfg.reach then
             pt.done = true
@@ -270,6 +372,9 @@ local function verdict()
         end
         if all then done = done + 1 else missed = missed + 1 end
     end
+    if today.train then
+        if today.train.done then done = done + 1 else missed = missed + 1 end
+    end
     companionsLeave(today.companions)
     local change = done * cfg.standingDone + missed * cfg.standingMissed
     standing = standing + change
@@ -304,6 +409,10 @@ function Duties.Init(c)
     cfg.companions = math.max(0, math.floor(tonumber(p.Companions or "") or cfg.companions))
     cfg.minDist = tonumber(p.MinDistance or "") or cfg.minDist
     cfg.maxDist = tonumber(p.MaxDistance or "") or cfg.maxDist
+    local t = ini["Train"] or {}
+    cfg.train = (t.On or "1") ~= "0"
+    cfg.trainMaxRank = (t.MaxRank or "") ~= "" and t.MaxRank or cfg.trainMaxRank
+    cfg.trainBond = tonumber(t.Bond or "") or cfg.trainBond
     local s = ini["Standing"] or {}
     cfg.standingDone = tonumber(s.Done or "") or cfg.standingDone
     cfg.standingMissed = tonumber(s.Missed or "") or cfg.standingMissed
@@ -319,6 +428,13 @@ function Duties.Init(c)
             if not today then assign(DayNight.Day() or 1) end
         end)
     end)
+    -- the fight's end: its end screen, or the combat manager's EndCombat (whichever comes first; the second finds no
+    -- fight running)
+    WaCa.On("ScreenShown", function(screen)
+        if screen:GetClass():GetFName():ToString() == "WBP_GuiHudCombatOver_C" then sparOver() end
+    end)
+    WaCa.Watch("EndCombat", "/Script/SwtAdventure.SwtAdventureCombatManager", "WaCaSparEnd", "post")
+    WaCa.On("WaCaSparEnd", function() sparOver() end)
     WaCa.On("DayEnded", function() verdict() end)
     WaCa.On("DayStarted", function(day) if ready then assign(day) end end)
     WaCa.On("HourChanged", function() checkPatrol() end)
