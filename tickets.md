@@ -233,6 +233,14 @@ game data in this repo.
         Nearest with a generic clanmate (its narrativeRole isn't a number). STILL UNSEEN: a talk with the deputy (the
         VM never opens one - even PlaySequenceDialogue with the deputy showed no dialogue screen); a REAL deposit at the
         pile (the harness called the achievements function itself).
+      FIRST-RELEASE CUT 2026-10-28 (now in C:/Projects/WaCa-ClanLife, 0.8.0; ROADMAP.md there = in / later): the day at
+      a glance (clan.status topic + hud.lua: a COPY of the game's own WBP_GuiHudCurrentObjective_C under the game's
+      quest panel - the HUD is laid out in 3840 x 2160 units), clanlife.ini one switch (c.part), the REPORT KEY (F next
+      to the deputy / partner - VM-VERIFIED: "reports to BP_Quest_Giver_Deputy (287 away)" -> turned in -> meeting),
+      and from MaxRank on "yours to lead" thirds (F in camp ends them; time used to stand still for deputies).
+      DEFERRED to their own mods (ROADMAP.md): story packs, cutscenes from text, the cast / ENarrativeRole, murmurings,
+      apprentice duties, NPC jobs + patrol encounters, the party, the day-clock dial, fresh kill without hunger, story
+      fixer. OPERATOR CHECKS LEFT: a real conversation turn-in with the deputy, a real pile deposit.
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
