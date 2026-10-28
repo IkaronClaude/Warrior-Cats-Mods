@@ -76,9 +76,12 @@ game data in this repo.
 - [ ] **P1: clan meetings use the books' words and each clan's own meeting place** (operator 2026-10-28): the
   summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
   meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
-  card) say "the Highrock" for EVERY clan (ThunderClan's). The game's text names no meeting rock (Strings_EN has
-  none), so the place is config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highrock, ...) - fill the
-  other clans' names from the books with the operator, don't guess; a {MEETINGPLACE} placeholder in cards.
+  card) say "the Highrock" for EVERY clan - and Highrock is ThunderClan's OLD FOREST spot (operator caught it); this
+  game is the LAKE era (the island + Great Oak), where ThunderClan's leader speaks from the HIGHLEDGE (Twilight:
+  Firestar on the Highledge above the stone hollow - confirmed via a book excerpt). The game's text names no meeting
+  place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
+  ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
+  {MEETINGPLACE} placeholder in cards.
 - [ ] **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
