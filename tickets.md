@@ -819,8 +819,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         FIXED + VERIFIED (same night): the director in play is BP_CombatDirector_C (a Blueprint subclass) - the
         property lookup must search the class CHAIN (GetValuePtrByPropertyNameInChain); with the plain lookup both
         "attacker" and "player" were null, so nothing was ever scaled. VM after the fix, a real fight vs forest rats:
-        "[combat] damage taken by your cat: 8 -> 7 (x0.85)", "30 -> 26". Damage DEALT by the player's cat: the same
-        code path; not yet seen (its attacks didn't come up in the VM fights).
+        "[combat] damage taken by your cat: 8 -> 7 (x0.85)", "30 -> 26", and "damage dealt by your cat: 35 -> 44 (x1.25)" -
+        both directions VERIFIED.
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
