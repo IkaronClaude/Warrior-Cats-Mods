@@ -612,6 +612,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         OPEN: (1) the look at a real resolution + the sound level (operator's PC);
         (2) the release CI has no Unreal - the pak must be built on the VM and shipped (operator's call: attach a
         separate content zip to the release, or a self-hosted runner).
+        PREPARED 2026-10-28: tools/release_with_content.ps1 -Version X [-Upload] - builds content + native + UE4SS +
+        the release zip WITH the pak (checked inside), -Upload replaces the release's zip (gh --clobber). Dry run on
+        the VM: built, pak inside. The operator only says "upload" per release (or sets up a self-hosted runner).
 - [ ] **22. Prey follows the world.** What hunting patrols bring back and what spawns depend on world state:
       - world events: e.g. a poisoned river = no fish. The player CAN still catch a fish there but can't put it on
         the fresh-kill pile (it's poisoned).

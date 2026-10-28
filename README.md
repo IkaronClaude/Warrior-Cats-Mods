@@ -207,6 +207,11 @@ entries in it too: `STR_CAT_NAME<n><suffix id>`.
   (`content/scripts/make_sources.py`), the assets made by `content/scripts/build_assets.py` in the content project
   `content/Wrc` (named like the game so the paths match), cooked into their own IoStore container. `package.ps1`
   adds it to the release (installed into `Wrc\Content\Paks\~mods`).
+- `tools\release_with_content.ps1 -Version X [-Upload]`: GitHub's release runners have no Unreal, so the zip the release
+  workflow attaches has no content pak. Run this on the Unreal machine after the workflow finished: it builds the
+  content, the native DLL and the release zip with all of it, checks the pak is inside, and with `-Upload` replaces the
+  release's zip (players still download one zip). (The alternative: a self-hosted runner on that machine for the
+  release workflow, which could then call `build_content.ps1` itself.)
 - `tools/check_hooks.py <unpacked exe>`: checks every native hook target against a game exe (run it on a game update
   before a release); the targets are read from the native sources.
 - `tools/AssetDump`: a headless CUE4Parse reader for the game's paks (for research; output stays out of git).
