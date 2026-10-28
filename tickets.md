@@ -956,10 +956,45 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         sync point is there, then they cross together (symmetric - nobody is "the long one");
       - the game's own main story (its quests / rank-ups) can't be held: against it the barrier is soft - the
         warning + summaries; between our stories (packs, days.lua's story) it is hard;
-      - escape: MaxRepeats per story day (then it moves on) + a player skip with the summaries, so a broken
-        condition can't hold everyone at a barrier;
+      - NO repeat limit (operator 2026-10-28: "if Mod A adds 20 days of apprentice story but mod B adds 2 and then 10
+        of warrior, repeating B day 2 18x is fine") - a long wait is the normal case, not an error. Instead (LOW PRIO, operator) a STORY
+        FIXER screen for a genuinely stuck story: every active story's day, what its Advance waits for, its next sync
+        point; skip forward (with the summaries) or rewind a day, by hand;
+      - the MAIN STORY needs small changes so it never continues on its own: forced steps ("go to camp after reaching
+        lvl 11") become player-started ones ("reach lvl 11 > speak to the leader") - the sync-point warning then
+        shows at that conversation, before anything moves;
+      - QUEST CHOICE: when two quests / stories both need the player to speak to the same cat, speaking to it offers
+        the choice which one to advance;
       - calendar things (seasons, moons, Gathering dates) stay on the calendar; a story waits for them with a
         condition (Require = Gathering.Today = 1).
+- [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
+      played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
+      and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
+      apprentice name), and the story may start with someone already in the party (an apprentice). GOAL: the fandom
+      has many talented writers - writing a story must be easy with little or no programming: plain files (the scene
+      steps, days, dialogue pools as they are), good docs + examples, clear errors (a story checker that lists
+      unknown roles / dialogue ids / broken conditions), maybe later an editor.
+- [ ] **The party = who you're out with** (operator 2026-10-28): the combat party should be the cats you're hunting /
+      patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
+      RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
+      narrative role: TheRegretfulWarrior, RiverClanDeputy ...); the game has a developer switch
+      USwtAdventureCheatsManager.ForcedParty (TArray<FAdventureForcedPartyStruct>: CharacterNarrativeRole + Attacks)
+      that likely sets the fight's party - try setting it from the task (patrol / hunt companions, the mentor) before
+      a fight and clearing it after. Needs: companions picked from story cats (roles) rather than generic clanmates,
+      or a mapping; VM test whether ForcedParty is honoured outside a dev build.
+- [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
+      - SHORT: mods can add new cat roles. The game's roles are ENarrativeRole (a compiled-in enum - not extensible),
+        so mod roles live in our layer: a role registry where a mod role is BOUND to a real cat in the world (a generic
+        clanmate, or one we spawn); every "who" in scenes / dialogue / tasks resolves game roles and mod roles alike.
+      - MEDIUM: every role becomes a FIXED cat (name + look): stories reference roles ("mentor"), a CAST file binds
+        them ("mentor = Greystripe", his look - looks system / roster.lua) - a translation / setup swaps the cast, not
+        the story. A CLAN SNAPSHOT = a cast file per book start (which book: undecided): every cat of the clan as it is
+        then, the game's roles mapped onto them, the rest as mod roles bound to generic clanmates - the whole clan in.
+      - DISPLAY: a role can hide itself - "warrior_1" cast as Silverpelt shows "Silverpelt\n[Warrior]" (name + rank);
+        a lore mod's custom role "warrior_otterstream" shows as "Warrior": characters kept apart and tracked while the
+        game's own rank system is honoured.
+      RESEARCH first: how generic clanmates get their names and name plates; whether we can place extra cats or only
+      re-cast the ones the world spawns.
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
