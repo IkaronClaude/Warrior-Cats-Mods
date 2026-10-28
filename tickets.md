@@ -983,9 +983,34 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       a fight and clearing it after. Needs: companions picked from story cats (roles) rather than generic clanmates,
       or a mapping; VM test whether ForcedParty is honoured outside a dev build.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
-      - SHORT: mods can add new cat roles. The game's roles are ENarrativeRole (a compiled-in enum - not extensible),
-        so mod roles live in our layer: a role registry where a mod role is BOUND to a real cat in the world (a generic
-        clanmate, or one we spawn); every "who" in scenes / dialogue / tasks resolves game roles and mod roles alike.
+      - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
+        which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
+        "E:<name>" = the game's ENarrativeRole (its tables / bonding / parties know it), "S:<name>" = a mod's string
+        role, BOUND to a real cat (a generic clanmate or one we spawn) - only our layer knows it. A bare name = E.
+        BUILT (events.lua): Events.BindRole("S:x", cat), Events.Role(key) -> kind, name; Events.Who resolves both
+        (every scene "@ who"). OPEN: S roles in dialogue (our own text, not the game's per-role filler keys), bonding,
+        parties - the custom-cat work.
+        For the GAME to take compound roles, every ENarrativeRole read path needs a survey + patch (operator). Scope
+        from the reflection dump (2026-10-28): the uint8 narrativeRole field in 10 classes (QuestBaseActor ...),
+        FCharacterNarrativeRoleStruct (narrativeRole + characterTag: OptionAlly, ForcedParty ...), the maps
+        IconicSkeletalMeshMap / NarrativeCustomDataMap, NarrativeRoleA-D, the UFunctions UpdatedRole / UpdatedClan,
+        data-table rows carrying those; plus the NATIVE readers of the byte (switches, lookups) - only disassembly finds
+        those (the enum's users: functions taking / comparing the role byte near its struct offsets).
+        SURVEY (2026-10-28, a Sonnet research agent, static only - report scratchpad/enum_survey.md; the loop bound and
+        the name lookup spot-checked by hand): every native role->text path goes through ONE lookup - the ENarrativeRole
+        UEnum (cached global 0x14A8B6FD0) + UEnum::GetNameStringByValue 0x141C14B20; 26 functions use it: the save
+        (NPCData/NarrativeRoles 0x141949ee0, Unlocked 0x1416a69b0 / 0x1416a731c, Party/Stats 0x14180f80e), bonding
+        (AddPersonalBonding / Get 0x1416a0ef0 -> "Bonding/<name>"), reward keys, combat character tags, a "%s.%s.%s.%i"
+        key builder (0x141815bdb, role via the actor's vtable+0x398 - probably the monologue key). THE SAVE STORES ROLE
+        NAMES: a value with no name is dropped on save; an unknown name loads as None. Exactly THREE hard loops
+        "cmp ebx, 0x68" (104 = the enum's count) won't see new values: 0x14162A64A ({role} text expansion),
+        0x141798F1C, 0x1419353A1 (RoleFromName 0x1419352c0 - name -> value on load; the one that matters).
+        RECOMMENDED: EXTEND the enum (UEnum::InsertIntoNames before the save manager loads; names like
+        S_warrior_otterstream, values 105+) and patch the three bounds (imm8: 0x7F = ~21 custom roles) or detour
+        RoleFromName to GetValueByName - then save, bonding, party stats and the key builders work unchanged; "S:" stays
+        our layer's identity, mapped to the value. Dialogue then = string-table rows for the new name (clone a donor's).
+        OPEN: Blueprint bytecode readers, the per-role DataTable (FSwtQuestNarrativeRoleStruct rows - which table), the
+        other two loops' purpose, InsertIntoNames on this build's UEnum layout, ImportText of unknown names.
       - MEDIUM: every role becomes a FIXED cat (name + look): stories reference roles ("mentor"), a CAST file binds
         them ("mentor = Greystripe", his look - looks system / roster.lua) - a translation / setup swaps the cast, not
         the story. A CLAN SNAPSHOT = a cast file per book start (which book: undecided): every cat of the clan as it is

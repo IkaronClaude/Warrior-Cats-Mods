@@ -105,10 +105,33 @@ end
 local ALIAS = { Teacher = "WarriorMoveLearn$" }
 
 -- a story cat by its part ("Deputy" -> the player's clan's ThunderClanDeputy ...), or the nearest clanmate
+-- ROLES are compound keys (operator 2026-10-28): "E:<name>" = one of the game's own (ENarrativeRole: E:RiverClanDeputy -
+-- the game's story cat with that role; its tables, bonding, parties know it), "S:<name>" = a mod's own string role
+-- (S:warrior_otterstream - bound to a real cat with Events.BindRole; only our layer knows it). A bare name = E.
+local bound = {}             -- "S:name" -> the bound cat's object path
+
+function Events.BindRole(key, cat)
+    if type(cat) ~= "string" then cat = cat and (cat:GetFullName():gsub("^%S+ ", "")) end
+    bound[key] = cat
+    log("events: role %s = %s", key, tostring(cat))
+    WaCa.Emit("RoleBound", key, cat)
+end
+
+function Events.Role(key)
+    local kind, name = tostring(key):match("^([ES]):(.+)$")
+    return kind or "E", name or key
+end
+
 function Events.Who(name)
     name = (name and name ~= "") and name or "Nearest"
     local pawn = pc() and pc().Pawn
     if name == "Nearest" then return pawn and nearestClanmate(pawn) or nil end
+    local kind, role = Events.Role(name)
+    if kind == "S" then
+        local a = bound[name] and StaticFindObject(bound[name])
+        return a and a:IsValid() and a or nil
+    end
+    name = role
     local pattern = ALIAS[name] or name
     local mine = clan()
     local fallback

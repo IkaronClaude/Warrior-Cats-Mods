@@ -75,10 +75,14 @@ function Patrols.Init(c)
     WaCa.On("ClanThird", function(_, third)
         if not cfg.thirds[third] or next(out) or math.random() * 100 >= cfg.chance then return end
         local camp = Duties.Camp()
-        if not (camp and camp.middle) then return end
+        if not (camp and camp.middle) then
+            log("patrols: no camp known yet - no patrol this %s", third:lower())
+            return
+        end
         local cats = Follow.Nearest(cfg.size, 6000, camp.middle)
         local points = Duties.BorderPoints(cfg.points, camp.middle)
-        if #cats > 0 and #points > 0 then Patrols.Send(cats, points) end
+        if #cats > 0 and #points > 0 then Patrols.Send(cats, points)
+        else log("patrols: no patrol this %s (%d cats in camp, %d border points)", third:lower(), #cats, #points) end
     end)
 end
 
