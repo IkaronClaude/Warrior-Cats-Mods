@@ -849,6 +849,94 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
+- [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
+      rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
+      - chosen: the Gathering itself (scenes);
+      - not chosen: what happens at home - e.g. rogues attack the camp while the others are away and your
+        warrior-rank cat organises the defence: big accolades, points toward becoming deputy with the leader;
+      - success / punishment as in the books: a choice in the main story (leaving the rogues alone - a forced choice -
+        or facing them alone whatever you do) angers the leader: irresponsible -> not allowed to the next Gathering.
+      Needs: story variables (leader favour / anger, bans) settable by scenes and read by conditions; the leader's pick
+      from standing + those variables + the story's override; scene hook points for announce / chosen / not chosen.
+      GROUNDWORK BUILT 2026-10-28 (gathering.lua, gatherings.ini, off; story variables in events.lua: Set / Add / If
+      steps, Events.Var / SetVar / Check / Provide, kept with the save; clanevents Require): every Every days (or the
+      story's Gathering = Yes) the leader announces at the AnnounceThird's start (ClanThirdStart hook), the pick =
+      the story's GatheringPick, else never while GatheringBan > 0 (each missed Gathering takes one off) / below
+      MinRank, else Base + PerStanding x standing + PerFavour x LeaderFavour %; back in camp in the Third: [Attend] /
+      [StayBehind] scenes (Hook: GatheringAttend / GatheringStayBehind). Gathering.Chosen / Count for the story's beats.
+      Offline: chosen -> attended, Count 1; GatheringBan 1 -> not chosen -> stay behind (+3 favour in the test scene),
+      ban cleared. OPEN: the 10+ cats travelling to the island (follow.lua Follow.Travel - see Following), the
+      Gathering's own scene / place.
+- [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
+      your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
+      make their way over to the island. A Lua API (follow.lua): a group follows a leader (the player or any cat) at
+      spread-out distances, matching walk / run, holding back while the leader sneaks; or travels to a place as a
+      group (in formation, the slow ones caught up). Started from the patrol companions (duties.lua: AI MoveToActor,
+      the cat's own brain paused).
+      BUILT 2026-10-28 (follow.lua): Follow.Group(cats, leader, opts) - staggered MoveToActor, checked at the leader's
+      FOOTSTEPS (every cat's steps are events - no ticking), holds back while the leader crouches (the game's
+      OnExplorationCrouch, bValue handed over), catches up after; Follow.Travel(cats, place, opts, onArrive) -
+      formation rings around the place, arrival checked at the travellers' steps; Follow.Release; Follow.Nearest.
+      The patrol companions and patrols.lua use it. NOT yet seen on the VM (the companions' earlier MoveToActor
+      version joined, the follow itself unconfirmed). OPEN: speed matching (run with the leader), fading out of view.
+- [~] **NPC patrols heading out together** (operator 2026-10-28): when the deputy assigns patrols, see them leave
+      together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
+      together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
+      Case = Patrol lines meanwhile. OPEN: fade them out when not in view (future); talking to a patrol stops it a
+      moment (future).
+- [ ] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
+      hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
+      ruin its hunt.
+- [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
+      you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
+      this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
+      Patrol / Leader, the daily grab bag); the stop-and-talk isn't.
+- [x] **Dialogue by days + the daily grab bag** (operator 2026-10-28: "all dialog should be able to be defined like
+      this, e.g. Queen 1 between Day 1 and 6 picks a random dialog to play each day out of 3"; "our filler pool must be
+      able to change for given cats on given days"). BUILT (lines.lua): [Dialogue.<Name>] Who / Days / Require / Case /
+      Leader / Line1..N - one pick per day by a grab bag (no repeat until all came; the last two of a bag wait out the
+      next refill), kept with the save; random pools [Lines.<Role>.<Tag>] with Days / Require too; the game's own line
+      comes back when nothing fits. Granularity = the game's filler keys: per role (named story cats have their own).
+      Offline: A B C D -> D B A C | D B C A | B; queen days 1-5 pool, day 6 the story line, the kit's pool gone after
+      day 3. Lua: Lines.Pick(name, lines, day).
+- [x] **Overlapping mods: content from every mod** (operator 2026-10-28: "a modding framework ... if two mods have to
+      overwrite the same ini, that's bad"). BUILT (WaCa.ReadContent + WaCa.EnabledMods): the clan configs (duties,
+      clanevents, days, events, gatherings, lines, patrols) are WaCaModKit's file + every enabled mod's
+      content/<name>.ini in load order: new sections added; shared sections get numbered keys APPENDED (two mods add
+      beats to the same day / lines to the same dialogue), plain keys overridden by the later mod (logged); Off = 1
+      turns another mod's section off.
+- [ ] **Explicit overrides instead of load order** (operator 2026-10-28: "load order as core design choice?" - no):
+      WaCa.ReadContent today lets the later mod win a plain key. Make it explicit and order-independent: ids
+      namespaced (<Mod>/<Section>); a mod overrides another's section only with Replaces = <Mod>/<Section>; two mods
+      setting the same plain key without that = a reported CONFLICT (log + an in-game notice), not a silent winner.
+      Load order only as the last tie-breaker. Appended steps stay per owning mod (see story packs).
+- [ ] **Mod stories (story packs)** (operator 2026-10-28): a mod can define its own story, like picking a clan's.
+      - a pack declares itself (name, clan, required rank range, entry) and owns its days / beats / dialogue / quests;
+        shown in the quest list as a story quest;
+      - CONNECTED mode (the 1:1 cat link: two packs on one cat): a pack that declares the clan + rank it runs at can
+        run alongside the main story on the same cat; otherwise standalone;
+      - SYNC POINTS: a pack names the main-story milestones it must reach first (all of A's kit missions before the
+        main story makes you apprentice); before main progress crosses one with a pack behind: "You are about to
+        progress the main story. It is highly advised you finish [Mod A story], [Mod C story] before continuing, to
+        avoid continuity errors.";
+      - SUMMARIES: every pack beat can carry an optional Summary; crossing a sync point anyway shows the skipped beats'
+        summaries ("what happened meanwhile") and the pack jumps to its sync point.
+      Groundwork that exists: story days (days.lua), story variables + conditions (events.lua), scenes, the clan loop
+      hooks. Needed: packs as units with their own story-day counters; a hook on main-story progress (the quest
+      system: rank-up / quest completion) to warn / skip; a quest-list entry (research the quest HUD).
+- [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
+      the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
+      other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
+      clan is split on a decision. Builds on lines.lua (filler pools) + the story variables (Gatherings) + recent
+      events (duties' verdicts, the story's beats).
+- [ ] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
+      kinds, drawn by [Tasks] weights / set by the story):
+      - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den);
+      - clear out the old bedding moss (from the dens, out of camp);
+      - water moss: soak moss in the lake / stream and bring it to cats too weak to move so they can drink - more
+        often in greenleaf (summer), the season from weather.lua. Needs a "weak / sick cat" (an elder, the medicine
+        den) and a carried-item state (no carry mechanic in the game yet - research: quest pickup items,
+        BP_Objective_Base pickups).
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue

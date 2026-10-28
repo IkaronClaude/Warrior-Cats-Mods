@@ -93,6 +93,11 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   night watch (go to the camp's entrance - a short cutscene shows the night passing). At the day's end the tasks done
   raise your standing in the clan, the missed ones lower it (kept with your save). From `MaxRank` (Deputy) on you get
   none. Every step has hook points for the story: see "Story and the clan loop" below.
+- **Gatherings** (experimental, off by default, `config/gatherings.ini`, needs the clan loop): every `Every` days the
+  leader names the cats who go to the Gathering - your cat by chance, more likely with a good standing and the
+  leader's favour (a story variable), never while banned (a punishment the story can give: `GatheringBan`). The
+  announcement, going and staying behind are scenes; the outcome is a story variable (`Gathering.Chosen`) the
+  story's own beats can follow (e.g. rogues attack the camp while the others are away).
 - **Time skips** (experimental, off by default, `config/timeskip.ini On = 1`, needs the day / night cycle): time passes
   on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
   card in the game's own style says so ("A quarter moon passes. It is leaf-bare.") and the season, weather and prey
@@ -204,14 +209,29 @@ Rows of the game's data tables from code: `WaCaNative_CloneTableRow(table:GetAdd
 numbers, bools).
 
 ### Story and the clan loop
+**Your mod's own files, no edits to anyone else's:** every clan-loop config (`duties`, `clanevents`, `days`,
+`events`, `gatherings`, `lines`, `patrols`) is WaCa ModKit's file plus `<YourMod>/content/<name>.ini` of every
+enabled mod, in load order (`WaCa.ReadContent`). A section only you have is simply added (two mods' clan events both
+exist); a section several mods share gets the numbered keys of each APPENDED (`Step1`, `Line1`, `Morning1` ... - two
+mods can add beats to the same story day or lines to the same dialogue); a plain key is set by the later mod (logged);
+`Off = 1` in your own copy of a section turns another mod's off.
+
+Dialogue by days (`lines.ini`): `[Dialogue.Queen1]` `Who = RiverClanQueen`, `Days = 1-6`, `Require = ...`,
+`Case = Talk | Patrol` (`Leader = <role>`), `Line1`...: that cat says one of the lines all day, a new one each day from
+a grab bag (no repeats until all came, the last two of a bag wait out the next refill); the random filler pools
+`[Lines.<Role>.<Tag>]` take `Days` / `Require` too. `Lines.Pick(name, lines, day)` is the same grab bag for any mod.
 Scenes are lines of steps, run one after another, each waiting for its end (`events.lua`, the one scene runner):
 `Card: <text>`, `Dialogue: <id> @ <who>` (the game's own conversations and cinematics, ids in
 `config/events-dialogues.txt`; who = Deputy, Leader, MedicineCat, Teacher, Nearest or a story role), `Fade: <s>` /
 `FadeIn: <s>`, `Wait: <s>`, `Bond: <points> @ <who>`, `Emit: <event>`, `Hook: <name>`. They go into the configs at the
 loop's hook points - no code: `duties.ini` `[Third.<Third>]` `Start1...` / `Event1...` and `[Assign.<Task>]` (how the
 deputy gives it), `[NightWatch]` (its cutscene), `clanevents.ini` `[Event.<Name>]` (When / Chance / Day / Every / Once
-/ steps), `days.ini` per story day (`<Third>Start`, `<Third>` beats, `<Third>Duty`, `NightDuty = Hunt` for a night
-hunt). From Lua:
+/ Require / steps), `gatherings.ini` (`[Announce]` / `[Chosen]` / `[NotChosen]` / `[Attend]` / `[StayBehind]`),
+`days.ini` per story day (`<Third>Start`, `<Third>` beats, `<Third>Duty`, `NightDuty = Hunt` for a night hunt,
+`Gathering = Yes` / `GatheringPick = Chosen`). Story variables, kept with the save: `Set: LeaderFavour = 2`,
+`Add: GatheringBan 1`, and `If: LeaderFavour >= 5, Rank >= 2` (the rest of the scene only then); clan events take
+`Require =` the same conditions; built-in ones: `Day`, `Rank`, `Standing`, `Gathering.Chosen`, `Gathering.Count`.
+From Lua:
 ```lua
 local Events = require("events")                          -- inside WaCaModKit; other mods: the WaCa events below
 Events.Run({ "Card: The leader calls you.", "Dialogue: <id> @ Leader", "Bond: 2 @ Leader" }, function() ... end)
@@ -220,6 +240,11 @@ Events.Hook("ClanBackInCamp", function(ctx, continue)     -- blocking: the loop 
     continue()
 end)                                                      -- also ClanThirdStart, ClanAssign, ClanNight
 WaCa.On("TaskDone", function(day, third, task) ... end)  -- also ClanThird, TaskAssigned, BackInCamp, ClanNight, DutiesJudged
+Events.SetVar("LeaderFavour", Events.Var("LeaderFavour") + 3)     -- story variables; Events.Check("LeaderFavour >= 5")
+Events.Hook("GatheringStayBehind", function(ctx, continue) ... end) -- also GatheringAttend; WaCa.On("GatheringHeld", ...)
+local Follow = require("follow")                          -- cats moving together
+local pack = Follow.Group(Follow.Nearest(3), pawn)        -- they follow, holding back while the leader sneaks
+Follow.Travel(cats, island, {}, function(g) ... end)      -- a group walks to a place together; Follow.Release(pack)
 ```
 The game's sequencer is open to every mod as events: `SequenceStarted` / `SequenceFinished` (manager, the sequence's
 id), `SequenceEnded`, `DialogueStarted` (manager, the dialogue's id), `DialogueNext`. Any other function: `WaCa.Watch`

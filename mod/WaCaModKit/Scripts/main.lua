@@ -637,14 +637,23 @@ require("preyworld").Init({ WaCa = WaCa, log = log, modDir = modDir, Weather = W
 -- intentional time skips (config/timeskip.ini)
 require("timeskip").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Weather = Weather })
 -- more for clan cats to say, by time of day (config/lines.ini)
-require("lines").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
+require("lines").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Days = require("days"),
+    Events = require("events") })
 -- exhaustion: a resource - pounces and fights tire the cat, sleep resets it (config/exhaustion.ini)
 require("exhaustion").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 -- scenes: the one scene runner + its hook points, and hour-scheduled scenes (config/events.ini) - before the loop
 require("events").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
+-- following: cats moving together - a modding tool (follow.lua)
+require("follow").Init({ WaCa = WaCa, log = log })
 -- the clan loop: thirds, the deputy's tasks, back in camp, the clan's events (config/duties.ini, clanevents.ini)
 require("duties").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Events = require("events"),
     Days = require("days") })
+-- the clan's own patrols heading out together (config/patrols.ini)
+require("patrols").Init({ WaCa = WaCa, log = log, modDir = modDir, Duties = require("duties"), Follow = require("follow"),
+    Lines = require("lines") })
+-- Gatherings: the leader's pick, the announcement, attending or staying behind (config/gatherings.ini)
+require("gathering").Init({ WaCa = WaCa, log = log, modDir = modDir, Events = require("events"), Days = require("days"),
+    DayNight = DayNight })
 
 -- the game's text and tables: loaded by the time a screen shows with text (the first screens are the splash)
 local textApplied = false

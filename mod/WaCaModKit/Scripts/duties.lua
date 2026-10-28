@@ -223,53 +223,19 @@ local function pileComponent()
     end
 end
 
--- clanmates on the patrol (tickets.md 7): the nearest idle clan cats walk with you - their own AI paused, an AI
--- MoveToActor on your cat (it keeps following a moving goal) - until the patrol is done or the day ends
+-- clanmates on the patrol (tickets.md 7): the nearest clan cats walk with you (follow.lua - they hold back while you
+-- sneak) until the patrol is done or the day ends
 local function companionsJoin(n)
-    local out = {}
-    if n <= 0 then return out end
-    local p = pc() and pc().Pawn
-    if not p then return out end
-    local at = p:K2_GetActorLocation()
-    local catType
-    pcall(function()
-        StaticFindObject("/Script/SwtQuest.ESwtQuestCharacterType"):ForEachName(function(name, v)
-            if name:ToString():gsub("^.*::", "") == "Cat" then catType = v end
-        end)
-    end)
-    local near = {}
-    for _, c in ipairs(FindAllOf("BP_Exploration_Character_Base_C") or {}) do
-        pcall(function()
-            if c:IsValid() and c.CharacterType == catType and not c.bHidden then
-                local q = c:K2_GetActorLocation()
-                local d = (q.X - at.X) ^ 2 + (q.Y - at.Y) ^ 2
-                if d < cfg.companionRadius ^ 2 then table.insert(near, { c, d }) end
-            end
-        end)
-    end
-    table.sort(near, function(a, b) return a[2] < b[2] end)
-    for i = 1, math.min(n, #near) do
-        local cat = near[i][1]
-        local ok = pcall(function()
-            local ai = cat.Controller
-            pcall(function() ai.BrainComponent:StopLogic("WaCa: on patrol") end)
-            ai:MoveToActor(p, 250.0, true, true, false, nil, true)
-        end)
-        if ok then table.insert(out, (cat:GetFullName():gsub("^%S+ ", ""))) end
-    end
-    if #out > 0 then log("duties: %d clanmate(s) join your patrol", #out) end
-    return out
+    if n <= 0 then return nil end
+    local Follow = require("follow")
+    local cats = Follow.Nearest(n, cfg.companionRadius)
+    if #cats == 0 then return nil end
+    log("duties: %d clanmate(s) join your patrol", #cats)
+    return Follow.Group(cats, pc().Pawn, { distance = 250, spread = 150 })
 end
 
-local function companionsLeave(list)
-    for _, name in ipairs(list or {}) do
-        local cat = StaticFindObject(name)
-        pcall(function()
-            local ai = cat.Controller
-            ai:StopMovement()
-            ai.BrainComponent:RestartLogic()
-        end)
-    end
+local function companionsLeave(group)
+    if group then require("follow").Release(group) end
 end
 
 local function removeMarker(point)
@@ -324,16 +290,32 @@ local function playerPos()
     return p and p:K2_GetActorLocation()
 end
 
--- the camp: where the clan's story cats live (VM 2026-10-28: the deputy, the leader, the medicine cats within ~40 m;
--- the game has no camp trigger - its QuestBoxTriggers are small quest / race boxes) - the middle of the story cats
--- whose role is the player's clan's (RiverClanDeputy ...; the median, so one cat out on the territory doesn't move it),
--- CampRadius around it. A trigger box there tells when your cat walks in / out; where it last walked in is the camp's
--- entrance as your cat uses it - the night watch's guard spot.
-local camp = { center = nil, inside = false, area = nil, entry = nil }
+-- the camp - THE GAME'S OWN: its zone-name triggers (WrcZoneNameTrigger: ZoneCode "R-05", ZoneNameId
+-- STR_RIVERCLAN_ZONE_5 = "RiverClan Camp"; big boxes over an area + thin gate pairs where one zone hands over to the next
+-- - tools/camp_map.py draws them). The camp's zone = the one whose boxes hold the most of the player's clan's story cats
+-- (the deputy, the leader, the medicine cat ...). In / out of camp = the zone the cat last walked into (the triggers'
+-- OnOverlapBegin, watched with the entering actor); its gates are the camp's entrances (the night watch's guard spot).
+-- Fallback without zones: the story cats' median + a radius, asked at the cat's footsteps.
+local camp = { code = nil, boxes = {}, gates = {}, center = nil, inside = false, entry = nil, zoneSeen = false }
+
+local function inBox(b, p, margin)
+    local dx, dy = p.X - b.x, p.Y - b.y
+    local yaw = math.rad(b.yaw)
+    local lx = dx * math.cos(yaw) + dy * math.sin(yaw)
+    local ly = -dx * math.sin(yaw) + dy * math.cos(yaw)
+    return math.abs(lx) <= b.ex + (margin or 0) and math.abs(ly) <= b.ey + (margin or 0)
+end
 
 local function campInside(p)
+    if not p then return false end
+    if camp.code then
+        -- the zone's boxes are its name triggers, not its whole floor (VM: the deputy stands 4.5 m outside them): the
+        -- rectangle around its area boxes, + 10 m (VM: every story cat and den door of the camp is in it)
+        local h = camp.hull
+        return p.X >= h.x0 and p.X <= h.x1 and p.Y >= h.y0 and p.Y <= h.y1
+    end
     local c = camp.center
-    return c and p and math.sqrt((p.X - c.X) ^ 2 + (p.Y - c.Y) ^ 2) <= (camp.radius or cfg.campRadius) or false
+    return c and math.sqrt((p.X - c.X) ^ 2 + (p.Y - c.Y) ^ 2) <= (camp.radius or cfg.campRadius) or false
 end
 
 local function clanName()
@@ -342,48 +324,96 @@ local function clanName()
     return me and me.Customization and me.Customization:match("ClanType=(%w+)") or nil
 end
 
+-- the game's zone boxes: { code, name, x, y, ex, ey, yaw } (a gate: one side under 1.5 m)
+local function zoneBoxes()
+    local out = {}
+    for _, z in ipairs(FindAllOf("WrcZoneNameTrigger") or {}) do
+        pcall(function()
+            if not z:IsValid() then return end
+            local comp = z.DetectionComponent
+            local c, e = comp:K2_GetComponentLocation(), comp:GetScaledBoxExtent()
+            table.insert(out, { code = z.ZoneCode:ToString(), name = z.ZoneNameId:ToString(), x = c.X, y = c.Y,
+                ex = e.X, ey = e.Y, yaw = comp:K2_GetComponentRotation().Yaw, gate = math.min(e.X, e.Y) < 150 })
+        end)
+    end
+    return out
+end
+
 local onCamp
 local function findCamp()
     local mine = clanName()
-    local xs, ys, zs = {}, {}, {}
+    local cats = {}
     for _, a in ipairs(FindAllOf("QuestBaseActor") or {}) do
         pcall(function()
             local r = a:IsValid() and not a.bHidden and a.narrativeRole and roleName(a.narrativeRole)
-            if r and mine and r:find("^" .. mine) then
-                local q = a:K2_GetActorLocation()
-                table.insert(xs, q.X) table.insert(ys, q.Y) table.insert(zs, q.Z)
-            end
+            if r and mine and r:find("^" .. mine) then table.insert(cats, a:K2_GetActorLocation()) end
         end)
     end
-    if #xs == 0 then
+    if #cats == 0 then
         log("duties: no story cats of %s found - back-in-camp can't be told", tostring(mine))
         return false
     end
-    local function median(t)
-        local c = {}
-        for i, v in ipairs(t) do c[i] = v end
-        table.sort(c)
-        return c[math.floor((#c + 1) / 2)]
+    -- the game's camp zone: the zone whose (area) boxes hold the most of them
+    local zones = zoneBoxes()
+    local count = {}
+    for _, b in ipairs(zones) do
+        if not b.gate then
+            for _, p in ipairs(cats) do if inBox(b, p, 300) then count[b.code] = (count[b.code] or 0) + 1 end end
+        end
     end
-    camp.center = { X = median(xs), Y = median(ys), Z = median(zs) }
-    -- big enough for the ones that live there (VM: RiverClan's deputy stands 38 m from the middle; some story cats
-    -- stand out in the territory - a quartile made the camp 351 m across): the farthest within CampMax + 10 m
+    local best
+    for code, n in pairs(count) do if not best or n > count[best] then best = code end end
+    if best and count[best] >= 2 then
+        camp.code = best
+        local h = { x0 = math.huge, y0 = math.huge, x1 = -math.huge, y1 = -math.huge }
+        for _, b in ipairs(zones) do
+            if b.code == best then
+                table.insert(b.gate and camp.gates or camp.boxes, b)
+                camp.name = b.name
+                -- (the area boxes only: the gates sit on the zone's border, next to the neighbour's - VM: a rectangle
+                -- around them took in the neighbouring zone's gate)
+                if not b.gate then
+                    local r = math.max(b.ex, b.ey)
+                    h.x0, h.x1 = math.min(h.x0, b.x - r), math.max(h.x1, b.x + r)
+                    h.y0, h.y1 = math.min(h.y0, b.y - r), math.max(h.y1, b.y + r)
+                end
+            end
+        end
+        h.x0, h.y0, h.x1, h.y1 = h.x0 - 1000, h.y0 - 1000, h.x1 + 1000, h.y1 + 1000
+        camp.hull = h
+        camp.inside = campInside(playerPos())
+        log("duties: the camp is the game's zone %s (%s): %d areas, %d entrances, %.0f x %.0f m, %d of %d story cats in its boxes; your cat is %s",
+            best, tostring(camp.name), #camp.boxes, #camp.gates, (h.x1 - h.x0) / 100, (h.y1 - h.y0) / 100, count[best],
+            #cats, camp.inside and "in it" or "out")
+        return true
+    end
+    -- no zones: the story cats' median + the farthest within CampMax
+    local xs, ys = {}, {}
+    for i, p in ipairs(cats) do xs[i], ys[i] = p.X, p.Y end
+    table.sort(xs) table.sort(ys)
+    local m = math.floor((#xs + 1) / 2)
+    camp.center = { X = xs[m], Y = ys[m], Z = cats[1].Z }
     local far = 0
-    for i = 1, #xs do
-        local d = math.sqrt((xs[i] - camp.center.X) ^ 2 + (ys[i] - camp.center.Y) ^ 2)
+    for _, p in ipairs(cats) do
+        local d = math.sqrt((p.X - camp.center.X) ^ 2 + (p.Y - camp.center.Y) ^ 2)
         if d <= cfg.campMax and d > far then far = d end
     end
     camp.radius = math.max(cfg.campRadius, far + 1000)
     camp.inside = campInside(playerPos())
-    camp.area = placeArea(camp.center, { X = camp.radius, Y = camp.radius, Z = 3000 }, 0,
-        function(entering) onCamp(entering) end)
-    log("duties: the %s camp is at %.0f %.0f, %.0f m across (%d story cats), your cat is %s", tostring(mine),
-        camp.center.X, camp.center.Y, camp.radius / 50, #xs, camp.inside and "in it" or "out in the territory")
+    log("duties: no camp zone - the camp is around %d story cats, %.0f m across; your cat is %s", #cats,
+        camp.radius / 50, camp.inside and "in it" or "out")
     return true
 end
 
--- the guard spot: where your cat last walked into the camp (its entrance), else the camp's edge
+-- the guard spot: the camp entrance (gate) nearest to where your cat last came in, else that spot, else an edge
 local function guardSpot()
+    local ref = camp.entry or playerPos()
+    local best, bd
+    for _, g in ipairs(camp.gates) do
+        local d = ref and ((g.x - ref.X) ^ 2 + (g.y - ref.Y) ^ 2) or 0
+        if not bd or d < bd then best, bd = g, d end
+    end
+    if best then return { X = best.x, Y = best.y, Z = (ref and ref.Z) or 0 } end
     if camp.entry then return camp.entry end
     local c = camp.center
     return c and { X = c.X + (camp.radius or cfg.campRadius), Y = c.Y, Z = c.Z } or nil
@@ -631,7 +661,8 @@ local function pickEvents(name, day)
     for _, e in ipairs(cfg.clanEvents) do
         local dayOk = (not e.day or day >= e.day) and (not e.every or (day - (e.day or 1)) % e.every == 0)
             and (not e.only or day == e.only)
-        if e.when == name and dayOk and not (e.once and eventsDone[e.name]) and math.random() * 100 < e.chance then
+        if e.when == name and dayOk and not (e.once and eventsDone[e.name]) and Events.Check(e.require)
+            and math.random() * 100 < e.chance then
             table.insert(out, e)
         end
     end
@@ -750,7 +781,7 @@ end
 local function where()
     local p = playerPos()
     if not p then return end
-    if camp.center then
+    if (camp.code and not camp.zoneSeen) or camp.center then
         local inside = campInside(p)
         if inside ~= camp.inside then onCamp(inside) end
     end
@@ -780,6 +811,29 @@ function Duties.Plan(hunt, patrol, kinds)
     plan = (hunt or patrol or (kinds and next(kinds))) and { hunt = hunt, patrol = patrol, kinds = kinds } or nil
 end
 function Duties.Today() return today end
+-- for other modules (patrols.lua ...): the camp - { middle = {X,Y,Z}, inside = bool, code = the game's zone } - and N
+-- border points out in the territory (unmarked)
+function Duties.Camp()
+    local mid = camp.center
+    if camp.hull then
+        local h = camp.hull
+        mid = { X = (h.x0 + h.x1) / 2, Y = (h.y0 + h.y1) / 2, Z = (camp.boxes[1] and playerPos() and playerPos().Z) or 0 }
+    end
+    return { middle = mid, inside = camp.inside, code = camp.code }
+end
+function Duties.BorderPoints(n, from)
+    local pts = {}
+    for _, g in ipairs(FindAllOf("BP_Enemy_Generator_C") or {}) do
+        pcall(function()
+            local q = g:K2_GetActorLocation()
+            local d = from and math.sqrt((q.X - from.X) ^ 2 + (q.Y - from.Y) ^ 2) or cfg.minDist
+            if d >= cfg.minDist and d <= cfg.maxDist then table.insert(pts, { X = q.X, Y = q.Y, Z = q.Z }) end
+        end)
+    end
+    local out = {}
+    for _ = 1, math.min(n, #pts) do table.insert(out, table.remove(pts, math.random(#pts))) end
+    return out
+end
 
 local function sidecar() return WaCa.SlotFile("WaCaDuties") end
 
@@ -793,7 +847,7 @@ end
 function Duties.Init(c)
     WaCa, log, DayNight = c.WaCa, c.log, c.DayNight
     Events, Days = c.Events or require("events"), c.Days
-    local ini = WaCa.ReadIni(c.modDir .. "/config/duties.ini") or {}
+    local ini = WaCa.ReadContent(c.modDir .. "/config/duties.ini", "duties") or {}
     local d = ini["Duties"] or {}
     cfg.on = (d.On or "0") == "1"
     cfg.maxRank = (d.MaxRank or "") ~= "" and d.MaxRank or cfg.maxRank
@@ -841,18 +895,19 @@ function Duties.Init(c)
     cfg.standingDone = tonumber(s.Done or "") or cfg.standingDone
     cfg.standingMissed = tonumber(s.Missed or "") or cfg.standingMissed
     -- the clan's events (clanevents.ini)
-    local ev = WaCa.ReadIni(c.modDir .. "/config/clanevents.ini") or {}
+    local ev = WaCa.ReadContent(c.modDir .. "/config/clanevents.ini", "clanevents") or {}
     for section, sec in pairs(ev) do
         local name = section:match("^Event%.(.+)$")
-        if name and (sec.When or "") ~= "" then
+        if name and (sec.When or "") ~= "" and sec.Off ~= "1" then
             table.insert(cfg.clanEvents, { name = name, when = sec.When, chance = tonumber(sec.Chance or "") or 100,
                 day = tonumber(sec.Day or ""), every = tonumber(sec.Every or ""), only = tonumber(sec.OnlyDay or ""),
-                once = (sec.Once or "0") == "1", steps = Events.Lines(sec, "Step") })
+                once = (sec.Once or "0") == "1", require = sec.Require, steps = Events.Lines(sec, "Step") })
         end
     end
     table.sort(cfg.clanEvents, function(a, b) return a.name < b.name end)
     pcall(function() cfg.restKey = (WaCa.ReadIni(c.modDir .. "/config/timeskip.ini") or {}).TimeSkip.RestKey end)
     cfg.restKey = cfg.restKey or "F9"
+    Events.Provide("Standing", function() return standing end)
     log("duties: %s (%d clan events)", cfg.on and "on" or "off", #cfg.clanEvents)
     if not cfg.on then return end
     if not DayNight.Drive(cfg.hours.Morning) then
@@ -886,13 +941,31 @@ function Duties.Init(c)
     WaCa.On("DayStarted", function(n) if ready then newDay(n, "dawn") end end)
     WaCa.Watch("BlendProgress", "/Script/SwtAdventure.SwtAdventureExplorationSenseComponent", "WaCaDutySense", "post")
     WaCa.On("WaCaDutySense", function() where() end)
+    -- the game's zones: the cat walked into a zone (its trigger's own overlap, with the actor that entered)
+    WaCa.Watch("OnOverlapBegin", "/Script/Wrc.WrcZoneNameTrigger", "WaCaZoneEnter", "post", "OtherActor")
+    WaCa.On("WaCaZoneEnter", function(trigger, other)
+        local pawn = pc() and pc().Pawn
+        local ok, mine = pcall(function() return other:GetAddress() == pawn:GetAddress() end)
+        if not (ok and mine and camp.code) then return end
+        local code = trigger.ZoneCode:ToString()
+        if not camp.zoneSeen then log("duties: zones report (%s)", code) end
+        camp.zoneSeen = true
+        local inside = code == camp.code
+        if inside ~= camp.inside then onCamp(inside) end
+    end)
     -- the player's own footsteps (the step notify hands over the stepping mesh - the notify is shared by all cats)
     local steps = 0
     WaCa.Watch("Received_Notify", "/Game/Gameplay/Blueprints/BP_AnimStepNotify.BP_AnimStepNotify_C", "CatStep", "pre", "MeshComp")
+    -- (every cat's steps arrive here: the player's cat's address is kept, not looked up per step)
+    local me
     WaCa.On("CatStep", function(_, mesh)
-        local pawn = pc() and pc().Pawn
-        local ok, mine = pcall(function() return mesh:GetOwner():GetAddress() == pawn:GetAddress() end)
-        if not (ok and mine) then return end
+        local ok, owner = pcall(function() return mesh:GetOwner():GetAddress() end)
+        if not ok then return end
+        if owner ~= me then
+            local pawn = pc() and pc().Pawn
+            me = pawn and pawn:GetAddress() or me
+            if owner ~= me then return end
+        end
         steps = steps + 1
         if steps % cfg.stepEvery == 0 then where() end
     end)

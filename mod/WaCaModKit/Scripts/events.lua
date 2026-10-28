@@ -14,12 +14,19 @@
 --   Hook: <name>                 BLOCKING: every function registered with Events.Hook(name, fn) runs in turn as
 --                                fn(context, continue) and calls continue() when its part is over (a mod's own
 --                                cutscene, a minigame, a choice ...)
+--   Set: <var> = <value>         a STORY VARIABLE (kept with the save): e.g. Set: LeaderAnger = 2
+--   Add: <var> <number>          e.g. Add: LeaderFavour 3, Add: GatheringBan -1
+--   If: <conditions>             the rest of the scene only if they hold: <var> <op> <value>[, ...], op = < <= = != >= >
+--                                (e.g. If: LeaderFavour >= 5, Rank >= 2) - unset variables are 0
+-- Story variables are also read by conditions elsewhere (clanevents.ini Require, gatherings.ini ...); built-in ones
+-- come from the mod (Day, Standing, Rank ... - Events.Provide(name, fn)).
 -- <who>: Deputy, Leader, MedicineCat, Teacher (the clan's move teacher), Nearest (the nearest clanmate; default), or
 -- any story role (ENarrativeRole name). The player's clan's cat first.
 -- The game's sequencer itself is open to every mod through WaCa events (WaCa.lua): SequenceStarted / SequenceFinished
 -- (manager, sequence id), SequenceEnded, DialogueStarted (manager, dialogue id), DialogueNext.
 -- Lua: Events.Run(steps, onDone, context), Events.Play(scene), Events.Hook(name, fn), Events.Who(name),
--- Events.Parse(line), Events.Lines(section, prefix).
+-- Events.Parse(line), Events.Lines(section, prefix), Events.Var(name), Events.SetVar(name, value),
+-- Events.Check(conditions), Events.Provide(name, fn). WaCa event StoryVar(name, value) when one changes.
 local Events = {}
 
 local WaCa, log, modDir, DayNight
@@ -143,6 +150,55 @@ function Events.Lines(section, prefix)
     return out
 end
 
+-- --- story variables ---
+
+local vars = {}                  -- name -> number or text (kept with the save)
+local providers = {}             -- built-in variables: name -> fn() (Day, Standing, Rank ...)
+
+function Events.Provide(name, fn) providers[name] = fn end
+
+function Events.Var(name)
+    if providers[name] then
+        local ok, v = pcall(providers[name])
+        return ok and v or 0
+    end
+    local v = vars[name]
+    if v == nil then return 0 end
+    return v
+end
+
+function Events.SetVar(name, value)
+    local n = tonumber(value)
+    if n then value = n end
+    if vars[name] == value then return end
+    vars[name] = value
+    log("events: %s = %s", name, tostring(value))
+    WaCa.Emit("StoryVar", name, value)
+end
+
+local OPS = {
+    ["="] = function(a, b) return a == b end, ["!="] = function(a, b) return a ~= b end,
+    ["<"] = function(a, b) return a < b end, ["<="] = function(a, b) return a <= b end,
+    [">"] = function(a, b) return a > b end, [">="] = function(a, b) return a >= b end,
+}
+
+-- "Var op value, Var op value" -> all hold (empty = true)
+function Events.Check(text)
+    for cond in tostring(text or ""):gmatch("[^,]+") do
+        local name, op, value = cond:match("^%s*([%w%.%_]+)%s*([<>=!]+)%s*(.-)%s*$")
+        if name and OPS[op] then
+            local have, want = Events.Var(name), tonumber(value) or value
+            if type(have) ~= type(want) then have, want = tostring(have), tostring(want) end
+            local ok, r = pcall(OPS[op], have, want)
+            if not (ok and r) then return false end
+        elseif cond:match("%S") then
+            log("events: can't read the condition '%s'", cond)
+            return false
+        end
+    end
+    return true
+end
+
 function Events.Hook(name, fn)
     hooks[name] = hooks[name] or {}
     table.insert(hooks[name], fn)
@@ -169,9 +225,19 @@ local function dialogueOver(why)
     w.done()
 end
 
-local function runStep(s, ctx, nextStep)
+local function runStep(s, ctx, nextStep, stop)
     local k = s.kind
-    if k == "Card" then
+    if k == "Set" then
+        local name, value = tostring(s.value):match("^%s*([%w%.%_]+)%s*=%s*(.-)%s*$")
+        if name then Events.SetVar(name, value) end
+        nextStep()
+    elseif k == "Add" then
+        local name, n = tostring(s.value):match("^%s*([%w%.%_]+)%s+([%-%+]?[%d%.]+)%s*$")
+        if name then Events.SetVar(name, (tonumber(Events.Var(name)) or 0) + tonumber(n)) end
+        nextStep()
+    elseif k == "If" then
+        if Events.Check(s.value) then nextStep() else stop() end
+    elseif k == "Card" then
         showCard(fill(s.value, ctx), cfg.cardSeconds)
         after(cfg.cardSeconds, nextStep)
     elseif k == "Wait" then
@@ -241,16 +307,20 @@ end
 -- run the steps in order, then onDone - also when a step fails: a scene never blocks the loop
 function Events.Run(steps, onDone, ctx)
     local i = 0
+    local finished = false
+    local function stop()
+        if finished then return end
+        finished = true
+        if onDone then onDone() end
+    end
     local function nextStep()
+        if finished then return end
         i = i + 1
         local s = steps and steps[i]
-        if not s then
-            if onDone then onDone() end
-            return
-        end
+        if not s then return stop() end
         if type(s) == "string" then s = Events.Parse(s) end
         if not s then return nextStep() end
-        local ok, err = pcall(runStep, s, ctx, nextStep)
+        local ok, err = pcall(runStep, s, ctx, nextStep, stop)
         if not ok then
             log("events: step %d failed (%s)", i, tostring(err))
             nextStep()
@@ -313,7 +383,7 @@ local function sidecar() return WaCa.SlotFile("WaCaEvents") end
 
 function Events.Init(c)
     WaCa, log, modDir, DayNight = c.WaCa, c.log, c.modDir, c.DayNight
-    local ini = WaCa.ReadIni(modDir .. "/config/events.ini") or {}
+    local ini = WaCa.ReadContent(modDir .. "/config/events.ini", "events") or {}
     local e = ini["Events"] or {}
     cfg.cardSeconds = tonumber(e.CardSeconds or "") or cfg.cardSeconds
     cfg.dialogueMax = tonumber(e.DialogueMaxSeconds or "") or cfg.dialogueMax
@@ -331,13 +401,34 @@ function Events.Init(c)
     WaCa.On("ScreenHidden", function(screen)
         if waiting and screen:GetClass():GetFName():ToString():find("Dialog") then dialogueOver("its screen closed") end
     end)
+    Events.Provide("Day", function() return DayNight and DayNight.Day() or 0 end)
+    Events.Provide("Rank", function() local p = WaCa.GameProgress() return p and tonumber(p.Rank) or 0 end)
+    -- story variables live with the save (a sidecar, written when the game saves)
+    local varsFor
+    WaCa.On("GameSaved", function()
+        local slot = WaCa.CurrentSlot()
+        if slot and varsFor ~= slot then
+            varsFor = slot
+            vars = {}
+            for k, v in pairs((WaCa.ReadIni(WaCa.SlotFile("WaCaStory") or "") or {})["Vars"] or {}) do
+                if k ~= "__order" then vars[k] = tonumber(v) or v end
+            end
+        end
+        local path = WaCa.SlotFile("WaCaStory")
+        if path then
+            local d = { __order = {} }
+            for k, v in pairs(vars) do d[k] = tostring(v) table.insert(d.__order, k) end
+            table.sort(d.__order)
+            WaCa.WriteIni(path, { Vars = d, __order = { "Vars" } }, "; WaCa ModKit - this save's story variables (events.lua)")
+        end
+    end)
     if (e.On or "0") ~= "1" then
         log("events: hour-scheduled scenes off (the runner is on)")
         return
     end
     for section, sec in pairs(ini) do
         local name = section:match("^Event%.(.+)$")
-        if name and tonumber(sec.Hour or "") then
+        if name and tonumber(sec.Hour or "") and sec.Off ~= "1" then
             local steps = {}
             if (sec.Card or "") ~= "" then table.insert(steps, { kind = "Card", value = sec.Card }) end
             if (sec.Dialogue or "") ~= "" then table.insert(steps, { kind = "Dialogue", value = sec.Dialogue }) end

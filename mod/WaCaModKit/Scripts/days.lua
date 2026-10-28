@@ -108,13 +108,15 @@ local function advances()
 end
 
 function Days.Story() return story end
+-- a key of the current story day (Like chains followed) - other features' story overrides (gatherings.ini ...)
+function Days.Get(key) return cfg.on and get(story, key) or nil end
 
 local function sidecar() return WaCa.SlotFile("WaCaDays") end
 
 function Days.Init(c)
     WaCa, log, DayNight = c.WaCa, c.log, c.DayNight
     Weather, Duties, Events = c.Weather, c.Duties, c.Events
-    local ini = WaCa.ReadIni(c.modDir .. "/config/days.ini") or {}
+    local ini = WaCa.ReadContent(c.modDir .. "/config/days.ini", "days") or {}
     local d = ini["Days"] or {}
     cfg.on = (d.On or "0") == "1"
     for name in pairs(cfg.phases) do cfg.phases[name] = tonumber(d[name .. "Hour"] or "") or cfg.phases[name] end

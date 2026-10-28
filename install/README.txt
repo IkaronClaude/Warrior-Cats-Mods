@@ -58,6 +58,7 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: exhaustion - pouncing and fighting tire your cat (exploring doesn't), rest resets it (exhaustion.ini).
   - Wading: water slows your cat down, deep water more; RiverClan cats less (wading.ini).
   - Experimental, off by default: the clan loop - each morning, noon and evening the deputy gives your cat a task, you do it (and explore as long as you like), come back to camp for the clan's event (meetings, eating together, sharing tongues), then the next third; sleep or night watch at night (duties.ini On = 1).
+  - Experimental, off by default: Gatherings - every few days the leader picks who goes; your standing and the leader's favour count (gatherings.ini On = 1).
   - Experimental, off by default: scenes at given times - a card or a conversation (events.ini On = 1).
   - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
   - Experimental, off by default: press G next to a story cat to spend time together - your bond grows

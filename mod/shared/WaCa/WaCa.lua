@@ -285,6 +285,88 @@ function WaCa.ReadIni(path)
     return out
 end
 
+-- the enabled UE4SS mods, in load order: Mods/mods.txt's "<Mod> : 1" lines first, then every other folder with an
+-- enabled.txt (sorted). modsDir = the Mods folder.
+function WaCa.EnabledMods(modsDir)
+    local out, seen = {}, {}
+    local txt = io.open(modsDir .. "/mods.txt", "r")
+    if txt then
+        for line in txt:lines() do
+            local name, on = line:match("^%s*([^:;%s][^:]-)%s*:%s*(%d)")
+            if name and on == "1" and not seen[name] then
+                seen[name] = true
+                table.insert(out, name)
+            end
+        end
+        txt:close()
+    end
+    local extra = {}
+    pcall(function()
+        for name, dir in pairs(IterateGameDirectories().Game.Binaries.Win64.ue4ss.Mods) do
+            if type(dir) == "table" and not tostring(name):match("^__") and not seen[name] then
+                local f = io.open(modsDir .. "/" .. name .. "/enabled.txt", "r")
+                if f then
+                    f:close()
+                    table.insert(extra, name)
+                end
+            end
+        end
+    end)
+    table.sort(extra)
+    for _, name in ipairs(extra) do table.insert(out, name) end
+    return out
+end
+
+-- CONTENT FROM EVERY MOD (operator 2026-10-28: a modding framework - overlapping mods must not have to edit the same
+-- file): WaCa.ReadContent(basePath, name) reads basePath (e.g. WaCaModKit/config/clanevents.ini), then every enabled
+-- mod's own <Mod>/content/<name>.ini on top, in load order, and returns one ini table:
+--   - a section only one file has: added as it is (two mods' [Event.Rogues] / [Event.Moonhigh] simply both exist);
+--   - a section several files have: NUMBERED keys are ADDED after the ones already there (Step1 / Line1 / Morning1 ...
+--     -> renumbered: two mods can both add beats to [Day.10] or lines to the same [Dialogue.X]); a plain key (On, Days,
+--     Chance ...) is set by the later mod, and the override is logged.
+-- section.__mods lists the mods that touched it. A mod turns one of another's off with its own section + Off = 1 (the
+-- readers honour it).
+function WaCa.ReadContent(basePath, name)
+    local out = WaCa.ReadIni(basePath) or {}
+    out.__order = out.__order or {}
+    for s, t in pairs(out) do if s ~= "__order" and type(t) == "table" then t.__mods = { "WaCaModKit" } end end
+    local modsDir, own = basePath:match("^(.*)[/\\]([^/\\]+)[/\\]config[/\\][^/\\]+$")
+    if not modsDir then return out end
+    for _, mod in ipairs(WaCa.EnabledMods(modsDir)) do
+        local add = mod ~= own and WaCa.ReadIni(modsDir .. "/" .. mod .. "/content/" .. name .. ".ini")
+        for section, t in pairs(add or {}) do
+            if section ~= "" and type(t) == "table" then
+                local into = out[section]
+                if not into then
+                    t.__mods = { mod }
+                    out[section] = t
+                else
+                    table.insert(into.__mods, mod)
+                    for _, k in ipairs(t.__order or {}) do
+                        local prefix = k:match("^(%a+)%d+$")
+                        if prefix then
+                            local i = 1
+                            while into[prefix .. i] ~= nil do i = i + 1 end
+                            into[prefix .. i] = t[k]
+                            table.insert(into.__order, prefix .. i)
+                        else
+                            if into[k] ~= nil and into[k] ~= t[k] then
+                                print(string.format("[WaCa] %s: %s sets [%s] %s = %s (was %s)\n", name, mod, section, k,
+                                    tostring(t[k]), tostring(into[k])))
+                            elseif into[k] == nil then
+                                table.insert(into.__order, k)
+                            end
+                            into[k] = t[k]
+                        end
+                    end
+                end
+            end
+        end
+        if add then print(string.format("[WaCa] %s: content from %s\n", name, mod)) end
+    end
+    return out
+end
+
 -- write { [section] = { key = value, __order = {...} } } as an ini (sections and keys in their __order when present)
 function WaCa.WriteIni(path, data, header)
     local f = io.open(path, "w")
