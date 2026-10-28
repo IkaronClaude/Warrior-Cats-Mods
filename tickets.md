@@ -1053,6 +1053,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       (AttachBoundActorToParentAnchor, SequencerStarted / Finished) - the shapes may map onto those; the game's camera
       actor (ASwtAdventureCameraActor), montages (SwtPlayMontageComponent) and emote animations for the actions; the
       cast (roles) for who stands where.
+      PRINCIPLE (operator 2026-10-28): REUSE as much as possible - maximum freedom from what's there, mixing and
+      matching the game's standard pieces; no 3D work. INVENTORY (tools/cinematic_catalog.py over dumps/files.txt -
+      local output, asset names stay out of git): 125 level sequences - LS_Cinematic_RankUp_* (35: ceremonies per clan
+      / rank), ProphecyIntro / Closure (32: clan meetings), Quest_SandboxG_EstablishingShot (camera), Quest_TalkToNPC
+      (two-cat talk framing), Combat_End win / lose / flee, Gameplay_SneakAttack; 149 cat montages (hiss, warning
+      growl, surprise, sleep, play, dig, win / lose, tail pose ...); 246 cat animations (15 photo-mode poses, idles,
+      sit / sleep in-out, walk incl. crouching / backwards, run, drink, play, Creating_Memories - likely eating /
+      sharing tongues). First types to build: ceremony (RankUp re-cast), clan meeting (Prophecy re-cast), two-cat talk.
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
