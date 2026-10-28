@@ -215,6 +215,12 @@ game data in this repo.
         is comes from its own FOOTSTEPS (every StepEvery-th) and sense pulses - a trigger box spawned at the camp never
         reported (teleports, VM); boxes kept for patrol points / the teacher as a second signal.
       - a done task never sends you home; Free: leave and come back; Train in camp counts at once.
+      - THE CAMPS (VM 2026-10-28, zones.json + tools/zone_map.py): every clan's camp is one of the game's zones -
+        R-05 RiverClan Camp (3 areas, 2 gates, 46 x 90 m), S-08 ShadowClan Camp (2 / 1, 33 x 57 m), T-10 ThunderClan
+        Camp (1 / 2, 40 x 40 m), W-04 WindClan Camp (2 / 1, 62 x 78 m); the code's letter = the clan's initial. Found
+        by its DEN DOORS (6-7 in each camp's outline, none elsewhere; the other clans' story cats aren't in the world),
+        story cats as the fallback. The zone event (WrcZoneNameTrigger OnOverlapBegin, the entering actor handed over)
+        fires for the player (VM: crossing R-03's gate) - entering / leaving camp = the game's own zone change.
       - hook points: steps in configs (Card / Dialogue @ who / Fade / FadeIn / Wait / Bond @ who / Emit / Hook),
         blocking Lua hooks ClanThirdStart / ClanAssign / ClanBackInCamp / ClanNight (Events.Hook), WaCa events
         ClanThird / TaskAssigned / TaskDone / BackInCamp / ClanNight / DutiesJudged; days.ini Days.Beats per third.
@@ -924,6 +930,36 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Groundwork that exists: story days (days.lua), story variables + conditions (events.lua), scenes, the clan loop
       hooks. Needed: packs as units with their own story-day counters; a hook on main-story progress (the quest
       system: rank-up / quest completion) to warn / skip; a quest-list entry (research the quest HUD).
+      DESIGN (2026-10-28, with the operator - "a mod story longer than the main story"):
+      - THREE CLOCKS: the CALENDAR (the world's day count - seasons, weather, moons, Gathering dates; one per save);
+        the MAIN STORY's position (story days that move on their Advance, else repeat); each PACK's own position
+        (its own [Day.N] + Advance). Story days are positions, not dates - a longer pack just takes more calendar days.
+      - <Mod>/content/story.ini: [Story] Name / Clan / Ranks / Mode = Connected; [Sync.<Name>] Main = Rank:X |
+        Quest:<id> | MainDay:N, PackDay = N, Hold = Warn (default) | Gate; [Day.N] as days.ini + Summary.
+      - pack behind at a sync point: Warn = the warning, crossing anyway jumps the pack to PackDay and shows the
+        skipped days' Summaries; Gate = the main story's Advance also needs the pack there (its last day repeats as
+        plain clan-loop days). Pack ahead: it holds (its sync day repeats: clan loop + its dialogue pools). Pack past
+        the main story's end: the pack owns the story.
+      - one calendar day, both stories: beats main first, then packs by declared priority (not load order); a
+        third's task = the main story's, unless a pack declares Owns = <Third> in its sync window (two packs claiming
+        it = a reported conflict); season / weather forced only by the main story (packs' requests apply otherwise);
+        dialogue Days ranges resolve against the OWNING story's clock.
+      - open questions for the operator: Warn or Gate as the default; on a skip, replay the skipped beats' story
+        variable changes (Set / Add) or only show the summaries (replaying keeps later conditions consistent).
+      REFINED (operator 2026-10-28: "each story its own independent day counter and progress condition - if not met,
+      the previous day repeats for this story - with fixed sync points"):
+      - every story is evaluated at the same calendar boundary against its OWN Advance; stories never read each
+        other's day numbers;
+      - sync points are NAMED (Sync.Apprentice ...), declared by their owner; each story says at which of its days it
+        reaches one - renumbering a story doesn't break the others;
+      - a sync point is a BARRIER: a story that reaches it repeats its sync day until every story that DECLARES that
+        sync point is there, then they cross together (symmetric - nobody is "the long one");
+      - the game's own main story (its quests / rank-ups) can't be held: against it the barrier is soft - the
+        warning + summaries; between our stories (packs, days.lua's story) it is hard;
+      - escape: MaxRepeats per story day (then it moves on) + a player skip with the summaries, so a broken
+        condition can't hold everyone at a barrier;
+      - calendar things (seasons, moons, Gathering dates) stay on the calendar; a story waits for them with a
+        condition (Require = Gathering.Today = 1).
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the

@@ -349,21 +349,50 @@ local function findCamp()
             if r and mine and r:find("^" .. mine) then table.insert(cats, a:K2_GetActorLocation()) end
         end)
     end
-    if #cats == 0 then
-        log("duties: no story cats of %s found - back-in-camp can't be told", tostring(mine))
+    if #cats == 0 and not mine then
+        log("duties: no clan known - back-in-camp can't be told")
         return false
     end
-    -- the game's camp zone: the zone whose (area) boxes hold the most of them
+    -- the game's camp zone (VM 2026-10-28, all four: R-05, S-08, T-10, W-04 - "<Clan> Camp"): of the player's clan's
+    -- zones (the code's letter = the clan's initial) the one with the most DEN DOORS in its outline (every camp has 6-7;
+    -- the other clans' story cats aren't in the world, the doors always are); else the zone holding the most of the
+    -- clan's story cats
     local zones = zoneBoxes()
-    local count = {}
+    local hulls = {}
     for _, b in ipairs(zones) do
         if not b.gate then
-            for _, p in ipairs(cats) do if inBox(b, p, 300) then count[b.code] = (count[b.code] or 0) + 1 end end
+            local h = hulls[b.code] or { x0 = math.huge, y0 = math.huge, x1 = -math.huge, y1 = -math.huge }
+            local r = math.max(b.ex, b.ey)
+            h.x0, h.x1 = math.min(h.x0, b.x - r - 1000), math.max(h.x1, b.x + r + 1000)
+            h.y0, h.y1 = math.min(h.y0, b.y - r - 1000), math.max(h.y1, b.y + r + 1000)
+            hulls[b.code] = h
         end
+    end
+    local count, why = {}, "den doors"
+    local initial = mine and mine:sub(1, 1)
+    for _, door in ipairs(FindAllOf("SwtAdventureHousingDoorActor") or {}) do
+        pcall(function()
+            local q = door:K2_GetActorLocation()
+            for code, h in pairs(hulls) do
+                if code:sub(1, 1) == initial and q.X >= h.x0 and q.X <= h.x1 and q.Y >= h.y0 and q.Y <= h.y1 then
+                    count[code] = (count[code] or 0) + 1
+                end
+            end
+        end)
     end
     local best
     for code, n in pairs(count) do if not best or n > count[best] then best = code end end
-    if best and count[best] >= 2 then
+    if not (best and count[best] >= 3) then
+        count, why, best = {}, "story cats", nil
+        for _, b in ipairs(zones) do
+            if not b.gate then
+                for _, p in ipairs(cats) do if inBox(b, p, 300) then count[b.code] = (count[b.code] or 0) + 1 end end
+            end
+        end
+        for code, n in pairs(count) do if not best or n > count[best] then best = code end end
+        if best and count[best] < 2 then best = nil end
+    end
+    if best then
         camp.code = best
         local h = { x0 = math.huge, y0 = math.huge, x1 = -math.huge, y1 = -math.huge }
         for _, b in ipairs(zones) do
@@ -382,12 +411,16 @@ local function findCamp()
         h.x0, h.y0, h.x1, h.y1 = h.x0 - 1000, h.y0 - 1000, h.x1 + 1000, h.y1 + 1000
         camp.hull = h
         camp.inside = campInside(playerPos())
-        log("duties: the camp is the game's zone %s (%s): %d areas, %d entrances, %.0f x %.0f m, %d of %d story cats in its boxes; your cat is %s",
+        log("duties: the camp is the game's zone %s (%s): %d areas, %d entrances, %.0f x %.0f m (by its %d %s); your cat is %s",
             best, tostring(camp.name), #camp.boxes, #camp.gates, (h.x1 - h.x0) / 100, (h.y1 - h.y0) / 100, count[best],
-            #cats, camp.inside and "in it" or "out")
+            why, camp.inside and "in it" or "out")
         return true
     end
     -- no zones: the story cats' median + the farthest within CampMax
+    if #cats == 0 then
+        log("duties: no camp zone and no story cats of %s - back-in-camp can't be told", tostring(mine))
+        return false
+    end
     local xs, ys = {}, {}
     for i, p in ipairs(cats) do xs[i], ys[i] = p.X, p.Y end
     table.sort(xs) table.sort(ys)
