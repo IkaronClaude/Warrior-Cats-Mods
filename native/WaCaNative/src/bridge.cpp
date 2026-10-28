@@ -10,8 +10,10 @@
 //
 // Lua side, registered as globals in EVERY Lua mod's state (WaCa.lua wraps them as WaCa.On / WaCa.Watch):
 //   WaCaNative_Watch(functionName, classPath, eventName, "pre" | "post" [, paramName])
-//     paramName: an object parameter of that function, handed to the handler after the calling object (e.g. an anim
-//     notify's MeshComp - the notify object itself is shared by every cat playing that animation)
+//     paramName: a parameter of that function, handed to the handler after the calling object - an object as itself
+//     (e.g. an anim notify's MeshComp - the notify object is shared by every cat playing that animation), anything
+//     simple as text: a name, a gameplay tag (its name - e.g. the sequencer manager's sequenceId), a string, a
+//     number, a bool ("true" / "false"), an enum (its number)
 //   WaCaNative_Ready()            the mod's main.lua finished - events may be delivered from now on; the first thing
 //                                 delivered is "Started" (on the game thread), so the mod can catch up on what is
 //                                 already there (WaCa.lua replays ScreenShown for the screens already up)
@@ -38,6 +40,9 @@
 #include <Unreal/UObjectGlobals.hpp>
 #include <Unreal/Engine/UDataTable.hpp>
 #include <Unreal/UScriptStruct.hpp>
+#include <Unreal/CoreUObject/UObject/UnrealType.hpp>
+#include <Unreal/Property/FEnumProperty.hpp>
+#include <Unreal/CoreUObject/UObject/FStrProperty.hpp>
 
 #include <algorithm>
 #include <atomic>
@@ -80,8 +85,8 @@ struct Watch {
     UClass* cls = nullptr;                    // resolved on first use (a class may load after the watch is made)
     bool post = true;
     std::string event;
-    std::wstring param;                       // an object parameter to deliver too ("" = none)
-    int32_t paramOffset = -1;                 // its offset in the parameters, resolved with the function
+    std::wstring param;                       // a parameter to deliver too ("" = none)
+    FProperty* paramProp = nullptr;           // resolved with the function
     ModState* state = nullptr;
 };
 
@@ -119,8 +124,58 @@ ModState* StateOf(const LuaMadeSimple::Lua& lua) {
     return nullptr;
 }
 
+std::string Narrow(std::wstring_view s) {
+    if (s.empty()) return {};
+    int n = WideCharToMultiByte(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), nullptr, 0, nullptr, nullptr);
+    std::string out(n, ' ');
+    WideCharToMultiByte(CP_UTF8, 0, s.data(), static_cast<int>(s.size()), out.data(), n, nullptr, nullptr);
+    return out;
+}
+
+// a watched parameter's value for Lua: an object, or text (kind 2), or nothing (0)
+struct ParamValue {
+    int kind = 0;
+    UObject* object = nullptr;
+    std::string text;
+};
+
+ParamValue ReadParam(FProperty* p, void* params) {
+    ParamValue v;
+    if (!p || !params) return v;
+    uint8_t* at = static_cast<uint8_t*>(params) + p->GetOffset_Internal();
+    if (CastField<FObjectProperty>(p)) {
+        v.kind = 1;
+        v.object = *reinterpret_cast<UObject**>(at);
+    } else if (CastField<FNameProperty>(p)) {
+        v.kind = 2;
+        v.text = Narrow(reinterpret_cast<FName*>(at)->ToString());
+    } else if (auto* sp = CastField<FStructProperty>(p)) {
+        // a gameplay tag: its one FName (TagName) first
+        if (sp->GetStruct() && sp->GetStruct()->GetName() == STR("GameplayTag")) {
+            v.kind = 2;
+            v.text = Narrow(reinterpret_cast<FName*>(at)->ToString());
+        }
+    } else if (CastField<FStrProperty>(p)) {
+        v.kind = 2;
+        v.text = Narrow(**reinterpret_cast<FString*>(at));
+    } else if (auto* bp = CastField<FBoolProperty>(p)) {
+        v.kind = 2;
+        v.text = bp->GetPropertyValue(at) ? "true" : "false";
+    } else if (auto* ep = CastField<FEnumProperty>(p)) {
+        if (auto* under = ep->GetUnderlyingProperty()) {
+            v.kind = 2;
+            v.text = std::to_string(under->GetSignedIntPropertyValue(at));
+        }
+    } else if (auto* np = CastField<FNumericProperty>(p)) {
+        v.kind = 2;
+        v.text = np->IsFloatingPoint() ? std::to_string(np->GetFloatingPointPropertyValue(at))
+                                       : std::to_string(np->GetSignedIntPropertyValue(at));
+    }
+    return v;
+}
+
 void Deliver(ModState& s, const std::string& event, UObject* object, std::initializer_list<std::string> args,
-             UObject* extra = nullptr, bool hasExtra = false) {
+             const ParamValue* extra = nullptr) {
     if (!s.ready || !s.thread) return;
     const LuaMadeSimple::Lua& lua = *s.thread;
     if (!lua.is_global_function("WaCaNative_OnEvent")) return;
@@ -134,12 +189,13 @@ void Deliver(ModState& s, const std::string& event, UObject* object, std::initia
         lua.set_string(event);
         if (object) LuaType::auto_construct_object(lua, object);
         else lua.set_nil();
-        if (hasExtra) {
-            if (extra) LuaType::auto_construct_object(lua, extra);
+        if (extra) {
+            if (extra->kind == 1 && extra->object) LuaType::auto_construct_object(lua, extra->object);
+            else if (extra->kind == 2) lua.set_string(extra->text);
             else lua.set_nil();
         }
         for (const auto& a : args) lua.set_string(a);
-        lua.call_function(2 + (hasExtra ? 1 : 0) + static_cast<int32_t>(args.size()), 0);
+        lua.call_function(2 + (extra ? 1 : 0) + static_cast<int32_t>(args.size()), 0);
     } catch (const std::exception& e) {
         // the traceback is already in UE4SS.log (LuaMadeSimple's error handler)
         logx::Line(L"[bridge] %s: event %s failed: %s", s.name.c_str(), Wide(event).c_str(), Wide(e.what()).c_str());
@@ -162,7 +218,7 @@ void OnProcessEvent(bool post, UObject* context, UFunction* function, void* para
     if (g_startPending.load(std::memory_order_relaxed)) DeliverStarted();
     if (g_watchCount.load(std::memory_order_relaxed) == 0 || !context || !function) return;
     const FName name = function->GetNamePrivate();
-    struct Due { ModState* state; std::string event; UObject* extra; bool hasExtra; };
+    struct Due { ModState* state; std::string event; ParamValue extra; bool hasExtra; };
     std::vector<Due> due;
     {
         std::lock_guard<std::mutex> lock(g_watchesMutex);
@@ -174,19 +230,17 @@ void OnProcessEvent(bool post, UObject* context, UFunction* function, void* para
             }
             if (!context->IsA(w.cls)) continue;
             if (w.param.empty()) {
-                due.push_back({w.state, w.event, nullptr, false});
+                due.push_back({w.state, w.event, {}, false});
                 continue;
             }
-            if (w.paramOffset < 0) {
-                FProperty* p = function->FindProperty(FName(w.param.c_str(), FNAME_Find));
-                if (!p) continue;
-                w.paramOffset = p->GetOffset_Internal();
+            if (!w.paramProp) {
+                w.paramProp = function->FindProperty(FName(w.param.c_str(), FNAME_Find));
+                if (!w.paramProp) continue;
             }
-            UObject* extra = params ? *reinterpret_cast<UObject**>(static_cast<uint8_t*>(params) + w.paramOffset) : nullptr;
-            due.push_back({w.state, w.event, extra, true});
+            due.push_back({w.state, w.event, ReadParam(w.paramProp, params), true});
         }
     }
-    for (auto& d : due) Deliver(*d.state, d.event, context, {}, d.extra, d.hasExtra);
+    for (auto& d : due) Deliver(*d.state, d.event, context, {}, d.hasExtra ? &d.extra : nullptr);
 }
 
 // --- Lua functions (the calling Lua state is the argument; arguments are consumed from index 1) ---

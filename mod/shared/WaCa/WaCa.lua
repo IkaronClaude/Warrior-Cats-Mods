@@ -103,6 +103,13 @@ local BUILTIN = {
     ScreenHidden = { { "Destruct", "/Script/SwtEngine.SwtScreen", "pre" } },
     ScreenFocusIn = { { "OnAddedToFocusPath", "/Script/SwtEngine.SwtScreen", "post" } },
     ScreenFocusOut = { { "OnRemovedFromFocusPath", "/Script/SwtEngine.SwtScreen", "post" } },
+    -- the game's sequencer (cutscenes, cinematic dialogues): handlers get (manager, id) - the sequence's / dialogue's
+    -- gameplay tag as text. Story mods hook in here: WaCa.On("SequenceFinished", function(_, id) ... end)
+    SequenceStarted = { { "SequencerStarted", "/Script/SwtEngine.SwtSequencerManager", "post", "sequenceId" } },
+    SequenceFinished = { { "SequencerFinished", "/Script/SwtEngine.SwtSequencerManager", "post", "sequenceId" } },
+    SequenceEnded = { { "OnSequenceFinished", "/Script/SwtEngine.SwtSequencerManager", "post" } },
+    DialogueStarted = { { "PlaySequenceDialogue", "/Script/SwtQuest.SwtQuestSequencerManager", "pre", "SequenceDialogueId" } },
+    DialogueNext = { { "SwtSequencerDialogueNext", "/Script/SwtQuest.SwtQuestSequencerManager", "post", "bIsStart" } },
     CatSpawned = {
         { "ReceiveBeginPlay", "/Script/SwtAdventure.SwtAdventureCharacter", "post" },
         { "ReceiveBeginPlay", "/Script/SwtAdventure.SwtAdventureQuestActor", "post" },
@@ -135,8 +142,9 @@ function WaCaNative_OnEvent(event, object, ...)
 end
 
 -- watch a UFunction (by name, on objects of a class) as an event; when = "pre" (before it runs) or "post" (default)
--- param: an object parameter of the function, handed to the handlers after the object (e.g. an anim notify's
--- "MeshComp" - the notify itself is one object shared by every cat playing the animation)
+-- param: a parameter of the function, handed to the handlers after the object - an object as itself (e.g. an anim
+-- notify's "MeshComp" - the notify is one object shared by every cat playing the animation), anything simple as text
+-- (a name, a gameplay tag's name, a string, a number, "true" / "false", an enum's number)
 function WaCa.Watch(functionName, classPath, event, when, param)
     local id = functionName .. "|" .. classPath .. "|" .. event
     if watched[id] then return true end
@@ -151,7 +159,7 @@ end
 function WaCa.On(event, fn)
     handlers[event] = handlers[event] or {}
     table.insert(handlers[event], fn)
-    for _, w in ipairs(BUILTIN[event] or {}) do WaCa.Watch(w[1], w[2], event, w[3]) end
+    for _, w in ipairs(BUILTIN[event] or {}) do WaCa.Watch(w[1], w[2], event, w[3], w[4]) end
 end
 
 -- the cat look component of an actor (pawn, quest actor, cutscene cat, creator preview), or nil

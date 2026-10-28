@@ -75,18 +75,24 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   day with its scenes per phase (morning / afternoon / evening: a card or one of the game's conversations), its duties,
   season and weather, and when to move on (`Advance = Always / Duties / Rank:Warrior`); until then the story day
   repeats, scenes already seen skipped. `Like = M` copies an earlier day. Kept with your save. Example days inside.
-- **Exhaustion** (experimental, off by default, `config/exhaustion.ini`, needs the day / night cycle): every hour awake
-  tires your cat a bit (more after `LateHour`), and so does every duty done; tired, it moves slower and hunts and
-  fights worse, exhausted even more so. Resting (the time-skip key) resets it. Kept with your save.
+- **Exhaustion** (experimental, off by default, `config/exhaustion.ini`): a resource, not a meter to watch - it only
+  goes down when your cat does something: a pounce on prey (`PerPounce`, caught or missed) or a fight (`PerFight`),
+  more late at night. Walking and exploring cost nothing. Tired, your cat moves slower and hunts and fights worse,
+  exhausted even more so - so one cat can only hunt so much in a day. Resting (the time-skip key) resets it. Kept
+  with your save.
 - **Wading** (on, `config/wading.ini`): the game has no swimming - stepping into water slows your cat (shallow
   `Shallow`, deep `Deep`), RiverClan cats only part of it (`RiverClan`). Read from the floor under each footstep.
-- **The clan's day: duties** (experimental, off by default, `config/duties.ini`, needs the day / night cycle): every
-  morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low; a
-  hunting ground with prey of the season is marked, and a finished hunt feeds the clan's fresh-kill pile),
-  patrol N border points (marked like StarClan's guidance; clanmates walk it with you - `Companions`), and for
-  apprentices a sparring fight with the clan's move teacher (`[Train]`: go to them and the game's own fight starts,
-  win or lose it counts and your bond grows); at the day's end the duties done raise your standing in
-  the clan and the ones skipped lower it (kept with your save). From `MaxRank` (Deputy) on you get none.
+- **The clan loop** (experimental, off by default, `config/duties.ini` + `clanevents.ini`, needs the day / night
+  cycle): the clan's day in thirds - morning, noon, evening - each the same loop: the deputy gives your cat a task
+  (hunt N prey - every prey caught feeds the clan's pile, hunt on as long as you like; patrol N border points out in
+  the territory, clanmates walk with you; training - a sparring fight with the clan's move teacher, the game's own
+  fight; or free time), you do it and explore as long as you like (a done task never sends you home), you come back
+  to camp (the camp = where the clan's story cats live), then the clan's event of that third, if any (a clan meeting,
+  the Gathering; in the evening eating together and sharing tongues - `clanevents.ini`), and the next third. The sky
+  shows each third's hour - no wall clock, no race against the day. After the evening: sleep (the rest key) or the
+  night watch (go to the camp's entrance - a short cutscene shows the night passing). At the day's end the tasks done
+  raise your standing in the clan, the missed ones lower it (kept with your save). From `MaxRank` (Deputy) on you get
+  none. Every step has hook points for the story: see "Story and the clan loop" below.
 - **Time skips** (experimental, off by default, `config/timeskip.ini On = 1`, needs the day / night cycle): time passes
   on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
   card in the game's own style says so ("A quarter moon passes. It is leaf-bare.") and the season, weather and prey
@@ -196,6 +202,30 @@ fallback's). The saved cat keeps the fallback's index, so the save works without
 Rows of the game's data tables from code: `WaCaNative_CloneTableRow(table:GetAddress(), "FromRow", "NewRow")` and
 `WaCaNative_SetTableField(table:GetAddress(), "NewRow", "Field", "value")` (text, `/Game/...` asset paths, enum names,
 numbers, bools).
+
+### Story and the clan loop
+Scenes are lines of steps, run one after another, each waiting for its end (`events.lua`, the one scene runner):
+`Card: <text>`, `Dialogue: <id> @ <who>` (the game's own conversations and cinematics, ids in
+`config/events-dialogues.txt`; who = Deputy, Leader, MedicineCat, Teacher, Nearest or a story role), `Fade: <s>` /
+`FadeIn: <s>`, `Wait: <s>`, `Bond: <points> @ <who>`, `Emit: <event>`, `Hook: <name>`. They go into the configs at the
+loop's hook points - no code: `duties.ini` `[Third.<Third>]` `Start1...` / `Event1...` and `[Assign.<Task>]` (how the
+deputy gives it), `[NightWatch]` (its cutscene), `clanevents.ini` `[Event.<Name>]` (When / Chance / Day / Every / Once
+/ steps), `days.ini` per story day (`<Third>Start`, `<Third>` beats, `<Third>Duty`, `NightDuty = Hunt` for a night
+hunt). From Lua:
+```lua
+local Events = require("events")                          -- inside WaCaModKit; other mods: the WaCa events below
+Events.Run({ "Card: The leader calls you.", "Dialogue: <id> @ Leader", "Bond: 2 @ Leader" }, function() ... end)
+Events.Hook("ClanBackInCamp", function(ctx, continue)     -- blocking: the loop waits for continue()
+    -- your cutscene / scene for ctx.THIRD of day ctx.DAY ...
+    continue()
+end)                                                      -- also ClanThirdStart, ClanAssign, ClanNight
+WaCa.On("TaskDone", function(day, third, task) ... end)  -- also ClanThird, TaskAssigned, BackInCamp, ClanNight, DutiesJudged
+```
+The game's sequencer is open to every mod as events: `SequenceStarted` / `SequenceFinished` (manager, the sequence's
+id), `SequenceEnded`, `DialogueStarted` (manager, the dialogue's id), `DialogueNext`. Any other function: `WaCa.Watch`
+with a fifth argument hands one of its parameters to the handler - an object, or text (a name, a gameplay tag, a
+string, a number, a bool): `WaCa.Watch("SequencerStarted", "/Script/SwtEngine.SwtSequencerManager", "MyEvent",
+"post", "sequenceId")`.
 
 All game text is one string table (`SwtStrings`, from `Gameplay/Strings/NonAsset/Strings_<LANG>.csv`). Cat names are
 entries in it too: `STR_CAT_NAME<n><suffix id>`.

@@ -1,12 +1,14 @@
--- Exhaustion (tickets.md 4, Dredge-style): staying out late and doing too much tires your cat - it walks slower and is
--- worse at hunting and fighting - and sleep (a rest: the time-skip key, timeskip.ini) resets it. Tiredness 0-100 grows
--- every in-game hour awake (PerHour; LateFactor x after LateHour until dawn) and with every duty done (duties.lua);
--- at Tired / Exhausted the effects step in. Kept with the save. Emits TiredFactors(hunt, damage) - hunting.lua folds
--- them into the hunting chance and the combat scaling. config/exhaustion.ini.
+-- Exhaustion (tickets.md 4): a RESOURCE, not a meter to watch (operator 2026-10-28) - it only goes down when your cat
+-- DOES something: a pounce on prey (caught or missed: HuntCaught / HuntMissed - hunting by chance), a fight (its end
+-- screen / the combat manager's EndCombat); LateFactor x for things done late (LateHour until DawnHour). Walking and
+-- exploring cost nothing. Tired / Exhausted: slower, worse at hunting and fighting - so a day's hunting has a limit
+-- (one cat can't keep the clan's pile full alone in leaf-bare). Sleep (a rest: the time-skip key) resets it. Kept with
+-- the save. Emits TiredFactors(hunt, damage) - hunting.lua folds them into the hunting chance and the combat scaling.
+-- config/exhaustion.ini.
 local Exhaustion = {}
 
 local WaCa, log, DayNight
-local cfg = { on = false, perHour = 4, late = 22, dawn = 5, lateFactor = 2.5, perDuty = 5,
+local cfg = { on = false, perPounce = 3, perFight = 10, late = 22, dawn = 5, lateFactor = 1.5,
               levels = { { name = "Tired", at = 60, speed = 0.85, hunt = 0.85, damage = 0.9 },
                          { name = "Exhausted", at = 85, speed = 0.65, hunt = 0.6, damage = 0.75 } } }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
@@ -83,11 +85,11 @@ function Exhaustion.Init(c)
     local ini = WaCa.ReadIni(c.modDir .. "/config/exhaustion.ini") or {}
     local e = ini["Exhaustion"] or {}
     cfg.on = (e.On or "0") == "1"
-    cfg.perHour = tonumber(e.PerHour or "") or cfg.perHour
+    cfg.perPounce = tonumber(e.PerPounce or "") or cfg.perPounce
+    cfg.perFight = tonumber(e.PerFight or "") or cfg.perFight
     cfg.late = tonumber(e.LateHour or "") or cfg.late
     cfg.dawn = tonumber(e.DawnHour or "") or cfg.dawn
     cfg.lateFactor = tonumber(e.LateFactor or "") or cfg.lateFactor
-    cfg.perDuty = tonumber(e.PerDuty or "") or cfg.perDuty
     for i, name in ipairs({ "Tired", "Exhausted" }) do
         local sec = ini[name] or {}
         local l = cfg.levels[i]
@@ -98,14 +100,31 @@ function Exhaustion.Init(c)
     end
     log("exhaustion: %s", cfg.on and "on" or "off")
     if not cfg.on then return end
-    WaCa.On("HourChanged", function(hour)
-        local late = hour >= cfg.late or hour < cfg.dawn
-        setTired(tired + cfg.perHour * (late and cfg.lateFactor or 1), late and "a late hour" or "an hour awake")
-    end)
+    -- a thing done: tiredness (x LateFactor late; the hour only when the day / night cycle runs)
+    local function did(points, what)
+        local h = DayNight and DayNight.Hour()
+        local late = h and (h >= cfg.late or h < cfg.dawn)
+        setTired(tired + points * (late and cfg.lateFactor or 1), what)
+    end
+    WaCa.On("HuntCaught", function() did(cfg.perPounce, "a pounce") end)
+    WaCa.On("HuntMissed", function() did(cfg.perPounce, "a pounce") end)
+    -- a fight's end: its end screen or the combat manager's EndCombat - the second within seconds is the same fight
+    -- (the end screen also shows while a world loads - only a fight whose popup opened counts)
+    local lastFight, inFight = -100, false
+    local function fought()
+        if not inFight or os.clock() - lastFight < 5 then return end
+        inFight = false
+        lastFight = os.clock()
+        did(cfg.perFight, "a fight")
+    end
+    WaCa.Watch("EndCombat", "/Script/SwtAdventure.SwtAdventureCombatManager", "WaCaTiredFight", "post")
+    WaCa.On("WaCaTiredFight", fought)
     WaCa.On("TimeSkipped", function() setTired(0, "slept") end)
-    WaCa.On("DutiesJudged", function(_, done) if done and done > 0 then setTired(tired + cfg.perDuty * done, "duties done") end end)
     WaCa.On("ScreenShown", function(screen)
-        if screen:GetClass():GetFName():ToString():find("^WBP_GuiHudGame") then apply() end
+        local name = screen:GetClass():GetFName():ToString()
+        if name == "WBP_GuiPopupCombat_C" then inFight = true end
+        if name == "WBP_GuiHudCombatOver_C" then fought() end
+        if name:find("^WBP_GuiHudGame") then apply() end
     end)
     WaCa.On("GameSaved", function()
         local slot = WaCa.CurrentSlot()

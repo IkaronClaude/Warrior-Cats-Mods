@@ -151,8 +151,12 @@ local function step(gen)
     end)
 end
 
+-- the clan sim (duties.lua) can DRIVE the clock: no real-time clock then - the cat's activities move it through the
+-- day's slots (DayNight.Advance) - and the day turns at its first slot's hour (the morning), not at midnight
+local driven = false
+
 local function startClock()
-    if not running or ticking or frozen() then return end
+    if driven or not running or ticking or frozen() then return end
     generation = generation + 1
     step(generation)
 end
@@ -169,6 +173,26 @@ function DayNight.Freeze(source, on)
     end
 end
 function DayNight.Frozen() return frozen() end
+
+-- the clan sim takes the clock: from now on only DayNight.Advance moves it; days start (and end) at dayStart
+function DayNight.Drive(dayStart)
+    if not cfg.on then return false end
+    driven = true
+    generation = generation + 1                  -- a running step chain ends at its next step
+    cfg.startHour, cfg.bedHour = dayStart % 24, dayStart % 24
+    hour = cfg.startHour
+    DayNight.lastHour = math.floor(hour)
+    log("daynight: the clan's day drives the clock (days start at %02d:00)", math.floor(cfg.startHour))
+    return true
+end
+function DayNight.Driven() return driven end
+
+-- move the clock on by `hours` (the clan sim): nothing while frozen; false when the cycle is off / frozen
+function DayNight.Advance(hours)
+    if not cfg.on or frozen() or not hours or hours <= 0 then return false end
+    advance(hours)
+    return true
+end
 
 -- an intentional time skip (tickets.md 20): `days` days pass, the new day starts at `toHour` (default StartHour).
 -- Emits DayEnded(fromDay), TimeSkipped(days, fromDay, toDay), then DayStarted(toDay) - the season, weather and prey follow. Returns
@@ -253,6 +277,7 @@ function DayNight.Init(c)
         end
         if not readBase(s) then return end
         running = true
+        refresh()
         startClock()
     end)
     WaCa.On("ScreenHidden", function(screen)

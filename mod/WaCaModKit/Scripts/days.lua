@@ -25,15 +25,36 @@ local function get(n, key, depth)
     return nil
 end
 
+-- a phase's scenes of story day n: any scene step (events.lua: Card / Dialogue / Fade / Bond / Hook ...), in order;
+-- Noon also reads the older Afternoon keys
 local function scenesOf(n, phase)
     local out = {}
-    for _, suffix in ipairs({ "", "1", "2", "3", "4" }) do
-        local v = get(n, phase .. suffix)
-        if v then
-            local kind, text = v:match("^%s*(%a+)%s*:%s*(.+)$")
-            if kind and (kind == "Card" or kind == "Dialogue") then
-                table.insert(out, { key = phase .. suffix, card = kind == "Card" and text or nil, dialogue = kind == "Dialogue" and text or nil })
+    local keys = { phase }
+    if phase == "Noon" then table.insert(keys, "Afternoon") end
+    for _, base in ipairs(keys) do
+        for _, suffix in ipairs({ "", "1", "2", "3", "4", "5", "6", "7", "8", "9" }) do
+            local v = get(n, base .. suffix)
+            local step = v and Events and Events.Parse(v)
+            if step then
+                step.key = base .. suffix
+                table.insert(out, step)
             end
+        end
+    end
+    return out
+end
+
+-- the clan loop's hook point (duties.lua): the story day's beats for a phase not seen yet on this story day - Morning /
+-- Noon / Evening / Night (at that third's clan-event time, back in camp) and MorningStart / NoonStart / EveningStart /
+-- NightStart (when the third begins, before the deputy) - marked seen
+function Days.Beats(phase)
+    local out = {}
+    if not cfg.on then return out end
+    for _, step in ipairs(scenesOf(story, phase)) do
+        if not seen[step.key] then
+            seen[step.key] = true
+            log("days: story day %d, %s: %s %s", story, step.key, step.kind, tostring(step.value))
+            table.insert(out, step)
         end
     end
     return out
@@ -47,7 +68,16 @@ local function setUp(why)
         return
     end
     local hunt, patrol = tonumber(get(story, "Hunt") or ""), tonumber(get(story, "Patrol") or "")
-    if Duties then Duties.Plan(hunt, patrol) end
+    -- the story's activity per slot of the clan's day (MorningDuty = Train, NightDuty = Hunt: a night hunt ...)
+    local kinds
+    for _, slot in ipairs({ "Morning", "Noon", "Evening", "Night" }) do
+        local k = get(story, slot .. "Duty") or (slot == "Noon" and get(story, "AfternoonDuty")) or nil
+        if k then
+            kinds = kinds or {}
+            kinds[slot] = k
+        end
+    end
+    if Duties then Duties.Plan(hunt, patrol, kinds) end
     if Weather then Weather.SetDay(get(story, "Season"), get(story, "Weather")) end
     log("days: story day %d (%s) - duties hunt %s / patrol %s, season %s, weather %s, advance on %s", story, why,
         tostring(hunt or "by needs"), tostring(patrol or "by needs"), tostring(get(story, "Season") or "by days"),
@@ -115,15 +145,11 @@ function Days.Init(c)
         setUp("a new day")
     end)
     WaCa.On("HourChanged", function(hour)
+        if DayNight.Driven() then return end             -- the clan loop plays the beats (Days.Beats)
         for phase, at in pairs(cfg.phases) do
             if hour == at then
-                for _, scene in ipairs(scenesOf(story, phase)) do
-                    if not seen[scene.key] and Events then
-                        seen[scene.key] = true
-                        log("days: story day %d, %s: %s", story, scene.key, scene.card or scene.dialogue)
-                        Events.Play({ card = scene.card, dialogue = scene.dialogue, seconds = 8 })
-                    end
-                end
+                local steps = Days.Beats(phase)
+                if #steps > 0 and Events then Events.Run(steps) end
             end
         end
     end)

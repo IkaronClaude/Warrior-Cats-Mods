@@ -55,9 +55,9 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: StarClan's guidance leads you to prey in sense mode (hunting.ini [Guidance] On = 1).
   - Experimental, off by default: more lines for clan cats, by time of day (lines.ini On = 1).
   - Experimental, off by default: the story as days - scenes, duties, season and weather per story day (days.ini).
-  - Experimental, off by default: exhaustion - late hours and work tire your cat, rest resets it (exhaustion.ini).
+  - Experimental, off by default: exhaustion - pouncing and fighting tire your cat (exploring doesn't), rest resets it (exhaustion.ini).
   - Wading: water slows your cat down, deep water more; RiverClan cats less (wading.ini).
-  - Experimental, off by default: daily duties - hunt, patrol, sparring with your teacher - and your standing in the clan (duties.ini On = 1).
+  - Experimental, off by default: the clan loop - each morning, noon and evening the deputy gives your cat a task, you do it (and explore as long as you like), come back to camp for the clan's event (meetings, eating together, sharing tongues), then the next third; sleep or night watch at night (duties.ini On = 1).
   - Experimental, off by default: scenes at given times - a card or a conversation (events.ini On = 1).
   - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
   - Experimental, off by default: press G next to a story cat to spend time together - your bond grows

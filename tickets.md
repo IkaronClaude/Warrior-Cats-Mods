@@ -196,19 +196,48 @@ game data in this repo.
       installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
+- [ ] **THE CLAN LOOP** (operator 2026-10-28, "the most important thing I want to see"): wake up -> the deputy assigns
+      the task -> you do it (exploring as long as you like) -> return to camp -> the clan event of that time of day,
+      if any (morning / noon / evening: warrior ceremonies, clan meetings ...; the evening: eating together, sharing
+      tongues) -> the time advances by a FULL THIRD (8 hours) -> the next assignment. After the evening: sleep, or
+      the night watch: go to a guard position, a short cutscene shows the time skip. Replaces the effort clock of the
+      slot day (15) - time moves in whole thirds.
+      BUILT 2026-10-28 (duties.lua rewritten again; duties.ini, NEW clanevents.ini; events.lua = the one scene runner):
+      - thirds Morning / Noon / Evening (+ Night) at [Thirds] hours (the sky jumps there; DayNight.Drive - no wall
+        clock; moved forward only within a day - never across the morning, VM: a restored night hour round the clock
+        ended two days at once). Stages: start (beats) -> assign (the deputy: [Assign.<Task>] steps) -> task -> return
+        -> event (back in camp: days.ini beats, clanevents.ini events by When / Chance / Day / Every / Once,
+        [Third.X] Event steps) -> the next third. Night: Sleep (rest key) / NightWatch (the guard spot = where the cat
+        last walked into camp; counts once it stepped away and back; the [NightWatch] cutscene: Fade + card, then
+        DayNight.Skip, the morning fades in) / any task (story NightDuty = Hunt).
+      - the camp = the median of the player's clan's story cats (VM: RiverClan, 22 cats, ~40 m; the game has NO camp
+        trigger - its QuestBoxTriggers are small quest / race boxes, EventOnActivate all 0) + CampRadius. Where the cat
+        is comes from its own FOOTSTEPS (every StepEvery-th) and sense pulses - a trigger box spawned at the camp never
+        reported (teleports, VM); boxes kept for patrol points / the teacher as a second signal.
+      - a done task never sends you home; Free: leave and come back; Train in camp counts at once.
+      - hook points: steps in configs (Card / Dialogue @ who / Fade / FadeIn / Wait / Bond @ who / Emit / Hook),
+        blocking Lua hooks ClanThirdStart / ClanAssign / ClanBackInCamp / ClanNight (Events.Hook), WaCa events
+        ClanThird / TaskAssigned / TaskDone / BackInCamp / ClanNight / DutiesJudged; days.ini Days.Beats per third.
+      - the game's sequencer for every mod: WaCa events SequenceStarted / SequenceFinished (id) / SequenceEnded /
+        DialogueStarted (id) / DialogueNext; WaCa.Watch's 5th arg now hands over ANY simple parameter (native
+        ReadParam: object / FName / gameplay tag / string / number / bool / enum).
+      - offline (lupa, real events.lua, mocked world): morning hunt -> out -> 2 catches -> back -> meeting -> noon free
+        -> out / back -> evening free -> share tongues + bond -> night watch -> away / back -> cutscene -> verdict
+        "2 done +5" -> day 2 morning. VM: see below.
+- [ ] **Day clock HUD instead of an exhaustion meter** (operator 2026-10-28): a clock with the three times of day
+      rotating through (Cult of the Lamb's day clock), showing where the day is - exhaustion shown through it
+      instead of as a meter. Needs a HUD widget (the content pak: a UMG widget, or a material dial on an image).
 - [ ] **Time freezes at story points** (operator 2026-10-28): questing must not happen under time pressure - while a
       story point the day / night clock stands still. NOT "while a quest is active" (operator 2026-10-28: quests run
       over action in the forest - that would make all exploration timeless). Which story points freeze = the clan
       sim's call (15). Built so far: DayNight.Freeze(source, on) / DayNight.Frozen() + the TimeFrozen event; frozen,
       the clock's step chain ends (no idle ticking) and restarts when the last freeze is lifted. Nothing sets it yet.
 - [ ] **Time follows effort, not the wall clock** (operator 2026-10-28: "bind time directly to cat exhaustion based on
-      the current activity's time slot (morning / afternoon / night)"). BLOCKED ON 15 (operator 2026-10-28: "a true
-      time of day cannot really be wired UNTIL we have the day/night clan sim"). Design kept for then (a first cut
-      was written and taken out again): the clock doesn't run on real time; exhaustion.lua emits Effort(points) for
-      footsteps (the CatStep watch wading.lua uses), catches (HuntCaught), fights (EndCombat) and duties; daynight
-      turns points into hours at a per-slot rate (Morning / Afternoon / Evening / Night, hours per point) through the
-      same advance(hours) the clock uses; the waking day stops at BedHour until the cat rests (the time-skip key);
-      PerHour tiredness off in that mode (it would feed itself); frozen time (story quests) moves nothing.
+      the current activity's time slot (morning / afternoon / night)"). Operator: "a true time of day cannot really be
+      wired UNTIL we have the day/night clan sim" -> BUILT AS PART OF 15 (2026-10-28, see there): the clan's day
+      drives the clock by the cat's effort per slot. Refined by the operator the same day: exhaustion is NOT the
+      clock - it's a resource that only drops with things DONE (pounces, fights); walking moves the time but never
+      tires (see 4).
 - [~] **Procedural names: no doubled prefix / suffix** (done, operator check open) (operator 2026-10-25: "Blazeblaze"). The NPC name generator
       (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
       the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
@@ -280,6 +309,28 @@ game data in this repo.
         over - 1 done, 1 missed: standing +1". Hunt counting not seen live (no pounce on the VM - same HuntCaught as
         hunting by chance). Open: Train / Night watch duties, the deputy ASSIGNING duties, standing feeding rank-ups
         (14).
+      THE SLOT DAY (operator 2026-10-28, answers: slots with one activity each; effort moves the clock; night = sleep
+        or night watch, the story may set e.g. a night hunt; "exploration is super key": activities send you out into
+        the territory and a done activity never forces you back to camp). BUILT 2026-10-28 (duties.lua rewritten,
+        duties.ini [Day] / [Slots] / [Effort] / [NightWatch]; daynight.lua DayNight.Drive / Advance / Driven):
+        - a day = 4 slots (Morning 6, Afternoon 12, Evening 17, Night 21; the day turns at the morning). At dawn each
+          slot draws an activity by weight ([Slots]: Hunt / Patrol / Train / NightWatch / Sleep / Free; hunting x
+          PileFactor when the pile is low; training only up to [Train] MaxRank) - or the story's (days.ini
+          MorningDuty / AfternoonDuty / EveningDuty / NightDuty -> Duties.Plan(hunt, patrol, kinds)).
+        - the clock: no wall clock - DayNight.Drive(morning hour) stops it; effort (PerStep footsteps of the player -
+          the BP_AnimStepNotify watch with MeshComp, PerCatch per pounce caught or missed, PerFight) moves it through
+          the slot ([Effort] <Slot> points = the whole slot), HELD at the slot's end until its activity is done; a
+          done activity frees the rest of the slot (hunt on - every catch still feeds the pile: PilePerPrey; "make
+          your own way back" after a patrol); the next slot comes with effort. Night: Sleep holds until the rest key;
+          NightWatch passes in real minutes ([NightWatch] Minutes, an animation step chain) and ends the night (+
+          Standing). Free slots run straight on.
+        - verdict at the day's end (the morning, or a rest): activities begun and done / missed -> standing.
+        - exploration: patrol points + hunting grounds 30-120 m away (MinDistance / MaxDistance 3000 / 12000).
+        - offline sim (lupa, mocked clock): plan -> morning hunt held at 06:00 while open -> 2 catches -> done, the
+          hunt goes on (10 of 2) -> afternoon by effort -> evening hunt -> night held at 05:59 -> rest -> verdict
+          "2 done +4" -> day 2 morning. VM: see below.
+        OPEN: the deputy ASSIGNING duties (from MaxRank on); standing -> rank-ups (14, parked); which story points
+        freeze time (DayNight.Freeze exists).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A day = daynight.lua's day (DayEnded at BedHour). At dawn the deputy hands out 1-2 duties from the clan's
         needs: fresh-kill pile low (USwtAdventureFreshKillPileComponent value) -> HUNT; border / rival tension ->
@@ -311,6 +362,11 @@ game data in this repo.
       DayEnded(nil, day) + day count (VM, 1-minute days, bedtime 22: "day 1 is over", "day 2 is over");
       DayNight.Hour() / DayNight.Day() for other modules. Exhaustion / pacing can hang on DayEnded - the operator
       only picks the numbers (DayMinutes, BedHour) and what a day's end does.
+      EXHAUSTION REDEFINED 2026-10-28 (operator: "more a resource to manage ... caps how much you can hunt ... I don't
+        want to watch an exhaustion meter 24/7 while just exploring - only when you do a thing, a fight or a
+        pounce"): tiredness now ONLY from PerPounce (HuntCaught / HuntMissed) and PerFight (a fight whose popup
+        opened: its end screen / EndCombat), x LateFactor late; PerHour / PerDuty removed. Hunt = 0 at Exhausted =
+        a hard cap on a day's hunting (operator's call).
       EXHAUSTION BUILT 2026-10-28 (experimental, exhaustion.ini On = 0): tiredness 0-100, +PerHour per in-game hour
       awake (x LateFactor between LateHour and DawnHour), +PerDuty per duty done (DutiesJudged); at Tired (60) /
       Exhausted (85): the cat's CustomTimeDilation (moves + animates slower - MaxWalkSpeed is rewritten by the game
