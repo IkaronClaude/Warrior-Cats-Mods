@@ -129,7 +129,14 @@ local function dispatch(event, ...)
 end
 
 -- called by the native part for every event this mod's state watches
+local received                        -- a cross-mod event's handling (below)
+local BROADCAST_MARK = "\1J"           -- a cross-mod payload's first bytes
+
 function WaCaNative_OnEvent(event, object, ...)
+    local first = ...
+    if object == nil and type(first) == "string" and first:sub(1, #BROADCAST_MARK) == BROADCAST_MARK then
+        return received(event, first, select(2, ...))
+    end
     if event == "Started" then
         -- the first event after WaCa.Ready(): the screens already up were shown before this mod listened - replay them
         if handlers["ScreenShown"] then
@@ -173,8 +180,161 @@ function WaCa.CatComponent(actor)
 end
 
 -- raise an event from Lua (to this mod's listeners, at once)
+-- --- JSON (cross-mod payloads): numbers, strings, booleans, nil, plain tables (arrays and string-keyed) ---
+
+local function jsonString(s)
+    return '"' .. s:gsub('[%c"\\]', function(c)
+        local map = { ['"'] = '\\"', ['\\'] = '\\\\', ['\n'] = '\\n', ['\r'] = '\\r', ['\t'] = '\\t' }
+        return map[c] or string.format("\\u%04x", c:byte())
+    end) .. '"'
+end
+
+-- encode a value; returns nil for anything that can't cross (a UObject, a function, a cycle)
+function WaCa.JsonEncode(v, seen)
+    local t = type(v)
+    if v == nil then return "null" end
+    if t == "boolean" then return v and "true" or "false" end
+    if t == "number" then
+        if v ~= v or v == math.huge or v == -math.huge then return "null" end
+        return (math.type and math.type(v) == "integer") and tostring(v) or string.format("%.17g", v)
+    end
+    if t == "string" then return jsonString(v) end
+    if t ~= "table" or getmetatable(v) ~= nil then return nil end
+    seen = seen or {}
+    if seen[v] then return nil end
+    seen[v] = true
+    local n = #v
+    local isArray = n > 0 or next(v) == nil
+    if isArray then for k in pairs(v) do if type(k) ~= "number" then isArray = false break end end end
+    local parts = {}
+    if isArray then
+        for i = 1, n do
+            local e = WaCa.JsonEncode(v[i], seen)
+            if not e then return nil end
+            parts[i] = e
+        end
+        seen[v] = nil
+        return "[" .. table.concat(parts, ",") .. "]"
+    end
+    for k, val in pairs(v) do
+        if k ~= "__order" then
+            local e = WaCa.JsonEncode(val, seen)
+            if not e then return nil end
+            table.insert(parts, jsonString(tostring(k)) .. ":" .. e)
+        end
+    end
+    seen[v] = nil
+    return "{" .. table.concat(parts, ",") .. "}"
+end
+
+function WaCa.JsonDecode(s)
+    local i = 1
+    local function ws() i = s:find("[^ \t\r\n]", i) or #s + 1 end
+    local value
+    local function str()
+        local out, j = {}, i + 1
+        while true do
+            local c = s:sub(j, j)
+            if c == "" then error("unterminated string") end
+            if c == '"' then i = j + 1 break end
+            if c == "\\" then
+                local e = s:sub(j + 1, j + 1)
+                local map = { n = "\n", r = "\r", t = "\t", b = "\b", f = "\f", ['"'] = '"', ["\\"] = "\\", ["/"] = "/" }
+                if e == "u" then
+                    local code = tonumber(s:sub(j + 2, j + 5), 16)
+                    table.insert(out, utf8 and utf8.char(code) or string.char(code % 256))
+                    j = j + 6
+                else
+                    table.insert(out, map[e] or e)
+                    j = j + 2
+                end
+            else
+                table.insert(out, c)
+                j = j + 1
+            end
+        end
+        return table.concat(out)
+    end
+    value = function()
+        ws()
+        local c = s:sub(i, i)
+        if c == "{" then
+            i = i + 1
+            local obj = {}
+            ws()
+            if s:sub(i, i) == "}" then i = i + 1 return obj end
+            while true do
+                ws()
+                local k = str()
+                ws()
+                i = i + 1                                  -- ':'
+                obj[k] = value()
+                ws()
+                local d = s:sub(i, i)
+                i = i + 1
+                if d == "}" then return obj end
+            end
+        elseif c == "[" then
+            i = i + 1
+            local arr, n = {}, 0
+            ws()
+            if s:sub(i, i) == "]" then i = i + 1 return arr end
+            while true do
+                n = n + 1
+                arr[n] = value()
+                ws()
+                local d = s:sub(i, i)
+                i = i + 1
+                if d == "]" then return arr end
+            end
+        elseif c == '"' then
+            return str()
+        elseif s:sub(i, i + 3) == "true" then i = i + 4 return true
+        elseif s:sub(i, i + 4) == "false" then i = i + 5 return false
+        elseif s:sub(i, i + 3) == "null" then i = i + 4 return nil
+        else
+            local num = s:match("^-?%d+%.?%d*[eE]?[-+]?%d*", i)
+            i = i + #num
+            return tonumber(num)
+        end
+    end
+    return value()
+end
+
+-- --- events: local and ACROSS MODS ---
+-- WaCa.Emit(event, ...) dispatches in this mod and - when its arguments are plain data - to every other mod using WaCa
+-- (the parts of WaCa are separate UE4SS mods; the native bridge hands the event over as JSON). Handlers can tell where
+-- an event came from by WaCa.EventFrom (nil = this mod). Received events are never sent on (no echo).
+-- WaCa.Publish(topic, data) / WaCa.Subscribe(topic, fn(data, fromMod)): the same for documented topics with ONE table
+-- payload ("<mod>.<thing>" names, e.g. "clan.thirdStarted" { day = 3, third = "Morning" } - see the Core README).
+WaCa.EventFrom = nil
+
 function WaCa.Emit(event, ...)
     dispatch(event, ...)
+    if not WaCaNative_Broadcast then return end
+    -- (the arguments one by one: a nil in the middle must stay a null, not end the list)
+    local n = select("#", ...)
+    local parts = {}
+    for i = 1, n do
+        local ok, e = pcall(WaCa.JsonEncode, (select(i, ...)))
+        if not ok or not e then return end          -- something that can't cross (a UObject): this mod only
+        parts[i] = e
+    end
+    WaCaNative_Broadcast(event, BROADCAST_MARK .. '{"n":' .. n .. ',"a":[' .. table.concat(parts, ",") .. "]}")
+end
+
+function WaCa.Publish(topic, data) WaCa.Emit(topic, data) end
+function WaCa.Subscribe(topic, fn) WaCa.On(topic, function(data) fn(data, WaCa.EventFrom) end) end
+
+-- a received cross-mod event (from WaCaNative_OnEvent): decoded and dispatched here only
+received = function(event, payload, from)
+    local ok, msg = pcall(WaCa.JsonDecode, payload:sub(#BROADCAST_MARK + 1))
+    if not ok or type(msg) ~= "table" then return end
+    local a = msg.a or {}
+    WaCa.EventFrom = from
+    local ok2, err = pcall(dispatch, event, table.unpack(a, 1, msg.n or #a))
+    WaCa.EventFrom = nil
+    if not ok2 then print(string.format("[WaCa] cross-mod event %s: %s\n", event, tostring(err))) end
 end
 
 -- the mod's main.lua is done: events may arrive from now on (they are held back while it runs on UE4SS's loader thread)

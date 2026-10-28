@@ -226,6 +226,13 @@ game data in this repo.
         check): talking to the deputy (the VM never makes an NPC talkable - see the VM notes), a pile contribution, the
         Gathering's evening, the night watch's guard spot. Check in play whether the deputy ALWAYS offers a talk (else
         the report needs a fallback, e.g. its own interaction).
+        VM FULL DAY 2026-10-28 (Free tasks turned in at the PILE - the game's own UWrcAchievementsManager
+        OnContributeFreshKill called by the harness): morning -> meeting (200) -> noon -> evening -> sharing tongues
+        (200) -> the Gathering (attended, Gathering.Count 1) -> night watch: away, onto camp gate 1 -> the cutscene ->
+        "day 18 over" -> day 19 morning + its Gathering pick. The zone event fired for R-05. Fixed on the way: Bond @
+        Nearest with a generic clanmate (its narrativeRole isn't a number). STILL UNSEEN: a talk with the deputy (the
+        VM never opens one - even PlaySequenceDialogue with the deputy showed no dialogue screen); a REAL deposit at the
+        pile (the harness called the achievements function itself).
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).

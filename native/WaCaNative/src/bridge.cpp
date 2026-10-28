@@ -273,6 +273,27 @@ int LuaWatch(const LuaMadeSimple::Lua& lua) {
     return 0;
 }
 
+// CROSS-MOD EVENTS (operator 2026-10-28: the parts of WaCa are separate UE4SS mods = separate Lua states):
+// WaCaNative_Broadcast(event, payload) hands an event to EVERY OTHER mod's Lua state as
+// WaCaNative_OnEvent(event, nil, payload, fromMod) - the payload a JSON text (WaCa.lua encodes / decodes it; UObjects
+// don't cross states). The sender dispatches to itself in Lua. Game thread only (the states run there).
+int LuaBroadcast(const LuaMadeSimple::Lua& lua) {
+    ModState* from = StateOf(lua);
+    if (!lua.is_string()) lua.throw_error("WaCaNative_Broadcast(event, payloadJson)");
+    std::string event(lua.get_string());
+    std::string payload = lua.is_string() ? std::string(lua.get_string()) : std::string();
+    if (!OnGameThread()) {
+        logx::Line(L"[bridge] broadcast %s off the game thread - dropped", Wide(event).c_str());
+        return 0;
+    }
+    std::string sender = from ? Narrow(from->name) : std::string("?");
+    for (size_t i = 0; i < g_states.size(); ++i) {
+        if (g_states[i].get() == from) continue;
+        Deliver(*g_states[i], event, nullptr, {payload, sender});
+    }
+    return 0;
+}
+
 int LuaReady(const LuaMadeSimple::Lua& lua) {
     if (ModState* state = StateOf(lua)) {
         state->ready = true;
@@ -812,6 +833,7 @@ void LuaStarted(const std::wstring& modName, LuaMadeSimple::Lua& lua) {
     lua.registry().make_ref();                // anchors the thread (new_thread left it on the stack)
     lua.register_function("WaCaNative_Watch", &LuaWatch);
     lua.register_function("WaCaNative_Ready", &LuaReady);
+    lua.register_function("WaCaNative_Broadcast", &LuaBroadcast);
     lua.register_function("WaCaNative_Command", &LuaCommand);
     lua.register_function("WaCaNative_DevDelegate", &LuaDevDelegate);
     lua.register_function("WaCaNative_RebuildLook", &LuaRebuildLook);

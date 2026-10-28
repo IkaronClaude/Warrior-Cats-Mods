@@ -271,7 +271,10 @@ local function runStep(s, ctx, nextStep, stop)
         after(t, nextStep)
     elseif k == "Bond" then
         local cat = Events.Who(s.who or "Nearest")
-        local role = cat and cat.narrativeRole
+        -- (only a story cat has a role number; a generic clanmate's narrativeRole is not one - VM 2026-10-28)
+        local role
+        pcall(function() role = cat and cat.narrativeRole end)
+        if type(role) ~= "number" then role = nil end
         local now = role and role > 0 and WaCaNative_AddBond and WaCaNative_AddBond(role, tonumber(s.value) or 1)
         log("events: bond +%s with %s%s", s.value, s.who or "Nearest", now and "" or " (not a story cat - no bond)")
         nextStep()
