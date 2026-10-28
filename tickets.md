@@ -220,6 +220,12 @@ game data in this repo.
         NpcRef has a ...Deputy role) | Partner (talk to the cat the task was with - training: the mentor, back in camp;
         operator) | any role (Leader, MedicineCat ...) | None. Defaults: Hunt Pile, Patrol Deputy, Free Deputy,
         Train Partner. (The pile as an "end of afternoon" trigger: possible per task, not used - morning patrols.)
+        VM STATUS 2026-10-28: the loop runs morning -> noon -> evening with the camp found by its den doors, camp in / out
+        from the player's footsteps (on EVERY step - every 4th aliased with the VM's 2-step walks), Gatherings announced
+        + picked, NPC patrols gathered and sent out (3 clanmates, 3 border points). NOT seen on the VM (operator play
+        check): talking to the deputy (the VM never makes an NPC talkable - see the VM notes), a pile contribution, the
+        Gathering's evening, the night watch's guard spot. Check in play whether the deputy ALWAYS offers a talk (else
+        the report needs a fallback, e.g. its own interaction).
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
