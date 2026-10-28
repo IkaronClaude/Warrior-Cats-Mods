@@ -40,7 +40,7 @@ local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow 
               weights = { Morning = { Hunt = 2, Patrol = 2, Train = 1 }, Noon = { Hunt = 1, Patrol = 1, Train = 2 },
                           Evening = { Patrol = 2, Hunt = 1, Free = 1 }, Night = { Sleep = 3, NightWatch = 1 } },
               turnIn = { Hunt = "Pile", Patrol = "Deputy", Free = "Deputy", Train = "Partner" },
-              pileFactor = 3, campRadius = 3500, campMax = 6000, watchStanding = 1, stepEvery = 4,
+              pileFactor = 3, campRadius = 3500, campMax = 6000, watchStanding = 1, stepEvery = 1,
               thirdScenes = {}, assignScenes = {}, watchScene = {}, clanEvents = {} }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
 local HINT = "/Game/Gameplay/Blueprints/WorldElements/POIHintArea/BP_POI_HintArea_Quest.BP_POI_HintArea_Quest_C"
@@ -849,6 +849,10 @@ local function where()
     -- teleport back into camp the zones alone never told. Each signal acts when ITS answer changes.)
     if camp.code or camp.center then
         local inside = campInside(p)
+        if not camp.checked then
+            camp.checked = true
+            log("duties: the camp check reads your cat's steps (%.0f %.0f: %s)", p.X, p.Y, inside and "in camp" or "out")
+        end
         if inside ~= camp.stepInside then
             camp.stepInside = inside
             if inside ~= camp.inside then onCamp(inside) end
@@ -1047,7 +1051,9 @@ function Duties.Init(c)
     -- the player's own footsteps (the step notify hands over the stepping mesh - the notify is shared by all cats)
     local steps = 0
     WaCa.Watch("Received_Notify", "/Game/Gameplay/Blueprints/BP_AnimStepNotify.BP_AnimStepNotify_C", "CatStep", "pre", "MeshComp")
-    -- (every cat's steps arrive here: the player's cat's address is kept, not looked up per step)
+    -- (every cat's steps arrive here: the player's cat's address is kept, not looked up per step; the look is a few
+    -- distance checks - on EVERY step: a walk is only a couple of steps on a slow machine, and every 4th step kept
+    -- landing on the same side of a teleport, VM 2026-10-28)
     local me
     WaCa.On("CatStep", function(_, mesh)
         local ok, owner = pcall(function() return mesh:GetOwner():GetAddress() end)
