@@ -35,11 +35,16 @@ local function card(text)
     end)
 end
 
+-- other slow-downs of the cat (WaCa.Emit("SpeedFactor", source, factor), e.g. wading.lua) - the one time dilation is
+-- the product of them all and the tiredness
+local speedFactors = {}
+
 -- the effects of the current level: walking speed now, hunting / damage through TiredFactors
 local function apply()
     local l = cfg.levels[level]
     local speed, hunt, damage = 1, 1, 1
     if l then speed, hunt, damage = l.speed, l.hunt, l.damage end
+    for _, f in pairs(speedFactors) do speed = speed * f end
     -- (MaxWalkSpeed is set by the game every frame for its walk / run / crouch states - VM: an override never held;
     -- the cat's own time dilation slows its movement AND animations: a sluggish, tired cat)
     pcall(function() pawn().CustomTimeDilation = speed end)
@@ -62,12 +67,19 @@ local function setTired(value, why)
 end
 
 function Exhaustion.Tiredness() return tired end
+
 function Exhaustion.Add(points, why) setTired(tired + points, why or "effort") end
 
 local function sidecar() return WaCa.SlotFile("WaCaExhaustion") end
 
 function Exhaustion.Init(c)
     WaCa, log, DayNight = c.WaCa, c.log, c.DayNight
+    -- (before any early return: other slow-downs work with exhaustion off too)
+    WaCa.On("SpeedFactor", function(source, factor)
+        if type(source) ~= "string" then return end
+        speedFactors[source] = (factor and factor ~= 1) and factor or nil
+        apply()
+    end)
     local ini = WaCa.ReadIni(c.modDir .. "/config/exhaustion.ini") or {}
     local e = ini["Exhaustion"] or {}
     cfg.on = (e.On or "0") == "1"

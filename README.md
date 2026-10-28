@@ -78,6 +78,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **Exhaustion** (experimental, off by default, `config/exhaustion.ini`, needs the day / night cycle): every hour awake
   tires your cat a bit (more after `LateHour`), and so does every duty done; tired, it moves slower and hunts and
   fights worse, exhausted even more so. Resting (the time-skip key) resets it. Kept with your save.
+- **Wading** (on, `config/wading.ini`): the game has no swimming - stepping into water slows your cat (shallow
+  `Shallow`, deep `Deep`), RiverClan cats only part of it (`RiverClan`). Read from the floor under each footstep.
 - **The clan's day: duties** (experimental, off by default, `config/duties.ini`, needs the day / night cycle): every
   morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low; a
   hunting ground with prey of the season is marked, and a finished hunt feeds the clan's fresh-kill pile),

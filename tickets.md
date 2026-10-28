@@ -994,6 +994,18 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       read per footstep - the step notify is ONE shared object per animation (a ProcessEvent watch can't tell whose
       step), so it needs a native detour on its Notify virtual (MeshComp is a parameter). Needs the VM to build +
       verify.
+      BUILT 2026-10-28 (wading.lua, config/wading.ini, ON by default: Shallow 0.8, Deep 0.6, RiverClan 0.5 of it):
+        - WaCaNative_Watch / WaCa.Watch take a 5th arg: an OBJECT PARAMETER of the watched function handed to the
+          handler after the object - so a shared notify tells whose step it was (no native detour needed).
+        - the cat's footsteps are BP_AnimStepNotify_C's Received_Notify (VM: the C++ step notify never fires it) -
+          MeshComp's owner == the player pawn.
+        - the floor: CurrentFloor.HitResult.PhysMaterial is a plain material on the terrain; the floor mesh's
+          GetMaterial(0):GetPhysicalMaterial() is the game's (VM: PM_Terrain_Dirt -> "floor type 1"). Water =
+          PM_Terrain_Water / PM_Terrain_DeepWater.
+        - the slow-down: WaCa.Emit("SpeedFactor", "wading", f) - exhaustion.lua multiplies all SpeedFactors into the
+          one CustomTimeDilation (works with exhaustion off too).
+        NOT yet seen: a step INTO water on the VM (no water near the test spot; the VM can't steer) - check in play;
+        GetMaterial(0) may miss a water material on a multi-material mesh (then: the hit's face material).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,

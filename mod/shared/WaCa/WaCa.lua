@@ -135,11 +135,14 @@ function WaCaNative_OnEvent(event, object, ...)
 end
 
 -- watch a UFunction (by name, on objects of a class) as an event; when = "pre" (before it runs) or "post" (default)
-function WaCa.Watch(functionName, classPath, event, when)
+-- param: an object parameter of the function, handed to the handlers after the object (e.g. an anim notify's
+-- "MeshComp" - the notify itself is one object shared by every cat playing the animation)
+function WaCa.Watch(functionName, classPath, event, when, param)
     local id = functionName .. "|" .. classPath .. "|" .. event
     if watched[id] then return true end
     if not WaCaNative_Watch then return false end
-    WaCaNative_Watch(functionName, classPath, event, when or "post")
+    if param then WaCaNative_Watch(functionName, classPath, event, when or "post", param)
+    else WaCaNative_Watch(functionName, classPath, event, when or "post") end
     watched[id] = true
     return true
 end

@@ -9,7 +9,9 @@
 // Native code adds its own events (Emit): the Steam keyboard's answer, for one.
 //
 // Lua side, registered as globals in EVERY Lua mod's state (WaCa.lua wraps them as WaCa.On / WaCa.Watch):
-//   WaCaNative_Watch(functionName, classPath, eventName, "pre" | "post")
+//   WaCaNative_Watch(functionName, classPath, eventName, "pre" | "post" [, paramName])
+//     paramName: an object parameter of that function, handed to the handler after the calling object (e.g. an anim
+//     notify's MeshComp - the notify object itself is shared by every cat playing that animation)
 //   WaCaNative_Ready()            the mod's main.lua finished - events may be delivered from now on; the first thing
 //                                 delivered is "Started" (on the game thread), so the mod can catch up on what is
 //                                 already there (WaCa.lua replays ScreenShown for the screens already up)
@@ -78,6 +80,8 @@ struct Watch {
     UClass* cls = nullptr;                    // resolved on first use (a class may load after the watch is made)
     bool post = true;
     std::string event;
+    std::wstring param;                       // an object parameter to deliver too ("" = none)
+    int32_t paramOffset = -1;                 // its offset in the parameters, resolved with the function
     ModState* state = nullptr;
 };
 
@@ -115,7 +119,8 @@ ModState* StateOf(const LuaMadeSimple::Lua& lua) {
     return nullptr;
 }
 
-void Deliver(ModState& s, const std::string& event, UObject* object, std::initializer_list<std::string> args) {
+void Deliver(ModState& s, const std::string& event, UObject* object, std::initializer_list<std::string> args,
+             UObject* extra = nullptr, bool hasExtra = false) {
     if (!s.ready || !s.thread) return;
     const LuaMadeSimple::Lua& lua = *s.thread;
     if (!lua.is_global_function("WaCaNative_OnEvent")) return;
@@ -129,8 +134,12 @@ void Deliver(ModState& s, const std::string& event, UObject* object, std::initia
         lua.set_string(event);
         if (object) LuaType::auto_construct_object(lua, object);
         else lua.set_nil();
+        if (hasExtra) {
+            if (extra) LuaType::auto_construct_object(lua, extra);
+            else lua.set_nil();
+        }
         for (const auto& a : args) lua.set_string(a);
-        lua.call_function(2 + static_cast<int32_t>(args.size()), 0);
+        lua.call_function(2 + (hasExtra ? 1 : 0) + static_cast<int32_t>(args.size()), 0);
     } catch (const std::exception& e) {
         // the traceback is already in UE4SS.log (LuaMadeSimple's error handler)
         logx::Line(L"[bridge] %s: event %s failed: %s", s.name.c_str(), Wide(event).c_str(), Wide(e.what()).c_str());
@@ -148,12 +157,13 @@ void DeliverStarted() {
     }
 }
 
-void OnProcessEvent(bool post, UObject* context, UFunction* function) {
+void OnProcessEvent(bool post, UObject* context, UFunction* function, void* params) {
     if (!OnGameThread()) return;
     if (g_startPending.load(std::memory_order_relaxed)) DeliverStarted();
     if (g_watchCount.load(std::memory_order_relaxed) == 0 || !context || !function) return;
     const FName name = function->GetNamePrivate();
-    std::vector<std::pair<ModState*, std::string>> due;
+    struct Due { ModState* state; std::string event; UObject* extra; bool hasExtra; };
+    std::vector<Due> due;
     {
         std::lock_guard<std::mutex> lock(g_watchesMutex);
         for (auto& w : g_watches) {
@@ -162,10 +172,21 @@ void OnProcessEvent(bool post, UObject* context, UFunction* function) {
                 w.cls = UObjectGlobals::StaticFindObject<UClass*>(nullptr, nullptr, w.classPath.c_str());
                 if (!w.cls) continue;
             }
-            if (context->IsA(w.cls)) due.emplace_back(w.state, w.event);
+            if (!context->IsA(w.cls)) continue;
+            if (w.param.empty()) {
+                due.push_back({w.state, w.event, nullptr, false});
+                continue;
+            }
+            if (w.paramOffset < 0) {
+                FProperty* p = function->FindProperty(FName(w.param.c_str(), FNAME_Find));
+                if (!p) continue;
+                w.paramOffset = p->GetOffset_Internal();
+            }
+            UObject* extra = params ? *reinterpret_cast<UObject**>(static_cast<uint8_t*>(params) + w.paramOffset) : nullptr;
+            due.push_back({w.state, w.event, extra, true});
         }
     }
-    for (auto& [state, event] : due) Deliver(*state, event, context, {});
+    for (auto& d : due) Deliver(*d.state, d.event, context, {}, d.extra, d.hasExtra);
 }
 
 // --- Lua functions (the calling Lua state is the argument; arguments are consumed from index 1) ---
@@ -179,7 +200,10 @@ int LuaWatch(const LuaMadeSimple::Lua& lua) {
     std::string event(lua.get_string());
     bool post = true;
     if (lua.is_string()) post = lua.get_string() != "pre";
+    std::wstring param;
+    if (lua.is_string()) param = Wide(std::string(lua.get_string()));
     Watch w;
+    w.param = param;
     w.function = FName(function.c_str(), FNAME_Add);
     w.classPath = classPath;
     w.post = post;
@@ -718,9 +742,9 @@ void Install() {
         },
         once);
     if (id == Hook::ERROR_ID) logx::Line(L"[bridge] no engine tick hook - events are OFF");
-    Hook::RegisterProcessEventPreCallback([](auto&, UObject* c, UFunction* f, void*) { OnProcessEvent(false, c, f); },
+    Hook::RegisterProcessEventPreCallback([](auto&, UObject* c, UFunction* f, void* p) { OnProcessEvent(false, c, f, p); },
                                           {false, true, STR("WaCaModKit"), STR("EventsPre")});
-    Hook::RegisterProcessEventPostCallback([](auto&, UObject* c, UFunction* f, void*) { OnProcessEvent(true, c, f); },
+    Hook::RegisterProcessEventPostCallback([](auto&, UObject* c, UFunction* f, void* p) { OnProcessEvent(true, c, f, p); },
                                            {false, true, STR("WaCaModKit"), STR("EventsPost")});
     combat::Install();
     logx::Line(L"[bridge] ProcessEvent callbacks installed");
