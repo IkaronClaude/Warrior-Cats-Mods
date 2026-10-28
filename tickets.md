@@ -219,7 +219,10 @@ game data in this repo.
         game's UWrcAchievementsManager.OnContributeFreshKill) | Deputy (a talk with the deputy - the dialogue screen's
         NpcRef has a ...Deputy role) | Partner (talk to the cat the task was with - training: the mentor, back in camp;
         operator) | any role (Leader, MedicineCat ...) | None. Defaults: Hunt Pile, Patrol Deputy, Free Deputy,
-        Train Partner. (The pile as an "end of afternoon" trigger: possible per task, not used - morning patrols.) Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
+        Train Partner. (The pile as an "end of afternoon" trigger: possible per task, not used - morning patrols.)
+      - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
+        numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
+        story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
       - THE CAMPS (VM 2026-10-28, zones.json + tools/zone_map.py): every clan's camp is one of the game's zones -
         R-05 RiverClan Camp (3 areas, 2 gates, 46 x 90 m), S-08 ShadowClan Camp (2 / 1, 33 x 57 m), T-10 ThunderClan
         Camp (1 / 2, 40 x 40 m), W-04 WindClan Camp (2 / 1, 62 x 78 m); the code's letter = the clan's initial. Found
@@ -1029,6 +1032,27 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       "putting fresh-kill on the pile" screen - or at least force depositing EVERYTHING in the inventory at the pile -
       so every day is fresh. (The clan loop's hunt turn-in is the pile contribution: UWrcAchievementsManager
       OnContributeFreshKill.)
+- [ ] **Cutscenes from text** (operator 2026-10-28: "what a writer would need to truly build their own story"): a mod
+      defines a cutscene in plain text, with prebuilt configs:
+      - SHAPES: named, premade cat arrangements - e.g. "two sides facing: side 1 = cat1 + player, side 2 = cat2, cat3,
+        cat4" - the writer only fills the slots with roles (the cast);
+      - TYPES: the game's own cutscene kinds turned generic - a clan meeting, an apprentice ceremony (single / dual /
+        triple), ...;
+      - PLACES: named locations where a shape can play out - "RiverClan camp clearing", "hunting location 1" ...;
+      - ACTIONS on a timeline: "look at: cat4", "say: cat2 line 1", emotes / animations ("cat3 bristling"), "walk in"
+        for any cat with delays (two groups walking in to face each other);
+      - CAMERA: simple named moves - "sweep above", "look at <cat>", "portrait shot player" ...
+      The format must be standardised (this sketch isn't). Sketch:
+        [Cutscene.RogueStandoff]  Shape = Facing_1v3   Place = RiverClanCampClearing
+        Side1 = player, S:mentor   Side2 = E:RoguLeader, S:rogue_1, S:rogue_2
+        At0 = WalkIn: Side2   At2 = Camera: SweepAbove   At4 = Say: E:RogueLeader "You're on our land now."
+        At6 = Emote: S:mentor Bristle   At8 = Camera: Portrait player
+      and played from any scene: "Cutscene: RogueStandoff" (a new events.lua step, waiting for its end).
+      RESEARCH: the game's cinematic dialogues place cats on TEAM SPATIAL POINTS (USwtQuestTeamSpatialPointComponent
+      TeamActorMain / Left / Right, LookAtPercentageOffset) and SwtSequencerManager binds actors into level sequences
+      (AttachBoundActorToParentAnchor, SequencerStarted / Finished) - the shapes may map onto those; the game's camera
+      actor (ASwtAdventureCameraActor), montages (SwtPlayMontageComponent) and emote animations for the actions; the
+      cast (roles) for who stands where.
 - [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
@@ -1036,7 +1060,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       events (duties' verdicts, the story's beats).
 - [ ] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
       kinds, drawn by [Tasks] weights / set by the story):
-      - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den);
+      - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den) -
+        its turn-in: talk to the medicine cat ([Task.<Kind>] TurnIn = MedicineCat - supported);
       - clear out the old bedding moss (from the dens, out of camp);
       - water moss: soak moss in the lake / stream and bring it to cats too weak to move so they can drink - more
         often in greenleaf (summer), the season from weather.lua. Needs a "weak / sick cat" (an elder, the medicine

@@ -728,15 +728,28 @@ thirdEnd = function()
     local name = thirdName()
     log("duties: the %s's end - its events", name:lower())
     WaCa.Emit("ClanThirdEnded", today.day, name)
-    local steps = {}
-    append(steps, Days and Days.Beats and Days.Beats(name))
+    -- the ORDER (operator 2026-10-28: a story's cutscene after the hand-in, BEFORE or AFTER the clan's event): numbered
+    -- slots, lowest first - the story's beats 100 (days.ini <Third>), the clan's events 200 (each its own Order =),
+    -- the story's after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the blocking hook ClanThirdEnd 400
+    local parts = {}
+    local function part(order, steps, what)
+        if steps and #steps > 0 then table.insert(parts, { order = order, steps = steps, what = what, n = #parts }) end
+    end
+    part(100, Days and Days.Beats and Days.Beats(name), "the story")
     for _, e in ipairs(pickEvents(name, today.day)) do
-        log("duties: clan event %s", e.name)
-        append(steps, e.steps)
+        part(e.order or 200, e.steps, "clan event " .. e.name)
         if e.once then eventsDone[e.name] = true end
     end
-    append(steps, cfg.thirdScenes[name] and cfg.thirdScenes[name].Event)
-    table.insert(steps, hook("ClanThirdEnd"))
+    part(300, Days and Days.Beats and Days.Beats(name .. "After"), "the story (after)")
+    part(350, cfg.thirdScenes[name] and cfg.thirdScenes[name].Event, "duties.ini")
+    part(400, { hook("ClanThirdEnd") }, "the hook")
+    table.sort(parts, function(a, b) if a.order ~= b.order then return a.order < b.order end return a.n < b.n end)
+    local steps, order = {}, {}
+    for _, pt in ipairs(parts) do
+        append(steps, pt.steps)
+        if pt.what ~= "the hook" then table.insert(order, string.format("%s (%d)", pt.what, pt.order)) end
+    end
+    if #order > 0 then log("duties: the %s's end: %s", name:lower(), table.concat(order, ", ")) end
     local day = today
     Events.Run(steps, function()
         if today ~= day then return end
@@ -961,7 +974,8 @@ function Duties.Init(c)
         if name and (sec.When or "") ~= "" and sec.Off ~= "1" then
             table.insert(cfg.clanEvents, { name = name, when = sec.When, chance = tonumber(sec.Chance or "") or 100,
                 day = tonumber(sec.Day or ""), every = tonumber(sec.Every or ""), only = tonumber(sec.OnlyDay or ""),
-                once = (sec.Once or "0") == "1", require = sec.Require, steps = Events.Lines(sec, "Step") })
+                once = (sec.Once or "0") == "1", require = sec.Require, order = tonumber(sec.Order or ""),
+                steps = Events.Lines(sec, "Step") })
         end
     end
     table.sort(cfg.clanEvents, function(a, b) return a.name < b.name end)
