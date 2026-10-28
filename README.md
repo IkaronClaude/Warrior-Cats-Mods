@@ -75,6 +75,10 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
   card in the game's own style says so ("A quarter moon passes. It is leaf-bare.") and the season, weather and prey
   move on with it. Day scripts and other modules can skip time too.
+- **More for clan cats to say** (experimental, off by default, `config/lines.ini`): the game gives each cat role one
+  line per story chapter, so cats repeat themselves. Add lines per role (or for all cats) and time of day (Morning /
+  Day / Evening / Night / Any); every in-game hour each cat's line is one of them by chance (`Share`), or the game's
+  own. A few example lines are in the ini.
 - **Scenes** (experimental, off by default, `config/events.ini`, needs the day / night cycle): things happen on screen
   at a time of day - a card ("The full moon rises - the Gathering is tonight.") and / or one of the game's own
   conversations with the nearest clanmate, on a day, every N days or daily, once or repeating (remembered with the

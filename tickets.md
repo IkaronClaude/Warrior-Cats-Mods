@@ -714,6 +714,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       The FRAMEWORK is core; the story content that fills it is P3. Do it once the clan-sim day (15) exists.
 - [ ] **11. Clan cat interactivity.** Every cat repeats the same single line. Context lines (rank, relationship, time of
       day, current duty, recent events), plus interactions.
+      FOUND 2026-10-28: the game's filler chatter = QST_Story.Monologue.Filler.<Role>.<Chapter>.<n>.Context.<n>.<Tone>
+        - 755 role x chapter x tone groups, EACH ONE line (nothing to rotate without breaking the story context).
+      BUILT 2026-10-28 (experimental, lines.ini On = 0): lines.lua - pools per role ([Lines.<Role>] or All) and time
+        of day (Morning / Day / Evening / Night / Any); every in-game hour each filler key's text is, by chance Share,
+        a pool line for the hour, else the game's own (swapped in the string table - the game still picks the key).
+        VM: "Night - 824 clan cat lines changed", read back: Brightheart's line = "Look at Silverpelt tonight...".
+        Open (content, operator): the lines themselves (7 examples in the ini); by relationship / rank needs the bond
+        level per cat (5).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Context lines by rank / relationship / time of day: the game's own Strings_EN rows already exist per role
         (QST_Story.Monologue.Filler.<Clan><Role>.*) - pick the line by context instead of the fixed one (hook the
