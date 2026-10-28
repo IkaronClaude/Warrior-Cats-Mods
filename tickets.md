@@ -664,6 +664,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         26) from the cat toward the prey, the first ShowLength cm (2500). VM: "StarClan shows the way (8 puffs)" with
         the cat 20 m before the guided mouse (that frame was blocked by a rock - the puff effect itself is the one
         confirmed visible).
+        SEEN (04:16): the cat 11 m before the guided prey, sense mode - "StarClan shows the way (4 puffs)" and the
+        glowing scent marker on screen between the cat and the prey (paw icon). VERIFIED.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Hook the game's StarClan guidance target (its quest-objective / scent-objective actors, e.g.
         BP_ScentObjectiveFish) and point it at the nearest prey of the kind the clan needs.
