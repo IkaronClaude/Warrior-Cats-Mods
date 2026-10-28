@@ -298,6 +298,13 @@ game data in this repo.
       DayEnded(nil, day) + day count (VM, 1-minute days, bedtime 22: "day 1 is over", "day 2 is over");
       DayNight.Hour() / DayNight.Day() for other modules. Exhaustion / pacing can hang on DayEnded - the operator
       only picks the numbers (DayMinutes, BedHour) and what a day's end does.
+      EXHAUSTION BUILT 2026-10-28 (experimental, exhaustion.ini On = 0): tiredness 0-100, +PerHour per in-game hour
+      awake (x LateFactor between LateHour and DawnHour), +PerDuty per duty done (DutiesJudged); at Tired (60) /
+      Exhausted (85): the cat's CustomTimeDilation (moves + animates slower - MaxWalkSpeed is rewritten by the game
+      every frame, an override never held, VM), hunting chance x and damage dealt x (TiredFactors -> hunting.lua ->
+      HuntRoll / CombatScale); a rest (TimeSkipped) resets it; kept in a save sidecar; cards at each level. VM:
+      "Tired (60)" -> "Exhausted (94, a late hour)", dilation 1.00 -> 0.65, "hunting: tiredness x0.60 hunting, x0.75
+      damage", F9 -> "rested (0, slept)". Phases (morning / afternoon / evening) for day scripts: open (25).
 - [ ] **25. Story as days (day scripts).** Operator 2026-10-25: the story is defined in DAYS, as data, which keeps it
       organised. Each day defines:
       - per phase (morning / afternoon / evening): cutscenes, the main story quest if any, where you may go

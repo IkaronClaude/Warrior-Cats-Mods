@@ -71,6 +71,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   Prey follows the season (`[Season.*] Prey`): in leaf-bare only part of the mice, rabbits and birds are about and
   hardly any squirrels - the rest are away (hidden, never destroyed) until a later season; every in-game hour some
   prey comes and goes (`PreyTurnover`), turning up at a random spot of its area (`PreyRandomPlaces`).
+- **Exhaustion** (experimental, off by default, `config/exhaustion.ini`, needs the day / night cycle): every hour awake
+  tires your cat a bit (more after `LateHour`), and so does every duty done; tired, it moves slower and hunts and
+  fights worse, exhausted even more so. Resting (the time-skip key) resets it. Kept with your save.
 - **The clan's day: duties** (experimental, off by default, `config/duties.ini`, needs the day / night cycle): every
   morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low),
   patrol N border points (marked like StarClan's guidance); at the day's end the duties done raise your standing in

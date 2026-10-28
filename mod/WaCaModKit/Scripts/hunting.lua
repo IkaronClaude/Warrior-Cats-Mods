@@ -12,6 +12,8 @@ local chance = { on = false, critMiss = 5, ranks = {}, factors = {}, kinds = {},
                  world = 1 }      -- world: the season's x the weather's factor (weather.lua WorldFactors)
 -- the cat's specialisation (config/roles.ini, tickets.md 13): active from MinRank on
 local role = { name = nil, minRank = "Warrior", roles = {}, active = nil }
+-- tiredness (exhaustion.lua TiredFactors): x hunting chance, x damage dealt
+local tiredHunt, tiredDamage = 1, 1
 local hooked, huntHooked = false, false
 local boosted = {}               -- prey -> its speed was raised once
 
@@ -81,13 +83,18 @@ end
 
 local function baseChance()
     local base = chance.ranks[chance.rank or chance.ifUnknown or ""]
-    return base and base * chance.world * roleOf("hunt")
+    return base and base * chance.world * roleOf("hunt") * tiredHunt
 end
 
 -- seconds after loud ground the prey still hears the cat (a Tracker moves quieter)
 local function noiseWindow() return chance.noise * roleOf("noise") end
 
 -- the specialisation applies once the cat's rank reaches MinRank (ranks by the game's own order, ECharacterRank)
+-- combat: damage your cat deals / takes in the game's fights (combat.cpp) - the role's x tiredness
+local function sendCombat()
+    WaCa.Command(string.format("CombatScale|%s|%s", tostring(roleOf("combat") * tiredDamage), tostring(roleOf("guard"))))
+end
+
 local function updateRole()
     local ranks = rankValues()
     local now = role.name and chance.rank and ranks[chance.rank] and ranks[role.minRank]
@@ -99,8 +106,7 @@ local function updateRole()
             now, roleOf("hunt"), roleOf("fish"), roleOf("noise"), roleOf("combat"), roleOf("guard"))
     end
     WaCa.Emit("RoleFactors", roleOf("hunt"), roleOf("fish"))
-    -- combat: damage your cat deals / takes in the game's fights (combat.cpp)
-    WaCa.Command(string.format("CombatScale|%s|%s", tostring(roleOf("combat")), tostring(roleOf("guard"))))
+    sendCombat()
 end
 
 local function sendChance()
@@ -304,6 +310,14 @@ function Hunting.Init(c)
     end)
     WaCa.Watch("Construct", "/Game/Art/UXD/Blueprints/Controls/gui_actor_widgets/WBP_GuiLevelWarning.WBP_GuiLevelWarning_C", "WaCaPreyMarker", "post")
     WaCa.On("WaCaPreyMarker", labelSoon)
+    -- tiredness (exhaustion.lua): a tired cat hunts and fights worse
+    WaCa.On("TiredFactors", function(hunt, damage)
+        tiredHunt, tiredDamage = hunt or 1, damage or 1
+        log("hunting: tiredness x%.2f hunting, x%.2f damage", tiredHunt, tiredDamage)
+        sendChance()
+        sendCombat()
+        labelSoon()
+    end)
     -- seasons / weather (weather.lua): leaf-bare and rain make hunting harder
     WaCa.On("WorldFactors", function(hunt)
         if chance.world == hunt then return end
