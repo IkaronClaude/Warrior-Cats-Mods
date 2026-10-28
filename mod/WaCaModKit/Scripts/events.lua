@@ -77,6 +77,12 @@ local function play(e, day)
     if e.once then done[e.name] = true end
 end
 
+-- play a scene now (day scripts, other modules): { card = text, dialogue = tag, seconds = n }
+function Events.Play(scene)
+    if scene.card then showCard(scene.card, scene.seconds or 6) end
+    if scene.dialogue then playDialogue(scene.dialogue) end
+end
+
 -- the scenes due at this hour of this day
 local function due(hour, day)
     if require("menus").InMenu() then return end

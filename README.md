@@ -71,6 +71,10 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   Prey follows the season (`[Season.*] Prey`): in leaf-bare only part of the mice, rabbits and birds are about and
   hardly any squirrels - the rest are away (hidden, never destroyed) until a later season; every in-game hour some
   prey comes and goes (`PreyTurnover`), turning up at a random spot of its area (`PreyRandomPlaces`).
+- **The story as days** (experimental, off by default, `config/days.ini`): the story as data - one `[Day.N]` per story
+  day with its scenes per phase (morning / afternoon / evening: a card or one of the game's conversations), its duties,
+  season and weather, and when to move on (`Advance = Always / Duties / Rank:Warrior`); until then the story day
+  repeats, scenes already seen skipped. `Like = M` copies an earlier day. Kept with your save. Example days inside.
 - **Exhaustion** (experimental, off by default, `config/exhaustion.ini`, needs the day / night cycle): every hour awake
   tires your cat a bit (more after `LateHour`), and so does every duty done; tired, it moves slower and hunts and
   fights worse, exhausted even more so. Resting (the time-skip key) resets it. Kept with your save.

@@ -14,6 +14,7 @@ local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow 
               reach = 800, minDist = 2000, maxDist = 9000, standingDone = 2, standingMissed = -1, seconds = 7 }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
 local HINT = "/Game/Gameplay/Blueprints/WorldElements/POIHintArea/BP_POI_HintArea_Quest.BP_POI_HintArea_Quest_C"
+local plan                        -- day scripts' override for the next duties: { hunt = n, patrol = n }
 local today                       -- { day, hunt = { need, got }, patrol = { points = { {X,Y,Z, done, marker} } } }
 local standing = 0
 local restoredFor
@@ -112,8 +113,15 @@ local function assign(day)
     pcall(function() pile = tonumber(WaCa.GameProgress().FreshKill.Value) or 100 end)
     today = { day = day }
     local hunt = pile < cfg.pileLow and cfg.huntMax or math.random(cfg.huntMin, cfg.huntMax)
-    today.hunt = { need = hunt, got = 0 }
-    if cfg.patrolPoints > 0 then today.patrol = patrolPoints(cfg.patrolPoints) end
+    local patrol = cfg.patrolPoints
+    if plan then hunt, patrol = plan.hunt or hunt, plan.patrol or patrol end
+    if hunt > 0 then today.hunt = { need = hunt, got = 0 } end
+    if patrol > 0 then today.patrol = patrolPoints(patrol) end
+    if not today.hunt and not today.patrol then
+        log("duties: day %d - no duties today", day)
+        today = nil
+        return
+    end
     log("duties: day %d (fresh-kill pile %d) - %s", day, pile, summary())
     card(string.format("Today's duties: %s.", summary()))
 end
@@ -155,6 +163,8 @@ local function verdict()
 end
 
 function Duties.Standing() return standing end
+-- day scripts (days.lua): the next duties' numbers (nil = the clan's needs decide)
+function Duties.Plan(hunt, patrol) plan = (hunt or patrol) and { hunt = hunt, patrol = patrol } or nil end
 function Duties.Today() return today end
 
 local function sidecar() return WaCa.SlotFile("WaCaDuties") end

@@ -52,7 +52,10 @@ local function chances(s)
     return out
 end
 
+local forcedSeason, dayChances      -- set by day scripts (days.lua): the story day's season / weather chances
+
 local function seasonFor(day)
+    if forcedSeason then return forcedSeason end
     if #cfg.order == 0 then return nil end
     local i = cfg.start
     if day then i = (cfg.start - 1 + math.floor((day - 1) / cfg.days)) % #cfg.order + 1 end
@@ -60,7 +63,7 @@ local function seasonFor(day)
 end
 
 local function rollWeather()
-    local list = (cfg.seasons[season] or {}).chances or {}
+    local list = dayChances or (cfg.seasons[season] or {}).chances or {}
     local total = 0
     for _, c in ipairs(list) do total = total + c[2] end
     if total <= 0 then return "Clear" end
@@ -228,6 +231,18 @@ function Weather.Set(name, hours)
     if not cfg.weathers[name] then return false end
     setWeather(name, hours or cfg.minHours, "set")
     return true
+end
+
+-- day scripts (days.lua): the story day's season (nil = by the day count again) and weather chances
+-- ("Rain=70, Snow=10, Clear=20"; nil = the season's) - a new spell is rolled at once
+function Weather.SetDay(seasonName, chancesText)
+    if not cfg.on then return end
+    forcedSeason = seasonName and cfg.seasons[seasonName] and seasonName or nil
+    dayChances = nil
+    if chancesText and chancesText ~= "" then dayChances = chances(chancesText) end
+    local before = season
+    updateSeason("the story day")
+    if season == before then newSpell("the story day") end
 end
 
 -- the weather lives with the save (a sidecar, written when the game saves - like daynight's time)

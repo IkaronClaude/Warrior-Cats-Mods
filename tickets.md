@@ -328,6 +328,15 @@ game data in this repo.
       - Day 13: the next big story beat.
       This is the backbone 15 (clan-sim day) fills in from deputy rank on. Needs 4 (phases), 21 (season / weather) and
       the game's quest / cutscene / dialogue hooks.
+      BUILT 2026-10-28 (experimental, days.ini On = 0): days.lua - [Day.N] per story day: Morning / Afternoon /
+        Evening scenes (Card: / Dialogue:, played through Events.Play at the [Days] phase hours, each once per story
+        day), Hunt / Patrol (Duties.Plan - instead of the clan's needs), Season / Weather (Weather.SetDay: a forced
+        season + day weather chances), Advance = Always | Duties (all done - DutiesJudged) | Rank:<Name>; not met = the
+        story day repeats (scenes seen skipped); Like = M copies, "none" turns a key off; the story day + scenes seen
+        in a save sidecar. Inited before weather / duties so it sets their day up first. Resting now ENDS the day
+        (DayNight.Skip emits DayEnded - the duty verdict runs). Offline test (lupa): advance / repeat / skip seen /
+        Like. VM: "story day 1 ... season Greenleaf, weather Clear=100", its morning card; F9 -> "on to story day 2"
+        with "patrol 2 border points"; F9 -> "story day 2 repeats (Duties not met)". Content (the real days): operator.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - days.ini / one file per story day: [Day.N] conditions (rank, duties done, previous choices) + the scenes to play
         (the game's own sequence dialogues by tag - PlaySequenceDialogue, verified on the VM) + which quests unlock.

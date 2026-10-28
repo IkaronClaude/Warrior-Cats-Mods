@@ -590,6 +590,9 @@ require("activities").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight =
 local DayNight = require("daynight")
 DayNight.Init({ WaCa = WaCa, log = log, modDir = modDir })
 -- seasons and weather (config/weather.ini)
+-- the story as days (config/days.ini) - before weather / duties: it sets their day up first on each DayStarted
+require("days").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Weather = require("weather"),
+    Duties = require("duties"), Events = require("events") })
 local Weather = require("weather")
 Weather.Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 -- prey follows the season (config/weather.ini [Season.*] Prey)
