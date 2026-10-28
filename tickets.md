@@ -773,6 +773,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         check (NavigationSystemV1.FindPathToLocationSynchronously) returns NOTHING from Lua - even for 300 units of
         open ground - so partners stay chosen by straight-line distance and an unreachable walk gives up. The world's
         idle clanmates near the VM cat stand 1700+ apart (6 pairs within 2500 of 66 idle) - a real camp is the test.
+      BOND GAIN - FOUND 2026-10-28 (the next step, an exe job like AddExperience): bonds are kept per narrative role
+        (save: GameplayProgression.Bonding = { <role>: points, <clan>: points, Nodes = answered dialogue nodes }, e.g.
+        TheRegretfulWarrior 97, RiverClan 102); at runtime that map is NOT reflected. The game changes it through (a) its
+        effect system - USwtAdventureUpdateRoleEffect.UpdateRoleStruct.AffectedBonding = [{ narrativeRole, Bonding }]
+        (FSwtAdventureUpdateBondingStruct), applied natively (no reflected Apply), and (b) dialogue answers
+        (UQuestDialogueEdge Score / ClanBonding, UQuestDialogueActionResolveBondAnswer). Plan: find the native
+        "apply effect" virtual of USwtAdventureBaseEffect (or the bonding add it ends in), anchor it in check_hooks.py,
+        and grant Bond = +n per finished joint activity through it (a constructed UpdateRoleEffect with
+        AffectedBonding) - then the game's own level-up UI / rewards follow.
 - [ ] **13. Less "jack of all trades".** Specialisation for your cat (strengths / weaknesses, roles).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - Specialisation = a role picked at warrior rank: Hunter (+15 hunt chance, -fight), Fighter (+combat damage,
