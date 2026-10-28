@@ -54,6 +54,7 @@ WHAT IT DOES (0.7.0)
   - Experimental, off by default: scent trails to prey in sense mode (hunting.ini [Scent] Trails = 1).
   - Experimental, off by default: StarClan's guidance leads you to prey in sense mode (hunting.ini [Guidance] On = 1).
   - Experimental, off by default: more lines for clan cats, by time of day (lines.ini On = 1).
+  - Experimental, off by default: daily duties - hunt, patrol - and your standing in the clan (duties.ini On = 1).
   - Experimental, off by default: scenes at given times - a card or a conversation (events.ini On = 1).
   - Off by default: a specialisation for your cat - Hunter, Tracker or Fighter (roles.ini Role = ...).
   - Experimental, off by default: press G next to a story cat to spend time together - your bond grows

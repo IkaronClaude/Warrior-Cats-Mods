@@ -598,6 +598,8 @@ require("preyworld").Init({ WaCa = WaCa, log = log, modDir = modDir, Weather = W
 require("timeskip").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight, Weather = Weather })
 -- more for clan cats to say, by time of day (config/lines.ini)
 require("lines").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
+-- the clan's day: duties from the clan's needs, standing (config/duties.ini)
+require("duties").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 -- scenes at given times (config/events.ini)
 require("events").Init({ WaCa = WaCa, log = log, modDir = modDir, DayNight = DayNight })
 

@@ -257,6 +257,16 @@ game data in this repo.
 - [ ] **15. Clan-sim day.** Each day you get assignments based on the clan's needs: hunt, patrol, night watch, train
       with your mentor, train your apprentice, ... From deputy rank on, your job becomes ASSIGNING the day's duties
       (then joining whichever you want). This is the backbone that 4 / 6 / 7 / 8 / 14 / 17 plug into.
+      BUILT 2026-10-28 (experimental, duties.ini On = 0): duties.lua - at each DayStarted (and 30 s into a session's
+        first world) the duties from the clan's needs: Hunt N prey (Max when the save's FreshKill.Value < PileLow;
+        counted by HuntCaught), Patrol N border points (random spots in generator areas 20-90 m away, each marked with
+        the game's quest hint actor; checked within Reach at every in-game hour / sense pulse); at DayEnded the
+        verdict: standing +Done per duty done, +Missed per missed, kept in a save sidecar (for 14 pacing) +
+        DutiesJudged event; cards at dawn / each duty / the verdict; none from MaxRank (Deputy) on. VM (1-minute test
+        days, Reach raised): "day 17 ... hunt 3 prey, patrol 2 border points" -> "border point 1/2 checked" -> "day 17
+        over - 1 done, 1 missed: standing +1". Hunt counting not seen live (no pounce on the VM - same HuntCaught as
+        hunting by chance). Open: Train / Night watch duties, the deputy ASSIGNING duties, standing feeding rank-ups
+        (14).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A day = daynight.lua's day (DayEnded at BedHour). At dawn the deputy hands out 1-2 duties from the clan's
         needs: fresh-kill pile low (USwtAdventureFreshKillPileComponent value) -> HUNT; border / rival tension ->
