@@ -394,6 +394,38 @@ local function rebuild(comp)
     end
 end
 
+-- the SHAPE (tickets.md "Decouple cat stats from looks"): appearance.ini [Player] BodyValue / FaceValue / FurValue /
+-- EyeValue / WhiskerValue / TailIdx / EarIdx / CatSize set the cat's look data (its FCatCustomData) before the build -
+-- the stats live apart in the save (GameplayProgression.Stats, set once by the creator), so the body you see no longer
+-- has to be the one the stats came from. Not while the creator is open (its own choices rule there).
+local SHAPE_KEYS = { "BodyValue", "FaceValue", "FurValue", "EyeValue", "WhiskerValue", "TailIdx", "EarIdx", "CatSize" }
+-- returns the values it replaced: put back right after the (synchronous) build, so the data the game SAVES stays the
+-- cat's own - the mod never changes the save
+local function applyShape(comp)
+    if Creator.IsOpen() then return nil end
+    local cfg = lookFor(comp)
+    if not cfg then return nil end
+    local d = comp.CustomData
+    local was = {}
+    for _, key in ipairs(SHAPE_KEYS) do
+        local v = tonumber(cfg[key] or "")
+        if v then
+            pcall(function()
+                was[key] = d[key]
+                d[key] = key == "CatSize" and v or math.floor(v)
+            end)
+        end
+    end
+    if next(was) then log("look: the shape from appearance.ini (the stats stay)") end
+    return was
+end
+
+local function restoreShape(comp, was)
+    if not was then return end
+    local d = comp.CustomData
+    for key, v in pairs(was) do pcall(function() d[key] = v end) end
+end
+
 -- the player's cats that need a build with the current look: all of them when the look changed, else the ones that
 -- were never built with it (a pawn whose first build came before it was known as the player's)
 local function rebuildCats(all)
@@ -402,7 +434,9 @@ local function rebuildCats(all)
         if all or builtWithLook[id] == nil then
             builtWithLook[id] = nil
             log("look: rebuilding %s", id:match("([^.:]+%.[^.:]+)$") or id)
+            local okShape, was = pcall(applyShape, comp)
             rebuild(comp)
+            if okShape then restoreShape(comp, was) end
             if not builtWithLook[id] then builtWithLook[id] = false end     -- built, but without a look (none set)
         end
     end

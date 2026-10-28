@@ -562,6 +562,11 @@ game data in this repo.
       clanmates to the player's Party (and remove them at the day's end), or move them along as activities.lua's
       pair walk does (AI MoveTo, brain paused) toward each border point; border marking = a scent puff (Scent.Puffs)
       + a card at each point. Needs the VM (whether Party accepts generic clanmates).
+      BUILT 2026-10-28 (duties.ini [Patrol] Companions = 2): when the patrol duty starts, the nearest idle clanmates
+        (within 30 m) pause their AI and MoveToActor your cat (it tracks a moving goal); they get their AI back when
+        all border points are checked or the day ends. VM: "1 clanmate(s) join your patrol" (twice, 1-minute test
+        days); the follow itself not confirmed (the 60 s check found none within 6 m - at the VM's 0.3 fps they cover a
+        few units per game second, and the test days ended the patrol within a minute). Check in play.
       PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
       - a patrol = a temporary party + a route. Needs: patrol goals / events.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
@@ -952,6 +957,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         the player's look component after the game builds it (like the colour / mask overrides) - the stored stats are
         never touched, the creator's choice keeps setting them. NEXT (needs the VM): write those CustomData fields +
         WaCa.RebuildLook, check the shape changes and the save's Stats don't.
+      BUILT 2026-10-28 (appearance.ini [Player] BodyValue / FaceValue / FurValue / EyeValue / WhiskerValue / TailIdx /
+        EarIdx / CatSize, empty by default): main.lua writes them into the player cat's CustomData right before the
+        look build and PUTS THE CAT'S OWN VALUES BACK right after (the build is synchronous) - the shape is built from
+        the ini, nothing the game saves changes, the stats are never touched. VM: "look: the shape from appearance.ini
+        (the stats stay)" applied before the rebuild; the visible change (BodyValue 100, CatSize 1.3) not judged at
+        480x270 - check in play. Caveat: a rebuild by the GAME itself (creator, respawn) uses the own values until the
+        mod's next look pass.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
         override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.

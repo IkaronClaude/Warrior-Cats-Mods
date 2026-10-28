@@ -81,7 +81,8 @@ asks whether to keep your settings or reset them to the new defaults (the old on
 - **The clan's day: duties** (experimental, off by default, `config/duties.ini`, needs the day / night cycle): every
   morning your cat gets the day's duties from the clan's needs - hunt N prey (more when the fresh-kill pile is low; a
   hunting ground with prey of the season is marked, and a finished hunt feeds the clan's fresh-kill pile),
-  patrol N border points (marked like StarClan's guidance); at the day's end the duties done raise your standing in
+  patrol N border points (marked like StarClan's guidance; clanmates walk it with you - `Companions`); at the day's
+  end the duties done raise your standing in
   the clan and the ones skipped lower it (kept with your save). From `MaxRank` (Deputy) on you get none.
 - **Time skips** (experimental, off by default, `config/timeskip.ini On = 1`, needs the day / night cycle): time passes
   on purpose - your cat rests with `RestKey` (F9) and `RestDays` pass (1 = to the next morning, 7 = a quarter moon); a
@@ -136,8 +137,9 @@ asks whether to keep your settings or reset them to the new defaults (the old on
   pads, inner ears, nose, whiskers), per-part colours (`Tail.Fur = #3E2B22`), any of the game's 23 patterns and 20
   markings in either mask slot (`MarkingsMask = game:M12_Mask`, so two markings can be combined), PNG pattern packs,
   per-part colours that follow a coat colour (`Tail.Fur = Pattern`), and looks: presets (`Look = Name`) or shapes
-  like the included **Colourpoint** (`PatternMask = look:Colourpoint`). Display only - the save keeps the
-  game's look.
+  like the included **Colourpoint** (`PatternMask = look:Colourpoint`). The **shape apart from the stats**
+  (`BodyValue`, `FaceValue`, `FurValue`, `EyeValue`, `WhiskerValue`, `TailIdx`, `EarIdx`, `CatSize`): your cat can
+  look different from the body its stats came from. Display only - the save keeps the game's look and stats.
 - **Per-save data:** each save slot carries its own name and look in a sidecar file next to the game's save
   (`%LOCALAPPDATA%\Wrc\Saved\SaveGames\WrcGame.<save>-<character slot>.WaCaModKit.ini`, `[Name]` / `[Appearance]`), loaded
   automatically with that save; it wins over the global `names.ini` / `appearance.ini` (the defaults for saves without

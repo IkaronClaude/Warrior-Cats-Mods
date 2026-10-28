@@ -11,6 +11,7 @@ local Duties = {}
 
 local WaCa, log, DayNight
 local cfg = { on = false, maxRank = "Deputy", huntMin = 1, huntMax = 3, pileLow = 50, patrolPoints = 2, pileReward = 10,
+              companions = 2, companionRadius = 3000,
               huntingGround = true,
               reach = 800, minDist = 2000, maxDist = 9000, standingDone = 2, standingMissed = -1, seconds = 7 }
 local CARD = "/Game/Art/UXD/Blueprints/Popups/WBP_GuiPopupCenterMessage.WBP_GuiPopupCenterMessage_C"
@@ -129,6 +130,55 @@ local function pileComponent()
     end
 end
 
+-- clanmates on the patrol (tickets.md 7): the nearest idle clan cats walk with you - their own AI paused, an AI
+-- MoveToActor on your cat (it keeps following a moving goal) - until the patrol is done or the day ends
+local function companionsJoin(n)
+    local out = {}
+    if n <= 0 then return out end
+    local p = pc() and pc().Pawn
+    if not p then return out end
+    local at = p:K2_GetActorLocation()
+    local catType
+    pcall(function()
+        StaticFindObject("/Script/SwtQuest.ESwtQuestCharacterType"):ForEachName(function(name, v)
+            if name:ToString():gsub("^.*::", "") == "Cat" then catType = v end
+        end)
+    end)
+    local near = {}
+    for _, c in ipairs(FindAllOf("BP_Exploration_Character_Base_C") or {}) do
+        pcall(function()
+            if c:IsValid() and c.CharacterType == catType and not c.bHidden then
+                local q = c:K2_GetActorLocation()
+                local d = (q.X - at.X) ^ 2 + (q.Y - at.Y) ^ 2
+                if d < cfg.companionRadius ^ 2 then table.insert(near, { c, d }) end
+            end
+        end)
+    end
+    table.sort(near, function(a, b) return a[2] < b[2] end)
+    for i = 1, math.min(n, #near) do
+        local cat = near[i][1]
+        local ok = pcall(function()
+            local ai = cat.Controller
+            pcall(function() ai.BrainComponent:StopLogic("WaCa: on patrol") end)
+            ai:MoveToActor(p, 250.0, true, true, false, nil, true)
+        end)
+        if ok then table.insert(out, (cat:GetFullName():gsub("^%S+ ", ""))) end
+    end
+    if #out > 0 then log("duties: %d clanmate(s) join your patrol", #out) end
+    return out
+end
+
+local function companionsLeave(list)
+    for _, name in ipairs(list or {}) do
+        local cat = StaticFindObject(name)
+        pcall(function()
+            local ai = cat.Controller
+            ai:StopMovement()
+            ai.BrainComponent:RestartLogic()
+        end)
+    end
+end
+
 local function removeMarker(point)
     local m = point.marker and StaticFindObject(point.marker)
     if m and m:IsValid() then pcall(function() m:K2_DestroyActor() end) end
@@ -163,7 +213,10 @@ local function assign(day)
         today.hunt = { need = hunt, got = 0 }
         if cfg.huntingGround then today.hunt.ground = huntingGround() end
     end
-    if patrol > 0 then today.patrol = patrolPoints(patrol) end
+    if patrol > 0 then
+        today.patrol = patrolPoints(patrol)
+        today.companions = companionsJoin(cfg.companions)
+    end
     if not today.hunt and not today.patrol then
         log("duties: day %d - no duties today", day)
         today = nil
@@ -185,6 +238,9 @@ local function checkPatrol()
             pt.done = true
             removeMarker(pt)
             log("duties: border point %d checked", i)
+            local all = true
+            for _, q in ipairs(today.patrol) do if not q.done then all = false end end
+            if all then companionsLeave(today.companions) today.companions = nil end
             card(string.format("Border point checked - %s.", summary()))
         end
     end
@@ -214,6 +270,7 @@ local function verdict()
         end
         if all then done = done + 1 else missed = missed + 1 end
     end
+    companionsLeave(today.companions)
     local change = done * cfg.standingDone + missed * cfg.standingMissed
     standing = standing + change
     log("duties: day %d over - %d done, %d missed: standing %+d = %d", today.day, done, missed, change, standing)
@@ -244,6 +301,7 @@ function Duties.Init(c)
     local p = ini["Patrol"] or {}
     cfg.patrolPoints = math.max(0, math.floor(tonumber(p.Points or "") or cfg.patrolPoints))
     cfg.reach = tonumber(p.Reach or "") or cfg.reach
+    cfg.companions = math.max(0, math.floor(tonumber(p.Companions or "") or cfg.companions))
     cfg.minDist = tonumber(p.MinDistance or "") or cfg.minDist
     cfg.maxDist = tonumber(p.MaxDistance or "") or cfg.maxDist
     local s = ini["Standing"] or {}
