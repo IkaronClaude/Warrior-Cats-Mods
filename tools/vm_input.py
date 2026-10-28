@@ -7,6 +7,7 @@
   vm_input.py move <x> <y>               a mouse move to client coordinates
   vm_input.py nudge <dx> <dy> [steps]     relative mouse motion via SendInput (raw input, like a real mouse)
   vm_input.py wheel <x> <y> <notches>     mouse wheel at a client point (negative = down)
+  vm_input.py drag <x0> <y0> <x1> <y1> [seconds]   a left-button drag (SendInput down / up, moves between)
 
 Posts window messages to the game's top-level window (found by the game's process name), so it needs no focus and no
 interactive desktop."""
@@ -130,6 +131,32 @@ def main():
             inp = INPUT(0, MOUSEINPUT(0, 0, 0, flags, 0, 0))
             user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
             time.sleep(0.3)
+    elif cmd == "drag":
+        # a left-button drag from one client point to another through SendInput: down, moves in steps, up
+        class MOUSEINPUT(ctypes.Structure):
+            _fields_ = [("dx", wt.LONG), ("dy", wt.LONG), ("mouseData", wt.DWORD), ("dwFlags", wt.DWORD),
+                        ("time", wt.DWORD), ("dwExtraInfo", ctypes.c_size_t)]
+
+        class INPUT(ctypes.Structure):
+            _fields_ = [("type", wt.DWORD), ("mi", MOUSEINPUT)]
+
+        def button(flags):
+            inp = INPUT(0, MOUSEINPUT(0, 0, 0, flags, 0, 0))
+            user32.SendInput(1, ctypes.byref(inp), ctypes.sizeof(INPUT))
+
+        x0, y0, x1, y1 = (int(v) for v in sys.argv[2:6])
+        seconds = float(sys.argv[6]) if len(sys.argv) > 6 else 3.0
+        user32.SetForegroundWindow(hwnd)
+        place_cursor(hwnd, x0, y0)
+        time.sleep(0.2)
+        button(0x0002)                                                   # MOUSEEVENTF_LEFTDOWN
+        steps = 20
+        for i in range(1, steps + 1):
+            x, y = x0 + (x1 - x0) * i // steps, y0 + (y1 - y0) * i // steps
+            place_cursor(hwnd, x, y)
+            user32.PostMessageW(hwnd, WM_MOUSEMOVE, MK_LBUTTON, lparam(x, y))
+            time.sleep(seconds / steps)
+        button(0x0004)                                                   # MOUSEEVENTF_LEFTUP
     elif cmd in ("keydown", "keyup"):
         vk = int(sys.argv[2], 16)
         down = 1 | (user32.MapVirtualKeyW(vk, 0) << 16)

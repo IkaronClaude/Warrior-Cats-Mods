@@ -26,6 +26,37 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [x] **Operator play-test of the split mods (2026-10-28) - fixed, VM-confirmed in bulk runs the same day.**
+  - Rank: WaCa.PlayerRank = 1 + rank quests done (QuestProgression), promotions live (topic player.rank). VM: a new
+    RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
+    slot is Shared.General.CurrentCatSlot - CurrentSaveSlotIndex stayed 0, so a new cat read another cat's day, names,
+    sidecars (VM: slot 8 cat now "-8", day 1).
+  - The day: morning / afternoon duties, the evening gathering staged (5 camp cats placed in a ring through a fade,
+    poses, release - the camp cats are BP_Quest_Filler_C scenery, no controller), night: den sleep (My den / your rank's
+    den by STR_DEN_* names; VM: walked into the warriors' den -> sleep pose, fade, day 2 at dawn). F9 off by default.
+    VISUALS of the gathering NOT seen (dark evening, offscreen camera) - the log only.
+  - Deputy lines ([Talk]): VM with the game's dialogue widget + NpcRef = RiverClanDeputy: "free time turned in
+    (Deputy)" and the line swapped to the report text, restored on close. The Busy line not exercised.
+  - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
+    conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
+  - Lead mode: the meeting place marked; F there ends the third, F 594 away refused (VM).
+  - Mouse (VM): hover selects via the game's own steps (main menu, Select Your Cat grid, clan crests via native rects,
+    creator pattern / colour grids, pause menu); clicks = select + the real confirm key; footers by their key icon's
+    command (Continue = Button_Y); creator 1 / 2 tabs; pause tabs on click only; map drag (held WASD) + wheel zoom
+    (held Up / Down). Map icon INFO: the game has none (its hover list is empty with only WaCa Core too; E = legend).
+  - Name box: the screen maps Enter to its confirm commands itself (OnListenCommand 5 / 26 / 28 with the rows
+    blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
+  - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
+- [ ] **P2: Colourpoint needs its own grid icon** (a texture in the content pak) - with Tabby's it isn't found.
+- [ ] **P2: the evening gathering's look** - check it on the operator's PC (ring spacing, poses on the camp cats).
+- [ ] **P1 (operator 2026-10-28): leading = MANAGING the clan** (deputy / leader). Each duty third marks the clan's
+      meeting place, where you assign the tasks (first cut 2026-10-28: the marker + F there ends the third). Later a
+      proper UI: clan cats with stats that make them better at patrols or hunting, you build parties and send them out,
+      the outcome depends on their stats - "lead" means deciding what the clan does, not bimbling around.
+- [ ] **P1 (operator 2026-10-28): "walk quests" for the story mod** - e.g. promoted to apprentice, the mentor WALKS you
+      to the apprentice den to meet the others: the cat leads (paths over, waits when you fall behind, goes on when you
+      catch up), no quest marker. A scene step on follow.lua (Follow.Travel for the leader + the player's distance).
+      Reuse the game's battle animations in cutscenes (hackles raised, sneaky / subdued poses - operator 2026-10-28).
 - [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
   redesign tickets, the "creator finding" note and the old "Creator UI injection").
   - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
