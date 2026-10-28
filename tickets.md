@@ -853,6 +853,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         work). VM: 63 prey switched; in sense mode a trail element spawned for the tracked prey. NOT yet seen on
         screen (the prey was off-camera at 480x270) - check in real play; tune the sense range later (which prey count
         as candidates is the game's own radius).
+        2026-10-28 later: framed shots (the cat 6 m before the prey, in sense mode) showed NO trail - the prey's trail
+        element had 0 spline points / 0 effects, while the game's quest trail had 24 points + 1 effect: the game makes
+        PATHS only for its own quest targets. scent.lua now lays one (cat -> prey, 150 cm steps) when a sense pulse
+        starts (the sense component's first BlendProgress; BlendsFinished = the pulse ENDED - VM-timed: 48 s later at
+        0.3 fps) and calls the spline's SetupMeshes + the element's OnTrackStateChange. VM: "1 trail(s) laid to prey"
+        in sense mode; the shot still shows no clear line (more particles at the prey) - NOT confirmed visually. Next:
+        compare the element's spline meshes / Niagara with the quest trail's (reading RegisteredSplineVisualMeshes from
+        Lua crashed UE4SS natively - do it in C++), or spawn the game's NS_ScentTracking along the path directly.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - A trail = a short line of the game's step Niagara (NS_Steps_* / scent sense effects) spawned behind moving
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.

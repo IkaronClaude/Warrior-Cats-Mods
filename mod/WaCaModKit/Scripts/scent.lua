@@ -5,11 +5,16 @@
 -- track component gets that class instead (when the world is up and when a creature spawns) - sense mode then
 -- draws a scent trail from your cat to the prey, in the game's own trail look. The elements are spawned natively
 -- (their BeginPlay / state calls never pass ProcessEvent), hence the class swap rather than a hook.
+-- The game has PATHS only for its own quest targets (its track path manager's): a prey's trail element gets none
+-- (0 spline points, nothing drawn - VM). So when a sense pulse starts (the sense component's first BlendProgress -
+-- its timeline tick, it passes ProcessEvent; BlendsFinished = the pulse is over, VM-timed), every prey trail without
+-- points gets one laid: from the cat to the prey, a little under the surface like the game's, its meshes built
+-- (SetupMeshes) and the element switched off / on to draw it.
 -- config/hunting.ini [Scent].
 local Scent = {}
 
 local WaCa, log
-local cfg = { on = false, kinds = {}, trail = nil }
+local cfg = { on = false, kinds = {}, trail = nil, sink = 40 }
 local TRAIL = "/Game/Gameplay/Blueprints/WorldElements/TrackerElements/BP_POI_Hint_TrackerElement_Duration.BP_POI_Hint_TrackerElement_Duration_C"
 local preyValues
 local trailClass, trackClass
@@ -57,6 +62,38 @@ local function trailAll(why)
     log("scent: %s - %d prey leave a trail in sense mode", why, n)
 end
 
+-- lay a path (cat -> prey) into each prey trail element that has none
+local function layPaths()
+    local pawn
+    for _, c in ipairs(FindAllOf("SwtPlayerController") or {}) do
+        if c:IsValid() and c.Player and c.Pawn and c.Pawn:IsValid() then pawn = c.Pawn end
+    end
+    if not pawn then return end
+    local a = pawn:K2_GetActorLocation()
+    local n = 0
+    for _, e in ipairs(FindAllOf("BP_POI_Hint_TrackerElement_Duration_C") or {}) do
+        pcall(function()
+            local owner = e:GetOwner()
+            if not (owner and owner:IsValid() and owner.CharacterType and preyKind(owner.CharacterType)) then return end
+            local spl = e.EngineSplineMeshComponent
+            if spl:GetNumberOfSplinePoints() > 1 then return end
+            local b = owner:K2_GetActorLocation()
+            local steps = math.max(2, math.floor(math.sqrt((b.X - a.X) ^ 2 + (b.Y - a.Y) ^ 2) / 150))
+            spl:ClearSplinePoints(false)
+            for i = 0, steps do
+                local t = i / steps
+                spl:AddSplinePoint({ X = a.X + (b.X - a.X) * t, Y = a.Y + (b.Y - a.Y) * t, Z = a.Z + (b.Z - a.Z) * t - cfg.sink },
+                    1, i == steps)
+            end
+            spl:SetupMeshes()                              -- the visible trail: meshes along the spline
+            e:OnTrackStateChange(false)
+            e:OnTrackStateChange(true)
+            n = n + 1
+        end)
+    end
+    if n > 0 then log("scent: %d trail(s) laid to prey", n) end
+end
+
 function Scent.Init(c)
     WaCa, log = c.WaCa, c.log
     local s = (WaCa.ReadIni(c.modDir .. "/config/hunting.ini") or {})["Scent"] or {}
@@ -72,6 +109,19 @@ function Scent.Init(c)
         "/Game/Gameplay/Blueprints/Characters/ExplorationCharacters/BP_Exploration_Character_Base.BP_Exploration_Character_Base_C",
         "WaCaScentCreature", "post")
     WaCa.On("WaCaScentCreature", function(creature) pcall(trailFor, creature) end)
+    local pulse = false
+    WaCa.Watch("BlendProgress", "/Script/SwtAdventure.SwtAdventureExplorationSenseComponent", "WaCaSenseTick", "post")
+    WaCa.Watch("BlendsFinished", "/Script/SwtAdventure.SwtAdventureExplorationSenseComponent", "WaCaSenseOver", "post")
+    WaCa.On("WaCaSenseTick", function()
+        if pulse then return end
+        pulse = true
+        -- (the tracker elements appear as the pulse finds its candidates - a moment after it starts)
+        ExecuteInGameThreadWithDelay(1500, function()
+            local ok, err = pcall(layPaths)
+            if not ok then log("scent: laying trails failed (%s)", tostring(err)) end
+        end)
+    end)
+    WaCa.On("WaCaSenseOver", function() pulse = false end)
 end
 
 return Scent
