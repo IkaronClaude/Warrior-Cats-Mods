@@ -66,10 +66,19 @@ game data in this repo.
     step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
     target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
     group at a time. Your cat joins a group by its own bonds/rank.
-  - NOT the same as the Gathering / clan meetings (operator 2026-10-28): those are announcements by the leader -
-    "speaker on stage": the leader up on its rock (Highrock / the Gathering's Great Rock), the clan an AUDIENCE in
-    rows/a fan facing it. The current Gather step (an arc facing one point) is the start of that audience layout -
-    reuse it there with the leader as the point, and build the evening's groups as a separate layout.
+  - THREE different things, never mix the words (operator 2026-10-28):
+    - the evening in camp = these small groups (eating, sharing tongues);
+    - a CLAN MEETING / ceremony (apprentice / warrior naming, announcements) = the leader on its rock, "speaker on
+      stage", the clan an AUDIENCE in rows / a fan facing it - the current Gather step (an arc facing one point) is
+      the start of that layout, with the leader as the point;
+    - THE GATHERING = all four clans meeting on the island (the game's own line: "the four become one under the silver
+      moon ... where the Great Oak stands", STR_QUEST_FINDLOCATION_ISLAND_01) - gatherings.ini.
+- [ ] **P1: clan meetings use the books' words and each clan's own meeting place** (operator 2026-10-28): the
+  summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
+  meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
+  card) say "the Highrock" for EVERY clan (ThunderClan's). The game's text names no meeting rock (Strings_EN has
+  none), so the place is config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highrock, ...) - fill the
+  other clans' names from the books with the operator, don't guess; a {MEETINGPLACE} placeholder in cards.
 - [ ] **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
