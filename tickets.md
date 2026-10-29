@@ -116,6 +116,14 @@ game data in this repo.
   place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
   ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
   {MEETINGPLACE} placeholder in cards.
+- [ ] **P2: the camp's walking cats ARE the camp's named cats** (operator 2026-10-29: "there are some unnamed cats
+  walking around camp, I'd like to in future ensure that they are the same as named cat and any named cat can, at
+  times, walk around like that (unless they're super important key characters/shops/etc.)"). Today: 3-6 walking cats
+  (BP_WalkingNPC_Character_Base_C, game-generated, no nameplate; Clan Life now keeps their generated names per save by
+  spawn point) beside the named camp cats (quest actors: fillers / givers, placed, mostly parked). Wanted: a walker
+  takes a named camp cat's identity (its CustomData look + name) while that cat's placed actor stays hidden, and
+  named cats take turns walking; never the key cats (story roles, deputy / leader / medicine cat givers, the
+  shop / trainer / fresh-kill / skirmish givers). Then the evening groups and ties use the real named cats.
 - [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
