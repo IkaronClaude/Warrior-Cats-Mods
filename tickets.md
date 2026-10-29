@@ -70,9 +70,15 @@ game data in this repo.
   all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
   Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
   apprentices together 82% PASS.
-  - [~] P2 follow-up: walk-in - since 6c2a7fc the cats start on the open ground round your cat and walk out to their
-    seats: VM 5 of 6 seated at the meal, 3 of 6 for tongues (the rest slide against camp geometry at 12-39 speed and
-    are set down). Next: route round obstacles (a navmesh path - the game's pathfinding order never started on them).
+  - [x] 2026-10-29 (c977490) walk-in: the cats' own behaviour tree was never paused (PauseLogic did nothing - their
+    pacing overrode our order); StopLogic + a game-time clock -> VM 6 of 6 seated at the meal, 5 of 6 for tongues
+    (one stuck on geometry, set down).
+  - [x] 2026-10-29 (6bf0904) groups are fixed rules, never chance (operator): leader + mate + deputy unless
+    LeaderAway / DeputyAway, queens with kits, by role in 3s / 2s, BigPrey for a 4; the camp's named cats take part
+    where they stand (Lionstar, Freezesong, Tigerclaw ...). VM: self-test PASS on every rule; RiverClan's camp
+    "1: Lionstar (Leader), your cat (Deputy)" at both group steps.
+  - [ ] P2 (question for the operator): the duties' task picks (duties.ini [Tasks] weights) and clan events' Chance
+    are still dice - same "no random chance" principle? (e.g. tasks from the clan's needs / the story, not weights).
   - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
     first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
     kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
@@ -81,8 +87,9 @@ game data in this repo.
     mention a branch / stump).
   - [ ] P2: the walk-in through a navmesh path (the 3 of 6 that slide along camp rocks) - a pathfinding order first,
     the straight move as fallback, was written and NOT verified (a rabbit stalk started a fight mid-run); reverted.
-  - [ ] P3: see the hunt-chance label on screen again (data-confirmed 2026-10-29: "95%", visible, inside the game's
-    sneak-attack paw; teleport-stalks on the VM alert the prey / start fights - check in a normal play session). OPEN: the walking
+  - [x] 2026-10-29 (Hunting e76beda) hunt-chance label: it sat in the insta-kill paw, shown only for prey low enough
+    to kill outright; now under the prey's level warning within LabelRange (15 m). VM: "95%" under the paw of a
+    rabbit 5 m off (a prey picked with no creature within 25 m - fights mapped), nothing at the horizon. OPEN: the walking
   cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
   3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
   when moved - stage them in place?).
