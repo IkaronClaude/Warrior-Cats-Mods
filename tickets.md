@@ -76,8 +76,13 @@ game data in this repo.
   - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
     first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
     kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
-  - [ ] P3: confirm ShadowClan's lake-era meeting place with the operator ("the fallen log" from Victoria Holmes;
-    fan sources also mention a branch / stump). OPEN: the walking
+  - [ ] P3 (operator 2026-10-29: "just leave it and note it down as a ticket for later"): ShadowClan's lake-era
+    meeting place - "the fallen log" for now (Victoria Holmes); look it up in the books later (fan sources also
+    mention a branch / stump).
+  - [ ] P2: the walk-in through a navmesh path (the 3 of 6 that slide along camp rocks) - a pathfinding order first,
+    the straight move as fallback, was written and NOT verified (a rabbit stalk started a fight mid-run); reverted.
+  - [ ] P3: see the hunt-chance label on screen again (data-confirmed 2026-10-29: "95%", visible, inside the game's
+    sneak-attack paw; teleport-stalks on the VM alert the prey / start fights - check in a normal play session). OPEN: the walking
   cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
   3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
   when moved - stage them in place?).
