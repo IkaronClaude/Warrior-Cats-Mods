@@ -48,7 +48,8 @@ game data in this repo.
     overlap (contact sheet); FISHING end to end: moving arrival -> startled, stays away while moving, still -> "back
     and biting (60%, rolled 35)" (earlier misses were a rat fight mid-test); hunting parts all report on (chance on
     63 prey, scent trails, guidance 10 puffs, wading). Found + fixed: "0 of 0 duties done" card after a night-start
-    session (not re-run: the save now starts in the morning). Known: a Hunting hot reload re-arms fishing spots
+    session - VM 2026-10-29: "day 18 over - 0 done, 0 missed", no card. Hunt chance label: VM probe on a rabbit 3 m
+    off - label "95%" visible inside the game's sneak-attack paw canvas (shown by the game when stalking). Known: a Hunting hot reload re-arms fishing spots
     twice (13 areas) - reload-only.
   - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
     conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
@@ -62,7 +63,12 @@ game data in this repo.
     blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
   - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
 - [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
-- [ ] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28):
+- [x] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28) - BUILT
+  2026-10-29 (WaCa-ClanLife b0c1600): Groups: Tongues|Prey, config/relations.ini, names from the game's text, walk-in
+  via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats. OPEN: the walking
+  cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
+  3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
+  when moved - stage them in place?).
   - Sharing tongues: 5-6 small circles of 2-3 cats each, spread over the camp.
   - Sharing prey: groups of 2 or 3, sometimes a group of 4 around a big piece of prey.
   - Who sits with whom follows like / dislike: two cats with tension (story tensions) never share tongues. The
@@ -81,7 +87,9 @@ game data in this repo.
       the start of that layout, with the leader as the point;
     - THE GATHERING = all four clans meeting on the island (the game's own line: "the four become one under the silver
       moon ... where the Great Oak stands", STR_QUEST_FINDLOCATION_ISLAND_01) - gatherings.ini.
-- [ ] **P1: clan meetings use the books' words and each clan's own meeting place** (operator 2026-10-28): the
+- [x] **P1: clan meetings use the books' words and each clan's own meeting place** - DONE 2026-10-29 (a551f49):
+  {MEETINGPLACE} from duties.ini [MeetingPlace], ThunderClan = the Highledge, Default = the leader's rock; VM card
+  verified. STILL OPEN: RiverClan / ShadowClan / WindClan's lake-era names (operator + books). (operator 2026-10-28): the
   summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
   meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
   card) say "the Highrock" for EVERY clan - and Highrock is ThunderClan's OLD FOREST spot (operator caught it); this
@@ -90,7 +98,7 @@ game data in this repo.
   place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
   ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
   {MEETINGPLACE} placeholder in cards.
-- [ ] **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
+- [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
   a DisableRequester on their USwtQuestHideByDistanceComponent); the rest are hidden by a 23 m hide sphere. Quest
