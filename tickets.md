@@ -69,7 +69,15 @@ game data in this repo.
   via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats (leg 14: 3 of 6 walked
   all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
   Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
-  apprentices together 82% PASS. OPEN: the walking
+  apprentices together 82% PASS.
+  - [ ] P2 follow-up: the walk-in is partial - 2-3 of 6 per step reach their seats on the VM (e0592cf: they pass
+    through each other now); the rest stop short - some never start, likely set down 3 m out against camp rocks /
+    den walls. Next: pick start points the cat can stand on (a line trace / the game's own walking spline points).
+  - [ ] P2 follow-up: camp walking cats have no lasting identity (ActorIdentifier empty, runtime names; new random
+    names each load) - persistent ties for them need our own per-save identity (e.g. keep their generated names
+    in the sidecar and re-apply the CustomData name ids at load). Story cats are stable.
+  - [ ] P3: confirm ShadowClan's lake-era meeting place with the operator ("the fallen log" from Victoria Holmes;
+    fan sources also mention a branch / stump). OPEN: the walking
   cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
   3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
   when moved - stage them in place?).
