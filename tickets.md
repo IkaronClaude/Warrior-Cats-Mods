@@ -129,19 +129,26 @@ game data in this repo.
   place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
   ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
   {MEETINGPLACE} placeholder in cards.
-- [x] 2026-10-29 (ClanLife 0275637 + walker fixes) BUILT: walkers wear named cats in turns (look + name, the placed
-  self hidden, key cats never, Walk:<Name> lever, no turn during a scene). VM: 37 may walk / 28 kept home, six per
-  turn, names on the walkers, placed selves hidden, daylight shot - different coats; real named walkers in the
-  evening groups incl. an apprentice and an elder. OPEN: walkers show no nameplate (the game's walkers have none) -
-  a name label like the hunt-chance label could be added.
-  **P2: the camp's walking cats ARE the camp's named cats** (operator 2026-10-29: "there are some unnamed cats
-  walking around camp, I'd like to in future ensure that they are the same as named cat and any named cat can, at
-  times, walk around like that (unless they're super important key characters/shops/etc.)"). Today: 3-6 walking cats
-  (BP_WalkingNPC_Character_Base_C, game-generated, no nameplate; Clan Life now keeps their generated names per save by
-  spawn point) beside the named camp cats (quest actors: fillers / givers, placed, mostly parked). Wanted: a walker
-  takes a named camp cat's identity (its CustomData look + name) while that cat's placed actor stays hidden, and
-  named cats take turns walking; never the key cats (story roles, deputy / leader / medicine cat givers, the
-  shop / trainer / fresh-kill / skirmish givers). Then the evening groups and ties use the real named cats.
+- [x] 2026-10-29 **The camp's NAMED cats move about** (REBUILT - the costume walkers were rejected: operator "I don't
+  want the unnamed cats to be assigned a name ... they should be the same type of object" -> "remove walkers, move
+  named cats"; then "not all cats should walk, and ideally which walk should change ... the important cats (trainer,
+  medicine cat) stay close to where they sit, idle cycle a bit ... they stop when spoken to"). walkers.lua now: the
+  nameless walking cats hidden (AI stopped, no collision); each third of the day a few named quest cats move, longest
+  -unmoved first - roamers (plain warriors / apprentices / elders) across camp to dens' fronts / fresh-kill / meeting
+  place / another cat's spot and home; homebodies (any cat with a part) to a spot 1.5-3.5 m away and back. The game's
+  walk anim (single-node, then back to the anim BP), swept moves, following the ground (knee-height WorldStatic trace:
+  a level move buried Lionstar in his hillside, a trace from 3 m up put him in a tree). Only cats the game was SEEN
+  drawing take part (hidden != out of range: an online-only giver never draws). Talk = the game's
+  WBP_QuestGiver_Dialogue* screen (NpcRef = the cat): every mover holds, that cat stops; closed -> moving again.
+  Walk:<Name> lever, walkers.ini Never. Public event WalkerMoves(name, path, home|away).
+  VM 2026-10-29: turns + sets off / is there / home logs; walking cats drawn (WasRecentlyRendered) at 3-17 m;
+  conversation with Blackheart mid-trip -> stops, released on close; turns wait for the world (a load-time turn crashed
+  the game twice - fixed and re-booted clean; the walkers-off boot was clean too). A QuestBaseActor:OnDialogSetActive
+  watch was dropped while bisecting (suspected, NOT proven; the dialogue screen covers it).
+  Evening groups: named cats walk to their seats (scene speed, per-cat limit) - VM 9/9 walked in (4-19 m, 13 s),
+  home again on release. ClanLife 551cb7c. Open for the operator: an in-game look at the walking.
+  OPEN P3: a mod hot-reload mid-walk leaves those cats on the walk anim where they stood (dev-only).
+  **P3: more named camp cats** to make up for the 6 removed walkers (operator: "later add extra camp cats").
 - [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
   the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
