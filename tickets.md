@@ -70,12 +70,12 @@ game data in this repo.
   all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
   Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
   apprentices together 82% PASS.
-  - [ ] P2 follow-up: the walk-in is partial - 2-3 of 6 per step reach their seats on the VM (e0592cf: they pass
-    through each other now); the rest stop short - some never start, likely set down 3 m out against camp rocks /
-    den walls. Next: pick start points the cat can stand on (a line trace / the game's own walking spline points).
-  - [ ] P2 follow-up: camp walking cats have no lasting identity (ActorIdentifier empty, runtime names; new random
-    names each load) - persistent ties for them need our own per-save identity (e.g. keep their generated names
-    in the sidecar and re-apply the CustomData name ids at load). Story cats are stable.
+  - [~] P2 follow-up: walk-in - since 6c2a7fc the cats start on the open ground round your cat and walk out to their
+    seats: VM 5 of 6 seated at the meal, 3 of 6 for tongues (the rest slide against camp geometry at 12-39 speed and
+    are set down). Next: route round obstacles (a navmesh path - the game's pathfinding order never started on them).
+  - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
+    first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
+    kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
   - [ ] P3: confirm ShadowClan's lake-era meeting place with the operator ("the fallen log" from Victoria Holmes;
     fan sources also mention a branch / stump). OPEN: the walking
   cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
