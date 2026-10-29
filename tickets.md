@@ -147,7 +147,8 @@ game data in this repo.
   watch was dropped while bisecting (suspected, NOT proven; the dialogue screen covers it).
   Evening groups: named cats walk to their seats (scene speed, per-cat limit) - VM 9/9 walked in (4-19 m, 13 s),
   home again on release. ClanLife 551cb7c. Open for the operator: an in-game look at the walking.
-  OPEN P3: a mod hot-reload mid-walk leaves those cats on the walk anim where they stood (dev-only).
+  FIXED (ClanLife c12f400): a mod reload mid-walk left cats on the walk anim - a turn now idles them where they
+  stand (VM: "3 cat(s) left walking by an earlier run - idle again").
   **P3: more named camp cats** to make up for the 6 removed walkers (operator: "later add extra camp cats").
 - [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
   will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
