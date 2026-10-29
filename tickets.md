@@ -48,7 +48,8 @@ game data in this repo.
     overlap (contact sheet); FISHING end to end: moving arrival -> startled, stays away while moving, still -> "back
     and biting (60%, rolled 35)" (earlier misses were a rat fight mid-test); hunting parts all report on (chance on
     63 prey, scent trails, guidance 10 puffs, wading). Found + fixed: "0 of 0 duties done" card after a night-start
-    session - VM 2026-10-29: "day 18 over - 0 done, 0 missed", no card. Hunt chance label: VM probe on a rabbit 3 m
+    session - VM 2026-10-29: "day 18 over - 0 done, 0 missed", no card; and in the ORIGINAL setup (a fresh load that
+    starts at night, sleep in the den): "the night begins (the session starts)" -> "0 done, 0 missed" -> no card. Hunt chance label: VM probe on a rabbit 3 m
     off - label "95%" visible inside the game's sneak-attack paw canvas (shown by the game when stalking). Known: a Hunting hot reload re-arms fishing spots
     twice (13 areas) - reload-only.
   - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
@@ -65,7 +66,10 @@ game data in this repo.
 - [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
 - [x] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28) - BUILT
   2026-10-29 (WaCa-ClanLife b0c1600): Groups: Tongues|Prey, config/relations.ini, names from the game's text, walk-in
-  via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats. OPEN: the walking
+  via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats (leg 14: 3 of 6 walked
+  all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
+  Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
+  apprentices together 82% PASS. OPEN: the walking
   cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
   3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
   when moved - stage them in place?).
@@ -89,7 +93,8 @@ game data in this repo.
       moon ... where the Great Oak stands", STR_QUEST_FINDLOCATION_ISLAND_01) - gatherings.ini.
 - [x] **P1: clan meetings use the books' words and each clan's own meeting place** - DONE 2026-10-29 (a551f49):
   {MEETINGPLACE} from duties.ini [MeetingPlace], ThunderClan = the Highledge, Default = the leader's rock; VM card
-  verified. STILL OPEN: RiverClan / ShadowClan / WindClan's lake-era names (operator + books). (operator 2026-10-28): the
+  verified. 2026-10-29 (e631a54): RiverClan = the Highstump, WindClan = the Tallrock, ShadowClan = the fallen log
+  (Warriors Wiki / Victoria Holmes); VM: "... gather beneath the Highstump for a Clan meeting!" (RiverClan). (operator 2026-10-28): the
   summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
   meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
   card) say "the Highrock" for EVERY clan - and Highrock is ThunderClan's OLD FOREST spot (operator caught it); this
