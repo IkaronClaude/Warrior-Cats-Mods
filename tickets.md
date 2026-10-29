@@ -42,6 +42,14 @@ game data in this repo.
   - Deputy lines ([Talk]): VM with the game's dialogue widget + NpcRef = RiverClanDeputy: "free time turned in
     (Deputy)" and the line swapped to the report text, restored on close. Busy (VM, during "hunt 2 prey"): "Shouldn't
     you be out on your hunting? The clan is counting on you." - restored on close.
+  - BULK RE-CHECK 2026-10-28/29 (960x540 where detail mattered): Colourpoint tile at full size (masked face, dark
+    points, unlike the Tabby tiles); night HUD "Your den / Sleep in your nest"; F9 = nothing (0 rest lines); walked
+    into the warriors' den -> "in its den - it goes to sleep" -> day 18 at dawn; dawn cards one at a time, no
+    overlap (contact sheet); FISHING end to end: moving arrival -> startled, stays away while moving, still -> "back
+    and biting (60%, rolled 35)" (earlier misses were a rat fight mid-test); hunting parts all report on (chance on
+    63 prey, scent trails, guidance 10 puffs, wading). Found + fixed: "0 of 0 duties done" card after a night-start
+    session (not re-run: the save now starts in the morning). Known: a Hunting hot reload re-arms fishing spots
+    twice (13 areas) - reload-only.
   - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
     conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
   - Lead mode: the meeting place marked; F there ends the third, F 594 away refused (VM).
