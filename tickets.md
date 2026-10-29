@@ -129,7 +129,12 @@ game data in this repo.
   place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
   ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
   {MEETINGPLACE} placeholder in cards.
-- [ ] **P2: the camp's walking cats ARE the camp's named cats** (operator 2026-10-29: "there are some unnamed cats
+- [x] 2026-10-29 (ClanLife 0275637 + walker fixes) BUILT: walkers wear named cats in turns (look + name, the placed
+  self hidden, key cats never, Walk:<Name> lever, no turn during a scene). VM: 37 may walk / 28 kept home, six per
+  turn, names on the walkers, placed selves hidden, daylight shot - different coats; real named walkers in the
+  evening groups incl. an apprentice and an elder. OPEN: walkers show no nameplate (the game's walkers have none) -
+  a name label like the hunt-chance label could be added.
+  **P2: the camp's walking cats ARE the camp's named cats** (operator 2026-10-29: "there are some unnamed cats
   walking around camp, I'd like to in future ensure that they are the same as named cat and any named cat can, at
   times, walk around like that (unless they're super important key characters/shops/etc.)"). Today: 3-6 walking cats
   (BP_WalkingNPC_Character_Base_C, game-generated, no nameplate; Clan Life now keeps their generated names per save by
