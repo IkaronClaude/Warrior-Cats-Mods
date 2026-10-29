@@ -146,7 +146,8 @@ game data in this repo.
   the game twice - fixed and re-booted clean; the walkers-off boot was clean too). A QuestBaseActor:OnDialogSetActive
   watch was dropped while bisecting (suspected, NOT proven; the dialogue screen covers it).
   Evening groups: named cats walk to their seats (scene speed, per-cat limit) - VM 9/9 walked in (4-19 m, 13 s),
-  home again on release. ClanLife 551cb7c. Open for the operator: an in-game look at the walking.
+  home again on release. ClanLife 551cb7c. SEEN 2026-10-29 (noon, VM): a named cat mid-stride crossing the grass
+  (WalkerWalkTo, ClanLife). Suffix box SEEN on the ceremony's "CHOOSE WARRIOR NAME" popup (top right).
   FIXED (ClanLife c12f400): a mod reload mid-walk left cats on the walk anim - a turn now idles them where they
   stand (VM: "3 cat(s) left walking by an earlier run - idle again").
   **P3: more named camp cats** to make up for the 6 removed walkers (operator: "later add extra camp cats").
