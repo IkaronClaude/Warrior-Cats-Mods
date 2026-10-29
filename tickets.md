@@ -81,9 +81,10 @@ game data in this repo.
     chances (days.ini <Third>Duties), RepeatFactor against repeats, group levers ([Pairs], [Tensions], story steps
     Pair / Part, LeaderAway / DeputyAway, BigPrey / NoBigPrey). VM self-tests PASS; real camp: Lionstar + your cat
     fixed, warrior groups by chance, a group of 4 round prey.
-  - [ ] P2: levers for the remaining dice (operator wants a story override on each): clan events' Chance (a days.ini
-    "Events = ClanMeeting" force / "NoEvents"), patrols.ini Chance, the training partner / patrol points / hunt
-    count picks (Hunt / Patrol per day exist), the Gathering pick (GatheringPick exists), weather (Weather exists).
+  - [x] 2026-10-29 (ClanLife) levers on the remaining dice: Event:<Name> = 1 / -1 + days.ini Events / NoEvents
+    (VM self-test PASS), ClanPatrol = 1 / -1 (VM: "one leaves this evening - ClanPatrol = 1"), patrol points / hunt
+    spot never the last ones again while there are others; other mods: WaCa.Emit("SetStoryVar", name, value).
+    Untouched (cosmetic): camp idle activities, dialogue line shares, prey spawn spots.
   - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
     first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
     kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
