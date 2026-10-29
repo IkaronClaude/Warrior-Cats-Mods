@@ -77,8 +77,13 @@ game data in this repo.
     LeaderAway / DeputyAway, queens with kits, by role in 3s / 2s, BigPrey for a 4; the camp's named cats take part
     where they stand (Lionstar, Freezesong, Tigerclaw ...). VM: self-test PASS on every rule; RiverClan's camp
     "1: Lionstar (Leader), your cat (Deputy)" at both group steps.
-  - [ ] P2 (question for the operator): the duties' task picks (duties.ini [Tasks] weights) and clan events' Chance
-    are still dice - same "no random chance" principle? (e.g. tasks from the clan's needs / the story, not weights).
+  - [x] 2026-10-29 (d38d2db) operator: "some randomness is fine but we need a control lever / override": per-day duty
+    chances (days.ini <Third>Duties), RepeatFactor against repeats, group levers ([Pairs], [Tensions], story steps
+    Pair / Part, LeaderAway / DeputyAway, BigPrey / NoBigPrey). VM self-tests PASS; real camp: Lionstar + your cat
+    fixed, warrior groups by chance, a group of 4 round prey.
+  - [ ] P2: levers for the remaining dice (operator wants a story override on each): clan events' Chance (a days.ini
+    "Events = ClanMeeting" force / "NoEvents"), patrols.ini Chance, the training partner / patrol points / hunt
+    count picks (Hunt / Patrol per day exist), the Gathering pick (GatheringPick exists), weather (Weather exists).
   - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
     first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
     kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
