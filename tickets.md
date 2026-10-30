@@ -1636,7 +1636,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [x] 2026-10-30 **Time freezes at story points**: the game's own sequences / conversations and WaCa cutscenes freeze the
       clan's clock while they play (each lifted at its end, 5 min safety); story files freeze with a `Freeze: On` /
       `Freeze: Off` scene step; a third that would start while frozen waits (the clan's day and the sky never part).
-      VM: a cutscene and the Freeze steps froze and released time. Not tested on the VM: a third waiting on a freeze.
+      VM: a cutscene and the Freeze steps froze and released time; tasks given out while frozen -> "the evening waits
+      - time stands still", Freeze: Off -> "the evening begins".
 - [x] 2026-10-30 **Day clock HUD instead of an exhaustion meter** (Clan Life dayclock.lua, [DayClock]): a 24-hour dial
       top right (noon at the top), a mark where Morning / Noon / Evening / Night begin, a needle at the hour (the
       clan clock, else the third's start), the middle = tiredness (green / amber Tired / red Exhausted). Built from
