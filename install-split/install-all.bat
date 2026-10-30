@@ -20,5 +20,8 @@ if errorlevel 1 goto end
 echo.
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp06-WaCa-Graphics-1.0.0\install.ps1" %*
 if errorlevel 1 goto end
+echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp07-WaCa-Cutscenes-0.1.0\install.ps1" %*
+if errorlevel 1 goto end
 :end
 pause

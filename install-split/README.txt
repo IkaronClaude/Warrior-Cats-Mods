@@ -1,6 +1,6 @@
-WaCa mods - test install (2026-10-28)
+WaCa mods - test install (2026-10-30)
 
-The fast way: double-click install-all.bat. It removes the old WaCa ModKit, then installs all six mods, Core first.
+The fast way: double-click install-all.bat. It removes the old WaCa ModKit, then installs all seven mods, Core first.
 
 One at a time:
   0-Uninstall-old-WaCaModKit\uninstall-old.bat   run this first
@@ -10,6 +10,7 @@ One at a time:
   4-WaCa-ClanLife-0.8.0\install.bat
   5-WaCa-Hunting-0.8.0\install.bat
   6-WaCa-Graphics-1.0.0\install.bat
+  7-WaCa-Cutscenes-0.1.0\install.bat
 
 The scripts find the game through Steam, or ask for the game's folder.
 - uninstall-old deletes nothing. It moves the old mod folder and its content pak to
@@ -25,4 +26,6 @@ Worth checking while you play (ue4ss\UE4SS.log):
 - Put prey on the fresh-kill pile: look for "turned in (Pile)".
 - Report key F near the deputy: "reports to ...".
 - The day status panel sits under the game's quest panel.
+- WaCa Cutscenes: config\cutscenes.ini has three example scenes (Standoff, ClanMeeting, Talk);
+  the PreviewKey plays the one named in Preview. Look for "WaCaCutscenes" in the log.
 - If you use MothColorPicker: does it get along with WaCa Looks?

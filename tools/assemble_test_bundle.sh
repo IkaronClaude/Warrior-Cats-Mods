@@ -6,13 +6,13 @@
 set -e
 O="$1"; S=/c/Projects/WarriorCats-Mod/install-split
 [ -n "$O" ] || { echo "usage: $0 <out dir>"; exit 1; }
-for r in Core KeybindsMouse Looks ClanLife Hunting Graphics; do
+for r in Core KeybindsMouse Looks ClanLife Hunting Graphics Cutscenes; do
   powershell -NoProfile -ExecutionPolicy Bypass -File "C:\Projects\WaCa-$r\tools\package.ps1" >/dev/null
 done
 mkdir -p "$O/0-Uninstall-old-WaCaModKit"
 cp "$S/uninstall-old.ps1" "$S/uninstall-old.bat" "$O/0-Uninstall-old-WaCaModKit/"
 i=1
-for r in Core KeybindsMouse Looks ClanLife Hunting Graphics; do
+for r in Core KeybindsMouse Looks ClanLife Hunting Graphics Cutscenes; do
   pkg=$(ls -d /c/Projects/WaCa-$r/dist/WaCa-$r-*/ | head -1); p=$(basename "$pkg")
   d="$O/$i-$p"; mkdir -p "$d/files"
   [ -d "$d/files/Wrc" ] && mv "$d/files/Wrc" "$d/files/Wrc.old-$(date +%H%M%S)"
