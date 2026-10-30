@@ -475,11 +475,6 @@ game data in this repo.
       - offline (lupa, real events.lua, mocked world): morning hunt -> out -> 2 catches -> back -> meeting -> noon free
         -> out / back -> evening free -> share tongues + bond -> night watch -> away / back -> cutscene -> verdict
         "2 done +5" -> day 2 morning. VM: see below.
-- [ ] **Time freezes at story points** (operator 2026-10-28): questing must not happen under time pressure - while a
-      story point the day / night clock stands still. NOT "while a quest is active" (operator 2026-10-28: quests run
-      over action in the forest - that would make all exploration timeless). Which story points freeze = the clan
-      sim's call (15). Built so far: DayNight.Freeze(source, on) / DayNight.Frozen() + the TimeFrozen event; frozen,
-      the clock's step chain ends (no idle ticking) and restarts when the last freeze is lifted. Nothing sets it yet.
 - [ ] **Time follows effort, not the wall clock** (operator 2026-10-28: "bind time directly to cat exhaustion based on
       the current activity's time slot (morning / afternoon / night)"). Operator: "a true time of day cannot really be
       wired UNTIL we have the day/night clan sim" -> BUILT AS PART OF 15 (2026-10-28, see there): the clan's day
@@ -1638,6 +1633,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-10-30 **Time freezes at story points**: the game's own sequences / conversations and WaCa cutscenes freeze the
+      clan's clock while they play (each lifted at its end, 5 min safety); story files freeze with a `Freeze: On` /
+      `Freeze: Off` scene step; a third that would start while frozen waits (the clan's day and the sky never part).
+      VM: a cutscene and the Freeze steps froze and released time. Not tested on the VM: a third waiting on a freeze.
 - [x] 2026-10-30 **Day clock HUD instead of an exhaustion meter** (Clan Life dayclock.lua, [DayClock]): a 24-hour dial
       top right (noon at the top), a mark where Morning / Noon / Evening / Night begin, a needle at the hour (the
       clan clock, else the third's start), the middle = tiredness (green / amber Tired / red Exhausted). Built from
