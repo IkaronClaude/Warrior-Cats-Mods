@@ -62,6 +62,17 @@ game data in this repo.
   - [x] Fresh-kill pile decay: it IS the pile component's tick (VM: tick on - countdown 1m27s -> 50s in 37 s of game
         time; off - stood at 49 s). Hunting [Pile] Decay = 0 (default): tick off at the HUD, the pause card's
         countdown hidden (VM: card shows 90/100, no timer).
+  - [ ] THE POUNCE WALK (operator 2026-10-30 spec): the game's own detection (sound + sight) keeps running while the
+        game walks the cat in, and stops only at the JUMP; spotted -> the prey flees, the cat's walk / jump carries on
+        (or pounces at once: "spotted, tried anyway, missed"); a failed chance roll -> the prey flees AT THE JUMP.
+        VM facts: detection flags Vision 1 / Sound 2 / Cone 4 / InPursue 8 (BT_Enemy services 7 and 15); prey
+        detection sphere 16 m; pounce sphere 4 m, jump at SneakAttackWalkOffset 2 m; sneaking from behind NOT detected
+        at 2.0 / 3.2 / 3.8 m (teleport-placed at 1.5 m: detected - teleport artefact or a close range). A pounce can't
+        be started on the VM (Space = Player_Pounce 72, held or tapped; camera on the mouse; crouched; in range - the
+        game shows no prompt) - so the walk / jump hooks can't be seen here: needs the operator's machine or a way to
+        start the pounce. DONE meanwhile: the landing-loud check removed (Core 3912265, Hunting f08db93 - the prey is
+        already caught there); [Prey] PounceFromJumpRange = 1 (VM: in range at 2.0 m, not at 3.8 m) as the
+        alternative the operator named.
   - [x] Prey charging into battle (operator: "flee instead of charging"; "if you fail the first jump, it's gone"):
         Hunting peace.lua - on the game's detection (AWrcRoamingEnemy::OnCharacterDetected, ProcessEvent) or a
         missed / heard pounce, the listed kinds' AI stops, they dash off and are hidden after 1.5 s. Our loud-ground
