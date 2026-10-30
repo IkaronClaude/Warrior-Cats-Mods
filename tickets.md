@@ -62,6 +62,11 @@ game data in this repo.
   - [x] Fresh-kill pile decay: it IS the pile component's tick (VM: tick on - countdown 1m27s -> 50s in 37 s of game
         time; off - stood at 49 s). Hunting [Pile] Decay = 0 (default): tick off at the HUD, the pause card's
         countdown hidden (VM: card shows 90/100, no timer).
+  - [x] Prey charging into battle (operator: "flee instead of charging"; "if you fail the first jump, it's gone"):
+        Hunting peace.lua - on the game's detection (AWrcRoamingEnemy::OnCharacterDetected, ProcessEvent) or a
+        missed / heard pounce, the listed kinds' AI stops, they dash off and are hidden after 1.5 s. Our loud-ground
+        "heard" rule stays (the game's detection stops once the pounce plays - operator). VM: mouse heard the cat on
+        loud ground -> ran off, hidden, no combat; heard-miss -> gone.
   - [x] Field mouse fighting back: the operator's log shows the pounce CAUGHT (95%, rolled 87) - the fight is the
         game's touch encounter (OnEncounterOverlap). Core PreyPeace + Hunting [Prey] NoFight (Mice / Squirrel / Rabbit /
         Bird): the call is dropped (VM: mouse touched - "no fight", no combat; rat touched - combat as before). The
@@ -1088,6 +1093,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
+- [ ] Party mates comment on a hunt (operator 2026-10-30, "for future work"): after you land or miss a pounce, a cat in
+      your party says a line (HuntCaught / HuntMissed events -> Clan Life's lines, a speech card like the walkers').
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
       - chosen: the Gathering itself (scenes);
