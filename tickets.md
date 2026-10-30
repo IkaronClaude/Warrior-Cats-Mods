@@ -26,7 +26,7 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
-- [ ] **Operator play-test 2026-10-30 - fixed, VM run 2026-10-30 08:45-11:22 (drop Z:/WaCa/WaCa-mods-test-20261030b).**
+- [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
   - [x] P0 the deputy couldn't progress a third: the meeting place was a parked FILLER's spot (the leader role is also on
         a BP_Quest_Filler_C) behind a hidden 5 m report-key check. Now (ClanLife): your clan's leader = the
@@ -51,15 +51,21 @@ game data in this repo.
   - [x] Map names: legend names by core image name; the clan camps; the label font (a legend entry's - the title
         font drew a dark copy to the left).
   - [x] Names: a sidecar made for another cat ([Cat] PrefixNameId) is not used (VM: planted Cold/STR_CAT_NAME99 on
-        Dapplepatch -> "not used", name stays). Custom name shows on the pause General card and the HUD (VM, Mist).
+        Dapplepatch -> "not used", name stays). Custom name shows on the pause General card, the HUD and the PARTY
+        page (VM, prefix "Mist": "MISTPATCH" in the party list). Dialogue {PLAYER}: not testable on the VM (no talk
+        prompt at ~0.3 fps; the scripted sequences are ceremonies without {PLAYER}) - the operator's check.
   - [x] Our scent trail + StarClan guidance off in the test bundle.
   OPEN:
   - [ ] Camera spin when collecting: collecting shows no menu (VM) - so not the cursor-recapture jump; the VM can't send
         raw mouse input to reproduce. Core logs any frame where the mouse alone turns >= 45 deg (dt, delta) - read the
         operator's next log. (Recapture settle + hitch drop stay in.)
-  - [ ] Fresh-kill pile decay timer: no reflected decay data on SwtAdventureFreshKillPileComponent (only tick); test
-        switching its tick off over minutes of GAME time (the VM runs ~0.1x).
-  - [ ] Hunting: field mouse fought with 95% shown - cause needs the log; "0% - loud ground" label in (VM unseen).
+  - [x] Fresh-kill pile decay: it IS the pile component's tick (VM: tick on - countdown 1m27s -> 50s in 37 s of game
+        time; off - stood at 49 s). Hunting [Pile] Decay = 0 (default): tick off at the HUD, the pause card's
+        countdown hidden (VM: card shows 90/100, no timer).
+  - [x] Field mouse fighting back: the operator's log shows the pounce CAUGHT (95%, rolled 87) - the fight is the
+        game's touch encounter (OnEncounterOverlap). Core PreyPeace + Hunting [Prey] NoFight (Mice / Squirrel / Rabbit /
+        Bird): the call is dropped (VM: mouse touched - "no fight", no combat; rat touched - combat as before). The
+        encounter capsule's collision off did NOT stop it. "0% - loud ground" label in (VM unseen).
   - [ ] Coldpatch: the operator's existing slot-0 sidecar has no owner record - they remove its [Name] once.
   - [ ] VM crashes in UE4SS Lua (null read 0x18, UE4SS+0x2aed17): 09:46 (walker + reloads) and 10:41 (my probe set a
         font material to nil). Watch for the first kind in clean runs.
