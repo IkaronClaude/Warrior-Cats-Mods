@@ -475,9 +475,6 @@ game data in this repo.
       - offline (lupa, real events.lua, mocked world): morning hunt -> out -> 2 catches -> back -> meeting -> noon free
         -> out / back -> evening free -> share tongues + bond -> night watch -> away / back -> cutscene -> verdict
         "2 done +5" -> day 2 morning. VM: see below.
-- [ ] **Day clock HUD instead of an exhaustion meter** (operator 2026-10-28): a clock with the three times of day
-      rotating through (Cult of the Lamb's day clock), showing where the day is - exhaustion shown through it
-      instead of as a meter. Needs a HUD widget (the content pak: a UMG widget, or a material dial on an image).
 - [ ] **Time freezes at story points** (operator 2026-10-28): questing must not happen under time pressure - while a
       story point the day / night clock stands still. NOT "while a quest is active" (operator 2026-10-28: quests run
       over action in the forest - that would make all exploration timeless). Which story points freeze = the clan
@@ -1641,6 +1638,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-10-30 **Day clock HUD instead of an exhaustion meter** (Clan Life dayclock.lua, [DayClock]): a 24-hour dial
+      top right (noon at the top), a mark where Morning / Noon / Evening / Night begin, a needle at the hour (the
+      clan clock, else the third's start), the middle = tiredness (green / amber Tired / red Exhausted). Built from
+      the game's round UI texture in the HUD canvas, event-driven. VM: drawn, needle at 13:00, tiredness 28 green.
+      Operator: is the look right (size, place, colours)? A custom dial texture would need the content pak.
 - [x] 2026-10-30 **Pounce walk, VM-tested** (Hunting 0620f72 + Core hunt.cpp): loud ground from the pounce key to the
       leap -> "starts - on loud ground", the prey runs, HuntFail -> the leap lands on "nothing to catch"; a normal pounce
       rolls at the leap and catches at the landing (+EXP); a missed roll bolts the prey at the leap; one pounce per prey,
