@@ -65,7 +65,8 @@ game data in this repo.
   - [x] Field mouse fighting back: the operator's log shows the pounce CAUGHT (95%, rolled 87) - the fight is the
         game's touch encounter (OnEncounterOverlap). Core PreyPeace + Hunting [Prey] NoFight (Mice / Squirrel / Rabbit /
         Bird): the call is dropped (VM: mouse touched - "no fight", no combat; rat touched - combat as before). The
-        encounter capsule's collision off did NOT stop it. "0% - loud ground" label in (VM unseen).
+        encounter capsule's collision off did NOT stop it. "0% - loud ground" label: VM-seen (cat on BP_MovementModifier_Loud,
+        the prey 3 m off labelled "0% - loud ground").
   - [ ] Coldpatch: the operator's existing slot-0 sidecar has no owner record - they remove its [Name] once.
   - [ ] VM crashes in UE4SS Lua (null read 0x18, UE4SS+0x2aed17): 09:46 (walker + reloads) and 10:41 (my probe set a
         font material to nil). Watch for the first kind in clean runs.
