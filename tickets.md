@@ -26,6 +26,47 @@ instead of narrated. Pacing and characters match the books. The mod sits on the 
 game data in this repo.
 
 ## Doing
+- [ ] **Operator play-test 2026-10-30 - fixed, VM run 2026-10-30 08:45-11:22 (drop Z:/WaCa/WaCa-mods-test-20261030b).**
+  VM-CONFIRMED:
+  - [x] P0 the deputy couldn't progress a third: the meeting place was a parked FILLER's spot (the leader role is also on
+        a BP_Quest_Filler_C) behind a hidden 5 m report-key check. Now (ClanLife): your clan's leader = the
+        quest-available story cat of your ClanType; the meeting place = the game's interactable
+        (BP_Interactable_CInematic, mesh hidden) on open ground 2.5-4.5 m from the leader, clear of every story cat
+        (world traces: ground, 3 m of sky, room at knee height - the camp has no navmesh); the game's own "E Interact";
+        heard as Player_Interact (65). VM: E -> morning ends -> clan meeting -> afternoon (new spot) -> evening.
+  - [x] Its mark: the game's scent-hint glow (NS_Scent_Hint_Item, User.Code_Color) in CYAN, replayed every 2.5 s (a
+        one-shot burst); a cyan dot on the world map (mapmarks.lua: the game's white UI circle, axes read off the
+        checkpoint icons - exact) with "Meeting place: give out the clan's tasks" on hover. No quest hint marker there
+        (once tracked it guides to the tracked QUEST - the far StarClan target).
+  - [x] "(F)" in the leader's goal: gone with the report key (F stays only for talk turn-ins, README).
+  - [x] Prophecy / Defender flicker: one switch per crossing, none while jiggling on the overlap.
+  - [x] Settings tab hover: no command sent, the list's selection stays (a row nav steps only on a click, shoulders
+        only; a hover toward a tab had sent Down to the volume list). Click on Gameplay turns the page.
+  - [x] Only the top menu screen takes the mouse (the pause menu's tabs were hovered through the Settings popup).
+  - [x] Pause > Party: nothing of the hidden General page is hovered (non-current GuiPausePanel = not on screen).
+  - [x] Pause > Quest: "Main / Side quests" clicks press TriggerL / R from the active tab (CanvasSelected) - only the
+        sub-tab turns.
+  - [x] Pause > Bonds scroll bar: a drag selects the row that far down (rows counted by the grid's own selection);
+        drag down / up shows the list's end / start.
+  - [x] Map names: legend names by core image name; the clan camps; the label font (a legend entry's - the title
+        font drew a dark copy to the left).
+  - [x] Names: a sidecar made for another cat ([Cat] PrefixNameId) is not used (VM: planted Cold/STR_CAT_NAME99 on
+        Dapplepatch -> "not used", name stays). Custom name shows on the pause General card and the HUD (VM, Mist).
+  - [x] Our scent trail + StarClan guidance off in the test bundle.
+  OPEN:
+  - [ ] Camera spin when collecting: collecting shows no menu (VM) - so not the cursor-recapture jump; the VM can't send
+        raw mouse input to reproduce. Core logs any frame where the mouse alone turns >= 45 deg (dt, delta) - read the
+        operator's next log. (Recapture settle + hitch drop stay in.)
+  - [ ] Fresh-kill pile decay timer: no reflected decay data on SwtAdventureFreshKillPileComponent (only tick); test
+        switching its tick off over minutes of GAME time (the VM runs ~0.1x).
+  - [ ] Hunting: field mouse fought with 95% shown - cause needs the log; "0% - loud ground" label in (VM unseen).
+  - [ ] Coldpatch: the operator's existing slot-0 sidecar has no owner record - they remove its [Name] once.
+  - [ ] VM crashes in UE4SS Lua (null read 0x18, UE4SS+0x2aed17): 09:46 (walker + reloads) and 10:41 (my probe set a
+        font material to nil). Watch for the first kind in clean runs.
+  - [ ] A tab click right after the pause menu opened went "through its host" once (the next click worked).
+  - [ ] Night: the den sleep wasn't re-run this time (teleport into the den didn't trigger it).
+  - [ ] The map hover label shows the game's legend names; our own icons beyond the meeting place (hunting ground,
+        den) - next.
 - [x] **Operator play-test of the split mods (2026-10-28) - fixed, VM-confirmed in bulk runs the same day.**
   - Rank: WaCa.PlayerRank = 1 + rank quests done (QuestProgression), promotions live (topic player.rank). VM: a new
     RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
