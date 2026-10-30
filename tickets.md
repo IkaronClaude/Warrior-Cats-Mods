@@ -84,6 +84,8 @@ game data in this repo.
         encounter capsule's collision off did NOT stop it. "0% - loud ground" label: VM-seen (cat on BP_MovementModifier_Loud,
         the prey 3 m off labelled "0% - loud ground").
   - [ ] Coldpatch: the operator's existing slot-0 sidecar has no owner record - they remove its [Name] once.
+  - [ ] VM HANG 2026-10-30 15:29: the game thread stopped right after a hot reload of WaCaHunting (log ends at its
+        "wading: on", 4 GB, the harness command file never read) - dev-only path; watch for it.
   - [ ] VM crashes in UE4SS Lua (null read 0x18, UE4SS+0x2aed17): 09:46 (walker + reloads) and 10:41 (my probe set a
         font material to nil). Watch for the first kind in clean runs.
   - [ ] A tab click right after the pause menu opened went "through its host" once (the next click worked).
