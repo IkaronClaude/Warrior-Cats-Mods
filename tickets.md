@@ -1231,10 +1231,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       hunt comments come from them. Camp story cats have no AI/movement (an AI move crashed the game), so the walkers'
       swept mover carries them. Fixed on the way: Clan Life's camp state stuck after a teleport in (no CampLeft);
       os.clock() is CPU time (2-9x the wall) -> Core WaCa.Now() everywhere.
-      STILL OPEN: (a) the party is read off the PARTY page, which the game fills only when the pause menu opens - until
-      then (once per session) nobody follows: find the native party read (save Party.Stats / the page's fill function);
-      (b) a fight: party cats are in the combat party already - check they're back beside you after one; (c) the VM
-      camera sits 1.1 m behind the cat - check the formation on the operator's camera (Distance / Side in walkers.ini).
+      DONE since: (a) the party comes from the save (WaCa.PartyRoles: QuestProgression <chapter>.PartySetup roles -
+      RiverClanKit = Nightheart, RiverClanWarriorSideRace = Rippleface), no pause menu needed (VM); (b) fights: the party
+      waits while the combat manager has an enemy (it had been teleported into the arena) and is back beside the cat
+      after (VM).
+      STILL OPEN: (c) the VM camera sits 1.1 m behind the cat - check the formation on the operator's camera (Distance /
+      Side in walkers.ini); (d) PartySetup by "latest chapter key" - check once a save has a second chapter.
 - [ ] **The party = who you're out with** (operator 2026-10-28): the combat party should be the cats you're hunting /
       patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
       RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
