@@ -498,6 +498,11 @@ game data in this repo.
       CSVs (NpcGenerator, CatSize, Scars, ForcedAppearance ...).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - = the roster.ini plan under 1 (role -> name + look over the generated cats).
+      STATUS 2026-10-30 (VM-tested): this game version's generator keeps NO lists (NPCClansData / NarrativeCustomDataMap
+      empty), so WaCa Looks pins LIVE cats as they show up: [Cat.<its name now>] (Troutwing -> Mossfeather) and
+      [Narrative.<story role>] (RiverClanWarriorSideRace: Rippleface -> Ripplestream, the party and Clan Life follow the
+      new name); story packs bring their own contentoster.ini. STILL OPEN: by giver role for non-story cats
+      ([<Clan>.<GiverRole>] - the medicine cat, the elders), size and traits.
 - [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
       that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
       our bindings), mouse bindings for the camera.
