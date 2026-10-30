@@ -1225,6 +1225,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       has many talented writers - writing a story must be easy with little or no programming: plain files (the scene
       steps, days, dialogue pools as they are), good docs + examples, clear errors (a story checker that lists
       unknown roles / dialogue ids / broken conditions), maybe later an editor.
+- [ ] **P1: Party members follow you as you roam the forest** (operator 2026-10-30) - BUILT + VM-tested 2026-10-30
+      (Clan Life walkers.lua [Party]): the PARTY page's cats (Nightheart, Rippleface) leave camp with you, run alongside
+      (0.8-1.1 m on the VM), catch up when 25 m behind / stuck, hold while you sneak, walk back to their spots in camp;
+      hunt comments come from them. Camp story cats have no AI/movement (an AI move crashed the game), so the walkers'
+      swept mover carries them. Fixed on the way: Clan Life's camp state stuck after a teleport in (no CampLeft);
+      os.clock() is CPU time (2-9x the wall) -> Core WaCa.Now() everywhere.
+      STILL OPEN: (a) the party is read off the PARTY page, which the game fills only when the pause menu opens - until
+      then (once per session) nobody follows: find the native party read (save Party.Stats / the page's fill function);
+      (b) a fight: party cats are in the combat party already - check they're back beside you after one; (c) the VM
+      camera sits 1.1 m behind the cat - check the formation on the operator's camera (Distance / Side in walkers.ini).
 - [ ] **The party = who you're out with** (operator 2026-10-28): the combat party should be the cats you're hunting /
       patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
       RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
