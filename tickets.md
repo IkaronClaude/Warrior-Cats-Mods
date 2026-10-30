@@ -1106,8 +1106,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
-- [ ] Party mates comment on a hunt (operator 2026-10-30, "for future work"): after you land or miss a pounce, a cat in
-      your party says a line (HuntCaught / HuntMissed events -> Clan Life's lines, a speech card like the walkers').
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
       - chosen: the Gathering itself (scenes);
@@ -1624,6 +1622,22 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-10-30 **Pounce walk, VM-tested** (Hunting 0620f72 + Core hunt.cpp): loud ground from the pounce key to the
+      leap -> "starts - on loud ground", the prey runs, HuntFail -> the leap lands on "nothing to catch"; a normal pounce
+      rolls at the leap and catches at the landing (+EXP); a missed roll bolts the prey at the leap; one pounce per prey,
+      a key press that started no pounce lapses after 20 s. Still open: sight during the walk (proximity risk, not built);
+      a VM test of loud ground crossed MID-walk (only "starts on loud ground" was tested).
+- [x] 2026-10-30 **Library exercise: a story pack with no code** (ClanLife examples/WaCaStoryPackExample, VM-tested):
+      custom cat (Looks [Cat.Troutwing] -> Mossfeather), custom role ([Cast] S:herbalist), custom cutscene (HerbLesson,
+      both parts and lines on screen), clan event (Bond @ S:herbalist). Rough edges found and fixed: packs couldn't add
+      roster cats (content/roster.ini); the rank-based roster pins found NO cat in this game version (generator keeps no
+      lists -> live pins by name / story role); roles couldn't be cast without Lua ([Cast]); an unbound role waited for
+      the next third (now retried every 10 s); Cutscenes didn't know S roles; no {PLAYER} in lines; Bond on S roles was a
+      no-op; no subtitle for other mods (ShowLine); cat/player-name helpers duplicated (now Core WaCa.Cats/CatName/
+      PlayerName); deploy_split missed Cutscenes.
+- [x] 2026-10-30 **Hunt comments** (operator future work): the nearest clanmate within Radius says lines.ini [Hunt]
+      Caught/Missed lines as a subtitle (VM: "Spikebranch: Nice catch, Dapplepatch!"). Nearest clanmate, not strictly
+      "party" - a party filter is a follow-up if wanted.
 - [x] 2026-10-27 RELEASED 0.7.0 (operator go): hunting by chance, fishing, day / night, clan activities, dialogue
       click / space, left-click interact, placeholder fixes, the start-up crash fix.
 - [x] 2026-10-27 CRASH FIX - the watch dispatcher (bridge.cpp OnProcessEvent): a start-up crash in main.dll+0xACDC
