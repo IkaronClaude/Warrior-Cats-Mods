@@ -1238,6 +1238,25 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       growl, surprise, sleep, play, dig, win / lose, tail pose ...); 246 cat animations (15 photo-mode poses, idles,
       sit / sleep in-out, walk incl. crouching / backwards, run, drink, play, Creating_Memories - likely eating /
       sharing tongues). First types to build: ceremony (RankUp re-cast), clan meeting (Prophecy re-cast), two-cat talk.
+      BUILT 2026-10-30 as its own mod (operator: "start building our cutscene toolkit as its own mod"):
+      C:/Projects/WaCa-Cutscenes (local repo, no remote yet - commit 27b67d2), WaCa Cutscenes 0.1.0. The format
+      standardised: [Cutscene.<Name>] Place / Shape / <Group> = cast list / BeatN = <s> <Action>: <who> [= <what>]
+      [~blend]; shapes.ini (Facing, Circle, Line, Pair, Meeting, Ceremony - writer-extendable), places.ini, cast by
+      part (your cat fills the rank it holds), beats WalkIn / Walk / Place / Look / Pose / Say / Card / Camera / Fade /
+      FadeIn / Emit / End on game time; camera = a spawned CameraActor (Wide, High, Orbit, Portrait, Over, Two, Game),
+      traced clear of rocks; the shape is fitted to the ground (turned / brought nearer; no marks in rocks or WATER -
+      the floor type); subtitles = the game's centre card with its swirl hidden; events PlayCutscene /
+      CutsceneStarted / Queued / Ended. Clan Life: the scene step Cutscene: <name> (commit 9352bc5); walkers and cards
+      hold while one plays. VM 2026-10-30: five batches in the RiverClan camp - all of the above seen in the log and
+      in screenshots.
+      FOLLOW-UPS: (a) the camera in tight spots (riverbank under tree roots: Wide pulled in to 1.7 m) - rise instead of
+      shortening, or pick the open side; (b) game cinematics (LS_Cinematic_RankUp_* re-cast) as a shot type;
+      (c) the camera's own named moves between two shots (dolly / crane); (d) a skip key; (e) a cat that isn't drawn
+      can't be cast (Lionstar out of range at the river) - bring it in through a fade?; (f) Clan Life days.ini /
+      clanevents.ini examples using Cutscene:.
+- [ ] **P3: Clan Life loses the save's day on a hot Lua reload** (VM 2026-10-30, dev only): after an auto-reload the
+      day restarts at day 1, Greenleaf (the save had day 19, Leaf-bare) - the day is restored on the save-load event,
+      which doesn't come again on a reload. Re-read the sidecar at Init when a save is already loaded.
 - [ ] **Nexus Mods: release, reuse the UE4SS upload, split into parts, a base mod** (operator 2026-10-28). Research
       (Nexus public GraphQL API, game id 10777, domain warriorcatsclansoftheforest - 6 mods on 2026-10-28):
       - mod 2 "UE4SS For Warrior Cats - CotF" (CaptainJackalope): plain UE4SS v3.0.1-1181-g83330635 - THE SAME commit
