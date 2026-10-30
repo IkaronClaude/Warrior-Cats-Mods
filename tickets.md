@@ -468,6 +468,8 @@ game data in this repo.
       writes the new warrior name to the save's player Customization after the popup closes (the pawn copy stays old),
       so the override sat on the old name ("Dapplepool" showed). Now read from the save + re-applied on save / popup.
       NOTE: that test renamed the VM test cat Dapplepatch -> Dapplepool in its save (the list can't be driven back).
+      RESTORED 2026-10-30: tools/save_edit.py rewrote the save's JSON (_POOL -> _PATCH, and the sidecar's test prefix "gh"
+      removed); the game loaded it (hash not checked), Select Your Cat + HUD show DAPPLEPATCH, the game's next save kept it.
       OPEN: the operator's real-game test (does the shown name update? HUD / party / dialogue / ceremony). Then an
       in-game text box at cat creation (UMG, or a runtime-built EditableTextBox from Lua).
 - [ ] **1. Canon clan roster.** Remove the procedural generation of the clan cats. Lock the roster to a specific point
