@@ -729,17 +729,13 @@ game data in this repo.
       fishing on: 7 spots armed, no crash.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
-- [ ] **P2: Sight during the pounce walk** (operator 2026-10-30: "ideally also sight", as long as a proximity sense can't
-      make prey uncatchable). FOUND (VM 2026-10-30): at the pounce key the game sets the prey's blackboard Hunted = true;
-      its AI keeps running but the Hunted branch has no detection - the game's detection is the native behaviour-tree
-      service UBTService_DetectionTask (DetectionType 7 / 15, one instance per AI, owned by the BT manager; the
-      detection component stays inactive). Ticking that service by hand from Lua (ReceiveTickAI) does nothing - its
-      logic is native TickNode; a control mouse (no Hunted) saw the cat 3 m in front within a second and ran. Loud
-      ground during the walk is done (our Loud-area overlap). NEXT (native, Core): call the service's TickNode for the
-      hunted prey during the walk (BT component + its node memory), or find the vision check TickNode calls (disassemble
-      its vtable slot) and call that; then check proximity: from behind at 2.0-3.8 m no detection, a teleport to 1.5 m
-      detected at once - the walk stops at 2 m (SneakAttackWalkOffset), so the game's own check should leave a quiet
-      approach catchable.
+- [x] **Sight during the pounce walk** (operator 2026-10-30, "ideally also sight" - if a proximity sense doesn't make
+      prey uncatchable) - BUILT + VM-tested 2026-10-30, OFF by default: WaCa Core runs the game's own detection pass
+      (WaCaNative_HuntDetect - the function UBTService_DetectionTask's tick calls) on the hunted prey through the walk.
+      RESULT: by the game's own rules a WALKING cat 3 m off is noticed from any side (types 7 and 5, from behind and both
+      sides: 6 of 6 noticed) - the very proximity sense the operator feared; that's why the game turns detection off
+      for the walk. Kept as [Prey] SightDuringPounce = 1 (experimental). A sight that stays fair would need our own cone
+      rule (the game's view cone without its proximity) - operator's call.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
       SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
