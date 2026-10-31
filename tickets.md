@@ -1365,6 +1365,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         with our creator colours (palette.ini swatches, appearance.ini, the custom-swatch sanitize in creator.lua):
         test both together; options - detect it and leave colours to it, or read its saved colours; take UI ideas.
       - the other mods: small cheats (infinite health / stamina / sprint, no NPC pushback).
+      STATUS 2026-10-31: the split and the MOD-ONLY packages are done - seven repos, each tools/package.ps1 -> a
+      package without UE4SS (0 UE4SS.dll / dwmapi.dll), each README naming WaCa Core; assemble_test_bundle.sh puts them
+      in one drop with per-mod install.bat + install-all.bat (operator drops 2026-10-30 / 31). LEFT (operator): the
+      Nexus pages / upload (login, go-ahead) and a test under Nexus mod 2's UE4SS download (login).
       PROPOSED SPLIT (UE4SS mods are separate Lua states - parts talk through WaCa events, which the C++ bridge then
       has to broadcast ACROSS states; shared libraries live in Mods/shared):
       1. WaCa Core - the BASE MOD others build on: shared/WaCa (events / Watch, text, tables, LoadAsset, ReadContent /
