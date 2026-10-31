@@ -1786,6 +1786,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       counts frozen water (through a hole = in water). VM (ThinChance 100 for the test): StaticMeshActor_151 gave way,
       the line, wading 'shallow water (21 cm)'. Drop Z:/WaCa/WaCa-mods-test-20261031r. OPEN: the story arc itself (a
       scene on FellThroughIce), NPC cats on the ice, the operator's look at it.
+      STORY ARC (library exercise, 2026-10-31, VM): Clan Life clan events take When = Event:<name> (new - a data-only
+      pack reacts to any event); the example pack's IceRescue (When = Event:FellThroughIce): a cutscene - the nearest
+      clanmate hauls your cat out - then a card. VM: the ice gave way -> Rippleface 'Hold on - grab my scruff!' -> the
+      card. Drop Z:/WaCa/WaCa-mods-test-20261031s. Still open: NPC cats on the ice; the operator's look.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
