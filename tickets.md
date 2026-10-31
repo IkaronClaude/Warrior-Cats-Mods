@@ -1774,6 +1774,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
         looks (the look framework) after N days (seasons).
+      PRE-WORK 2026-10-31 (WaCa Core, VM): the kits' looks - WaCa.LookOf(cat) (the game's text form of a cat's look,
+      FProperty::ExportTextItem), WaCa.BlendLooks(a, b) (each trait from one parent, Role Kit, kit-sized, a new prefix
+      + 'kit'), WaCa.SpawnCat / ImportLook to put the kit in the world. VM: your cat x Nightheart -> Stonekit by the camp
+      stream. The operator's to decide: who can be a mate (the bond's CloseBond?), the asking, when kits come, where
+      they live (the nursery), growing up. Drop Z:/WaCa/WaCa-mods-test-20261031x.
 - [ ] **Frozen water in leaf-bare** (operator 2026-10-31, future work): the lake and / or parts of the river freeze,
       changing the terrain that can be walked (new paths across the ice); from that, a "falling through ice" mechanic /
       story arc. NOTES: water is visual planes + Water / DeepWater floor types (no water volumes - see 16), so ice =
