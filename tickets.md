@@ -523,6 +523,10 @@ game data in this repo.
       in-game text box at cat creation (UMG, or a runtime-built EditableTextBox from Lua).
 - [ ] **1. Canon clan roster.** Remove the procedural generation of the clan cats. Lock the roster to a specific point
       in the books' timeline (pick the book / moment with the operator).
+      PRE-WORK 2026-10-31: WaCa-Looks examples/WaCaCanonRosterDraft - RiverClan at Into the Wild (leader Crookedstar,
+      deputy Leopardfur, medicine cat Mudfur, warriors Blackclaw / Stonefur / Heavystep / Loudbelly), names from memory,
+      OFF until the operator checks them and picks the moment; live [<Clan>.<Rank>.<n>] pins added for it. VM: all
+      applied (the deputy slot unused - the player is the deputy). The operator's: the book / moment, the other clans.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - roster.ini per clan: role -> name + look (the existing name / look framework); applied when the clan is
         generated (the game's procedural roster) by replacing the generated cats' names / looks for those roles.
