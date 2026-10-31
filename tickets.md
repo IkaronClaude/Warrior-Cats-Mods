@@ -1331,6 +1331,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         game's own rank system is honoured.
       RESEARCH first: how generic clanmates get their names and name plates; whether we can place extra cats or only
       re-cast the ones the world spawns.
+      ANSWERED 2026-10-31: extra cats CAN be placed - WaCa.SpawnCat (the game's cutscene cat, dressed from any look's text
+      form, e.g. the save's other-Clan story cats; no AI, no name plate); VM: three other-Clan cats at the Island.
 - [ ] **Fresh kill without hunger** (operator 2026-10-28, future work): as the original hunger system goes, remove the
       "putting fresh-kill on the pile" screen - or at least force depositing EVERYTHING in the inventory at the pile -
       so every day is fresh. (The clan loop's hunt turn-in is the pile contribution: UWrcAchievementsManager
