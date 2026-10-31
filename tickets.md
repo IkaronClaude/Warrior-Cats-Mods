@@ -1339,7 +1339,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       in screenshots.
       FOLLOW-UPS: (a) the camera in tight spots (riverbank under tree roots: Wide pulled in to 1.7 m) - rise instead of
       shortening, or pick the open side; (b) game cinematics (LS_Cinematic_RankUp_* re-cast) as a shot type;
-      (c) the camera's own named moves between two shots (dolly / crane); (d) a skip key; (e) a cat that isn't drawn
+      (c) the camera's own named moves between two shots (dolly / crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
+      SkipCutscene, VM); (e) a cat that isn't drawn
       can't be cast (Lionstar out of range at the river) - bring it in through a fade?; (f) Clan Life days.ini /
       clanevents.ini examples using Cutscene:.
 - [ ] **P3: Clan Life loses the save's day on a hot Lua reload** (VM 2026-10-30, dev only): after an auto-reload the
