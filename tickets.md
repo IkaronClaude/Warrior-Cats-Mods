@@ -1769,6 +1769,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (the stats stay)" applied before the rebuild; the visible change (BodyValue 100, CatSize 1.3) not judged at
         480x270 - check in play. Caveat: a rebuild by the GAME itself (creator, respawn) uses the own values until the
         mod's next look pass.
+      CAVEAT FIXED 2026-10-31 (VM): a rebuild the mod didn't start (the game's own) is seen through CatLookPart and the
+      shape goes on again right after (your cat only, coalesced); a skipped shape logs why. VM: CatSize 1.5 applied at
+      boot and again after an outside rebuild; the cat's own CatSize (0.8) and the save's Stats unchanged. The visible
+      size: the operator's look in play. Drop Z:/WaCa/WaCa-mods-test-20261031y.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
         override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.
