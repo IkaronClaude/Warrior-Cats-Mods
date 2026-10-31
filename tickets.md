@@ -1402,6 +1402,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       passes its own music (mus_cutscene_rankup_<Clan> / _leader, mus_moonpool_a - as the game; Music = to change;
       not audible on the VM). Test drop Z:/WaCa/WaCa-mods-test-20261031f. Prophecy INTRO scenes: not found in the
       game state's start (only Closure) - the intros are sequence dialogues (events-dialogues.txt).
+      CORRECTION + DONE 2026-10-31 (VM): Gameplay.Narrative.Prophecy.Intro.<Clan> IS a registered sequence (type 3) - it
+      plays placed (the leader by the river, a StarClan spirit, the leader by the stone): Scene = Prophecy.Intro added
+      (no music: not in the traced start; Music = to set one). RankUp.Leader run AS A CUTSCENE: MedicineCat =
+      Mossfeather, StarClanAncestor = Freezesong dressed; ended with the scene; rank unchanged. All four scenes
+      (RankUp, RankUp.Leader, Prophecy.Intro, Prophecy.Closure) VM-run. Test drop Z:/WaCa/WaCa-mods-test-20261031h.
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
