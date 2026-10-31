@@ -1797,6 +1797,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       under the cat (a trace against the plane mesh itself - complex collision / its triangles) or the terrain's
       collision face material (GetMaterialFromCollisionFaceIndex with a complex trace). Wading stays as built; its
       water read is the open bug here.
+      MORE (VM): the water planes have NO collision (0 of them; traces on channels 0-5 all hit the terrain under the
+      plane) - a trace can't find a water surface. The stream right by the RiverClan camp isn't one of the
+      MI_WC_Water_RiverClan planes (none within 60 m) - river water is more than one kind of mesh. A plane seen from
+      below may be invisible (one-sided), so 'cat under the plane's Z' might be right after all - needs an in-play look
+      (operator) at a spot where the cat is visibly in the river, then read its floor / the planes there.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
