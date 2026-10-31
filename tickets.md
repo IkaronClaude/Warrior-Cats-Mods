@@ -1189,6 +1189,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       BUILT 2026-10-31 (walkers.lua [Jobs]): hunters out at a morning / afternoon to the game's prey places 30-90 m
       from camp, a stay, home; near one while it hunts -> a line (ShowLine). VM: Blacktail out 66 m, its line on screen,
       home after. Not yet: the hunter actually catching prey (a pounce animation at the spot) - optional per the spec.
+      DONE 2026-10-31 (VM): at its spot the hunter hunts - sniffs, stalks, leaps (the game's montages, a short lunge)
+      and catches by chance ([Jobs] CatchChance 40 / TryEvery 25 s; event NpcHuntTry(name, caught)). VM: Pineblaze 5
+      tries, 4 caught; Blackdash's mesh read live: AM_WC_Hunting_Leap then AM_Interact_Bite_1. Cutscenes poses Stalk /
+      Pounce added. Test drop Z:/WaCa/WaCa-mods-test-20261031n. (Real prey to catch at the spot: not spawned - a
+      visual hunt.)
 - [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
