@@ -1194,6 +1194,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       tries, 4 caught; Blackdash's mesh read live: AM_WC_Hunting_Leap then AM_Interact_Bite_1. Cutscenes poses Stalk /
       Pounce added. Test drop Z:/WaCa/WaCa-mods-test-20261031n. (Real prey to catch at the spot: not spawned - a
       visual hunt.)
+      REAL PREY 2026-10-31 (VM): the hunter goes for the game's prey near its spot (15 m) - faces it, leaps onto it;
+      caught -> WaCa Hunting's PreyTaken (gone, as the player's catch), missed -> PreyScare (bolts, gone); none near ->
+      acted out. VM: Willowstorm caught one ('caught by Willowstorm'), Sagefur's missed prey ran off. Drop
+      Z:/WaCa/WaCa-mods-test-20261031o.
 - [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
