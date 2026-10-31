@@ -1350,6 +1350,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       context; the save's rank quests were untouched (backup Z:/WaCa/SaveGames-before-ceremonytest-20261031). Re-casting
       = native work on how the RankUp objective starts its sequence and binds cats (team spatial points
       SetTeamActorMain / Left / Right look like the cast handle).
+      ENGINE PATH WORKS (2026-10-31, VM): the ceremony is a plain level sequence - LS_Cinematic_RankUp_ButLeader (+ per
+      clan _C<Clan> and per shot _S* subsequences; 35 assets) - and the engine's own LevelSequencePlayer.Create +
+      Play runs it from Lua (2400 frames; the view cut to its camera, dark: its cameras sit at the sequence's origin).
+      NEXT: anchor it the game's way (USwtSequencerManager ParentAnchor / AttachBoundActorToParentAnchor - an actor at
+      the camp's ceremony spot), list its bindings (MovieSceneSequence FindBindingsByTag / the director's
+      SequenceEvent entry points) and bind our cast with ALevelSequenceActor SetBindingByTag - then a Cutscenes shot
+      type 'Ceremony'. Save untouched by the test.
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
