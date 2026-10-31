@@ -1768,6 +1768,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       GROUNDWORK (2026-10-31, VM): the water planes CAN be made solid - SetCollisionEnabled + Block on the Pawn channel
       (wading now sets them query-only); in leaf-bare blocking the Pawn channel on chosen planes = walkable ice, an ice
       material swap for the look. Falling through: switch one plane's block off under the cat (thin ice) + a scene.
+      VERIFIED (VM): 3 planes at the deep river spot set QueryAndPhysics + Block on Pawn - the cat stands ON the water
+      (feet 853, surface ~845) instead of the riverbed (592).
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
