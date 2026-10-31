@@ -1340,7 +1340,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       FOLLOW-UPS: (a) DONE 2026-10-31 (rises 1.5 / 3 m per direction before pulling in; VM: turned 110 deg + 3 m higher at
       the Leader's den, full 7.7 m) - was: the camera in tight spots (riverbank under tree roots: Wide pulled in to 1.7 m) - rise instead of
       shortening, or pick the open side; (b) game cinematics (LS_Cinematic_RankUp_* re-cast) as a shot type;
-      (c) the camera's own named moves between two shots (dolly / crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
+      (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
+      with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
       can't be cast (Lionstar out of range at the river) - bring it in through a fade?; (f) Clan Life days.ini /
       clanevents.ini examples using Cutscene: - DONE 2026-10-30 (examples/WaCaStoryPackExample: [Event.HerbLesson] plays
