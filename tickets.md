@@ -1688,6 +1688,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       from the meshes on the player's PC - no game-derived art in the repo).
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - More patterns / markings need new textures -> the mod pipeline (pak); colour wheel = the hex box (done).
+      EYES CHECKED 2026-10-31 (VM): the eyes are the body mesh's material slot 2 (MID of MI_Cat_Eyes); the iris colour
+      = an index per eye (IndexIrisColorCurveLeft / Right) into the game's eye-colour palette (texture
+      CurveAtlas_Characters_Eyes_AllColors). WaCa Looks rosters already set it (EyeLeftColorIdx / EyeRightColorIdx -
+      odd eyes too). Colours outside the palette = a new palette texture (art -> the pak pipeline). So eye colour is
+      covered within the game's palette; open here: the colour wheel UI (editor), the colourpoint mask pack, the
+      operator's look.
 - [x] **18. More graphics options.** DONE 2026-10-27: config/graphics.ini - [Scalability] the engine's groups (sg.*),
       [CVars] any console variable (motion blur, DoF, fringe, screen %, t.MaxFPS listed), applied through
       ExecuteConsoleCommand at start and after the game's options popup closes. VM: read back sg.ShadowQuality 0,
