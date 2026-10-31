@@ -1344,9 +1344,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       can't be cast (Lionstar out of range at the river) - bring it in through a fade?; (f) Clan Life days.ini /
       clanevents.ini examples using Cutscene: - DONE 2026-10-30 (examples/WaCaStoryPackExample: [Event.HerbLesson] plays
       Cutscene: HerbLesson). (e) needs forcing a hidden cat's mesh visible and restoring it - the operator's eyes.
-- [ ] **P3: Clan Life loses the save's day on a hot Lua reload** (VM 2026-10-30, dev only): after an auto-reload the
-      day restarts at day 1, Greenleaf (the save had day 19, Leaf-bare) - the day is restored on the save-load event,
-      which doesn't come again on a reload. Re-read the sidecar at Init when a save is already loaded.
 - [ ] **Nexus Mods: release, reuse the UE4SS upload, split into parts, a base mod** (operator 2026-10-28). Research
       (Nexus public GraphQL API, game id 10777, domain warriorcatsclansoftheforest - 6 mods on 2026-10-28):
       - mod 2 "UE4SS For Warrior Cats - CotF" (CaptainJackalope): plain UE4SS v3.0.1-1181-g83330635 - THE SAME commit
@@ -1660,6 +1657,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-10-31 **Clan Life lost the save's day on a hot Lua reload** (P3): DayNight restores + starts the clock at
+      Init when the world is already up, and Drive keeps a restored hour. VM: two reloads -> day 19, 13:00, Leaf-bare,
+      the noon resumed.
 - [x] 2026-10-31 **Framework: fixed cats for specific roles** (WaCa Looks roster, VM-tested): live pins by the cat's
       name ([Cat.Troutwing]), story role ([Narrative.RiverClanWarriorSideRace]) and clan + job ([RiverClan.MedicineCat]);
       name, the game's look values, CatSize (VM: Gooseheart 1.40 -> her root bone 1.22, the others 1.00), scars,
