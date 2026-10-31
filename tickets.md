@@ -1215,6 +1215,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       BUILT 2026-10-31: the clan's patrols walk with the walkers' mover now (camp cats, border points, home); meet one
       -> it stops, its leader says a [PatrolMeet] line (subtitle). VM: Owlleaf's patrol stopped and spoke, walked on.
       Talking to each cat (the game's conversation) stays the operator's check - the VM opens no conversations.
+      EACH CAT SPEAKS 2026-10-31 (VM): on a meet every patrol cat says a line in turn (3 s apart): the leader's from
+      [PatrolMeet], the others' from [PatrolMeet.Member], a cat's own [PatrolMeet.<Name>] first, by who leads
+      [PatrolMeet.LedBy.<Name>]; {LEADER}; no line twice in one meet. VM: Maplefang, Cricketdash, Slatefeather each spoke.
+      CRASH FIXED on the way: the walkers' ground check called GetMaterial(0):GetFName() on a hit with no material -
+      the game died (null 0x18 in UE4SS) as a patrol set off. New WaCa.HitMaterialName (Core) used in walkers, stage,
+      wading (the wading one ran every tick - a likely cause of the 16:24 crash too). Drop Z:/WaCa/WaCa-mods-test-20261031za.
 - [x] **Dialogue by days + the daily grab bag** (operator 2026-10-28: "all dialog should be able to be defined like
       this, e.g. Queen 1 between Day 1 and 6 picks a random dialog to play each day out of 3"; "our filler pool must be
       able to change for given cats on given days"). BUILT (lines.lua): [Dialogue.<Name>] Who / Days / Require / Case /
