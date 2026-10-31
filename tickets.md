@@ -977,6 +977,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NightLight), faded over FadeSeconds; works with the cycle off too (the sky's own look, dimmed / tinted).
         Hunting (base chance x) and fishing (bite chance x) follow WorldFactors (season x weather). Effect / Sound
         slots per weather (a Niagara system attached to the cat, a 2D looping sound) - empty until the content pak.
+        VM-CHECKED 2026-10-31: the season and weather load with the save (one line, "as saved" - a double roll at load
+        fixed), SetWeather Snow / Rain -> the effect on (snow flakes, rain streaks on screen), hunting / fishing factors
+        follow (leaf-bare: rain x0.48 / x0.84). Look (flake size, rain density) = the operator's check.
         Offline logic test (lupa, 60 days): seasons turn every 7 days, Snow only in leaf-bare. NOT YET VM-CHECKED
         (the VM's Steam was busy - the game stalled at the logos, with the stock UE4SS too).
         CONTENT PAK BUILT (same day): tools/build_content.ps1 - UE 5.7.4 on the VM, fully headless (~1 min):
