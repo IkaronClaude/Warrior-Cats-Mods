@@ -1357,6 +1357,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the camp's ceremony spot), list its bindings (MovieSceneSequence FindBindingsByTag / the director's
       SequenceEvent entry points) and bind our cast with ALevelSequenceActor SetBindingByTag - then a Cutscenes shot
       type 'Ceremony'. Save untouched by the test.
+      Tried: setting the sequencer manager's ParentAnchor (normally Actor_2147475258 in the persistent level) to the
+      player before Play - still black: the game attaches bound actors from its own director events while it plays
+      the sequence through its manager; a free LevelSequencePlayer isn't anchored. Next: find what places the game's
+      own ceremony (the RankUp task's native start) or move the LevelSequenceActor's transform origin (sequence
+      'transform origin' override on the actor) to the camp spot.
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
