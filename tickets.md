@@ -457,6 +457,11 @@ game data in this repo.
       stays empty (needs the native setup). E next to it does nothing on the VM (like NPC talk). The SwtAdventure
       FreshKillPileComponent is on the GameState (data only). So the deposit -> OnContributeFreshKill -> TaskTurnedIn
       Pile chain is verified only from OnContributeFreshKill on (VM full day); the screen part needs the operator.
+      SCREEN PART 2026-10-31 (VM): the pile screen opens on the VM now (WaCa Core OpenPopup 86) and WaCa Hunting's
+      Deposit drives it - 10 mice went on (+10 pts), and the game saved its achievement + inventory at the confirm (its
+      own contribution path). A single run screen -> OnContributeFreshKill -> TaskTurnedIn with a Hunt task waiting
+      still needs fresh-kill in hand (VM pounces don't finish at 0.5 fps); duties now LOGS a contribution no task waits
+      for, so the link shows in any run.
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
