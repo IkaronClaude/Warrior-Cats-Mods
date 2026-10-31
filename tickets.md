@@ -1765,6 +1765,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       story arc. NOTES: water is visual planes + Water / DeepWater floor types (no water volumes - see 16), so ice =
       a walkable surface over the water plane in leaf-bare (WaCa Clan Life's seasons) + the floor read as ice; falling
       through = a scene (Cutscenes) / story beat (rescue, injury) at thin-ice spots.
+      GROUNDWORK (2026-10-31, VM): the water planes CAN be made solid - SetCollisionEnabled + Block on the Pawn channel
+      (wading now sets them query-only); in leaf-bare blocking the Pawn channel on chosen planes = walkable ice, an ice
+      material swap for the look. Falling through: switch one plane's block off under the cat (thin ice) + a scene.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
@@ -1802,6 +1805,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       MI_WC_Water_RiverClan planes (none within 60 m) - river water is more than one kind of mesh. A plane seen from
       below may be invisible (one-sided), so 'cat under the plane's Z' might be right after all - needs an in-play look
       (operator) at a spot where the cat is visibly in the river, then read its floor / the planes there.
+      FIXED 2026-10-31 (VM): wading measures the water by its SURFACE - the MI_WC_Water planes are set QueryOnly with
+      every channel ignored (nothing walks on them), a world-static object trace at each step finds the surface over
+      the cat's feet: shallow under DeepDepth 35 cm, deep above, dry under MinDepth 5 cm. VM: shallow 21 cm at the
+      ford, deep 253 cm beyond, out; the camp's level plane not wet. Drop Z:/WaCa/WaCa-mods-test-20261031p.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
