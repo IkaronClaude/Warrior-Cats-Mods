@@ -1178,6 +1178,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       formation rings around the place, arrival checked at the travellers' steps; Follow.Release; Follow.Nearest.
       The patrol companions and patrols.lua use it. NOT yet seen on the VM (the companions' earlier MoveToActor
       version joined, the follow itself unconfirmed). OPEN: speed matching (run with the leader), fading out of view.
+      STATUS 2026-10-31: the AI follow can't work on this map (field / camp cats have no movement component - AI moves
+      fail, VM 2026-10-30), so the walkers' mover does it all, VM-verified: your party runs with you (walk / trot / run
+      matched, holds while you sneak, catches up - the speed matching), escorts walk with you (patrol companions,
+      TemporaryParty, the Gathering party), patrols and the Gathering party travel as a group to places and home. Left
+      open: fading cats out when far from view (cosmetic, not started).
 - [~] **NPC patrols heading out together** (operator 2026-10-28): when the deputy assigns patrols, see them leave
       together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
       together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
