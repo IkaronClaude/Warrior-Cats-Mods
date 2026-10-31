@@ -1892,6 +1892,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       OPEN: the shallow-water exit seen on its own (in play: swim to a bank); a steep bank may hold a swimming cat
       (deep right to the wall - no climb out); no paddle animation (none in the game - the mod pipeline's job).
       Drop Z:/WaCa/WaCa-mods-test-20261031zc.
+      2026-10-31 later: the SHALLOW EXIT seen on its own (VM: swum forward into 33 / 36 cm -> walking). Steep banks:
+      [Swim] Climb 80 - land (not water) 70 cm the way you steer, at / over the surface -> climbed out onto it. NOT
+      VERIFIED: no steep bank within 30 m of the test spot (the river shelves gently there), and a placed bank failed
+      for test reasons (no engine cube in the shipped game; a scaled world rock wasn't hit by the traces; a probe
+      reading a null mesh crashed the game). Also seen: at -40866,6059 the swimming cat didn't move with W at all
+      (earlier it swam 6 m) - unexplained. Operator check in play: swim to a steep bank. Drop ...20261031zd.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
