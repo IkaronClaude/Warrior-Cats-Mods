@@ -1344,7 +1344,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       SkipCutscene, VM); (e) a cat that isn't drawn
       can't be cast (Lionstar out of range at the river) - bring it in through a fade?; (f) Clan Life days.ini /
       clanevents.ini examples using Cutscene: - DONE 2026-10-30 (examples/WaCaStoryPackExample: [Event.HerbLesson] plays
-      Cutscene: HerbLesson). (e) needs forcing a hidden cat's mesh visible and restoring it - the operator's eyes.
+      Cutscene: HerbLesson). (e) DONE 2026-10-31: an undrawn quest cat is cast,
+      shown for the cutscene and hidden again (VM: Lionstar 90 m off, his line, back) - the look is the operator's check.
 - [ ] **Nexus Mods: release, reuse the UE4SS upload, split into parts, a base mod** (operator 2026-10-28). Research
       (Nexus public GraphQL API, game id 10777, domain warriorcatsclansoftheforest - 6 mods on 2026-10-28):
       - mod 2 "UE4SS For Warrior Cats - CotF" (CaptainJackalope): plain UE4SS v3.0.1-1181-g83330635 - THE SAME commit
