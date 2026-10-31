@@ -1362,6 +1362,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the sequence through its manager; a free LevelSequencePlayer isn't anchored. Next: find what places the game's
       own ceremony (the RankUp task's native start) or move the LevelSequenceActor's transform origin (sequence
       'transform origin' override on the actor) to the camp spot.
+      Tried too: the LevelSequenceActor's transform origin (bOverrideInstanceData, DefaultInstanceData.TransformOrigin)
+      at the cat - still black: the cameras live in the per-shot subsequences, bound / spawned through the game's own
+      start (director events, the manager). Needs the native trace of the RankUp task's sequence start + bindings.
+      The game was restarted after the tests (a clean sequencer manager).
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
