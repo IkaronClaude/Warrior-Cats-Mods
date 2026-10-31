@@ -1737,6 +1737,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       morning, a catch within two days finds her, else a patrol does - missed). VM: deadline 21 on day 19, the catch
       in time fired LostKitFound; past the deadline nothing. Drop Z:/WaCa/WaCa-mods-test-20261031u. The operator's:
       the real threads to write.
+      MISSED ENDING run on the VM too (new: WaCa.Emit("ClanEvent", name) runs a clan event now, Require checked):
+      refused before the deadline, after it the patrol card and LostKit = -1; a later catch finds nothing. Drop
+      Z:/WaCa/WaCa-mods-test-20261031v.
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
