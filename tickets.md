@@ -489,20 +489,6 @@ game data in this repo.
       (suffix text == prefix text) and replaces the suffix with one its rank uses, deterministically per prefix; runs
       after UQuestManager.OnNPCGenerationCompleted, on load and on slot change, and syncs spawned NPCs. OPEN: the
       operator's in-game check (log line "renamed ... (doubled name)").
-- [ ] **Framework: fixed cats for specific roles** (operator 2026-10-25, the next step after the doubled names; the
-      base for "1. Canon clan roster"). Data-driven overrides of the procedural generation: for a clan + role (leader,
-      deputy, medicine cat, mentor, specific warriors / apprentices ...), a fixed cat - name (any text, via the string
-      table), look (FCatCustomData fields + WaCa colours / masks), size, traits. Content packs as ini files so the canon
-      roster (and other mods) are just data. Hook points: UWrcNPCGenerationManager (NPCClansData TMap<EGiverRole,
-      FCatCustomDataList>, NarrativeCustomDataMap TMap<ENarrativeRole, FCatCustomData>), the generator's
-      CSVs (NpcGenerator, CatSize, Scars, ForcedAppearance ...).
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - = the roster.ini plan under 1 (role -> name + look over the generated cats).
-      STATUS 2026-10-30 (VM-tested): this game version's generator keeps NO lists (NPCClansData / NarrativeCustomDataMap
-      empty), so WaCa Looks pins LIVE cats as they show up: [Cat.<its name now>] (Troutwing -> Mossfeather) and
-      [Narrative.<story role>] (RiverClanWarriorSideRace: Rippleface -> Ripplestream, the party and Clan Life follow the
-      new name); story packs bring their own contentoster.ini. by giver role done too ([RiverClan.MedicineCat]: Freezesong ->
-      Willowshine, VM 2026-10-31). STILL OPEN: size and traits.
 - [ ] **19a. PC controls: bindings.** Pause on Esc: DONE in 0.1 (awaiting the operator's test). Still open: hint
       that quests are on K (UI), an in-game rebinding UI (the game's own GuiCustomConfigKey screen should read / write
       our bindings), mouse bindings for the camera.
@@ -1638,6 +1624,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-10-31 **Framework: fixed cats for specific roles** (WaCa Looks roster, VM-tested): live pins by the cat's
+      name ([Cat.Troutwing]), story role ([Narrative.RiverClanWarriorSideRace]) and clan + job ([RiverClan.MedicineCat]);
+      name, the game's look values, CatSize (VM: Gooseheart 1.40 -> her root bone 1.22, the others 1.00), scars,
+      accessories (any FCatCustomData field), WaCa colours / masks; story packs bring contentoster.ini. Traits: camp
+      cats have none (only the player's creation data and its dialogue choices carry ECharacterTrait) - nothing to pin.
+      The canon roster (1) builds on this.
 - [x] 2026-10-30 **Time freezes at story points**: the game's own sequences / conversations and WaCa cutscenes freeze the
       clan's clock while they play (each lifted at its end, 5 min safety); story files freeze with a `Freeze: On` /
       `Freeze: Off` scene step; a third that would start while frozen waits (the clan's day and the sky never part).
