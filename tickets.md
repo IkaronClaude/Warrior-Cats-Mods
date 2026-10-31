@@ -1374,6 +1374,20 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the sequencer (native) -> OnPlayRankUpSequenceFinish(sequenceId). NEXT: that handler's native body -> the
       sequencer's play-by-tag call (RegisteredSequences by ESwtEngineSequencerType) and its bindings; call it with our
       cast. Never call 0x1416edab0 itself - it promotes the player.
+      (b) DONE 2026-10-31 - the ceremony as a cutscene type, VM-verified end to end. Native: the game state's rank-up
+      start (0x1418a8390, the func that binds &ThisClass::OnPlayRankUpSequenceFinish) builds a params block (+0x08 music,
+      +0x18 rate, +0x28 TMap<FName, weak actor> replacements - passed empty, +0x7C type 3, +0x80 tag
+      Gameplay.Narrative.RankUp.<Clan> / .Leader) and calls the sequencer manager's vtable +0x330 with a 'started'
+      delegate it EXECUTES (an unbound one = null read 0x1412b7646 - crashed once). WaCa Core: WaCaNative_PlaySequence
+      (sequences.cpp; our delegate = a copied weak-lambda vtable with Execute a no-op - the game's would wire the
+      promotion) and WaCa.CopyLook(to, from) (SetDefaultCustomData with another cat's data). The scene's cats are
+      stand-ins (WrcCatSkeletalMeshWithCustomization: Clan, GiverRole, Index), dressed by the game at each start (so
+      nothing to restore). WaCa Cutscenes: Scene = RankUp / RankUp.Leader + <Job>[.<n>] = <who> (scenes.lua), stand-ins
+      re-dressed on the game's look builds (CatLookPart), start = the skip prompt, end = OnSequenceFinished. VM: the
+      [Cutscene.Ceremony] example (Leader = MedicineCat) - Freezesong leads the RiverClan ceremony; ends with the scene;
+      rank unchanged (3). Test drop Z:/WaCa/WaCa-mods-test-20261031e. NOT YET: RankUp.Leader (Moonpool) only by
+      reading - untested; the replacement map's use (ActorsReplaced stayed empty - possibly for spawnables only);
+      Prophecy (clan meeting) scenes are the next type (Gameplay.Narrative.Prophecy.*, the same play).
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
