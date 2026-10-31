@@ -1884,6 +1884,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       every channel ignored (nothing walks on them), a world-static object trace at each step finds the surface over
       the cat's feet: shallow under DeepDepth 35 cm, deep above, dry under MinDepth 5 cm. VM: shallow 21 cm at the
       ford, deep 253 cm beyond, out; the camp's level plane not wet. Drop Z:/WaCa/WaCa-mods-test-20261031p.
+      SWIMMING BUILT 2026-10-31 (VM, wading.ini [Swim]): deeper than Enter 60 cm the cat swims - movement mode Flying
+      (no gravity, input still steers), a 100 ms tick holds it Sink 5 cm under the water surface (flying input follows
+      the camera pitch: it sank 55 cm in 8 s without), MaxFlySpeed = walk x Speed 0.6 (RiverClan 0.9), the wading
+      slow-down off meanwhile; walking again under Leave 40 cm or with no water over the cat; event Swim. VM: into
+      2.56 m -> swimming, held at the surface while steered, on screen in the water; teleported out -> walking.
+      OPEN: the shallow-water exit seen on its own (in play: swim to a bank); a steep bank may hold a swimming cat
+      (deep right to the wall - no climb out); no paddle animation (none in the game - the mod pipeline's job).
+      Drop Z:/WaCa/WaCa-mods-test-20261031zc.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
