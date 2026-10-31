@@ -527,6 +527,11 @@ game data in this repo.
       deputy Leopardfur, medicine cat Mudfur, warriors Blackclaw / Stonefur / Heavystep / Loudbelly), names from memory,
       OFF until the operator checks them and picks the moment; live [<Clan>.<Rank>.<n>] pins added for it. VM: all
       applied (the deputy slot unused - the player is the deputy). The operator's: the book / moment, the other clans.
+      MORE 2026-10-31: the draft covers all four clans (ThunderClan Bluestar / Redtail / Spottedleaf ..., ShadowClan
+      Brokenstar / Blackfoot / Runningnose ..., WindClan Tallstar / Deadfoot / Barkface ...) - other clans' cats pin where
+      the game brings them in (only RiverClan's at camp on the VM). LIBRARY FIX found by it: [<Clan>.<Job>.<n>] now
+      stays with the same cat across sessions (WrcGame.<slot>.WaCaLooks.ini [Pins]; VM: two boots, Sagefang Heavystep
+      both times). Test drop Z:/WaCa/WaCa-mods-test-20261031i. Still the operator's: check the names, pick the moment.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - roster.ini per clan: role -> name + look (the existing name / look framework); applied when the clan is
         generated (the game's procedural roster) by replacing the generated cats' names / looks for those roles.
