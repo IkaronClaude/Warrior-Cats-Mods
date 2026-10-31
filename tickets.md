@@ -1301,6 +1301,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       HUD (Player_Interact 65) but no conversation opens (as every NPC talk on the VM). NEXT (native, Core): find the
       inventory's item store and the screen's contribute call (its command buttons -> the grid's CurrentItem) and
       deposit every fresh-kill item when the pile screen opens; testable end to end only in the operator's play.
+      DONE 2026-10-31 (VM) - no inventory RE needed: the pile screen is driven with its OWN commands. WaCa Core
+      WaCaNative_OpenPopup(screen, 86) opens it as the dialogue's create-screen action does (screen vtable +0x5D0) - for
+      testing; the screen's command handler (exe 0x1418f5f70): ShoulderL/R (TriggerL/R) -1/+1 on the amount (+0x588),
+      capped by what you carry (+0x590) and the pile (+0x598, points per item +0x58C); Button_Confirm (26) gives. WaCa
+      Hunting [Pile] Deposit = 1 (default) / Close: on the screen opening, each kind's amount raised till the game stops
+      it, then confirmed. VM: pile 69 + 8 rats carried -> 'on the pile: 8 Rat Fresh-kill (+32 pts) - the pile: Full'
+      (100). Test drop Z:/WaCa/WaCa-mods-test-20261031g. OPEN for the operator: in play by talking to the pile's cat
+      (the VM can't talk to NPCs), and whether the screen should also skip itself (Close = 1).
 - [ ] **Cutscenes from text** (operator 2026-10-28: "what a writer would need to truly build their own story"): a mod
       defines a cutscene in plain text, with prebuilt configs:
       - SHAPES: named, premade cat arrangements - e.g. "two sides facing: side 1 = cat1 + player, side 2 = cat2, cat3,
