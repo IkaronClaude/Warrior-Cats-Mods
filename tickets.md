@@ -1787,6 +1787,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
           one CustomTimeDilation (works with exhaustion off too).
         NOT yet seen: a step INTO water on the VM (no water near the test spot; the VM can't steer) - check in play;
         GetMaterial(0) may miss a water material on a multi-material mesh (then: the hit's face material).
+      FOUND 2026-10-31 (VM, with WaCa.Command HoldKey to walk and floor reads): the RiverClan riverbed is the TERRAIN MESH
+      (StaticMeshComponent, MI_Terrain_RiverClan_Terrain); the cat's floor hit carries NO physical material and the
+      mesh's material 0 is the terrain's -> the floor type reads Dirt / Rocks everywhere (a 60 x 60 m trace grid round
+      the camp: Dirt 483, Rocks 107, Wood 1, no Water / Grass) - so wading's floor-type test can't see this river.
+      Kismet traces return no per-face physical material either. Water itself = flat planes (MI_WC_Water_RiverClan_*
+      StaticMeshComponents, 20 x 20 m, surface Z in their bounds) - but a plane's box also covers banks (the cat on a
+      dry slope inside one, 2.5 m under its Z): box containment would misfire. NEXT: the water plane's actual surface
+      under the cat (a trace against the plane mesh itself - complex collision / its triangles) or the terrain's
+      collision face material (GetMaterialFromCollisionFaceIndex with a complex trace). Wading stays as built; its
+      water read is the open bug here.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
