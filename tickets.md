@@ -1780,6 +1780,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       576 on thaw; lake 752/750, held over the hole; camp unchanged; the lake a pale ice sheet in the screenshot.
       Drop Z:/WaCa/WaCa-mods-test-20261031q. OPEN: falling through (thin-ice spots: a scene + a story beat), NPC cats
       on the ice (the walkers' sweeps), the look checked by the operator.
+      THIN ICE BUILT 2026-10-31 (VM): [Ice] ThinChance 15 % of the frozen river stretches (stable) give way after
+      ThinSteps 6 footsteps (CatStep) - only over ground; the cat drops in, ShowLine 'The ice cracks beneath your paws!',
+      event FellThroughIce(stretch) for a story's rescue / injury scene; the hole refreezes after Refreeze 60 s. Wading
+      counts frozen water (through a hole = in water). VM (ThinChance 100 for the test): StaticMeshActor_151 gave way,
+      the line, wading 'shallow water (21 cm)'. Drop Z:/WaCa/WaCa-mods-test-20261031r. OPEN: the story arc itself (a
+      scene on FellThroughIce), NPC cats on the ice, the operator's look at it.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
