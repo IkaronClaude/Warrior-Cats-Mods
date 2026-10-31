@@ -1790,6 +1790,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       pack reacts to any event); the example pack's IceRescue (When = Event:FellThroughIce): a cutscene - the nearest
       clanmate hauls your cat out - then a card. VM: the ice gave way -> Rippleface 'Hold on - grab my scruff!' -> the
       card. Drop Z:/WaCa/WaCa-mods-test-20261031s. Still open: NPC cats on the ice; the operator's look.
+      NPC CATS ON THE ICE DONE 2026-10-31 (VM): the walkers' ground trace skips open water (a bug wading's query-only
+      planes would have caused: cats walking on the river) and stands on ice; Cutscenes' ground counts ice as dry. On the
+      frozen lake: the party (Nightheart, Rippleface) and HerbLesson's Mossfeather at 767-768 (surface 750). Drop
+      Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
