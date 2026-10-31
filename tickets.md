@@ -1731,6 +1731,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Builds on 25: multi-day quest chains as day-script entries with their own state in the save sidecar.
+      PRE-WORKED 2026-10-31 (library exercise, VM): side threads are DATA in a pack - clan events + story variables:
+      Set takes another variable +/- n (Set: LostKit.Until = Day + 2), conditions name a variable on the right
+      (Day <= LostKit.Until), When = Event:HuntCaught for the player's deed. Example pack: the lost kit (start one
+      morning, a catch within two days finds her, else a patrol does - missed). VM: deadline 21 on day 19, the catch
+      in time fired LostKitFound; past the deadline nothing. Drop Z:/WaCa/WaCa-mods-test-20261031u. The operator's:
+      the real threads to write.
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
