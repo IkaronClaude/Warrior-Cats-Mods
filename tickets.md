@@ -1119,6 +1119,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       broken "how {X}'s death" sentence rewritten. Left to other code (not broken): {N} {M} {S} {H}, ${QST_...},
       {PLAYER ... NAME}. Test drop Z:/WaCa/WaCa-mods-test-20261031j. OPEN: a sweep in a save of each other clan (only
       a RiverClan save on the VM); the operator's own lines seen in play (the detector still logs any).
+      COVERAGE checked 2026-10-31: the fill's 10 callers = the conversation text (rich text), the quest-dialogue talker,
+      the voice-over timing, the contextual action prompts, the dilemma buttons (GuiButtonDilemma) - the families the
+      sweep found broken all pass through it. Other clans' saves: the fallback doesn't depend on the save, and every
+      placeholder's spelling was checked against the 104 role names statically (only the ones fixed in text.ini were
+      off) - a per-clan sweep would only re-confirm. Remaining: text that never passes the fill (none found).
       - Done part: misspelled placeholders fixed (text.ini [Placeholders]); the in-play detector names any other
         unfilled line - its fix is one text.ini line each once seen.
 
