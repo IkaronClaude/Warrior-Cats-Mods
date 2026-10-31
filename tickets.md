@@ -1770,6 +1770,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       material swap for the look. Falling through: switch one plane's block off under the cat (thin ice) + a scene.
       VERIFIED (VM): 3 planes at the deep river spot set QueryAndPhysics + Block on Pawn - the cat stands ON the water
       (feet 853, surface ~845) instead of the riverbed (592).
+      BUILT 2026-10-31 (WaCa Clan Life ice.lua, weather.ini [Ice] On / Season / Lake / River %): in leaf-bare the lake
+      and River% of the river stretches (stable pick per plane) freeze - their water material as a dynamic instance,
+      still and pale (no flow / ripples / caustics, opacity up, frost-white foam), solid to cats. Water meshes differ:
+      river pieces / puddles have collision once on; the map-wide lake plane (SM_Water) only triangles - its mesh made
+      to collide on them (CollisionTraceFlag 3 + collision toggled; SetStaticMesh(nil) crashed). Thaw: material and
+      collision back; under the cat it drops onto the bed, over a hole (the lake) the ice under it holds till it steps
+      off. Freeze event for stories, IceFrozen / IceThawed. VM: 32 frozen (1 lake, 31 river); river ice 629/627 -> bed
+      576 on thaw; lake 752/750, held over the hole; camp unchanged; the lake a pale ice sheet in the screenshot.
+      Drop Z:/WaCa/WaCa-mods-test-20261031q. OPEN: falling through (thin-ice spots: a scene + a story beat), NPC cats
+      on the ice (the walkers' sweeps), the look checked by the operator.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
