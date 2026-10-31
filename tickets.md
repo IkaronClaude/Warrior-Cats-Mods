@@ -1148,6 +1148,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
       Patrol / Leader, the daily grab bag); the stop-and-talk isn't.
+      BUILT 2026-10-31: the clan's patrols walk with the walkers' mover now (camp cats, border points, home); meet one
+      -> it stops, its leader says a [PatrolMeet] line (subtitle). VM: Owlleaf's patrol stopped and spoke, walked on.
+      Talking to each cat (the game's conversation) stays the operator's check - the VM opens no conversations.
 - [x] **Dialogue by days + the daily grab bag** (operator 2026-10-28: "all dialog should be able to be defined like
       this, e.g. Queen 1 between Day 1 and 6 picks a random dialog to play each day out of 3"; "our filler pool must be
       able to change for given cats on given days"). BUILT (lines.lua): [Dialogue.<Name>] Who / Days / Require / Case /
