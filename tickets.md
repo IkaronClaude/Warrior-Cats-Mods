@@ -1157,6 +1157,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       (hidden while a cutscene plays). Lionstar speaks to the cats on the Island's grass. Test drop
       Z:/WaCa/WaCa-mods-test-20261031l. OPEN: the other Clans' cats at the Gathering (their cats aren't in the world
       away from their territories - the Gathering would need to bring some in).
+      OTHER CLANS DONE 2026-10-31 (VM): a RiverClan save holds only its story cats + ThunderClan's leader / deputy as
+      DATA (NPCData.NarrativeRoles - the look's text form); the game's cutscene stand-ins outside a scene sit in an
+      unloaded sublevel (can't move / draw). So: WaCa.SpawnCat spawns the game's cutscene cat class and ImportLook dresses
+      it from that text (FProperty::ImportText + the game's rebuild); WaCa Cutscenes' cast Clan:<Clan>[.<Part>] brings
+      one in (the save's story cat, else one made up from the save's cats, a name of its own) and removes it after.
+      The Island Gathering: Sunstar (ThunderClan), Pebbleface (ShadowClan), Leopardsong (WindClan) sat with the
+      RiverClan cats; none left after. Test drop Z:/WaCa/WaCa-mods-test-20261031m.
       ban cleared. OPEN: the 10+ cats travelling to the island (follow.lua Follow.Travel - see Following), the
       Gathering's own scene / place.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
