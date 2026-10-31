@@ -1284,6 +1284,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       "putting fresh-kill on the pile" screen - or at least force depositing EVERYTHING in the inventory at the pile -
       so every day is fresh. (The clan loop's hunt turn-in is the pile contribution: UWrcAchievementsManager
       OnContributeFreshKill.)
+      FOUND 2026-10-31: the pile screen (UGuiPopupFreshKill: an inventory grid, CurrentItem, two command buttons)
+      opens through a DIALOGUE action (UAdventureDialogueActionFreshKillPile - talking to the pile's cat, Mossfeather /
+      BP_Quest_Giver_FreshKill_C); the inventory (USwtQuestInventoryComponent / USwtAdventureInventoryComponent /
+      UWrcInventoryComponent) has NO reflected functions or fields - native only. VM: E beside the pile cat reaches the
+      HUD (Player_Interact 65) but no conversation opens (as every NPC talk on the VM). NEXT (native, Core): find the
+      inventory's item store and the screen's contribute call (its command buttons -> the grid's CurrentItem) and
+      deposit every fresh-kill item when the pile screen opens; testable end to end only in the operator's play.
 - [ ] **Cutscenes from text** (operator 2026-10-28: "what a writer would need to truly build their own story"): a mod
       defines a cutscene in plain text, with prebuilt configs:
       - SHAPES: named, premade cat arrangements - e.g. "two sides facing: side 1 = cat1 + player, side 2 = cat2, cat3,
