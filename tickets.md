@@ -1366,6 +1366,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       at the cat - still black: the cameras live in the per-shot subsequences, bound / spawned through the game's own
       start (director events, the manager). Needs the native trace of the RankUp task's sequence start + bindings.
       The game was restarted after the tests (a clean sequencer manager).
+      NATIVE TRACE (2026-10-31): the RankUp task (UQuestObjectiveRankUpTask, vtable 0x149aa0388 in the dump's exe) has
+      its own slots +0x2b0 / +0x2b8 / +0x2c8 / +0x2f8 (vs the camera-sequence task's). +0x2c8 (0x1416edab0) = its start:
+      the player's rank (0x1416ae290) below the task's Rank -> an achievement by name ("OnBecameWarrior" ..., the
+      achievements object's vtable +0x3a8), SET THE RANK (0x1416ae100(rank)), complete (+0x2f8), 0x141660c80. It
+      plays NO sequence: the ceremony comes from ASwtQuestGameplayGameState::OnQuestStatusChanged (the quest done) ->
+      the sequencer (native) -> OnPlayRankUpSequenceFinish(sequenceId). NEXT: that handler's native body -> the
+      sequencer's play-by-tag call (RegisteredSequences by ESwtEngineSequencerType) and its bindings; call it with our
+      cast. Never call 0x1416edab0 itself - it promotes the player.
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
