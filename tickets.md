@@ -1144,6 +1144,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       MinRank, else Base + PerStanding x standing + PerFavour x LeaderFavour %; back in camp in the Third: [Attend] /
       [StayBehind] scenes (Hook: GatheringAttend / GatheringStayBehind). Gathering.Chosen / Count for the story's beats.
       Offline: chosen -> attended, Count 1; GatheringBan 1 -> not chosen -> stay behind (+3 favour in the test scene),
+      TRAVEL DONE 2026-10-31 (VM, with the walkers' mover - the AI walks fail on this map): gatherings.ini [Travel]
+      Party / Place (I- = the Island: the game's zone trigger, Duties.ZonePlace - its only trigger is a thin gate box) /
+      Stay; picked -> Party cats walk with you (Walkers.Escort); left behind -> they walk to the Island, stay, come home
+      (Walkers.Patrol opts.stay); event GatheringTravel(chosen) for story mods. VM: Blackpool, Ridgewing, Pinepelt
+      135 m to the Island and back (ground followed), 'the Gathering party is back'. Test drop
+      Z:/WaCa/WaCa-mods-test-20261031k. Still open below: the Gathering's own scene / place at the Island.
       ban cleared. OPEN: the 10+ cats travelling to the island (follow.lua Follow.Travel - see Following), the
       Gathering's own scene / place.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
