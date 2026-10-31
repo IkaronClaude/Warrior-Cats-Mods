@@ -1773,6 +1773,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       shape goes on again right after (your cat only, coalesced); a skipped shape logs why. VM: CatSize 1.5 applied at
       boot and again after an outside rebuild; the cat's own CatSize (0.8) and the save's Stats unchanged. The visible
       size: the operator's look in play. Drop Z:/WaCa/WaCa-mods-test-20261031y.
+      CatSize REMOVED 2026-10-31: measured on the VM, CatSize sizes nothing in the world (the look build and
+      RefreshShape ignore it; it's the creator preview's anim CurrentScale) - so [Player] CatSize only pretended. The
+      remaining keys (BodyValue / FaceValue / FurValue / EyeValue / WhiskerValue / TailIdx / EarIdx) are the operator's
+      visual check. A real player size = the actor's scale - but that scales the collision capsule too (gameplay),
+      so the operator's call. Drop Z:/WaCa/WaCa-mods-test-20261031z.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - Find where body type / size feed the stats (the save's Stats / Customization; the creator's choices) and
         override the stat base after creation from a separate pick (creator page or stats.ini), leaving the look.
@@ -1787,7 +1792,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       PRE-WORK 2026-10-31 (WaCa Core, VM): the kits' looks - WaCa.LookOf(cat) (the game's text form of a cat's look,
       FProperty::ExportTextItem), WaCa.BlendLooks(a, b) (each trait from one parent, Role Kit, kit-sized, a new prefix
       + 'kit'), WaCa.SpawnCat / ImportLook to put the kit in the world. VM: your cat x Nightheart -> Stonekit by the camp
-      stream. The operator's to decide: who can be a mate (the bond's CloseBond?), the asking, when kits come, where
+      stream. CORRECTION 2026-10-31: that kit was ADULT-sized - a look's CatSize sizes nothing in the world (measured:
+      CatSize 0.8 -> 2.5 + a look build / RefreshShape moved no bone; it feeds the creator preview's anim only). Kits
+      are now sized by actor scale: SpawnCat(look, at, yaw, scale), BlendLooks' third value (WaCa.KIT_SCALE 0.6); VM
+      read-back: the kit's meshes at 0.60. The VM's screenshots didn't frame the pair - the operator's look in play.
+      The operator's to decide: who can be a mate (the bond's CloseBond?), the asking, when kits come, where
       they live (the nursery), growing up. Drop Z:/WaCa/WaCa-mods-test-20261031x.
 - [ ] **Frozen water in leaf-bare** (operator 2026-10-31, future work): the lake and / or parts of the river freeze,
       changing the terrain that can be walked (new paths across the ice); from that, a "falling through ice" mechanic /
