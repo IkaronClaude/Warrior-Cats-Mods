@@ -883,6 +883,10 @@ game data in this repo.
         all border points are checked or the day ends. VM: "1 clanmate(s) join your patrol" (twice, 1-minute test
         days); the follow itself not confirmed (the 60 s check found none within 6 m - at the VM's 0.3 fps they cover a
         few units per game second, and the test days ended the patrol within a minute). Check in play.
+      REBUILT 2026-10-31: the companions are the walkers' temporary party now (the field cats' AI moves fail on this
+      map): the nearest plain camp cats walk a row behind you (the party beside), home at the patrol's end / in camp.
+      VM: Turtleleaf + Slatefur followed 2.1 m behind from camp into the forest, home on release. TemporaryParty event.
+      Still open: the patrol's border-point events (rival scent, prey) - design / story content.
       PREPARED 2026-10-27: no native patrol classes. Parties exist (ASwtAdventureCharacter.Party, OnPartyMemberDestroyed)
       - a patrol = a temporary party + a route. Needs: patrol goals / events.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
