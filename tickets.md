@@ -1394,6 +1394,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         often in greenleaf (summer), the season from weather.lua. Needs a "weak / sick cat" (an elder, the medicine
         den) and a carried-item state (no carry mechanic in the game yet - research: quest pickup items,
         BP_Objective_Base pickups).
+      BUILT 2026-10-31 - GATHER (moss / herbs for the medicine cat): duties.lua task kind Gather, [Gather] Count /
+      Reach / MinDistance / MaxRank (Apprentice), [Tasks] Gather weight; the game's own pickups (moss containers where
+      the world has them - none loaded on the VM save - else healing herbs / catnip), marked, gathered by reaching
+      them, turned in to the MedicineCat. VM: assigned, 3 spots, 3/3, 'turn it in: report to the medicine cat'.
+      Operator check: the report key next to the medicine cat (the VM harness's keys have no key name). Still open:
+      bedding moss, water moss (needs a carry mechanic).
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
