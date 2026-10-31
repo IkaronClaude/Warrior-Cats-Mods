@@ -1108,6 +1108,17 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       logs "dialogue: UNFILLED ..." with the dialogue node for a {placeholder} or a number before 's - any playthrough
       (the operator's included) names the broken line and its node.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
+      SYSTEMATIC 2026-10-31 (operator: "likely dozens or hundreds of broken lines"): the game fills every line with ONE
+      function (exe 0x14162A000: {Player} {Friend} {The Traitor} {Clan} + each ENarrativeRole as "{%s}" of its spaced,
+      upper-cased name, from THIS save's cast). WaCaNative_FillText runs it on any text: a sweep over all 8901
+      string-table lines (RiverClan save, VM) - 1117 name someone, 682 leave a role in braces (roles of other clans'
+      stories / not cast yet: generic dilemmas, ShadowClan's "Is that {THE AMBITIOUS APPRENTICE}'s scent?" - the shape
+      of the reported "1's"). FIX: Core hooks that fill - a role with no cat shows in words ("the ambitious
+      apprentice", capitalised at a sentence start, clans as ThunderClan ...), logged once per role; text.ini [Fill]
+      Fallback = 1. Sweep after: 0 lines with a role in braces. Also: {RIVERCLAN MEDICINE CAT} spelling, WindClan's
+      broken "how {X}'s death" sentence rewritten. Left to other code (not broken): {N} {M} {S} {H}, ${QST_...},
+      {PLAYER ... NAME}. Test drop Z:/WaCa/WaCa-mods-test-20261031j. OPEN: a sweep in a save of each other clan (only
+      a RiverClan save on the VM); the operator's own lines seen in play (the detector still logs any).
       - Done part: misspelled placeholders fixed (text.ini [Placeholders]); the in-play detector names any other
         unfilled line - its fix is one text.ini line each once seen.
 
