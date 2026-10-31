@@ -1141,6 +1141,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
       hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
       ruin its hunt.
+      BUILT 2026-10-31 (walkers.lua [Jobs]): hunters out at a morning / afternoon to the game's prey places 30-90 m
+      from camp, a stay, home; near one while it hunts -> a line (ShowLine). VM: Blacktail out 66 m, its line on screen,
+      home after. Not yet: the hunter actually catching prey (a pounce animation at the spot) - optional per the spec.
 - [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
