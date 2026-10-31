@@ -1188,6 +1188,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       matched, holds while you sneak, catches up - the speed matching), escorts walk with you (patrol companions,
       TemporaryParty, the Gathering party), patrols and the Gathering party travel as a group to places and home. Left
       open: fading cats out when far from view (cosmetic, not started).
+      DONE 2026-10-31 (VM, walkers.ini [Walkers] FadeAt 60 m): a walker that far from your cat and not drawn lately is
+      hidden on its way and stepped without ground checks; shown again - set on the ground - within 0.8 x FadeAt or
+      when it stops. VM: a 3-cat patrol hid past 60 m, showed at its stops (+0 cm), hid, and on the home leg showed at
+      48 m set down 1.6-1.8 m (the straight line had drifted above the slope); all home. Not a real opacity fade (the
+      cats are out of sight when it happens). Drop Z:/WaCa/WaCa-mods-test-20261031zb.
 - [~] **NPC patrols heading out together** (operator 2026-10-28): when the deputy assigns patrols, see them leave
       together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
       together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
