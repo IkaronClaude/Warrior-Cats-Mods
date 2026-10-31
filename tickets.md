@@ -1388,6 +1388,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
       clan is split on a decision. Builds on lines.lua (filler pools) + the story variables (Gatherings) + recent
       events (duties' verdicts, the story's beats).
+      BUILT 2026-10-31 (murmurs.lua, lines.ini [Murmurs] / [Murmur.<Name>] Require / Who / Line*): a camp cat you pass
+      murmurs (subtitle) once a day by chance, lines from every matching set (Standing, Pile, Season, Weather,
+      LeaderFavour, Gathering.Today ...), the daily grab bag. VM: two cats, matching sets, lines on screen. The talk-screen
+      filler (lines.lua pools) can take the same sets later.
 - [ ] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
       kinds, drawn by [Tasks] weights / set by the story):
       - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den) -
