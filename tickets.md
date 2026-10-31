@@ -1760,6 +1760,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
         looks (the look framework) after N days (seasons).
+- [ ] **Frozen water in leaf-bare** (operator 2026-10-31, future work): the lake and / or parts of the river freeze,
+      changing the terrain that can be walked (new paths across the ice); from that, a "falling through ice" mechanic /
+      story arc. NOTES: water is visual planes + Water / DeepWater floor types (no water volumes - see 16), so ice =
+      a walkable surface over the water plane in leaf-bare (WaCa Clan Life's seasons) + the floor read as ice; falling
+      through = a scene (Cutscenes) / story beat (rescue, injury) at thin-ice spots.
 - [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
