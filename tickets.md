@@ -1150,6 +1150,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       (Walkers.Patrol opts.stay); event GatheringTravel(chosen) for story mods. VM: Blackpool, Ridgewing, Pinepelt
       135 m to the Island and back (ground followed), 'the Gathering party is back'. Test drop
       Z:/WaCa/WaCa-mods-test-20261031k. Still open below: the Gathering's own scene / place at the Island.
+      SCENE (library exercise, 2026-10-31, VM): the example story pack's [Attend] plays cutscene GatheringNight at
+      Place = Zone:I- (new: the game's zones as cutscene places, WaCa.ZonePlace in Core). Rough edges it found and
+      fixed in WaCa Cutscenes: a far place's ground isn't loaded (your cat goes there first, the scene starts after);
+      the Island's zone marks its shore (the middle moves to open ground 3-10 m round it); the cats' name plates showed
+      (hidden while a cutscene plays). Lionstar speaks to the cats on the Island's grass. Test drop
+      Z:/WaCa/WaCa-mods-test-20261031l. OPEN: the other Clans' cats at the Gathering (their cats aren't in the world
+      away from their territories - the Gathering would need to bring some in).
       ban cleared. OPEN: the 10+ cats travelling to the island (follow.lua Follow.Travel - see Following), the
       Gathering's own scene / place.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
