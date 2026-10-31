@@ -1340,6 +1340,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       FOLLOW-UPS: (a) DONE 2026-10-31 (rises 1.5 / 3 m per direction before pulling in; VM: turned 110 deg + 3 m higher at
       the Leader's den, full 7.7 m) - was: the camera in tight spots (riverbank under tree roots: Wide pulled in to 1.7 m) - rise instead of
       shortening, or pick the open side; (b) game cinematics (LS_Cinematic_RankUp_* re-cast) as a shot type;
+      (b) FOUND 2026-10-31: the ceremonies are sequence dialogues by tag (Gameplay.Narrative.RankUp.<Clan>.<Rank>, in
+      events-dialogues.txt); PlaySequenceDialogue(tag, npc = Spikebranch, player) opened WBP_QuestGiver_Dialogue3_C but no
+      level sequence played and nothing advanced it (confirm / back) - the ceremony needs the rank-up objective's
+      context; the save's rank quests were untouched (backup Z:/WaCa/SaveGames-before-ceremonytest-20261031). Re-casting
+      = native work on how the RankUp objective starts its sequence and binds cats (team spatial points
+      SetTeamActorMain / Left / Right look like the cast handle).
       (c) the camera's own named moves between two shots (dolly / crane) - COVERED by the blend: a shot then the next
       with ~<seconds> moves the camera there (Wide -> Portrait ~3 = a dolly in, a low shot -> High ~4 = a crane); (d) a skip key - DONE 2026-10-31 (SkipKey /
       SkipCutscene, VM); (e) a cat that isn't drawn
