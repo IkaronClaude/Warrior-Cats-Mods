@@ -1399,7 +1399,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the world has them - none loaded on the VM save - else healing herbs / catnip), marked, gathered by reaching
       them, turned in to the MedicineCat. VM: assigned, 3 spots, 3/3, 'turn it in: report to the medicine cat'.
       Operator check: the report key next to the medicine cat (the VM harness's keys have no key name). Still open:
-      water moss (needs a carry mechanic).
+      BUILT 2026-10-31 - WATER: soak moss at the nearest water (fishing spots), bring it to the elders (report:
+      Elder - Sharpfoot on the VM save), x3 in greenleaf; the carrying is the task's own state, no carry mechanic needed.
+      VM: soaked -> 'report to the elder'. All three apprentice duties built; operator check: the report key in play.
       BUILT 2026-10-31 - BEDDING: into one of the clan's dens (its inside point), the old moss to a marked spot out of
       camp, report to the deputy. VM: Medicine Cat's den -> taken -> thrown out -> report.
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
