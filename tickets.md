@@ -25,6 +25,21 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
+## Board status 2026-11-01 (every open item, checked against its own text)
+Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off by default) and waits on the operator:
+- DECISIONS / RULES: leading = managing (stats, outcomes, picker - P1); romance + kits (12); Gathering story beats;
+  canon roster names + the moment (1); pacing targets per rank (14); multi-story Warn / Gate + skip replay (Mod
+  stories - the story fixer depends on it); start rank via QuestStatus (story pack starts); hunting patrols on by
+  default? (party); turning the experimental systems on (days, duties, events, lines, timeskip, exhaustion,
+  activities, ambient, guidance, scent trails, specialisation, hunting by chance, fishing - each '... On = 0').
+- CONTENT: the real story days / threads / scenes (25, 27, Story, 17 + 10), border-point events (7).
+- PLAY CHECKS (what the VM can't show): a won fight (6), the pile via the pile's cat (Fresh kill), body shapes /
+  kit sizes (Decouple), Colourpoint (2), camera framing of the party (P1 follow), the ice's look, the controls
+  screen + mouse feel (19a / 19b), names in play (3, Procedural names), moved prey's pounce (23), the fight parties.
+- ACCOUNTS / TOOLS: Nexus login (upload, the Nexus-UE4SS DLL test, MothColorPicker); the Unreal editor (Mod
+  pipeline, colour wheel UI, new art).
+- WAITS ON THE GAME: PartySetup by the latest chapter key (P1 follow (d)) needs a save with a second chapter.
+
 ## Doing
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
