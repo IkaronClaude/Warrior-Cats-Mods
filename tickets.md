@@ -1187,7 +1187,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Slash and Ripple faced Dapplepatch, Spikebranch, Lionstar; lines, growl, hisses; rewards set. Seen on the way: a
       Lua hot reload (UE4SS reloads a mod whose files change) mid-trip leaves walkers stranded hidden - dev-only (a
       player doesn't swap Lua files mid-game). Also found + fixed: an intermittent START-UP CRASH in WaCa Core's bridge
-      (events delivered while UE4SS still started mods - now held until loading is quiet; 2 clean boots so far).
+      (events delivered while UE4SS still started mods - now held until loading is quiet; ~8 clean boots by
+      2026-11-01 04:10, no crash report since 00:27 - at the old ~2 in 15 that's encouraging, not yet proof).
       Drop Z:/WaCa/WaCa-mods-test-20261101b.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
       your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
