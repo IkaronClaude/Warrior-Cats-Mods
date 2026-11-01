@@ -562,7 +562,7 @@ game data in this repo.
       OPEN: the operator's real-game test (does the shown name update? HUD / party / dialogue / ceremony). Then an
       in-game text box at cat creation (UMG, or a runtime-built EditableTextBox from Lua).
       SEEN 2026-11-01 (VM): Select Your Cat lists the GAME's name (a warrior start's EMBERHEART shows as 'SHARPPAW,
-      Apprentice') - the override covers the HUD / world, not that list's slots. To fix: relabel the slot name there.
+      Apprentice') - FIXED same day: while the list is up each renamed cat's entry shows its own name (VM: EMBERHEART).
 - [ ] **1. Canon clan roster.** Remove the procedural generation of the clan cats. Lock the roster to a specific point
       in the books' timeline (pick the book / moment with the operator).
       PRE-WORK 2026-10-31: WaCa-Looks examples/WaCaCanonRosterDraft - RiverClan at Into the Wild (leader Crookedstar,
