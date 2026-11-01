@@ -1932,6 +1932,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       collision for the sight trace). Built meanwhile: [Camera] SeenCheck (turns a shot whose cats weren't rendered) -
       not seen firing yet. Next: keep the camera above the water surface (Hunting's wading finds the planes) or fit
       the stage away from water.
+      TRIED (same day, VM, timed shots): WaterClear (camera held 60 cm above water - never triggered) and SeenCheck
+      (never triggered: WasRecentlyRendered stays true for a cat behind roots / from the previous shot). At the river
+      edge (-46706 6269, facing -90) the Two shot looked low along the water, the Portrait sat in tree roots - neither
+      cat visible. Both fixes are in (guarded, harmless) but NOT proven. The real fix: Place = Here should pick an
+      OPEN spot near the cat (ground flat, no roots / water / rock within the shapes' radius + camera distances),
+      and the tests need a frame rate where frames can be judged (CLAUDE.md: -ResX 960 or a real PC). Still open.
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
