@@ -236,6 +236,10 @@ game data in this repo.
       to the apprentice den to meet the others: the cat leads (paths over, waits when you fall behind, goes on when you
       catch up), no quest marker. A scene step on follow.lua (Follow.Travel for the leader + the player's distance).
       Reuse the game's battle animations in cutscenes (hackles raised, sneaky / subdued poses - operator 2026-10-28).
+      BUILT 2026-11-01 (Clan Life, scene step Lead: <place> @ <who>; example pack MentorTour): the cat comes to your
+      cat first, leads (walkers' mover), waits when you're 6 m behind, goes on within 3.5 m; places Den:<den name> /
+      Zone:<code> / Pile / a cat. VM: come-to-you, lead, wait, go on all seen. NEXT (VM, when the operator isn't
+      playing): the arrival with the no-headway fallback (the 300 s limit ended a slow VM walk early).
 - [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
   redesign tickets, the "creator finding" note and the old "Creator UI injection").
   - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
