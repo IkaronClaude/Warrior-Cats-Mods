@@ -1389,6 +1389,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       a start RANK and PARTY (native quest data - see 'The party = who you're out with'); Day needs story days on.
       DAY VERIFIED (VM, story days switched on for the test): slot 1 (Sharppaw, level 1) -> 'story day 13 (the story
       pack's start)', the save's WaCaDays sidecar Day = 13, WaCaStart Applied = 1; days.ini put back (On = 0).
+      START RANK - OPTION FOR THE OPERATOR: rank = the rank quests turned in (WaCa.PlayerRank); UQuestBase.QuestStatus is
+      reflected (+0x2D5, 4 = QuestTurnedIn), so a start could mark Quest.Rank.N turned in. It would SKIP those quests'
+      rewards, rank-up sequences and their place in the game's quest chain (the main story could stall or jump).
+      Decide: should a warrior start skip the game's apprentice quests (and accept that), or stay rank-less?
       Example pack ships start.ini Off. Drop Z:/WaCa/WaCa-mods-test-20261101r. Still open: an editor.
       Drop Z:/WaCa/WaCa-mods-test-20261101m.
 - [ ] **P1: Party members follow you as you roam the forest** (operator 2026-10-30) - BUILT + VM-tested 2026-10-30
