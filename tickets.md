@@ -1347,6 +1347,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       has many talented writers - writing a story must be easy with little or no programming: plain files (the scene
       steps, days, dialogue pools as they are), good docs + examples, clear errors (a story checker that lists
       unknown roles / dialogue ids / broken conditions), maybe later an editor.
+      STORY CHECK BUILT 2026-11-01 (VM, Clan Life storycheck.lua): at the start every story file with every mod's
+      content is read as the scenes will be - unknown step kinds, cutscenes nobody defines (Cutscenes publishes its
+      names), roles with no cat, unreadable conditions, variables nothing sets - log + Saved/WaCaStoryCheck.txt + a line
+      on screen. VM: a test pack's 5 mistakes all reported; the shipped content clean. Found + fixed on the way: steps /
+      day beats past 9 were silently dropped. Still open here: standalone starts (a creator entry point) and an editor.
+      Drop Z:/WaCa/WaCa-mods-test-20261101m.
 - [ ] **P1: Party members follow you as you roam the forest** (operator 2026-10-30) - BUILT + VM-tested 2026-10-30
       (Clan Life walkers.lua [Party]): the PARTY page's cats (Nightheart, Rippleface) leave camp with you, run alongside
       (0.8-1.1 m on the VM), catch up when 25 m behind / stuck, hold while you sneak, walk back to their spots in camp;
