@@ -32,8 +32,7 @@ Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off
   stories - the story fixer depends on it); start rank via QuestStatus (story pack starts); hunting patrols on by
   default? (party); turning the experimental systems on (days, duties, events, lines, timeskip, exhaustion,
   activities, ambient, guidance, scent trails, specialisation, hunting by chance, fishing - each '... On = 0').
-  New GAME-side roles (Roles and the cast: the survey + patch of every role reader - the operator's go); NPC
-  patrols' fade-out when unseen + talking to a patrol (marked future by the operator).
+  New GAME-side roles (Roles and the cast: the survey + patch of every role reader - the operator's go).
 - CONTENT: the real story days / threads / scenes (25, 27, Story, 17 + 10), border-point events (7).
 - PLAY CHECKS (what the VM can't show): a won fight (6), the pile via the pile's cat (Fresh kill), body shapes /
   kit sizes (Decouple), Colourpoint (2), camera framing of the party (P1 follow), the ice's look, the controls
@@ -1275,11 +1274,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       when it stops. VM: a 3-cat patrol hid past 60 m, showed at its stops (+0 cm), hid, and on the home leg showed at
       48 m set down 1.6-1.8 m (the straight line had drifted above the slope); all home. Not a real opacity fade (the
       cats are out of sight when it happens). Drop Z:/WaCa/WaCa-mods-test-20261031zb.
-- [~] **NPC patrols heading out together** (operator 2026-10-28): when the deputy assigns patrols, see them leave
+- [x] **NPC patrols heading out together** (operator 2026-10-28; DONE 2026-11-01): when the deputy assigns patrols, see them leave
       together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
       together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
       Case = Patrol lines meanwhile. OPEN: fade them out when not in view (future); talking to a patrol stops it a
       moment (future).
+      BOTH DONE (checked 2026-11-01): the clan's patrols walk with the walkers' mover (Walkers.Patrol; the AI-walk
+      path is only the fallback) - far + unseen = hidden on its way (VM: NpcPatrol 3 -> Blackwing, Pinefur, Paletail
+      out, 'Pinefur is far out of view - hidden on its way'), meeting one stops it while each cat speaks (PatrolMeet).
 - [x] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
       DONE 2026-11-01: hunters (real prey), patrols, the medicine cat's herbs - all VM-verified.
       hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
