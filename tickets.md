@@ -1847,6 +1847,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       (sidecar written when the game saves); event KitsBorn. VM: Goosekit + Heronkit by RiverClan's nursery, back after
       a reboot. (A first version wiped its sidecar on a misread - fixed: read by number, never written unread.)
       Drop Z:/WaCa/WaCa-mods-test-20261101d.
+      ROMANCE DRAFT 2026-11-01 (VM; Clan Life romance.ini, OFF by default - every rule there for the operator to change):
+      the ask key (H) next to the story cat your cat FACES; yes when its bond is at MinBond (CloseBond - the save's own
+      BondDialogues '<Role>_Reward_<Level>') and your cat is MinRank (Warrior)+ with no mate; kept with the save, event
+      MateChosen, story var HasMate; KitsAfter (7) days later HaveKits. Kits grow up after kits.ini ApprenticeAfter
+      (12) days: '...paw', drawn at 0.8. VM: Nightheart (bond 0) 'not that close yet'; Toadfrost (CloseBond) 'Yes';
+      kits next day; Goosekit -> Goosepaw. Kit names now skip every living cat's (Lionkit beside Lionstar before).
+      Also found + fixed: a Clan Life HOT RELOAD hung the game (bridge events during a 12 s main.lua; mod states
+      removed under a delivery) - held while any mod loads, states under a recursive mutex; VM: reload mid-play, the
+      game kept responding. Drop Z:/WaCa/WaCa-mods-test-20261101g.
       The operator's to decide: who can be a mate (the bond's CloseBond?), the asking, when kits come, where
       they live (the nursery), growing up. Drop Z:/WaCa/WaCa-mods-test-20261031x.
 - [ ] **Frozen water in leaf-bare** (operator 2026-10-31, future work): the lake and / or parts of the river freeze,
