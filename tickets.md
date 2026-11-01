@@ -25,21 +25,52 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
-## Board status 2026-11-01 (every open item, checked against its own text)
-Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off by default) and waits on the operator:
-- DECISIONS / RULES: leading = managing (stats, outcomes, picker - P1); romance + kits (12); Gathering story beats;
-  canon roster names + the moment (1); pacing targets per rank (14); multi-story Warn / Gate + skip replay (Mod
-  stories - the story fixer depends on it); start rank via QuestStatus (story pack starts); hunting patrols on by
-  default? (party); turning the experimental systems on (days, duties, events, lines, timeskip, exhaustion,
-  activities, ambient, guidance, scent trails, specialisation, hunting by chance, fishing - each '... On = 0').
-  New GAME-side roles (Roles and the cast: the survey + patch of every role reader - the operator's go).
-- CONTENT: the real story days / threads / scenes (25, 27, Story, 17 + 10), border-point events (7).
-- PLAY CHECKS (what the VM can't show): a won fight (6), the pile via the pile's cat (Fresh kill), body shapes /
-  kit sizes (Decouple), Colourpoint (2), camera framing of the party (P1 follow), the ice's look, the controls
-  screen + mouse feel (19a / 19b), names in play (3, Procedural names), moved prey's pounce (23), the fight parties.
-- ACCOUNTS / TOOLS: Nexus login (upload, the Nexus-UE4SS DLL test, MothColorPicker); the Unreal editor (Mod
-  pipeline, colour wheel UI, new art).
-- WAITS ON THE GAME: PartySetup by the latest chapter key (P1 follow (d)) needs a save with a second chapter.
+## Board status 2026-11-01 (EVERY open item, checked against its own text - all wait on the operator)
+- Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
+- P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
+- Operator checks: the operator's list by definition.
+- Mod pipeline: needs the Unreal editor installed (operator).
+- THE CLAN LOOP: built + VM-verified; the operator's checks: a real conversation turn-in, a real pile deposit.
+- Procedural names: done; the operator's in-game check.
+- 19a PC controls: bindings: in-game rebinding built + VM-verified; the operator's feel check (the K hint: the pause page shows QUEST K).
+- 19b PC controls: mouse: built + VM-verified; the operator's feel check.
+- 3 Free-form name input: built + VM-verified (Select Your Cat too); the operator's real-game test.
+- 1 Canon clan roster: built, off until the operator checks the names and picks the moment.
+- 15 Clan-sim day: built; rank-ups by standing wait on pacing targets (14, operator).
+- 4 Day / night cycle: built + VM-verified; the day length / feel is the operator's call.
+- 25 Story as days: built (Day verified 2026-11-01); the real days = operator content.
+- 9b Fishing: built + VM-verified, off; turning it on = operator.
+- 9 Hunting rework: built (experimental, off); which creatures charge / on by default = operator decisions.
+- 8 Real hunting missions: built; hunting-ground card + map mark VERIFIED 2026-11-01 (VM); hunting patrols on by default? (operator).
+- 7 Real patrols: built + VM-verified; border-point events = operator content.
+- 6 Combat training: built; a WON fight in play (operator - the VM can't win one).
+- 14 Pacing: the target pace per rank (operator).
+- 20 Intentional time skips: built (off); the skip's card / what happened = operator design.
+- 21 Seasons and weather: built + VM-verified; the look / sound on the operator's PC, the release pak (operator).
+- 22 Prey follows the world: built + VM-verified; world events (poisoned river) = operator design.
+- 23 Random prey spawns: built + VM-verified; a moved prey's pounce in play (operator - the VM's pounce fails on any prey).
+- 24 StarClan guidance leads to prey: built + VERIFIED, off; turning it on = operator.
+- Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
+- Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
+- Mod stories (story packs): the multi-story design questions (Warn / Gate, replay) = operator; the story fixer depends on them.
+- Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch); start rank = operator decision; an editor = future.
+- P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
+- Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
+- Fresh kill without hunger: deposit VM-verified; talking to the pile's cat in play (the VM can't talk to NPCs) = operator.
+- Cutscenes from text: built + VM-verified (incl. Wait, cast to other mods); the look = operator.
+- Nexus Mods: the operator's login (upload, Nexus-UE4SS DLL test, MothColorPicker).
+- 17 + 10 Show, don't tell: framework built; which scenes = operator content.
+- 11 Clan cat interactivity: built (off); lines / turning it on = operator.
+- 5 Clan activities: built + bond gain VM-verified (off); turning it on = operator.
+- 13 Less jack of all trades: built + VERIFIED (combat scaling); the operator's real fight with a role.
+- 2 More customisation: built; the Colourpoint look (operator) + a colour wheel UI (needs the editor).
+- 26 Prey scent trails: built (off); turning it on = operator.
+- 27 Side threads: built + VM-verified (example thread); the real threads = operator content.
+- Decouple cat stats from looks: built; the body shape in play + a real player size (scales collision) = operator.
+- Story: operator content.
+- 12 Romance + kits: a configurable draft built, off; the rules = operator.
+- Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
+Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 
 ## Doing
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
@@ -517,7 +548,7 @@ Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off
       - offline (lupa, real events.lua, mocked world): morning hunt -> out -> 2 catches -> back -> meeting -> noon free
         -> out / back -> evening free -> share tongues + bond -> night watch -> away / back -> cutscene -> verdict
         "2 done +5" -> day 2 morning. VM: see below.
-- [ ] **Time follows effort, not the wall clock** (operator 2026-10-28: "bind time directly to cat exhaustion based on
+- [x] **Time follows effort, not the wall clock** (DONE - built as part of 15) (operator 2026-10-28: "bind time directly to cat exhaustion based on
       the current activity's time slot (morning / afternoon / night)"). Operator: "a true time of day cannot really be
       wired UNTIL we have the day/night clan sim" -> BUILT AS PART OF 15 (2026-10-28, see there): the clan's day
       drives the clock by the cat's effort per slot. Refined by the operator the same day: exhaustion is NOT the
@@ -938,6 +969,7 @@ Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off
       calls the anchored base directly (scan::CalleeWhere); anything else refused (it was, before the override was
       understood). VM: the pile 95 + 5 -> 100 (WaCaNative_AddResource). The hunting-ground card: not seen yet (the
       VM stalled in its menus that run). Territory / season: the prey there follows preyworld.lua (the season's).
+      VERIFIED 2026-11-01 (VM): a forced hunt -> HUD 'The hunting grounds - Hunt for the clan: Prey 0/2' + its map mark.
 - [ ] **7. Real patrols.** Cats join you just for the patrol (temporary party), with border marking and events.
       PREPARED 2026-10-28: the patrol DUTY exists (duties.lua: border points marked, checked on arrival). Missing:
       clanmates walking WITH you. The party = ASwtAdventureCharacter.Party (TArray<ASwtAdventureCharacter*>, the
@@ -1688,7 +1720,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       HelloWaCa's content/text.ini merged + its sidecar written; Core alone (see below).
       OPEN: (1) the DLL under the NEXUS UE4SS download (same commit 8333063; ours is a from-source build) - needs the
       operator's download; (2) MothColorPicker + Looks together; (3) Nexus link TODOs in NEXUS.md once pages exist.
-- [ ] **Murmurings: what the clan thinks, every day** (operator 2026-10-28, a note for later - side dialogue): replace
+- [x] **Murmurings: what the clan thinks, every day** (DONE 2026-10-31, VM) (operator 2026-10-28, a note for later - side dialogue): replace
       the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
       other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
       clan is split on a decision. Builds on lines.lua (filler pools) + the story variables (Gatherings) + recent
