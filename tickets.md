@@ -240,6 +240,9 @@ game data in this repo.
       cat first, leads (walkers' mover), waits when you're 6 m behind, goes on within 3.5 m; places Den:<den name> /
       Zone:<code> / Pile / a cat. VM: come-to-you, lead, wait, go on all seen. NEXT (VM, when the operator isn't
       playing): the arrival with the no-headway fallback (the 300 s limit ended a slow VM walk early).
+      ARRIVAL SEEN 2026-11-01 11:11 (VM): Otterfeather came to your cat (26 m), led to the Apprentice's den (40.6 m),
+      waited, went on, arrived on its own ('led your cat to Den:Apprentice's den', no fallback), the closing card.
+      Writers: docs/WRITING.md (Clan Life). Drop Z:/WaCa/WaCa-mods-test-20261101n.
 - [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
   redesign tickets, the "creator finding" note and the old "Creator UI injection").
   - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
