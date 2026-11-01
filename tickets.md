@@ -1825,6 +1825,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       CatSize 0.8 -> 2.5 + a look build / RefreshShape moved no bone; it feeds the creator preview's anim only). Kits
       are now sized by actor scale: SpawnCat(look, at, yaw, scale), BlendLooks' third value (WaCa.KIT_SCALE 0.6); VM
       read-back: the kit's meshes at 0.60. The VM's screenshots didn't frame the pair - the operator's look in play.
+      KITS GROUNDWORK 2026-11-01 (VM, Clan Life kits.lua / kits.ini): WaCa.Emit('HaveKits', mate[, count]) - 1-3 kits
+      blended from your cat and the mate, named from the game's own unused prefixes (RemainingPreffixes - not 'Lionkit'
+      beside Lionstar), kit-sized, placed in front of your clan's Nursery (the game's den door), kept with the save
+      (sidecar written when the game saves); event KitsBorn. VM: Goosekit + Heronkit by RiverClan's nursery, back after
+      a reboot. (A first version wiped its sidecar on a misread - fixed: read by number, never written unread.)
+      Drop Z:/WaCa/WaCa-mods-test-20261101d.
       The operator's to decide: who can be a mate (the bond's CloseBond?), the asking, when kits come, where
       they live (the nursery), growing up. Drop Z:/WaCa/WaCa-mods-test-20261031x.
 - [ ] **Frozen water in leaf-bare** (operator 2026-10-31, future work): the lake and / or parts of the river freeze,
