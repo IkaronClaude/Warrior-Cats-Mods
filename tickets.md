@@ -1380,6 +1380,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       names), roles with no cat, unreadable conditions, variables nothing sets - log + Saved/WaCaStoryCheck.txt + a line
       on screen. VM: a test pack's 5 mistakes all reported; the shipped content clean. Found + fixed on the way: steps /
       day beats past 9 were silently dropped. Still open here: standalone starts (a creator entry point) and an editor.
+      STARTS BUILT 2026-11-01 (VM): a pack's content/start.ini [Start] Day / Level / Name = Warrior / Step1.. for a NEW
+      cat only (level 1, no rank quest; an existing cat is recorded skipped): story day, level via the game's EXP one
+      level-up at a time (WaCaNative_LevelInfo), steps, and Looks' name box asks for the whole warrior name (no kit
+      suffix). VM: new ThunderClan cat EMBERHEART (slot 2) - box label, level 8 / 143 HP, the card. NOT possible yet:
+      a start RANK and PARTY (native quest data - see 'The party = who you're out with'); Day needs story days on.
+      Example pack ships start.ini Off. Drop Z:/WaCa/WaCa-mods-test-20261101r. Still open: an editor.
       Drop Z:/WaCa/WaCa-mods-test-20261101m.
 - [ ] **P1: Party members follow you as you roam the forest** (operator 2026-10-30) - BUILT + VM-tested 2026-10-30
       (Clan Life walkers.lua [Party]): the PARTY page's cats (Nightheart, Rippleface) leave camp with you, run alongside
