@@ -947,6 +947,10 @@ game data in this repo.
         sense pulse) within Reach; done at the fight's end (WBP_GuiHudCombatOver_C shown, or the combat manager's
         EndCombat) -> WaCaNative_AddBond(role, Bond). VM: "duties: sparring with the clan's move teacher" -> the combat
         popup. NOT yet seen: the fight's END being counted (the VM can't play the fight out - check in play).
+      END SEEN 2026-11-01 (VM): the fight can be ended on the VM by FLEEING (Down x3, Enter - no minigame): Train ->
+        next to Gooseheart -> the combat popup -> fled -> 'sparring done - bond with the clan's move teacher +2' ->
+        'training done'. Fixed on the way: the teacher pick took a parked Filler copy first (not hidden, far off) - the
+        duty waited by it; now the nearest real one. Drop Z:/WaCa/WaCa-mods-test-20261101h. (A WON fight: in play.)
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A training duty starts a combat with the mentor (the game's own combat, a friendly variant: no injuries);
         win / lose both give EXP (CombatBaseExperience "Cat" row = 45) and a technique point; config: training.ini.
