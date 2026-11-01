@@ -1898,6 +1898,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       for test reasons (no engine cube in the shipped game; a scaled world rock wasn't hit by the traces; a probe
       reading a null mesh crashed the game). Also seen: at -40866,6059 the swimming cat didn't move with W at all
       (earlier it swam 6 m) - unexplained. Operator check in play: swim to a steep bank. Drop ...20261031zd.
+      SOLVED 2026-11-01 (VM): the stall = bank terrain UNDER a water plane that reaches over it (swept: terrain ahead
+      on 3 sides, 30 cm under the surface); a flying cat steps up nothing. The look-ahead now also reads the bed under
+      water ahead: under Leave cm -> out onto the shelf. One 35 s swim: out at 33 cm, 'onto the shallows ahead, 19 cm
+      deep', 'climbed out onto the bank, 50 cm over the water' - all three exits seen, no stall. Left: a paddle
+      animation (none in the game). Drop Z:/WaCa/WaCa-mods-test-20261101a.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
