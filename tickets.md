@@ -917,6 +917,7 @@ game data in this repo.
       - At each point: scent-mark (a montage) and a small random event (rival scent -> an encounter, prey -> a hunt
         chance, nothing). Done -> party dissolves, duty done.
 - [ ] **6. Combat training with your mentor.** Actual training sessions, not narrated.
+      WAITING ON THE OPERATOR: a WON fight in play (the fight's end is counted - VM, fled).
       PREPARED 2026-10-28 (offline): the game HAS a training feature - the Training Grounds popup
       (WBP_GuiPopupTrainingGrounds = UGuiPopupAvailableMoves: learn attack moves from cats - panels General /
       Select / Completed, UGuiControlTrainingOptionCats 3 cats, 4 moves) + NPC training animations
@@ -1151,6 +1152,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P2: Depth, presentation
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
+      WAITING ON THE OPERATOR: the story beats (the groundwork, travel, other Clans, the stay-behind raid are built + VM-verified).
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
       - chosen: the Gathering itself (scenes);
       - not chosen: what happens at home - e.g. rogues attack the camp while the others are away and your
@@ -1203,7 +1205,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       fix (incl. the stricter hold + states mutex of 06:30); at the old ~2 in 15 that would happen ~6% of the time by
       luck. Also: every montage call now null-safe (WaCa.PlayMontage / StopMontage). Drop ...20261101j.
       Drop Z:/WaCa/WaCa-mods-test-20261101b.
-- [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
+- [x] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
+      DONE 2026-11-01: speed matching + fading out of view both built and VM-verified (see below).
       your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
       make their way over to the island. A Lua API (follow.lua): a group follows a leader (the player or any cat) at
       spread-out distances, matching walk / run, holding back while the leader sneaks; or travels to a place as a
@@ -1230,7 +1233,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
       Case = Patrol lines meanwhile. OPEN: fade them out when not in view (future); talking to a patrol stops it a
       moment (future).
-- [ ] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
+- [x] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
+      DONE 2026-11-01: hunters (real prey), patrols, the medicine cat's herbs - all VM-verified.
       hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
       ruin its hunt.
       BUILT 2026-10-31 (walkers.lua [Jobs]): hunters out at a morning / afternoon to the game's prey places 30-90 m
@@ -1248,7 +1252,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       MEDICINE CAT 2026-11-01 (VM, [Jobs] Herbs = 1): each morning the medicine cat walks to one of the game's herb /
       moss pickups 20-90 m out, sniffs + digs, comes home (NpcGatherHerbs / NpcHerbs). VM: Freezesong 75 m out, gathered,
       home again. Drop Z:/WaCa/WaCa-mods-test-20261101i.
-- [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
+- [x] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
+      DONE 2026-11-01: the meet, each cat's line, VM-verified; talking to each cat = the game's conversation (operator's play).
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
       Patrol / Leader, the daily grab bag); the stop-and-talk isn't.
@@ -1275,11 +1280,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       content/<name>.ini in load order: new sections added; shared sections get numbered keys APPENDED (two mods add
       beats to the same day / lines to the same dialogue), plain keys overridden by the later mod (logged); Off = 1
       turns another mod's section off.
-- [ ] **Explicit overrides instead of load order** (operator 2026-10-28: "load order as core design choice?" - no):
+- [x] **Explicit overrides instead of load order** (operator 2026-10-28: "load order as core design choice?" - no):
       WaCa.ReadContent today lets the later mod win a plain key. Make it explicit and order-independent: ids
       namespaced (<Mod>/<Section>); a mod overrides another's section only with Replaces = <Mod>/<Section>; two mods
       setting the same plain key without that = a reported CONFLICT (log + an in-game notice), not a silent winner.
       Load order only as the last tie-breaker. Appended steps stay per owning mod (see story packs).
+      DONE 2026-11-01 (WaCa Core ReadContent; offline + VM): Replaces = <Mod>/<Section> replaces whole; a plain key two
+      mods set differently without it = CONFLICT (logged with both mods + values, WaCa.ContentConflicts, a one-time
+      notice in game); load order only breaks the tie; numbered keys append, Off = 1 allowed. VM: the shipped packs
+      raise none; a test conflict -> the log line + the notice. Drop Z:/WaCa/WaCa-mods-test-20261101l.
 - [ ] **Mod stories (story packs)** (operator 2026-10-28): a mod can define its own story, like picking a clan's.
       - a pack declares itself (name, clan, required rank range, entry) and owns its days / beats / dialogue / quests;
         shown in the quest list as a story quest;
@@ -1404,6 +1413,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the spawned role had no way in; murmurs' {LEADER} missed Lionstar (giver role) -> 'our leader' in lowercase -
       now Events.Who + a capital. Drop Z:/WaCa/WaCa-mods-test-20261101k.
 - [ ] **Fresh kill without hunger** (operator 2026-10-28, future work): as the original hunger system goes, remove the
+      WAITING ON THE OPERATOR: talking to the pile's cat in play (the deposit is VM-verified).
       "putting fresh-kill on the pile" screen - or at least force depositing EVERYTHING in the inventory at the pile -
       so every day is fresh. (The clan loop's hunt turn-in is the pile contribution: UWrcAchievementsManager
       OnContributeFreshKill.)
@@ -1528,6 +1538,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Cutscene: HerbLesson). (e) DONE 2026-10-31: an undrawn quest cat is cast,
       shown for the cutscene and hidden again (VM: Lionstar 90 m off, his line, back) - the look is the operator's check.
 - [ ] **Nexus Mods: release, reuse the UE4SS upload, split into parts, a base mod** (operator 2026-10-28). Research
+      WAITING ON THE OPERATOR: the Nexus login (upload, its UE4SS download, MothColorPicker).
       (Nexus public GraphQL API, game id 10777, domain warriorcatsclansoftheforest - 6 mods on 2026-10-28):
       - mod 2 "UE4SS For Warrior Cats - CotF" (CaptainJackalope): plain UE4SS v3.0.1-1181-g83330635 - THE SAME commit
         our release builds from source - sample mods removed, "keep your existing setup, don't reinstall per mod".
@@ -1581,7 +1592,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       murmurs (subtitle) once a day by chance, lines from every matching set (Standing, Pile, Season, Weather,
       LeaderFavour, Gathering.Today ...), the daily grab bag. VM: two cats, matching sets, lines on screen. The talk-screen
       filler (lines.lua pools) can take the same sets later.
-- [ ] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
+- [x] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
+      DONE 2026-11-01: gather / water / bedding + the report key (real F) VM-verified.
       kinds, drawn by [Tasks] weights / set by the story):
       - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den) -
         its turn-in: talk to the medicine cat ([Task.<Kind>] TurnIn = MedicineCat - supported);
@@ -1737,6 +1749,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         "[combat] damage taken by your cat: 8 -> 7 (x0.85)", "30 -> 26", and "damage dealt by your cat: 35 -> 44 (x1.25)" -
         both directions VERIFIED.
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
+      WAITING ON THE OPERATOR: the Colourpoint look / a colour wheel UI (needs the editor).
       material / masks work first.
       0.3 (2026-10-25): DONE as a framework. Coat = M_Characters_Base parameters ("Fur Color", "Pattern Mask Color",
       "Markings Mask Color", "Paws Color" = pads, "Ears Color" = inner ears, "Nose Color", "Whiskers Color"; textures
@@ -1812,6 +1825,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       refused before the deadline, after it the patrol card and LostKit = -1; a later catch finds nothing. Drop
       Z:/WaCa/WaCa-mods-test-20261031v.
 - [ ] **Decouple cat stats from looks** (frequently requested by players; operator 2026-10-25). Today body type /
+      WAITING ON THE OPERATOR: the visible body shape in play.
       traits drive both the visuals and the stats. Add a separate set of visual sliders / choices whose list carries no
       stat effect; the visuals read from it, the stats keep the original choice.
       PREPARED 2026-10-28 (offline): the stats are STORED in the save once the cat is made -
@@ -1845,6 +1859,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - After 15 + 25 exist: port the existing story beats into day scripts first (no new writing), then extend.
 - [ ] **12. Romance + kits (far future).** The friendship system already exists. Add a mate, kits of your own, watching
+      WAITING ON THE OPERATOR: the rules (a configurable draft is built, off).
       them grow up. Maybe in a free-play mode after the story concludes.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - The friendship (bond) system's top level unlocks "mate"; kits = new clan cats generated with the parents'
@@ -1907,7 +1922,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       planes would have caused: cats walking on the river) and stands on ice; Cutscenes' ground counts ice as dry. On the
       frozen lake: the party (Nightheart, Rippleface) and HerbLesson's Mossfeather at 767-768 (surface 750). Drop
       Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
-- [ ] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
+- [x] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
+      DONE 2026-11-01: wading + swimming + all three exits VM-verified; a paddle animation needs new art (the mod pipeline).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
       physics volumes in any map (all 266 maps' names scanned) - water = visual planes + floor types:
       EAdventurePhysicalFloorType Water = 4 / DeepWater = 3 on UAdventurePhysicalMaterial.FloorType (+0xA8); the
