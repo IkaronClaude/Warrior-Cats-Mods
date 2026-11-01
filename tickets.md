@@ -1470,6 +1470,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
       LIBRARY: scene step Party: <story cats> (names anywhere in the world, E:<role>; none = the game's), kept with the
       save (VM: example FightBeside -> spar with Toadfrost; saved, next session restored). Drop ...20261101t.
+      MORE: Party: S:<role> follows the role's [Cast] cat (VM: S:herbalist = Mossfeather fought beside you; S:loner,
+      a brought-in Rogue, refused with the reason). Writers: [StoryCheck] Watch = 1 reloads on an edited story file (VM).
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
