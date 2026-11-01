@@ -1171,6 +1171,17 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       RiverClan cats; none left after. Test drop Z:/WaCa/WaCa-mods-test-20261031m.
       ban cleared. OPEN: the 10+ cats travelling to the island (follow.lua Follow.Travel - see Following), the
       Gathering's own scene / place.
+      BIG PARTY + STAY-BEHIND STORY 2026-11-01 (VM): the Gathering's trip takes the leader, deputy, medicine cat and named
+      warriors too (plain warriors alone were 3 of the RiverClan camp; queens / kits / elders stay), in a ring round the
+      place (12 cats within 3 m, 1.5 m apart - not a 13 m line into the lake). VM: Party 12 -> 8 (every eligible camp
+      cat, Lionstar too) hid on the way, reached the Island, stayed, set off home. New event GatheringEvening(chosen)
+      plays the evening's scene. Library exercise - the example pack's [StayBehind] = a rogue raid: cutscene RogueRaid
+      (WaCa Cutscenes' new cast Rogue / Rogue:<Name> - clanless cats brought in), LeaderFavour +2, DefendedCamp = 1. VM:
+      Slash and Ripple faced Dapplepatch, Spikebranch, Lionstar; lines, growl, hisses; rewards set. Seen on the way: a
+      Lua hot reload (UE4SS reloads a mod whose files change) mid-trip leaves walkers stranded hidden - dev-only (a
+      player doesn't swap Lua files mid-game). Also found + fixed: an intermittent START-UP CRASH in WaCa Core's bridge
+      (events delivered while UE4SS still started mods - now held until loading is quiet; 2 clean boots so far).
+      Drop Z:/WaCa/WaCa-mods-test-20261101b.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
       your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
       make their way over to the island. A Lua API (follow.lua): a group follows a leader (the player or any cat) at
