@@ -1926,6 +1926,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       frame showed a rock face and no cats - likely a rock without collision on that channel. Next: trace on
       Visibility too / against the rendered depth, or check the cats' WasRecentlyRendered after the move and try the
       next direction when they aren't. Needs a closer look at a real resolution (0.5 fps / 480x270 is too coarse).
+      MORE (same day, VM): on open camp ground the FightBeside shots frame both cats (Two, Portrait with TailUp) - the
+      bad frames are the RIVER EDGE: Place = Here stages the scene where your cat stands, and there the Two shot went
+      10 m out over the water (the frame a flat pale blue - the camera at / under the water's surface; water has no
+      collision for the sight trace). Built meanwhile: [Camera] SeenCheck (turns a shot whose cats weren't rendered) -
+      not seen firing yet. Next: keep the camera above the water surface (Hunting's wading finds the planes) or fit
+      the stage away from water.
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
