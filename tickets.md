@@ -1387,6 +1387,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       level-up at a time (WaCaNative_LevelInfo), steps, and Looks' name box asks for the whole warrior name (no kit
       suffix). VM: new ThunderClan cat EMBERHEART (slot 2) - box label, level 8 / 143 HP, the card. NOT possible yet:
       a start RANK and PARTY (native quest data - see 'The party = who you're out with'); Day needs story days on.
+      DAY VERIFIED (VM, story days switched on for the test): slot 1 (Sharppaw, level 1) -> 'story day 13 (the story
+      pack's start)', the save's WaCaDays sidecar Day = 13, WaCaStart Applied = 1; days.ini put back (On = 0).
       Example pack ships start.ini Off. Drop Z:/WaCa/WaCa-mods-test-20261101r. Still open: an editor.
       Drop Z:/WaCa/WaCa-mods-test-20261101m.
 - [ ] **P1: Party members follow you as you roam the forest** (operator 2026-10-30) - BUILT + VM-tested 2026-10-30
