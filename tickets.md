@@ -1380,6 +1380,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       that likely sets the fight's party - try setting it from the task (patrol / hunt companions, the mentor) before
       a fight and clearing it after. Needs: companions picked from story cats (roles) rather than generic clanmates,
       or a mapping; VM test whether ForcedParty is honoured outside a dev build.
+      TESTED 2026-11-01 (VM): ForcedParty is NOT honoured in the shipped game - written from Lua (read back: 1 entry,
+      role 29 TheRegretfulWarrior), then a sparring fight (the game's own combat box, TrainingGrounds): the party on
+      the fight screen was the same as without it (Nightheart, Dapplepatch, Rippleface - both screenshots). The
+      fight's party = the save's party (QuestProgression PartySetup, the PARTY page). Next route, if wanted: the game's
+      own party change (the PARTY page's set function) before a fight and back after - research.
+      On the way (all fixed, VM): four crashes 'reading 0x10' were (a) UE4SS's game-thread timers firing while mods
+      still loaded (now held - WaCa.lua's timer guard; 5/5 boots clean after 3 of 4 crashed) and (b) my probe reading
+      a null combat MainCharacter; WaCa.CustomData made the look-data reads null-safe on non-cat characters.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
