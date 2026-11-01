@@ -1938,6 +1938,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       cat visible. Both fixes are in (guarded, harmless) but NOT proven. The real fix: Place = Here should pick an
       OPEN spot near the cat (ground flat, no roots / water / rock within the shapes' radius + camera distances),
       and the tests need a frame rate where frames can be judged (CLAUDE.md: -ResX 960 or a real PC). Still open.
+      TRIED the open-spot fit (same day): Place = Here weighs camera room (clear + dry 7 m behind, 4.5 m to the sides)
+      and looks up to 7.5 m out - at -46706 6269 it still chose the bank (room 3 of 3) and the Two / Portrait shots
+      stayed low over the river behind reeds. The room test doesn't match what the shots see (they pick their side by
+      the cats' line, reeds don't block traces). STOPPED here on purpose: judging framing at 0.5 fps / 480x270 is
+      guesswork - needs a real-resolution session (or the operator's eyes). Committed, unproven, harmless elsewhere
+      (open camp ground framed fine).
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
