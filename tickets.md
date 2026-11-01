@@ -515,6 +515,15 @@ game data in this repo.
       just read and write the engine's own input mappings (UPlayerInput action / axis mappings, the menus'
       DT_GamepadButtons* rows, the viewport capture mode) - the menu saves them to keybinds.ini, the one source. The
       raw KeyDown event only observes (aliases press real keys), so it stays compatible.
+      IN-GAME REBINDING DONE 2026-11-01 (VM): the game ships an unused "Control Configuration" popup
+      (WBP_GuiPopupControlConfig - 11 commands, gamepad + keyboard icons, a hidden "Reset Default"); Enter / a click
+      on the pause menu's CONTROLS page opens it as the rebinding screen (Keybinds controls.lua): pick, press the new
+      key, Escape cancels, Delete = the game's key (keeps mouse buttons via "Default"). Written to keybinds.ini
+      [Actions] in place and applied LIVE (Core ApplyBindings - UPlayerInput layout read from AddActionMapping). Key
+      ICONS / HINTS now follow keybinds.ini everywhere (the default-list getters SwtPlayerInput +0x348/+0x350 hooked):
+      the controls page, the screen and the HUD prompt ('F Travel'). VM: Map = F live -> F opens the map, M nothing.
+      OPEN: the operator's feel check; axes (move / camera) are not on the game's screen - still ini-only; the
+      remaining 'quests are on K' hint.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Remaining: the on-screen key hints to follow keybinds.ini ([UIIcons] already covers menus; gameplay hints use
         the same icon table - extend the row list).
