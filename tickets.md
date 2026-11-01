@@ -32,6 +32,8 @@ Nothing below is open on the VM side; each item is BUILT (+ VM-tested, often off
   stories - the story fixer depends on it); start rank via QuestStatus (story pack starts); hunting patrols on by
   default? (party); turning the experimental systems on (days, duties, events, lines, timeskip, exhaustion,
   activities, ambient, guidance, scent trails, specialisation, hunting by chance, fishing - each '... On = 0').
+  New GAME-side roles (Roles and the cast: the survey + patch of every role reader - the operator's go); NPC
+  patrols' fade-out when unseen + talking to a patrol (marked future by the operator).
 - CONTENT: the real story days / threads / scenes (25, 27, Story, 17 + 10), border-point events (7).
 - PLAY CHECKS (what the VM can't show): a won fight (6), the pile via the pile's cat (Fresh kill), body shapes /
   kit sizes (Decouple), Colourpoint (2), camera framing of the party (P1 follow), the ice's look, the controls
