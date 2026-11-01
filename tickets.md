@@ -1388,6 +1388,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       On the way (all fixed, VM): four crashes 'reading 0x10' were (a) UE4SS's game-thread timers firing while mods
       still loaded (now held - WaCa.lua's timer guard; 5/5 boots clean after 3 of 4 crashed) and (b) my probe reading
       a null combat MainCharacter; WaCa.CustomData made the look-data reads null-safe on non-cat characters.
+      PARTY CHANGE RESEARCH (2026-11-01, parked - a native RE project): the party is set by quest tasks -
+      UQuestObjectiveSavePartyTask (PartyRoles / <Clan>PartyRoles: TMap<ECharacterRank, {Setup: [narrative roles],
+      OptionAlly}>, bClearOnQuestRemoved); 126 loaded, inside the quests' objectives (RankUp_0 [rank 2: RiverClanKit],
+      combat milestones [rank 4: RiverClanKit + RiverClanWarriorMoveLearn] ...). The maps are reflected (editable from
+      Lua); the live party is native (no reflected field). The task's vtable 0x149a9f440 overrides only +0x2b8
+      (0x1416ee040 - empties its map: cleanup); the party is applied by the owning objective's native code. NEXT if
+      wanted: trace the objective's start (where it reads its SavePartyTask) -> the party store, then a WaCaNative call.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
