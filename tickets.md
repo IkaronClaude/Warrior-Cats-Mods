@@ -1468,6 +1468,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       hunting patrol; VM with 2: Toadfrost + Otterfeather -> that party). Training = the spar itself (excluded). NOT YET:
       generic clanmates (no story role - the game's party fills in). OPERATOR: hunting patrols on by default?
       Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
+      LIBRARY: scene step Party: <story cats> (names anywhere in the world, E:<role>; none = the game's), kept with the
+      save (VM: example FightBeside -> spar with Toadfrost; saved, next session restored). Drop ...20261101t.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
