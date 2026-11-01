@@ -232,7 +232,14 @@ game data in this repo.
       meeting place, where you assign the tasks (first cut 2026-10-28: the marker + F there ends the third). Later a
       proper UI: clan cats with stats that make them better at patrols or hunting, you build parties and send them out,
       the outcome depends on their stats - "lead" means deciding what the clan does, not bimbling around.
-- [ ] **P1 (operator 2026-10-28): "walk quests" for the story mod** - e.g. promoted to apprentice, the mentor WALKS you
+      DESIGN QUESTIONS FOR THE OPERATOR (2026-11-01, before building the full UI): (1) the stats - the clan's generic
+      cats have none in the game (only story / party cats have combat levels); invent per-cat hunting / patrol / fighting
+      skills (from what? rank, age, traits the game gives the player only), or use the combat level for all? (2) what an
+      outcome changes - fresh-kill pile, border state, injuries, bond? (3) the screen: the game has no list-of-cats
+      picker to reuse (its popups take 1-2 options; the Defender / Skirmish party screens are its only cat pickers -
+      fed natively); a WaCa-built one (runtime text / image widgets, like the controls screen's hint line) is possible.
+      Waiting for the rules - inventing them would be the kind of guess the operator rejected for romance.
+- [x] **P1 (operator 2026-10-28): "walk quests" for the story mod** (DONE 2026-11-01: the Lead step, VM-verified end to end) - e.g. promoted to apprentice, the mentor WALKS you
       to the apprentice den to meet the others: the cat leads (paths over, waits when you fall behind, goes on when you
       catch up), no quest marker. A scene step on follow.lua (Follow.Travel for the leader + the player's distance).
       Reuse the game's battle animations in cutscenes (hackles raised, sneaky / subdued poses - operator 2026-10-28).
@@ -524,6 +531,11 @@ game data in this repo.
       the controls page, the screen and the HUD prompt ('F Travel'). VM: Map = F live -> F opens the map, M nothing.
       OPEN: the operator's feel check; axes (move / camera) are not on the game's screen - still ini-only; the
       remaining 'quests are on K' hint.
+      MOD KEYS 2026-11-01 (VM): WaCa.ModKey(mod, name, default, label) - every mod's own keys in keybinds.ini
+      [ModKeys] (Clan Life Report / JoinActivity / Rest / AskMate, Cutscenes Skip), announced so the controls screen
+      warns on a clash: 'F is Interact now - it is also Clan Life's key to report a finished task', 'also Scent
+      tracking'. The screen got a hint line in the game's font. A reload with the screen open no longer leaves every
+      key swallowed (native releases on Lua stop; the mod closes a leftover screen). Drop Z:/WaCa/WaCa-mods-test-20261101q.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Remaining: the on-screen key hints to follow keybinds.ini ([UIIcons] already covers menus; gameplay hints use
         the same icon table - extend the row list).
