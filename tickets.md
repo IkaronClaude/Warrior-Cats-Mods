@@ -57,7 +57,7 @@ game data in this repo.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
 - Fresh kill without hunger: deposit VM-verified; talking to the pile's cat in play (the VM can't talk to NPCs) = operator.
-- Cutscenes from text: built + VM-verified (incl. Wait, cast to other mods); the look = operator.
+- Cutscenes from text: built + VM-verified (incl. Wait, cast to other mods, [Rogue.<Name>] looks); the look = operator.
 - Nexus Mods: the operator's login (upload, Nexus-UE4SS DLL test, MothColorPicker).
 - 17 + 10 Show, don't tell: framework built; which scenes = operator content.
 - 11 Clan cat interactivity: built (off); lines / turning it on = operator.
@@ -1948,6 +1948,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
+- [ ] **P3: cutscene shots through foliage** (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
+      camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
+      the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
+      cats to the screen and count foliage instances on the camera -> head line (an overlap / instanced-mesh query), then
+      turn the shot. Data in hand: scratchpad cam_probe.lua.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
