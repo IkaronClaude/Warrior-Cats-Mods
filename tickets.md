@@ -1416,6 +1416,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Lua); the live party is native (no reflected field). The task's vtable 0x149a9f440 overrides only +0x2b8
       (0x1416ee040 - empties its map: cleanup); the party is applied by the owning objective's native code. NEXT if
       wanted: trace the objective's start (where it reads its SavePartyTask) -> the party store, then a WaCaNative call.
+      MORE (2026-11-01, VM): the pause PARTY tab only shows the party (no change in the game). The save keeps it as
+      QuestProgression.Chapter00.PartySetup [{NarrativeRole, CharacterTag}] (WrcGame.json; RiverClanKit +
+      RiverClanWarriorSideRace = the fight's Nightheart / Rippleface), read by the save's JSON code (exe 0x1416A555B,
+      'PartySetup' UTF-16 at 0x149AE8298). AQuestPlayerController.Party (+0x838) is empty. A scan of 2614 objects
+      (managers, save, quest components, one level into their arrays) found no live copy of that role list - it lives
+      in native quest data. Routes: (a) trace the JSON reader at 0x1416A555B to its destination (then write it
+      natively), (b) hook the combat director's party build (PlayerParty +0x460 / CharsPlayerPartyRef +0x4A0) at
+      fight start, (c) edit PartySetup in the save between sessions (tools/save_edit.py - not live). Parked.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
