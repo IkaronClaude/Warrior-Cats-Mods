@@ -1136,6 +1136,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       sweep found broken all pass through it. Other clans' saves: the fallback doesn't depend on the save, and every
       placeholder's spelling was checked against the 104 role names statically (only the ones fixed in text.ini were
       off) - a per-clan sweep would only re-confirm. Remaining: text that never passes the fill (none found).
+      OTHER-CLAN SWEEP DONE 2026-11-01 (VM): a ThunderClan cat made through the creator (Sharppaw, slot 1 - main menu ->
+      Prophecy mode -> an empty slot -> ThunderClan -> creator -> name (Enter into WaCa's box, Enter again) -> traits
+      -> the story). Its sweep: the game alone leaves a role in braces in 752 lines (RiverClan: 682 - the shared side
+      stories' roles aren't cast early in any clan), as shown 0 - the fallback covers both clans. Polished: a role
+      spoken TO goes without its article ('Thank you, resentful elder.' - was 'Thank you, the resentful elder.').
+      Drop Z:/WaCa/WaCa-mods-test-20261101f.
       - Done part: misspelled placeholders fixed (text.ini [Placeholders]); the in-play detector names any other
         unfilled line - its fix is one text.ini line each once seen.
 
