@@ -1114,7 +1114,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         the creatures roll again against the season's share, so prey comes and goes during the day. Random PLACES
         (PreyRandomPlaces = 1): a creature coming back appears at a random point of its nearest generator's
         AreaComponent box, dropped from 1.5 m above. VM: 24 came back elsewhere in 3 min, none fell through the world
-        (no height jumps > 3 m in 8 checks), stable. Open: a moved prey's pounce in real play (operator); habitat per
+        (no height jumps > 3 m in 8 checks), stable. TRIED ON THE VM 2026-11-01: preyworld's hide-move-show on a mouse,
+        then the scripted pounce - but the same pounce on an UNMOVED mouse fails too (the held crouch doesn't take at the
+        VM's frame rate: 'Detected true ... crouched false'), so the VM can't judge it. Open: a moved prey's pounce in real play (operator); habitat per
         species (fish only at water ...) - today a creature stays in its own generator's area, which is its habitat.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - On a timer step per in-game hour, pick a generator in the cat's area and spawn one prey of its kind at a random
