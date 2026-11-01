@@ -1199,6 +1199,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       player doesn't swap Lua files mid-game). Also found + fixed: an intermittent START-UP CRASH in WaCa Core's bridge
       (events delivered while UE4SS still started mods - now held until loading is quiet; ~8 clean boots by
       2026-11-01 04:10, no crash report since 00:27 - at the old ~2 in 15 that's encouraging, not yet proof).
+      STRESS 2026-11-01 (VM): 6 boots in a row - each up, a command taken, no crash report - ~20 clean boots since the
+      fix (incl. the stricter hold + states mutex of 06:30); at the old ~2 in 15 that would happen ~6% of the time by
+      luck. Also: every montage call now null-safe (WaCa.PlayMontage / StopMontage). Drop ...20261101j.
       Drop Z:/WaCa/WaCa-mods-test-20261101b.
 - [ ] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
       your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
