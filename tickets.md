@@ -1921,7 +1921,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       LIBRARY EXERCISE same day: FightBeside cutscene + the new Wait beat (Cutscenes) - VM ok.
       FIXED: Cutscenes sends the cast's paths with CutsceneStarted; Clan Life's walkers hide the party cats not in it for
       the scene (VM: '2 party cat(s) out of the cutscene's shots', the frame clear of them).
-- [ ] **P3: a cutscene camera behind scenery the trace can't see** (2026-11-01, FightBeside at the camp's river
+- [x] **P3: a cutscene camera behind scenery the trace can't see** (CLOSED 2026-11-01 - NOT A BUG, misread screenshots; 2026-11-01, FightBeside at the camp's river
       edge): the Two shot logged no 'blocked' (its sight trace on the Camera channel found the way clear) while the
       frame showed a rock face and no cats - likely a rock without collision on that channel. Next: trace on
       Visibility too / against the rendered depth, or check the cats' WasRecentlyRendered after the move and try the
@@ -1944,6 +1944,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the cats' line, reeds don't block traces). STOPPED here on purpose: judging framing at 0.5 fps / 480x270 is
       guesswork - needs a real-resolution session (or the operator's eyes). Committed, unproven, harmless elsewhere
       (open camp ground framed fine).
+      RESOLVED BY MEASURING (same night, VM at 960x540 + a probe: each cat's head projected to the screen, and the
+      line camera -> head traced on Visibility and Camera): at the 'bad' river-edge spot EVERY shot had its cats in
+      frame with clear lines (Two: Toadfrost x789, Dapplepatch x265 of 960; Portrait: Toadfrost centred; Over:
+      Dapplepatch in frame). The pale planes were the river seen from ABOVE (sky reflection, lily pads from above),
+      not the camera under water; nothing is above the camera on any channel. So: legit shots of small cats on a
+      bank, not a camera bug. The three 'fixes' built on the misread (SeenCheck, WaterClear, the room-aware fit) were
+      REVERTED (WaCa-Cutscenes fc22449 / d67961f / 578c6be). Lesson (CLAUDE.md already says it): project to the
+      screen before judging framing from a 480x270 screenshot. Tool: scratchpad cam_probe.lua.
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
