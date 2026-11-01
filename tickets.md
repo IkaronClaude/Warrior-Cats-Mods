@@ -462,6 +462,13 @@ game data in this repo.
       own contribution path). A single run screen -> OnContributeFreshKill -> TaskTurnedIn with a Hunt task waiting
       still needs fresh-kill in hand (VM pounces don't finish at 0.5 fps); duties now LOGS a contribution no task waits
       for, so the link shows in any run.
+      ONE RUN 2026-11-01 (VM, duties.ini Hunt-only + MaxRank Leader for the test - rank 3 = 'leads the clan's day', no
+      tasks): 'the deputy: hunt 2 prey' -> HuntCaught x2 -> 'hunting done' -> the pile screen opened, Deposit ran:
+      first 'nothing went on - the pile: Abundant' (78: each catch adds 4 to the pile itself), lowered to 38 ->
+      'nothing went on - Scarcity': the cat carries no prey (the earlier deposit test used the save's rats). Adding
+      prey from a script isn't possible: WrcInventoryComponent is fully native (no reflected functions / properties).
+      So the last link - a deposit counted as the turn-in - still needs a real catch (the operator's play: pounces
+      can't start on the VM). Also found: the test's 'out of camp' spot (-45000,4000) is inside R-05.
       - the third's end in ORDER (operator: a story's cutscene after the hand-in, BEFORE or AFTER the clan event):
         numbered slots, lowest first - story beats 100 (days.ini <Third>), clan events 200 (each its own Order =),
         story after-beats 300 (<Third>After), duties.ini [Third.X] Event 350, the ClanThirdEnd hook 400; logged. Walking into / out of camp only emits CampEntered / CampLeft (the night watch, patrols, mods).
