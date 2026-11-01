@@ -1242,6 +1242,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       caught -> WaCa Hunting's PreyTaken (gone, as the player's catch), missed -> PreyScare (bolts, gone); none near ->
       acted out. VM: Willowstorm caught one ('caught by Willowstorm'), Sagefur's missed prey ran off. Drop
       Z:/WaCa/WaCa-mods-test-20261031o.
+      MEDICINE CAT 2026-11-01 (VM, [Jobs] Herbs = 1): each morning the medicine cat walks to one of the game's herb /
+      moss pickups 20-90 m out, sniffs + digs, comes home (NpcGatherHerbs / NpcHerbs). VM: Freezesong 75 m out, gathered,
+      home again. Drop Z:/WaCa/WaCa-mods-test-20261101i.
 - [ ] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
       you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
       this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
