@@ -1386,7 +1386,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       cat only (level 1, no rank quest; an existing cat is recorded skipped): story day, level via the game's EXP one
       level-up at a time (WaCaNative_LevelInfo), steps, and Looks' name box asks for the whole warrior name (no kit
       suffix). VM: new ThunderClan cat EMBERHEART (slot 2) - box label, level 8 / 143 HP, the card. NOT possible yet:
-      a start RANK and PARTY (native quest data - see 'The party = who you're out with'); Day needs story days on.
+      a start RANK (native quest data); Day needs story days on. PARTY added later the same day (Party = <roles>, VM ok).
       DAY VERIFIED (VM, story days switched on for the test): slot 1 (Sharppaw, level 1) -> 'story day 13 (the story
       pack's start)', the save's WaCaDays sidecar Day = 13, WaCaStart Applied = 1; days.ini put back (On = 0).
       START RANK - OPTION FOR THE OPERATOR: rank = the rank quests turned in (WaCa.PlayerRank); UQuestBase.QuestStatus is
@@ -1407,7 +1407,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       after (VM).
       STILL OPEN: (c) the VM camera sits 1.1 m behind the cat - check the formation on the operator's camera (Distance /
       Side in walkers.ini); (d) PartySetup by "latest chapter key" - check once a save has a second chapter.
-- [ ] **The party = who you're out with** (operator 2026-10-28): the combat party should be the cats you're hunting /
+- [x] **The party = who you're out with** (operator 2026-10-28; DONE 2026-11-01 for patrols, operator check left): the combat party should be the cats you're hunting /
       patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
       RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
       narrative role: TheRegretfulWarrior, RiverClanDeputy ...); the game has a developer switch
@@ -1438,6 +1438,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       in native quest data. Routes: (a) trace the JSON reader at 0x1416A555B to its destination (then write it
       natively), (b) hook the combat director's party build (PlayerParty +0x460 / CharsPlayerPartyRef +0x4A0) at
       fight start, (c) edit PartySetup in the save between sessions (tools/save_edit.py - not live). Parked.
+      BUILT 2026-11-01 (VM): the story fight's director keeps the party as roles at +0x788, filled by its virtual
+      +0x9E0 - hooked there (Core party.cpp, WaCa.SetCombatParty / Party|<roles>): the list is replaced, the game
+      builds the cats its own way. Spar with Party|29 -> Dapplepatch + TOADFROST. Clan Life: a patrol's story cats
+      (patrols may now take the story cats the save keeps combat stats for - Party.Stats - first) fight beside you
+      till the patrol ends: forced patrol next to Toadfrost -> Toadfrost + Otterfeather joined -> that fight party.
+      Walkers now wait during spars too (a live director = a fight). NOT YET: hunts / training with the mentor
+      (the mentor-vs-apprentice spar excluded), generic clanmates (no story role - the game's party fills in).
+      Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
