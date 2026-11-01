@@ -1443,8 +1443,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       builds the cats its own way. Spar with Party|29 -> Dapplepatch + TOADFROST. Clan Life: a patrol's story cats
       (patrols may now take the story cats the save keeps combat stats for - Party.Stats - first) fight beside you
       till the patrol ends: forced patrol next to Toadfrost -> Toadfrost + Otterfeather joined -> that fight party.
-      Walkers now wait during spars too (a live director = a fight). NOT YET: hunts / training with the mentor
-      (the mentor-vs-apprentice spar excluded), generic clanmates (no story role - the game's party fills in).
+      Walkers now wait during spars too (a live director = a fight). HUNTS too: [Hunt] Companions (default 0 - a
+      hunting patrol; VM with 2: Toadfrost + Otterfeather -> that party). Training = the spar itself (excluded). NOT YET:
+      generic clanmates (no story role - the game's party fills in). OPERATOR: hunting patrols on by default?
       Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
