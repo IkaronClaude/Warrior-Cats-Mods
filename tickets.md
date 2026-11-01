@@ -1914,11 +1914,18 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
-- [ ] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise): the cats that follow you (walkers'
+- [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
       Also seen: two Toadfrost actors exist (one 140 m off, never drawn) - Cast takes the nearest; harmless so far.
       LIBRARY EXERCISE same day: FightBeside cutscene + the new Wait beat (Cutscenes) - VM ok.
+      FIXED: Cutscenes sends the cast's paths with CutsceneStarted; Clan Life's walkers hide the party cats not in it for
+      the scene (VM: '2 party cat(s) out of the cutscene's shots', the frame clear of them).
+- [ ] **P3: a cutscene camera behind scenery the trace can't see** (2026-11-01, FightBeside at the camp's river
+      edge): the Two shot logged no 'blocked' (its sight trace on the Camera channel found the way clear) while the
+      frame showed a rock face and no cats - likely a rock without collision on that channel. Next: trace on
+      Visibility too / against the rendered depth, or check the cats' WasRecentlyRendered after the move and try the
+      next direction when they aren't. Needs a closer look at a real resolution (0.5 fps / 480x270 is too coarse).
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
