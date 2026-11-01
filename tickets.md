@@ -1662,6 +1662,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         check (NavigationSystemV1.FindPathToLocationSynchronously) returns NOTHING from Lua - even for 300 units of
         open ground - so partners stay chosen by straight-line distance and an unreachable walk gives up. The world's
         idle clanmates near the VM cat stand 1700+ apart (6 pairs within 2500 of 66 idle) - a real camp is the test.
+      PAIRS SOLVED 2026-11-01 (VM, in the RiverClan camp): the AI move fails on this map (as the walkers found) and in
+        camp the nameless walkers activities picked are gone - pairs now use the camp's NAMED cats and the walkers'
+        mover: Walkers.Pair(a, b, montage) - both to either side of their midpoint, face, play, home (set down in
+        place after MaxWait). VM: Oakstorm + Cricketpelt play-fought; Tigerclaw + Lionstar walked 10 m each, met,
+        play-fought. Drop Z:/WaCa/WaCa-mods-test-20261101e. (Ambient stays Off by default - the operator's call.)
       BOND GAIN - BUILT + VM-VERIFIED 2026-10-28 (activities.ini [Join] On = 0 by default): the game's own
         AddPersonalBonding (0x1416A0BD0 in this build) - a free function (cl = ENarrativeRole, edx = points) that adds,
         sets through the progression's virtual +0x560 and saves with context "AddPersonalBonding". bonds.cpp finds it by
