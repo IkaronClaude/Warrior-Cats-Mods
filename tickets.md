@@ -1579,6 +1579,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       VM: soaked -> 'report to the elder'. All three apprentice duties built; operator check: the report key in play.
       BUILT 2026-10-31 - BEDDING: into one of the clan's dens (its inside point), the old moss to a marked spot out of
       camp, report to the deputy. VM: Medicine Cat's den -> taken -> thrown out -> report.
+      REPORT KEY SEEN 2026-11-01 (VM, a REAL F key - vm_input key 46 carries the key name the harness's HoldKey lacks):
+      water soaked -> next to the elder Sharpfoot, F -> 'water for the elders turned in (Elder)' -> the evening began
+      with its clan event. The medicine cat / deputy turn-ins use the same report path (role by name). The log now
+      names the cat (the actor's class misled: Sharpfoot is a BP_Quest_Giver_Deputy).
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
