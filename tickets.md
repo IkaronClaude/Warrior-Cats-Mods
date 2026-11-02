@@ -1968,6 +1968,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       together at frame end (hiding a cat between two captures of one frame hid it in both). NEXT if picked up: take
       the cast actor from Cutscenes (not a name search), and check a cat's mesh in a capture's show-only list on open
       ground first; if cats never render in captures, this route is closed.
+      DONE (same night): the PLAYER's own cat (unambiguous, on screen, open camp ground) in a show-only capture - with
+      its attached actors (none) - the cat-alone image equals the sky-alone one except sky noise along the top row.
+      The cats do NOT render into scene captures (all four capture checks: depth, difference, show-only, the player).
+      CAPTURE ROUTE CLOSED. What remains is a placement rule (keep portrait / two shots out of big trees' crowns -
+      e.g. a ring of traces at head height around the camera spot catching trunks/roots as a proxy for the leaves
+      above them), to be judged by the operator's eyes at a real resolution. Low priority.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
