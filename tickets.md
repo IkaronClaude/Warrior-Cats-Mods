@@ -1236,6 +1236,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
+- [ ] **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
+      (the loner's visit at the riverbank, VM): (1) reeds stood between the camera and Lionstar - the camera's
+      clear-view trace (Camera channel) didn't see them; (2) after a reboot, at another spot, the Portrait showed a
+      high view under a rock with Lionstar small mid-screen, not a 1.7 m portrait - the log said '1.7 m from what it
+      looks at' and 'turned 0 deg, 150 cm higher'. A trace forward from the camera (channels 0-2, simple and complex)
+      hit nothing there. Next: log the Portrait's own camera / look points each tick and compare with the player
+      camera manager's view (is our camera actor the view target during the hold?); for (1) find what collision the
+      reeds have (none on any channel = can't be traced - then a sphere sweep / the foliage instances' bounds).
+      Screenshots: scratchpad cutask4.png (reeds), cutask5.png (rock).
+
 - [ ] **P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
       <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
       keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
