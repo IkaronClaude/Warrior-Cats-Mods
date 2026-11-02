@@ -1976,6 +1976,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       15 Hunting reloads in a row, a delayed callback ran after every one. Nor 16 reloads rotating Clan Life / Cutscenes / Looks /
       Hunting (each followed by a harness delayed callback - all ran). Next if it comes back: which mods' delayed
       callbacks still run (one probe per mod), and whether the harness itself errored.
+      2026-11-02 later: the harness's own loop hardened (WaCaTest main.lua, game dir only - backup main.lua.bak-20261102):
+      the next poll is now armed FIRST and the file read is pcall'd - before, one error outside the per-line pcall ended
+      the loop for good, one way to the symptom; a deliberate failing command is followed by working ones (VM). It also
+      logs 'CMD poll N alive' every 300 polls (~10 min): a gap in those = the stall is back. Stays open: Hunting's
+      delayed start went quiet too, which a harness-only error wouldn't explain.
 
 - [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
       camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
