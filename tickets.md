@@ -1236,6 +1236,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
+- [ ] **P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
+      <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
+      keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
+      operator's call: is that fine, or a menu of the game's own look (its dialogue-answer list) - which would be the
+      next build.
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
       WAITING ON THE OPERATOR: the story beats (the groundwork, travel, other Clans, the stay-behind raid are built + VM-verified).
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
