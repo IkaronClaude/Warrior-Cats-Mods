@@ -1959,7 +1959,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       read its command file again and Hunting's delayed start logged nothing, while the game ran and reloads still
       logged; a restart cleared it. CORRECTED the same day: Clan Life's 'day clock' line is not a heartbeat (it logs on
       hour changes), so 'every mod's timers stopped' was not shown - only the harness and maybe Hunting. NOT reproduced:
-      15 Hunting reloads in a row, a delayed callback ran after every one. Next if it comes back: which mods' delayed
+      15 Hunting reloads in a row, a delayed callback ran after every one. Nor 16 reloads rotating Clan Life / Cutscenes / Looks /
+      Hunting (each followed by a harness delayed callback - all ran). Next if it comes back: which mods' delayed
       callbacks still run (one probe per mod), and whether the harness itself errored.
 
 - [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
