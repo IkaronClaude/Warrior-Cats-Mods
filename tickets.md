@@ -1043,6 +1043,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         the choice which one to advance;
       - calendar things (seasons, moons, Gathering dates) stay on the calendar; a story waits for them with a
         condition (Require = Gathering.Today = 1).
+      BUILT 2026-11-02 (WaCa Clan Life days.lua, content/story.ini): a pack's own story - [Story] Name / Priority, its
+        own [Day.N]; its own day counter and Advance (+ new Advance = If: <conditions> for every story); a day with
+        Sync = <Name> is a hard barrier between our stories (the refined design: symmetric, no repeat limit); beats after
+        the main story's by Priority; every story's day + seen beats in the save's WaCaDays sidecar; the story check
+        reads each pack's story.ini on its own; WRITING.md 7b; the example pack's 'The herbalist's lessons'. Offline
+        (lupa): the sync wait + crossing together; VM: separate counters / repeats, the pack alone moving on, the sidecar.
+        STILL OPEN: (a) against the GAME's own quests (soft barrier: the warning before main-story progress + the
+        skipped days' Summaries) - needs the operator's two answers above (Warn or Gate; replay the skipped beats'
+        variable changes or only show summaries); (b) a third's task owned by a pack (Owns = <Third>); (c) a quest-list
+        entry for a pack's story (research the quest HUD); (d) the STORY FIXER screen (low prio, operator).
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
