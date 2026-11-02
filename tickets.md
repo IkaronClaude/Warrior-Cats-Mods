@@ -1245,6 +1245,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       camera manager's view (is our camera actor the view target during the hold?); for (1) find what collision the
       reeds have (none on any channel = can't be traced - then a sphere sweep / the foliage instances' bounds).
       Screenshots: scratchpad cutask4.png (reeds), cutask5.png (rock).
+      (2) CAUSE FOUND + FIXED same day: the camera sat 45 cm from YOUR cat - Lionstar was looking at your cat, so 1.7 m
+      in front of his face was your cat's body, and the cast's cats are left out of the clear-view trace. A cast cat
+      on the line of sight now blocks (Camera CatGap 60), and the search tries small turns before big rises (it had
+      gone 3 m straight up). VM: 309 cm from your cat, a side view. STILL OPEN (1): reeds block the view - a trace
+      forward from the camera through them hit nothing on channels 0-2, simple or complex: no collision at all. Next:
+      check foliage instances along the line by their bounds (InstancedStaticMeshComponent GetInstancesOverlappingSphere),
+      limited to the components near the scene.
 
 - [ ] **P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
       <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
