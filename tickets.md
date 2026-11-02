@@ -1974,6 +1974,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       CAPTURE ROUTE CLOSED. What remains is a placement rule (keep portrait / two shots out of big trees' crowns -
       e.g. a ring of traces at head height around the camera spot catching trunks/roots as a proxy for the leaves
       above them), to be judged by the operator's eyes at a real resolution. Low priority.
+      RING RULE TRIED + REVERTED (2026-11-02): enclosure by 8 short traces (portrait spot 7/12 hit, open camp 0)
+      counted as half-blocked - the Portrait turned 70 deg instead of -35 and a trunk filled the frame (Lionstar
+      gone). The scene itself stands inside the tree's root zone: no camera direction round it is good. The fix
+      belongs to the STAGING (Place = Here choosing a spot whose surroundings aren't enclosed - the same ring test on
+      the scene's middle), not the camera. Next if picked up: score Place = Here candidates by enclosure (cheap, the
+      measurement is in hand) and compare the frames at 960x540.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
