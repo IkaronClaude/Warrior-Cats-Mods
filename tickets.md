@@ -767,7 +767,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       inlined into the thunk 0x14160D270 - reached through a delegate, if at all) -> the startle trigger needs another
       proximity event. Candidates: the spot's InteractionComponent overlap (a native delegate - find its handler like
       the prey's OnActorOverlapped), or the game's interaction prompt widget (InteractionWidget:SetInteract, a
-      UFunction - fires when the prompt shows). NEXT: hook InteractionWidget:SetInteract and walk onto a spot.
+      UFunction - fires when the prompt shows). [SUPERSEDED - see the later DONE / FIXED] NEXT: hook InteractionWidget:SetInteract and walk onto a spot.
       Tried same day: InteractionWidget:SetInteract doesn't fire either when the cat is teleported off / onto a spot -
       like the quest giver (Space-dialogue ticket), a teleported cat never becomes "can interact" on the VM. The game's
       interaction focus needs a real approach (not reproducible at 0.3 fps) - the startle trigger is the one open
@@ -796,7 +796,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       instead: the engine's native TriggerBox (spawns safely, overlaps the cat - IsOverlappingActor true) but its
       ReceiveActorBegin/EndOverlap never reach a watch (no Blueprint implements them, so the engine skips the event)
       -> no arrival events; reverted to the Blueprint version, off by default with a KNOWN ISSUE note in
-      hunting.ini. Next: find the area Blueprint's construction crash (symbolise 0x143E1AB60 / 0x143E1CDA0 under
+      hunting.ini. [SUPERSEDED - FIXED below] Next: find the area Blueprint's construction crash (symbolise 0x143E1AB60 / 0x143E1CDA0 under
       FinishSpawningActor), or detour AActor::NotifyActorBeginOverlap on the TriggerBox (a virtual - find its slot).
       ANALYSIS (same day): the crash is 0x143E1AE02 in 0x143E1AB60 (under GameplayStatics:FinishSpawningActor):
       `call 0x143E241E0; movzx ecx, byte [rax+0x18C]` - 0x143E241E0 is a GetWorld-style accessor that returns NULL
@@ -891,7 +891,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
         the NonAsset CSV Gameplay/DataTables/NonAsset/CombatBaseExperience.csv - NOT a loaded DataTable (no runtime
         object; the 34 combat DTs don't include it), read by code not yet found (no path string; the struct is
         SwtAdventureCombatBaseExperience). VM: 3 caught mice -> "no EXP ... table isn't loaded", EXP stayed 396.
-        Next: find the loader (the struct's StaticStruct users / a watch on +0x10C during a won fight) and read
+        [SUPERSEDED - the DONE above reads the table] Next: find the loader (the struct's StaticStruct users / a watch on +0x10C during a won fight) and read
         the parsed rows from there - no copied numbers.
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
@@ -1015,7 +1015,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
         ESwtAdventureCombatType has TrainingGrounds = 5; USwtAdventureCombatBoxComponent {CombatType +0x568,
         CombatTag +0x56C} starts combat in its OnBeginOverlap UFunction - the world map has NO combat boxes; one
         constructed on the player pawn (StaticConstructObject) + OnBeginOverlap(box, pawn, capsule, 0, false, {})
-        runs without error but no combat follows (unregistered component / its owner checked?). NEXT: disassemble
+        runs without error but no combat follows (unregistered component / its owner checked?). [SUPERSEDED - see the later DONE / FIXED] NEXT: disassemble
         that OnBeginOverlap (the class's natives table - the "OnBeginOverlap" string is shared between modules, the
         SwtQuest table is at 0x149ad0b50, find SwtAdventure's) to see its checks and the combat-manager call it
         ends in (USwtAdventureCombatManager, CombatClasses[5] = the training director) - then call that directly.
@@ -1191,7 +1191,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       not code. {Player} (77 UTF-16 literals in the exe) and {Friend} (2) are code-supplied, so the two case-variant
       lines (TheUnchosenApprentice "Good-bye, {Player}", STR_DEN_VISIT_FRIEND_HELPED) are likely fine. The reported
       "It seems that 1's Prophecy is true" isn't an EN line as such: most likely a role placeholder whose role had no
-      cat assigned yet, filled with a numeric default. Next: hook the role -> name resolution (find the data table the
+      cat assigned yet, filled with a numeric default. [SUPERSEDED - see the later DONE / FIXED] Next: hook the role -> name resolution (find the data table the
       roles come from) and log every role resolved to a number / empty; needs a story save at that point (operator's
       save, or reach it on the VM).
       FIXED 2026-10-27 (one class of it): the game's own English text MISSPELLS name placeholders - {THE WARROR
@@ -1632,7 +1632,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       ENGINE PATH WORKS (2026-10-31, VM): the ceremony is a plain level sequence - LS_Cinematic_RankUp_ButLeader (+ per
       clan _C<Clan> and per shot _S* subsequences; 35 assets) - and the engine's own LevelSequencePlayer.Create +
       Play runs it from Lua (2400 frames; the view cut to its camera, dark: its cameras sit at the sequence's origin).
-      NEXT: anchor it the game's way (USwtSequencerManager ParentAnchor / AttachBoundActorToParentAnchor - an actor at
+      [SUPERSEDED - see the later DONE / FIXED] NEXT: anchor it the game's way (USwtSequencerManager ParentAnchor / AttachBoundActorToParentAnchor - an actor at
       the camp's ceremony spot), list its bindings (MovieSceneSequence FindBindingsByTag / the director's
       SequenceEvent entry points) and bind our cast with ALevelSequenceActor SetBindingByTag - then a Cutscenes shot
       type 'Ceremony'. Save untouched by the test.
@@ -1650,7 +1650,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the player's rank (0x1416ae290) below the task's Rank -> an achievement by name ("OnBecameWarrior" ..., the
       achievements object's vtable +0x3a8), SET THE RANK (0x1416ae100(rank)), complete (+0x2f8), 0x141660c80. It
       plays NO sequence: the ceremony comes from ASwtQuestGameplayGameState::OnQuestStatusChanged (the quest done) ->
-      the sequencer (native) -> OnPlayRankUpSequenceFinish(sequenceId). NEXT: that handler's native body -> the
+      the sequencer (native) -> OnPlayRankUpSequenceFinish(sequenceId). [SUPERSEDED - see the later DONE / FIXED] NEXT: that handler's native body -> the
       sequencer's play-by-tag call (RegisteredSequences by ESwtEngineSequencerType) and its bindings; call it with our
       cast. Never call 0x1416edab0 itself - it promotes the player.
       (b) DONE 2026-10-31 - the ceremony as a cutscene type, VM-verified end to end. Native: the game state's rank-up
@@ -1944,7 +1944,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         PATHS only for its own quest targets. scent.lua now lays one (cat -> prey, 150 cm steps) when a sense pulse
         starts (the sense component's first BlendProgress; BlendsFinished = the pulse ENDED - VM-timed: 48 s later at
         0.3 fps) and calls the spline's SetupMeshes + the element's OnTrackStateChange. VM: "1 trail(s) laid to prey"
-        in sense mode; the shot still shows no clear line (more particles at the prey) - NOT confirmed visually. Next:
+        in sense mode; the shot still shows no clear line (more particles at the prey) - NOT confirmed visually.
+        [SUPERSEDED 2026-11-02: see VISIBLE below - built, off by default, the operator's look] Next:
         compare the element's spline meshes / Niagara with the quest trail's (reading RegisteredSplineVisualMeshes from
         Lua crashed UE4SS natively - do it in C++), or spawn the game's NS_ScentTracking along the path directly.
         Tried the latter (same night): NS_ScentTracking spawned every Spacing cm along the path for TrailSeconds - no
