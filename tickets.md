@@ -1954,6 +1954,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
+- [ ] **P3: every mod's timers stopped after many hot reloads (seen once, VM 2026-11-02)** - after ~10 reloads of
+      Clan Life / Cutscenes / Looks / Hunting within an hour (Watch + deploys), from ~09:50-09:56 nothing scheduled with
+      ExecuteInGameThreadWithDelay ran any more in ANY mod (Clan Life's day clock, the test harness's command loop,
+      Hunting's 5 s start) while the game process kept running and reloads still logged; a restart cleared it. Not
+      reproduced, cause unknown (UE4SS's delayed-action queue and a reload with callbacks pending is the guess - unproven).
+      Matters for writers with Watch = 1 (a reload per story save). Next: count reloads to the stall on the VM; read
+      UE4SS's delayed-action code; if it is the queue, a WaCa Core timer of its own (one native tick) would avoid it.
+
 - [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
       camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
       the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
