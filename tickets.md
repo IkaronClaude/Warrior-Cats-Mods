@@ -1236,23 +1236,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
-- [ ] **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
-      (the loner's visit at the riverbank, VM): (1) reeds stood between the camera and Lionstar - the camera's
-      clear-view trace (Camera channel) didn't see them; (2) after a reboot, at another spot, the Portrait showed a
-      high view under a rock with Lionstar small mid-screen, not a 1.7 m portrait - the log said '1.7 m from what it
-      looks at' and 'turned 0 deg, 150 cm higher'. A trace forward from the camera (channels 0-2, simple and complex)
-      hit nothing there. Next: log the Portrait's own camera / look points each tick and compare with the player
-      camera manager's view (is our camera actor the view target during the hold?); for (1) find what collision the
-      reeds have (none on any channel = can't be traced - then a sphere sweep / the foliage instances' bounds).
-      Screenshots: scratchpad cutask4.png (reeds), cutask5.png (rock).
-      (2) CAUSE FOUND + FIXED same day: the camera sat 45 cm from YOUR cat - Lionstar was looking at your cat, so 1.7 m
-      in front of his face was your cat's body, and the cast's cats are left out of the clear-view trace. A cast cat
-      on the line of sight now blocks (Camera CatGap 60), and the search tries small turns before big rises (it had
-      gone 3 m straight up). VM: 309 cm from your cat, a side view. STILL OPEN (1): reeds block the view - a trace
-      forward from the camera through them hit nothing on channels 0-2, simple or complex: no collision at all. Next:
-      check foliage instances along the line by their bounds (InstancedStaticMeshComponent GetInstancesOverlappingSphere),
-      limited to the components near the scene.
-
 - [ ] **P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
       <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
       keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
@@ -2246,6 +2229,26 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+2026-11-02 - [x] **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
+      (the loner's visit at the riverbank, VM): (1) reeds stood between the camera and Lionstar - the camera's
+      clear-view trace (Camera channel) didn't see them; (2) after a reboot, at another spot, the Portrait showed a
+      high view under a rock with Lionstar small mid-screen, not a 1.7 m portrait - the log said '1.7 m from what it
+      looks at' and 'turned 0 deg, 150 cm higher'. A trace forward from the camera (channels 0-2, simple and complex)
+      hit nothing there. Next: log the Portrait's own camera / look points each tick and compare with the player
+      camera manager's view (is our camera actor the view target during the hold?); for (1) find what collision the
+      reeds have (none on any channel = can't be traced - then a sphere sweep / the foliage instances' bounds).
+      Screenshots: scratchpad cutask4.png (reeds), cutask5.png (rock).
+      (2) CAUSE FOUND + FIXED same day: the camera sat 45 cm from YOUR cat - Lionstar was looking at your cat, so 1.7 m
+      in front of his face was your cat's body, and the cast's cats are left out of the clear-view trace. A cast cat
+      on the line of sight now blocks (Camera CatGap 60), and the search tries small turns before big rises (it had
+      gone 3 m straight up). VM: 309 cm from your cat, a side view. STILL OPEN (1): reeds block the view - a trace
+      forward from the camera through them hit nothing on channels 0-2, simple or complex: no collision at all. Next:
+      check foliage instances along the line by their bounds (InstancedStaticMeshComponent GetInstancesOverlappingSphere),
+      limited to the components near the scene.
+
+      (1) FIXED same day: plants with collision off are checked by their instances' boxes along the line (Camera
+      FoliageRadius) - VM: the Portrait turned 70 deg to a clear view of Lionstar, no reeds. Measured: the camera
+      164 cm from Lionstar (Portrait = 170 - how close a portrait should be is the operator's look).
 - [x] 2026-11-02 - **P3: a Lua-side crash inside UE4SS (UE4SS+0x2aed17 / +0x2aed57) - 19 reports 10-28 .. 11-01 13:39, none on 11-02** -
       the crashed thread is in UE4SS's Lua interpreter (c7xxxx frames) under an object access (b9ddd4 / ba2b5c): some
       mod's Lua touched a game object no longer valid (pcall can't catch an access violation). The session's UE4SS.log
