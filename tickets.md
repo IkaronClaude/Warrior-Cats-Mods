@@ -1052,7 +1052,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         STILL OPEN: (a) against the GAME's own quests (soft barrier: the warning before main-story progress + the
         skipped days' Summaries) - needs the operator's two answers above (Warn or Gate; replay the skipped beats'
         variable changes or only show summaries); (b) DONE same day - Owns = <thirds> + <Third>Duty (VM: the example owns the Morning, HerbRound); (c) a quest-list
-        entry for a pack's story (research the quest HUD); (d) the STORY FIXER screen (low prio, operator).
+        entry for a pack's story (research the quest HUD) - a step DONE 2026-11-02: a day's Goal shows as the story's own
+        HUD panel (VM-seen); the game's quest list itself still open; (d) the STORY FIXER screen (low prio, operator).
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
