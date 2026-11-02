@@ -1953,6 +1953,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
       cats to the screen and count foliage instances on the camera -> head line (an overlap / instanced-mesh query), then
       turn the shot. Data in hand: scratchpad cam_probe.lua.
+      MEASURED (2026-11-02, VM 960x540): the blockers are a big tree's roots + LEAVES round the camp's river edge.
+      Every physics query says clear (traces on Visibility / Camera, instanced-foliage overlaps: 0, plain meshes'
+      bounds: only our rain cylinders). A scene-DEPTH capture from the camera pose works (cm along the view, read a
+      frame later - scratchpad depth_probe.lua) but the leaves don't write depth (a 7x7 window read 100% seen while
+      Lionstar was half hidden) - so it would only catch opaque blockers; built + REVERTED (never seen to trigger).
+      What's left: an image check (a colour capture of the cat alone vs the full scene) or simply prefer shot
+      directions away from big trees. Open, low priority - the shots are valid, just ugly in that one spot.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
