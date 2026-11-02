@@ -348,7 +348,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
         DutiesJudged event; cards at dawn / each duty / the verdict; none from MaxRank (Deputy) on. VM (1-minute test
         days, Reach raised): "day 17 ... hunt 3 prey, patrol 2 border points" -> "border point 1/2 checked" -> "day 17
         over - 1 done, 1 missed: standing +1". Hunt counting not seen live (no pounce on the VM - same HuntCaught as
-        hunting by chance). Open: Train / Night watch duties, the deputy ASSIGNING duties, standing feeding rank-ups
+        hunting by chance). [2026-11-02: Train + NightWatch BUILT below; the deputy assigning = the P1 'leading = MANAGING' - first cut built, the full screen waits on the operator's design answers] Open: Train / Night watch duties, the deputy ASSIGNING duties, standing feeding rank-ups
         (14).
       THE SLOT DAY (operator 2026-10-28, answers: slots with one activity each; effort moves the clock; night = sleep
         or night watch, the story may set e.g. a night hunt; "exploration is super key": activities send you out into
@@ -370,7 +370,7 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
         - offline sim (lupa, mocked clock): plan -> morning hunt held at 06:00 while open -> 2 catches -> done, the
           hunt goes on (10 of 2) -> afternoon by effort -> evening hunt -> night held at 05:59 -> rest -> verdict
           "2 done +4" -> day 2 morning. VM: see below.
-        OPEN: the deputy ASSIGNING duties (from MaxRank on); standing -> rank-ups (14, parked); which story points
+        OPEN: the deputy ASSIGNING duties (from MaxRank on) [= the P1 'leading = MANAGING', waiting on the operator's design answers]; standing -> rank-ups (14, parked); which story points
         freeze time (DayNight.Freeze exists).
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A day = daynight.lua's day (DayEnded at BedHour). At dawn the deputy hands out 1-2 duties from the clan's
@@ -1515,7 +1515,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         WhiskerValue, TailIdx, EarIdx ..., the look component's CustomData, already read natively in bridge.cpp). So
         decoupling = a body / face override in appearance.ini ([Body] BodyValue / FaceValue / FurValue ...) applied to
         the player's look component after the game builds it (like the colour / mask overrides) - the stored stats are
-        never touched, the creator's choice keeps setting them. NEXT (needs the VM): write those CustomData fields +
+        never touched, the creator's choice keeps setting them. [SUPERSEDED - BUILT + VM-checked below] NEXT (needs the VM): write those CustomData fields +
         WaCa.RebuildLook, check the shape changes and the save's Stats don't.
       BUILT 2026-10-28 (appearance.ini [Player] BodyValue / FaceValue / FurValue / EyeValue / WhiskerValue / TailIdx /
         EarIdx / CatSize, empty by default): main.lua writes them into the player cat's CustomData right before the
