@@ -1053,7 +1053,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         skipped days' Summaries) - needs the operator's two answers above (Warn or Gate; replay the skipped beats'
         variable changes or only show summaries); (b) DONE same day - Owns = <thirds> + <Third>Duty (VM: the example owns the Morning, HerbRound); (c) a quest-list
         entry for a pack's story (research the quest HUD) - a step DONE 2026-11-02: a day's Goal shows as the story's own
-        HUD panel (VM-seen); the game's quest list itself still open; (d) the STORY FIXER screen (low prio, operator).
+        HUD panel (VM-seen); the game's quest list itself - RESEARCHED same day,
+        OPERATOR'S CALL: the pause menu's QUEST tab (UGuiPausePanelQuest) has a main and a side list (UGuiIListItemsQuest,
+        pooled WBP_GuiItemQuestPause entries) fed natively from ListQuestsStruct = TArray<FQuestStruct { UQuestBase*,
+        UQuestLine*, UQuestLineNode* }> - the quest manager's real quest objects (UQuestManager.Quests), which the game
+        saves and ticks. Options: (1) a REAL entry = constructing UQuestBase / UQuestLine objects into the quest
+        manager - selectable, the detail panel works, but a made-up quest inside the game's saved quest state risks the
+        saves; (2) a DISPLAY-ONLY line = a copy of an entry added to the side list after the game fills it - safe, but
+        not selectable (navigation is native over ListQuestsStruct). The HUD panel above already shows the story; (d) the STORY FIXER screen (low prio, operator).
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
