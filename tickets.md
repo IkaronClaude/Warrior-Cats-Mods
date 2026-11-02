@@ -1958,7 +1958,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       the crashed thread is in UE4SS's Lua interpreter (c7xxxx frames) under an object access (b9ddd4 / ba2b5c): some
       mod's Lua touched a game object no longer valid (pcall can't catch an access violation). The session's UE4SS.log
       is overwritten on the next start, so the script isn't known. 11-02: many boots and ~40 reloads, not once - maybe
-      gone with that day's fixes, not proven. NEXT time it happens: copy UE4SS.log + WaCaNative.log BEFORE restarting
+      gone with that day's fixes, not proven. A soak the same day - 30 scenes in a row (every cutscene, Groups, a
+      pack event, 3 rounds, ~75 min) - no crash. NEXT time it happens: copy UE4SS.log + WaCaNative.log BEFORE restarting
       (the last lines name the mod and the step), then fix that script. (Crash triage 11-02: the GC purge crash +0x1c64787
       fixed - gcguard; +0x1b355e5 at 08:57 was my own destroy-during-start, fixed; older groups stopped by 10-31.)
 
