@@ -139,142 +139,6 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
   - [ ] Night: the den sleep wasn't re-run this time (teleport into the den didn't trigger it).
   - [ ] The map hover label shows the game's legend names; our own icons beyond the meeting place (hunting ground,
         den) - next.
-- [x] **Operator play-test of the split mods (2026-10-28) - fixed, VM-confirmed in bulk runs the same day.**
-  - Rank: WaCa.PlayerRank = 1 + rank quests done (QuestProgression), promotions live (topic player.rank). VM: a new
-    RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
-    slot is Shared.General.CurrentCatSlot - CurrentSaveSlotIndex stayed 0, so a new cat read another cat's day, names,
-    sidecars (VM: slot 8 cat now "-8", day 1).
-  - The day: morning / afternoon duties, the evening in camp (sharing tongues) staged (5 camp cats placed in a ring through a fade,
-    poses, release - the camp cats are BP_Quest_Filler_C scenery, no controller), night: den sleep (My den / your rank's
-    den by STR_DEN_* names; VM: walked into the warriors' den -> sleep pose, fade, day 2 at dawn). F9 off by default.
-    THE EVENING SCENE REDONE + SEEN in daylight (VM 2026-10-28 evening, a dawn copy of the scene): the fillers were parked
-    by the game (38/41 bodies off) and moved quest actors never drew -> the camp's WALKING cats (game AI characters),
-    an arc in front of the camera (the camera sits ~1 m behind your cat - a ring hid them), movement held while
-    staged, released back to their own spots (the saved transform was a live view - nobody went back before). Shots:
-    5 clanmates sitting before Dapplepatch with the card; after: back 24-42 m away, walking on.
-  - Deputy lines ([Talk]): VM with the game's dialogue widget + NpcRef = RiverClanDeputy: "free time turned in
-    (Deputy)" and the line swapped to the report text, restored on close. Busy (VM, during "hunt 2 prey"): "Shouldn't
-    you be out on your hunting? The clan is counting on you." - restored on close.
-  - BULK RE-CHECK 2026-10-28/29 (960x540 where detail mattered): Colourpoint tile at full size (masked face, dark
-    points, unlike the Tabby tiles); night HUD "Your den / Sleep in your nest"; F9 = nothing (0 rest lines); walked
-    into the warriors' den -> "in its den - it goes to sleep" -> day 18 at dawn; dawn cards one at a time, no
-    overlap (contact sheet); FISHING end to end: moving arrival -> startled, stays away while moving, still -> "back
-    and biting (60%, rolled 35)" (earlier misses were a rat fight mid-test); hunting parts all report on (chance on
-    63 prey, scent trails, guidance 10 puffs, wading). Found + fixed: "0 of 0 duties done" card after a night-start
-    session - VM 2026-10-29: "day 18 over - 0 done, 0 missed", no card; and in the ORIGINAL setup (a fresh load that
-    starts at night, sleep in the den): "the night begins (the session starts)" -> "0 done, 0 missed" -> no card. Hunt chance label: VM probe on a rabbit 3 m
-    off - label "95%" visible inside the game's sneak-attack paw canvas (shown by the game when stalking). Known: a Hunting hot reload re-arms fishing spots
-    twice (13 areas) - reload-only.
-  - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
-    conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
-  - Lead mode: the meeting place marked; F there ends the third, F 594 away refused (VM).
-  - Mouse (VM): hover selects via the game's own steps (main menu, Select Your Cat grid, clan crests via native rects,
-    creator pattern / colour grids, pause menu); clicks = select + the real confirm key; footers by their key icon's
-    command (Continue = Button_Y); creator 1 / 2 tabs; pause tabs on click only; map drag (held WASD) + wheel zoom
-    (held Up / Down). Map icon INFO (the game has none): pointing at an icon shows its name by the cursor - from the
-    map's own legend by texture, else the creature kind (VM: Player, Clan Outpost, Mice).
-  - Name box: the screen maps Enter to its confirm commands itself (OnListenCommand 5 / 26 / 28 with the rows
-    blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
-  - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
-- [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
-- [x] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28) - BUILT
-  2026-10-29 (WaCa-ClanLife b0c1600): Groups: Tongues|Prey, config/relations.ini, names from the game's text, walk-in
-  via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats (leg 14: 3 of 6 walked
-  all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
-  Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
-  apprentices together 82% PASS.
-  - [x] 2026-10-29 (c977490) walk-in: the cats' own behaviour tree was never paused (PauseLogic did nothing - their
-    pacing overrode our order); StopLogic + a game-time clock -> VM 6 of 6 seated at the meal, 5 of 6 for tongues
-    (one stuck on geometry, set down).
-  - [x] 2026-10-29 (6bf0904) groups are fixed rules, never chance (operator): leader + mate + deputy unless
-    LeaderAway / DeputyAway, queens with kits, by role in 3s / 2s, BigPrey for a 4; the camp's named cats take part
-    where they stand (Lionstar, Freezesong, Tigerclaw ...). VM: self-test PASS on every rule; RiverClan's camp
-    "1: Lionstar (Leader), your cat (Deputy)" at both group steps.
-  - [x] 2026-10-29 (d38d2db) operator: "some randomness is fine but we need a control lever / override": per-day duty
-    chances (days.ini <Third>Duties), RepeatFactor against repeats, group levers ([Pairs], [Tensions], story steps
-    Pair / Part, LeaderAway / DeputyAway, BigPrey / NoBigPrey). VM self-tests PASS; real camp: Lionstar + your cat
-    fixed, warrior groups by chance, a group of 4 round prey.
-  - [x] 2026-10-29 (ClanLife) levers on the remaining dice: Event:<Name> = 1 / -1 + days.ini Events / NoEvents
-    (VM self-test PASS), ClanPatrol = 1 / -1 (VM: "one leaves this evening - ClanPatrol = 1"), patrol points / hunt
-    spot never the last ones again while there are others; other mods: WaCa.Emit("SetStoryVar", name, value).
-    Untouched (cosmetic): camp idle activities, dialogue line shares, prey spawn spots.
-  - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
-    first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
-    kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
-  - [ ] P3 (operator 2026-10-29: "just leave it and note it down as a ticket for later"): ShadowClan's lake-era
-    meeting place - "the fallen log" for now (Victoria Holmes); look it up in the books later (fan sources also
-    mention a branch / stump).
-  - [ ] P2: the walk-in through a navmesh path (the 3 of 6 that slide along camp rocks) - a pathfinding order first,
-    the straight move as fallback, was written and NOT verified (a rabbit stalk started a fight mid-run); reverted.
-  - [x] 2026-10-29 (Hunting e76beda) hunt-chance label: it sat in the insta-kill paw, shown only for prey low enough
-    to kill outright; now under the prey's level warning within LabelRange (15 m). VM: "95%" under the paw of a
-    rabbit 5 m off (a prey picked with no creature within 25 m - fights mapped), nothing at the horizon. OPEN: the walking
-  cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
-  3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
-  when moved - stage them in place?).
-  - Sharing tongues: 5-6 small circles of 2-3 cats each, spread over the camp.
-  - Sharing prey: groups of 2 or 3, sometimes a group of 4 around a big piece of prey.
-  - Who sits with whom follows like / dislike: two cats with tension (story tensions) never share tongues. The
-    leader only ever with its mate and/or the deputy. Apprentices most likely with apprentices. Mates together, etc.
-  - Needs: (1) each camp cat's identity - rank, clan, name (find it on the walking NPCs: CustomData /
-    narrativeRole / CurrentRank as on AQuestBaseActor; the game's NPC generation manager hands out roles + names);
-    (2) a cat-to-cat relationship table - the game only keeps the PLAYER's bond per story cat
-    (AddPersonalBonding), so ClanLife needs its own (ini: Mates, Tensions, Friends; story beats change it via a
-    step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
-    target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
-    group at a time. Your cat joins a group by its own bonds/rank.
-  - THREE different things, never mix the words (operator 2026-10-28):
-    - the evening in camp = these small groups (eating, sharing tongues);
-    - a CLAN MEETING / ceremony (apprentice / warrior naming, announcements) = the leader on its rock, "speaker on
-      stage", the clan an AUDIENCE in rows / a fan facing it - the current Gather step (an arc facing one point) is
-      the start of that layout, with the leader as the point;
-    - THE GATHERING = all four clans meeting on the island (the game's own line: "the four become one under the silver
-      moon ... where the Great Oak stands", STR_QUEST_FINDLOCATION_ISLAND_01) - gatherings.ini.
-- [x] **P1: clan meetings use the books' words and each clan's own meeting place** - DONE 2026-10-29 (a551f49):
-  {MEETINGPLACE} from duties.ini [MeetingPlace], ThunderClan = the Highledge, Default = the leader's rock; VM card
-  verified. 2026-10-29 (e631a54): RiverClan = the Highstump, WindClan = the Tallrock, ShadowClan = the fallen log
-  (Warriors Wiki / Victoria Holmes); VM: "... gather beneath the Highstump for a Clan meeting!" (RiverClan). (operator 2026-10-28): the
-  summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
-  meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
-  card) say "the Highrock" for EVERY clan - and Highrock is ThunderClan's OLD FOREST spot (operator caught it); this
-  game is the LAKE era (the island + Great Oak), where ThunderClan's leader speaks from the HIGHLEDGE (Twilight:
-  Firestar on the Highledge above the stone hollow - confirmed via a book excerpt). The game's text names no meeting
-  place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
-  ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
-  {MEETINGPLACE} placeholder in cards.
-- [x] 2026-10-29 **The camp's NAMED cats move about** (REBUILT - the costume walkers were rejected: operator "I don't
-  want the unnamed cats to be assigned a name ... they should be the same type of object" -> "remove walkers, move
-  named cats"; then "not all cats should walk, and ideally which walk should change ... the important cats (trainer,
-  medicine cat) stay close to where they sit, idle cycle a bit ... they stop when spoken to"). walkers.lua now: the
-  nameless walking cats hidden (AI stopped, no collision); each third of the day a few named quest cats move, longest
-  -unmoved first - roamers (plain warriors / apprentices / elders) across camp to dens' fronts / fresh-kill / meeting
-  place / another cat's spot and home; homebodies (any cat with a part) to a spot 1.5-3.5 m away and back. The game's
-  walk anim (single-node, then back to the anim BP), swept moves, following the ground (knee-height WorldStatic trace:
-  a level move buried Lionstar in his hillside, a trace from 3 m up put him in a tree). Only cats the game was SEEN
-  drawing take part (hidden != out of range: an online-only giver never draws). Talk = the game's
-  WBP_QuestGiver_Dialogue* screen (NpcRef = the cat): every mover holds, that cat stops; closed -> moving again.
-  Walk:<Name> lever, walkers.ini Never. Public event WalkerMoves(name, path, home|away).
-  VM 2026-10-29: turns + sets off / is there / home logs; walking cats drawn (WasRecentlyRendered) at 3-17 m;
-  conversation with Blackheart mid-trip -> stops, released on close; turns wait for the world (a load-time turn crashed
-  the game twice - fixed and re-booted clean; the walkers-off boot was clean too). A QuestBaseActor:OnDialogSetActive
-  watch was dropped while bisecting (suspected, NOT proven; the dialogue screen covers it).
-  Evening groups: named cats walk to their seats (scene speed, per-cat limit) - VM 9/9 walked in (4-19 m, 13 s),
-  home again on release. ClanLife 551cb7c. SEEN 2026-10-29 (noon, VM): a named cat mid-stride crossing the grass
-  (WalkerWalkTo, ClanLife). Suffix box SEEN on the ceremony's "CHOOSE WARRIOR NAME" popup (top right).
-  FIXED (ClanLife c12f400): a mod reload mid-walk left cats on the walk anim - a turn now idles them where they
-  stand (VM: "3 cat(s) left walking by an earlier run - idle again").
-  **P3: more named camp cats** to make up for the 6 removed walkers (operator: "later add extra camp cats").
-- [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
-  will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
-  the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
-  a DisableRequester on their USwtQuestHideByDistanceComponent); the rest are hidden by a 23 m hide sphere. Quest
-  actors teleported into a ring never drew (body "visible", never rendered) - so Gather now uses the walking camp cats
-  (ASwtAdventureWalkingNPC / BP_WalkingNPC_Character_Base_C, AIC_Wrc_WalkingNPC_Controller): moved in, the game shows
-  them at once and their AI resumes (paused while staged). NEXT: let them walk in instead of a fade-cut -
-  SimpleMoveToLocation did nothing while they were hidden/far (frozen out of range); try once in range, or drive the
-  game's own BT tasks (BTTask_NPCSplineWalking, ASwtQuestWalkingSplineActor, ASwtQuestNPCTargetPoint.WalkingSpline,
-  UQuestObjectiveTeleportNPCGiverTask + ASwtQuestNPCMoveObjectivePoint = the game's own "move a giver" step). Same
-  machinery serves the P1 walk quests (mentor walks you to the den).
 - [ ] **P1 (operator 2026-10-28): leading = MANAGING the clan** (deputy / leader). Each duty third marks the clan's
       meeting place, where you assign the tasks (first cut 2026-10-28: the marker + F there ends the third). Later a
       proper UI: clan cats with stats that make them better at patrols or hunting, you build parties and send them out,
@@ -286,139 +150,6 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       picker to reuse (its popups take 1-2 options; the Defender / Skirmish party screens are its only cat pickers -
       fed natively); a WaCa-built one (runtime text / image widgets, like the controls screen's hint line) is possible.
       Waiting for the rules - inventing them would be the kind of guess the operator rejected for romance.
-- [x] **P1 (operator 2026-10-28): "walk quests" for the story mod** (DONE 2026-11-01: the Lead step, VM-verified end to end) - e.g. promoted to apprentice, the mentor WALKS you
-      to the apprentice den to meet the others: the cat leads (paths over, waits when you fall behind, goes on when you
-      catch up), no quest marker. A scene step on follow.lua (Follow.Travel for the leader + the player's distance).
-      Reuse the game's battle animations in cutscenes (hackles raised, sneaky / subdued poses - operator 2026-10-28).
-      BUILT 2026-11-01 (Clan Life, scene step Lead: <place> @ <who>; example pack MentorTour): the cat comes to your
-      cat first, leads (walkers' mover), waits when you're 6 m behind, goes on within 3.5 m; places Den:<den name> /
-      Zone:<code> / Pile / a cat. VM: come-to-you, lead, wait, go on all seen. NEXT (VM, when the operator isn't
-      playing): the arrival with the no-headway fallback (the 300 s limit ended a slow VM walk early).
-      ARRIVAL SEEN 2026-11-01 11:11 (VM): Otterfeather came to your cat (26 m), led to the Apprentice's den (40.6 m),
-      waited, went on, arrived on its own ('led your cat to Den:Apprentice's den', no fallback), the closing card.
-      Writers: docs/WRITING.md (Clan Life). Drop Z:/WaCa/WaCa-mods-test-20261101n.
-- [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
-  redesign tickets, the "creator finding" note and the old "Creator UI injection").
-  - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
-        CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
-  - [x] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK: every enabled
-        mod's looks/*.ini is discovered (IterateGameDirectories + enabled.txt / mods.txt), id "<Mod>/looks/<File>.ini",
-        offered and added as a grid row with its Fallback / Label (creator.ini AutoLooks; 2357c88). VM: a test mod's
-        TestMitts.ini became DT_Markings row 21 "Test Mitts" next to Colourpoint. Colour indices: still only the
-        palette.ini swatches.
-  - [x] Entries in the native pattern / marking grids (2026-10-27; left: a custom ICON needs an image asset - art). DONE so far: native row cloner (tables.cpp, d61c6fa), and at
-        startup each offered pattern / markings look becomes a row of DT_Patterns / DT_Markings copied from its
-        fallback's row (VM-verified: "WaCa_Colourpoint" added, copied from NewRow_11 = P13_Tabby, 24 rows). Choosing
-        it (panel OnGriIdItemChanged + the grid's current item position) stores look:<Name> and keeps the fallback's
-        index in the cat data. NOT VERIFIED: that the grid lists the extra row, and the choice handler - the VM
-        cannot open the customisation screen (below). Next: operator check; an icon (IconHelper) for Colourpoint.
-        The panel standalone lists 0 items (it fills natively only with a preview cat). For the operator check the
-        log now says, on the first grid move, "grid lists N items (the game's own: 23, WaCa rows added: 1) - WaCa
-        entries listed / NOT listed" - one look at the log answers whether the game fills the grid from the rows.
-        Fixed: a reload no longer renumbers the WaCa entries (the game's rows counted without WaCa_ rows).
-  - RESOLVED 2026-10-25: the "VM crash" on the customisation screen was the TEST HARNESS - it built the main menu by
-    hand on the logos map (M_LogosMap), so the creator never had its level / preview cat. Through the real flow
-    (logos -> splash -> Enter -> L_MainMenu_P) the customisation screen works on the VM.
-  - DONE for PATTERNS (VM, real creator, 2026-10-25): the grids list UWrcGuiManager.ReadyPatterns /
-    ReadyMarkings (fill: 0x1418C2740, found with a hardware watch on the grid's Items), built from the tables' rows -
-    so the cloned WaCa row IS in the game's own grid (ReadyPatterns 0..23, WaCa_Colourpoint = 23; item labels are
-    generic "Pattern N"). Choosing it logged "Pattern entry 23 chosen = Colourpoint (the cat keeps PatternIdx 12)"
-    and rebuilt the preview cats with the WaCa look. Mapping = grid position -> ReadyPatterns index -> row.
-    MARKINGS too: their fill (0x1418C33D0) adds 3 game items AHEAD of the ReadyMarkings loop; mapping = position -
-    (items - indices). VM: the last markings item -> "Markings entry 23 chosen = TestMitts (the cat keeps
-    MarkingIdx 3)". Labels: the WaCa pattern item is relabelled with its look's Label ("Colourpoint" instead of
-    "Pattern 23"; VM read back 20 s later). Markings items have no name text. OPEN: an icon (IconHelper).
-  - The customisation crash on the VM: AGuiScreenBasePreview's setup (0x141915150) takes the first
-    GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
-    there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
-    the screen's GriNav, so the creator always opens in the main menu level.
-  - [x] One checkbox "Customise online cat" - DONE 2026-10-27: checkbox top right on the customisation screen (or
-        F8). On = the preview shows the online cat (no WaCa look: readAppearance -> empty) and the game's controls edit
-        only the game values (a WaCa grid entry gives the online cat its fallback, game shapes don't clear the WaCa
-        look, no hex box). Off = your cat with the WaCa look. Both kept across toggles. VM, real F8: ON -> preview
-        rebuilt bare, WaCa pattern chosen -> "online cat gets its fallback", F8 -> off -> WaCa look back.
-  - [x] Custom colours - DONE 2026-10-27 (hex entry): the game's colour pickers get a hex box (top right) showing
-        the selected swatch's colour; #RRGGBB + Enter puts that exact colour in the look (the save keeps the selected
-        game colour); picking a swatch afterwards drops it (last choice wins). VM, real keys: box shown (#FBD5A7),
-        #3366CC typed -> cats rebuilt, swatch 12 picked -> typed colour dropped. FINDING: the pickers are a FIXED grid
-        (0x1418E90C0: 4 + flag rows x 5 - the flag most likely the DLC), nothing scrolls, so palette.ini's extra
-        swatches never showed (README corrected); more rows would expose the DLC row to non-owners - not done.
-        A colour WHEEL instead of the box = a UX extra, if wanted.
-  - [x] Then: drop the WaCa side panel - DONE 2026-10-27: the panel only offers what the grids can't (pattern packs,
-        whole-look presets; game shapes across rows with creator.ini PanelShapes = 1); with the default config
-        there is no panel (VM: "no WaCa panel (the game's grids offer every WaCa choice)").
-- [x] P1 mouse look feel (operator) - implemented 2026-10-25/27 (yaw + pitch + camera-relative movement); feel = operator check: the camera clamps the mouse axis to the stick range and runs it through the stick
-  curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
-  Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
-  controller's WrcInputComponent has 4 at +0xE0 incl. Player_Camera_Up / _Right, value-only - nothing bound).
-  FOUND the consumer (WaCaNative_DevWatchAxis, a hardware watchpoint on the AxisValue): written by PlayerInput at
-  0x1448DC259, read via UInputComponent::GetAxisValue (leaf 0x14408E6xx) from 0x14126C0E0 (returns to 0x14126C16B):
-  abs + dead-zone compare + scale multiply (a sibling at 0x14126C1E0 reads a threshold at [rcx+0x748]). Next: name
-  those constants / the caller chain, then detour 0x14126C0E0 for mouse input (raw delta, no dead zone / clamp).
-  TRACED (WaCaNative_DevTraceCommandAxis): 0x14126C0E0 = dead zone helper; 0x141828B30 = per-command getter
-  (vtable +0x1000; invert flags at this+0x8B3 / +0x8B4). Yaw: 0x1417A0B60 turn = sum over cam(63) / move(61) of
-  sign * 2 * |v|^[this+0x1D4] (powf 0x147D46ED7), clamped to [-2, 2]; its caller 0x1417A61B0 (camera update) adds
-  turn * [this+0x1CC] (turn speed) * dt to the yaw double at [owner+0x4E8]+0x3A0. Pitch: getter vtable +0x1008
-  (cmd 62), clamped, separate path. 0x1417A6710 only resets an idle timer (+0x220) on camera input.
-  PLAN: MouseX / MouseY out of Player_Camera_* into their own value-only bindings (standard UE input, keybind-menu
-  friendly); detour the camera update 0x1417A61B0 (string / call-graph anchors via the relocation framework) and
-  after it add delta * sensitivity straight to yaw (+ pitch on its path) - no dead zone, curve, clamp or dt.
-  IMPLEMENTED (yaw) in camera.cpp: the mouse (GetInputMouseDelta, standard UE MouseX) goes into the game's own
-  turn value as degrees / (turn speed * dt) - turn detour on the update's camera-right callee, anchors "LookAtYaw" +
-  body checks. Direct writes to CameraActor+0x3A0 do NOT work (only honoured while the camera sees input; the
-  camera tick clamps pitch +-89.9, yaw free, then smooths and recentres behind the cat when idle). VM-proven: the
-  turn value carries the mouse (delta 37.8 -> 75.6 deg); the VIEW change could not be measured reliably on the VM
-  (CameraCachePrivate reads flaky at 0.6 fps) -> OPERATOR CHECK. Mouse look on/off follows the menu cursor.
-  PITCH done too: the raw axis getter (vtable +0x1008, hooked from the live vtable, anchored: the update calls that
-  slot + the getter reads the invert flag) answers sign(total) and the pitch speed becomes |total| / dt for that
-  frame (restored after) - stick + mouse degrees exactly, inside the game's pitch limits. VM: delta 5.6 -> 8.4 deg,
-  game alive. MouseX / MouseY are out of Player_Camera_* (photo mode keeps them). Left: [Mouse] GameplayCapture = 3
-  (drag to look) isn't honoured by the native path; the on-screen feel = operator check.
-- [x] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
-  while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
-  logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
-  2026-10-27 (operator): a LEFT CLICK advances dialogue too ([DialogueKeyAliases] LeftMouseButton = Enter) - except while
-  answer choices show (QuestGiverWidget mcButton1..4 visible): the click picks the choice itself.
-  2026-10-27: a VM real-conversation attempt failed to OPEN one - teleported 150 / walked in from 400 units to the
-  nearest quest giver (BP_Quest_Giver_Deputy_C), held E: QuestPlayerController.OnCanInteract never fired, no
-  QuestGiverWidget. At 0.3 fps the walk barely moves and that NPC may have nothing to say - an operator press in
-  play is the cheap check.
-  2026-10-27 (later): walked in for real - 300 units in front of the deputy, then held a movement key: the cat walks
-  (~30 units / wall s at 0.3 fps) but camera-relative, so W led away (1429) and S came to 203 then drifted to 607;
-  E there: no conversation. Steering the VM cat precisely needs the camera's actual yaw (the game camera ignores
-  SetControlRotation) - and that NPC may have nothing to say. Kept for the operator's one press in play (Space AND
-  now a left click, operator 2026-10-27).
-  DONE 2026-10-27 - VERIFIED IN A REAL CONVERSATION on the VM: started the game's way (the sequencer manager's
-  PlaySequenceDialogue with a tag from its own DT_QuestSequenceDialogues - "Unique2_RiverClan_TheVengefulRogue" with
-  the nearest NPC; WBP_QuestGiver_Dialogue2_C). Space -> "dialogue: SpaceBar -> Enter", the line advanced ("The walls
-  are closing in ..." -> "They've abandoned you ..."); a left click -> "LeftMouseButton -> Enter", advanced the same.
-  Found on the way: a plain line shows answer button 1 too, so "choices up" is now "the game's next prompt
-  (mcGuiNext) not shown" (visible up the parent chain); and a POSTED click never raised KeyDown on the VM until the
-  hook was checked - it does (0x201 seen); the earlier misses were the choices rule.
-- [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
-  (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
-  layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
-  them offline - the save hook too (2026-10-27: its thunk found in the exe's native function tables, the one "Save" entry
-  whose thunk holds the call layout). 5 of 5 + 6 cross-checks
-  pass on the current exe. Original ticket: every hook target found by several independent means
-  (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
-  logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
-  (string -> referencing code -> unwind-table function start -> prologue check) for the look hooks.
-  DONE: tools/check_hooks.py <exe> - reads the targets from the native sources, resolves them offline the same way
-  (4 of 4 unique on the current exe, same addresses as the runtime). Left: a second independent anchor per target
-  (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
-  DONE too: scan::Reaches - each look primitive must be reachable from the full build within 2 calls (chained
-  unwind bodies included) or it is NOT hooked; same check in the tool. VM: 3 of 3 "confirmed" at runtime.
-- [x] P2 a click skips the splash - VERIFIED 2026-10-27 on the REAL splash: a click -> "click on the splash - pressing
-  Enter" -> the main menu. menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
-  with the game's own WBP_GuiScreenSplash put on screen: the click logged "click on the splash - pressing Enter".
-  Left: the operator sees the real splash continue.
-- [x] Per-save sidecar: the write path end to end. FOUND + FIXED a real bug: the game saves through the native
-  USwtSaveManager::Save (static; 111 C++ call sites), never through ProcessEvent - the Lua RegisterHook on
-  SwtSaveManager:Save never fired, so in-game changes never reached the sidecar. saves.cpp hooks the native method
-  (anchors: the Save UFunction's thunk -> its call after setne r8b) and raises GameSaved(nil, context) for every
-  save; main.lua writes the sidecar on it. VM: GameSaved fired for SelectYourCat_OnFinishScreen /
-  SavePlayerExperience / SavePlayerLevel / SaveStringData, game alive.
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
   - mouse look / camera with a real mouse; the menu cursor with a real mouse
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
@@ -435,36 +166,14 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
     while you hold the mouse still (the game's own behaviour)
 
 ## P0: Foundation (nothing else can start until this works)
-- [x] **Engine version + toolchain.** DONE: UE 5.7.4 (PROJECT_PLAN.md; AssetDump EGame GAME_UE5_7, UE4SS 3.0.1). Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
-      wrapped (`.bind` section). Hints: pak v12, utoc v8, so 5.4 or later. Get FModel to browse the paks, plus a
-      `.usmap` mappings file (UE4SS dumper or community). Record versions + download sources in PROJECT_PLAN.md.
-- [x] **Asset map.** DONE 2026-10-27: docs/ASSET_MAP.md (every listed area; the roster lives in the save - NPCData.NarrativeRoles). Extract (FModel export, into gitignored `extracted/`) and map how these work:
-      - the clan-cat generator
-      - dialogue / quest data (DataTables, string tables, `.locres`)
-      - the day structure
-      - hunting / prey AI
-      - the party system
-      - rank ceremonies
-      - input bindings
-      - graphics settings
-      - save data (where the clan roster lives)
-      DRAFT PLAN (2026-10-27, for the operator to adjust):
-      - Script the FModel-style export with tools/AssetDump for the listed asset folders into extracted/ (gitignored)
-        and write a one-page map (what each blueprint / table controls) - no operator input needed, just time.
 
       Write the map into PROJECT_PLAN.md.
-- [x] **UE4SS injection.** DONE: UE4SS 3.0.1 runs (Lua + the WaCaNative C++ mod), object + header dumps in dumps/. Get UE4SS running: check SteamStub / EOS / any anti-cheat; the game uses the EOS SDK for its
-      online content. Live object dump + C++ header dump for a skeleton project. Lua hello-world hook on a gameplay
-      function.
 - [ ] **Mod pipeline.** A skeleton UE project in the matching engine version (dummy classes from the header dump). Cook a
       test Blueprint mod and load it from a `~mods` pak (IoStore: retoc / ZenTools for repacking). Prove ONE change
       end to end, e.g. a string edit.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
       - Install the matching UE version, generate dummy C++ classes from CXXHeaderDump, cook a test pak with one new
         Niagara (rain) and load it via UE4SS's pak loading - unlocks rain + any custom content.
-- [x] **Deploy rule.** DONE: the release zip installs / uninstalls itself (Install.bat / Uninstall.bat); the Z:
-      install is ours to modify (operator), backups as *.vmtest-backup / before overwriting. Installing a mod writes into the game folder on Z:. Agree with the operator where mods are
-      installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
 
 ## P1: MVP mechanics
 - [ ] **THE CLAN LOOP** (operator 2026-10-28, "the most important thing I want to see"): wake up -> the deputy assigns
@@ -548,12 +257,6 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       - offline (lupa, real events.lua, mocked world): morning hunt -> out -> 2 catches -> back -> meeting -> noon free
         -> out / back -> evening free -> share tongues + bond -> night watch -> away / back -> cutscene -> verdict
         "2 done +5" -> day 2 morning. VM: see below.
-- [x] **Time follows effort, not the wall clock** (DONE - built as part of 15) (operator 2026-10-28: "bind time directly to cat exhaustion based on
-      the current activity's time slot (morning / afternoon / night)"). Operator: "a true time of day cannot really be
-      wired UNTIL we have the day/night clan sim" -> BUILT AS PART OF 15 (2026-10-28, see there): the clan's day
-      drives the clock by the cat's effort per slot. Refined by the operator the same day: exhaustion is NOT the
-      clock - it's a resource that only drops with things DONE (pounces, fights); walking moves the time but never
-      tires (see 4).
 - [~] **Procedural names: no doubled prefix / suffix** (done, operator check open) (operator 2026-10-25: "Blazeblaze"). The NPC name generator
       (USwtAdventureNPCGenerationManager / UWrcNPCGenerationManager; tables PreffixName.csv / SuffixName.csv +
       the filter tables) must never pick a suffix that repeats the prefix (Blaze + blaze, Fern + fern ...). First tweak
@@ -810,13 +513,6 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       fishing on: 7 spots armed, no crash.
       Simpler chance model that keeps the game's own catch: on re-arm (5 s still) roll the bite - a hit re-enables
       the interaction, a miss keeps the fish away another round (no native reward blocking needed).
-- [x] **Sight during the pounce walk** (operator 2026-10-30, "ideally also sight" - if a proximity sense doesn't make
-      prey uncatchable) - BUILT + VM-tested 2026-10-30, OFF by default: WaCa Core runs the game's own detection pass
-      (WaCaNative_HuntDetect - the function UBTService_DetectionTask's tick calls) on the hunted prey through the walk.
-      RESULT: by the game's own rules a WALKING cat 3 m off is noticed from any side (types 7 and 5, from behind and both
-      sides: 6 of 6 noticed) - the very proximity sense the operator feared; that's why the game turns detection off
-      for the walk. Kept as [Prey] SightDuringPounce = 1 (experimental). A sight that stays fair would need our own cone
-      rule (the game's view cone without its proximity) - operator's call.
 - [ ] **9. Hunting rework.** On detection, small prey FLEES instead of charging you; you can still catch it if you're
       fast enough. No more prey combat.
       SPEC (operator 2026-10-27): the game's instakill (the icon) is too easy.
@@ -1296,93 +992,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       fix (incl. the stricter hold + states mutex of 06:30); at the old ~2 in 15 that would happen ~6% of the time by
       luck. Also: every montage call now null-safe (WaCa.PlayMontage / StopMontage). Drop ...20261101j.
       Drop Z:/WaCa/WaCa-mods-test-20261101b.
-- [x] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
-      DONE 2026-11-01: speed matching + fading out of view both built and VM-verified (see below).
-      your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
-      make their way over to the island. A Lua API (follow.lua): a group follows a leader (the player or any cat) at
-      spread-out distances, matching walk / run, holding back while the leader sneaks; or travels to a place as a
-      group (in formation, the slow ones caught up). Started from the patrol companions (duties.lua: AI MoveToActor,
-      the cat's own brain paused).
-      BUILT 2026-10-28 (follow.lua): Follow.Group(cats, leader, opts) - staggered MoveToActor, checked at the leader's
-      FOOTSTEPS (every cat's steps are events - no ticking), holds back while the leader crouches (the game's
-      OnExplorationCrouch, bValue handed over), catches up after; Follow.Travel(cats, place, opts, onArrive) -
-      formation rings around the place, arrival checked at the travellers' steps; Follow.Release; Follow.Nearest.
-      The patrol companions and patrols.lua use it. NOT yet seen on the VM (the companions' earlier MoveToActor
-      version joined, the follow itself unconfirmed). OPEN: speed matching (run with the leader), fading out of view.
-      STATUS 2026-10-31: the AI follow can't work on this map (field / camp cats have no movement component - AI moves
-      fail, VM 2026-10-30), so the walkers' mover does it all, VM-verified: your party runs with you (walk / trot / run
-      matched, holds while you sneak, catches up - the speed matching), escorts walk with you (patrol companions,
-      TemporaryParty, the Gathering party), patrols and the Gathering party travel as a group to places and home. Left
-      open: fading cats out when far from view (cosmetic, not started).
-      DONE 2026-10-31 (VM, walkers.ini [Walkers] FadeAt 60 m): a walker that far from your cat and not drawn lately is
-      hidden on its way and stepped without ground checks; shown again - set on the ground - within 0.8 x FadeAt or
-      when it stops. VM: a 3-cat patrol hid past 60 m, showed at its stops (+0 cm), hid, and on the home leg showed at
-      48 m set down 1.6-1.8 m (the straight line had drifted above the slope); all home. Not a real opacity fade (the
-      cats are out of sight when it happens). Drop Z:/WaCa/WaCa-mods-test-20261031zb.
-- [x] **NPC patrols heading out together** (operator 2026-10-28; DONE 2026-11-01): when the deputy assigns patrols, see them leave
-      together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
-      together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
-      Case = Patrol lines meanwhile. OPEN: fade them out when not in view (future); talking to a patrol stops it a
-      moment (future).
-      BOTH DONE (checked 2026-11-01): the clan's patrols walk with the walkers' mover (Walkers.Patrol; the AI-walk
-      path is only the fallback) - far + unseen = hidden on its way (VM: NpcPatrol 3 -> Blackwing, Pinefur, Paletail
-      out, 'Pinefur is far out of view - hidden on its way'), meeting one stops it while each cat speaks (PatrolMeet).
-- [x] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
-      DONE 2026-11-01: hunters (real prey), patrols, the medicine cat's herbs - all VM-verified.
-      hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
-      ruin its hunt.
-      BUILT 2026-10-31 (walkers.lua [Jobs]): hunters out at a morning / afternoon to the game's prey places 30-90 m
-      from camp, a stay, home; near one while it hunts -> a line (ShowLine). VM: Blacktail out 66 m, its line on screen,
-      home after. Not yet: the hunter actually catching prey (a pounce animation at the spot) - optional per the spec.
-      DONE 2026-10-31 (VM): at its spot the hunter hunts - sniffs, stalks, leaps (the game's montages, a short lunge)
-      and catches by chance ([Jobs] CatchChance 40 / TryEvery 25 s; event NpcHuntTry(name, caught)). VM: Pineblaze 5
-      tries, 4 caught; Blackdash's mesh read live: AM_WC_Hunting_Leap then AM_Interact_Bite_1. Cutscenes poses Stalk /
-      Pounce added. Test drop Z:/WaCa/WaCa-mods-test-20261031n. (Real prey to catch at the spot: not spawned - a
-      visual hunt.)
-      REAL PREY 2026-10-31 (VM): the hunter goes for the game's prey near its spot (15 m) - faces it, leaps onto it;
-      caught -> WaCa Hunting's PreyTaken (gone, as the player's catch), missed -> PreyScare (bolts, gone); none near ->
-      acted out. VM: Willowstorm caught one ('caught by Willowstorm'), Sagefur's missed prey ran off. Drop
-      Z:/WaCa/WaCa-mods-test-20261031o.
-      MEDICINE CAT 2026-11-01 (VM, [Jobs] Herbs = 1): each morning the medicine cat walks to one of the game's herb /
-      moss pickups 20-90 m out, sniffs + digs, comes home (NpcGatherHerbs / NpcHerbs). VM: Freezesong 75 m out, gathered,
-      home again. Drop Z:/WaCa/WaCa-mods-test-20261101i.
-- [x] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
-      DONE 2026-11-01: the meet, each cat's line, VM-verified; talking to each cat = the game's conversation (operator's play).
-      you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
-      this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
-      Patrol / Leader, the daily grab bag); the stop-and-talk isn't.
-      BUILT 2026-10-31: the clan's patrols walk with the walkers' mover now (camp cats, border points, home); meet one
-      -> it stops, its leader says a [PatrolMeet] line (subtitle). VM: Owlleaf's patrol stopped and spoke, walked on.
-      Talking to each cat (the game's conversation) stays the operator's check - the VM opens no conversations.
-      EACH CAT SPEAKS 2026-10-31 (VM): on a meet every patrol cat says a line in turn (3 s apart): the leader's from
-      [PatrolMeet], the others' from [PatrolMeet.Member], a cat's own [PatrolMeet.<Name>] first, by who leads
-      [PatrolMeet.LedBy.<Name>]; {LEADER}; no line twice in one meet. VM: Maplefang, Cricketdash, Slatefeather each spoke.
-      CRASH FIXED on the way: the walkers' ground check called GetMaterial(0):GetFName() on a hit with no material -
-      the game died (null 0x18 in UE4SS) as a patrol set off. New WaCa.HitMaterialName (Core) used in walkers, stage,
-      wading (the wading one ran every tick - a likely cause of the 16:24 crash too). Drop Z:/WaCa/WaCa-mods-test-20261031za.
-- [x] **Dialogue by days + the daily grab bag** (operator 2026-10-28: "all dialog should be able to be defined like
-      this, e.g. Queen 1 between Day 1 and 6 picks a random dialog to play each day out of 3"; "our filler pool must be
-      able to change for given cats on given days"). BUILT (lines.lua): [Dialogue.<Name>] Who / Days / Require / Case /
-      Leader / Line1..N - one pick per day by a grab bag (no repeat until all came; the last two of a bag wait out the
-      next refill), kept with the save; random pools [Lines.<Role>.<Tag>] with Days / Require too; the game's own line
-      comes back when nothing fits. Granularity = the game's filler keys: per role (named story cats have their own).
-      Offline: A B C D -> D B A C | D B C A | B; queen days 1-5 pool, day 6 the story line, the kit's pool gone after
-      day 3. Lua: Lines.Pick(name, lines, day).
-- [x] **Overlapping mods: content from every mod** (operator 2026-10-28: "a modding framework ... if two mods have to
-      overwrite the same ini, that's bad"). BUILT (WaCa.ReadContent + WaCa.EnabledMods): the clan configs (duties,
-      clanevents, days, events, gatherings, lines, patrols) are WaCaModKit's file + every enabled mod's
-      content/<name>.ini in load order: new sections added; shared sections get numbered keys APPENDED (two mods add
-      beats to the same day / lines to the same dialogue), plain keys overridden by the later mod (logged); Off = 1
-      turns another mod's section off.
-- [x] **Explicit overrides instead of load order** (operator 2026-10-28: "load order as core design choice?" - no):
-      WaCa.ReadContent today lets the later mod win a plain key. Make it explicit and order-independent: ids
-      namespaced (<Mod>/<Section>); a mod overrides another's section only with Replaces = <Mod>/<Section>; two mods
-      setting the same plain key without that = a reported CONFLICT (log + an in-game notice), not a silent winner.
-      Load order only as the last tie-breaker. Appended steps stay per owning mod (see story packs).
-      DONE 2026-11-01 (WaCa Core ReadContent; offline + VM): Replaces = <Mod>/<Section> replaces whole; a plain key two
-      mods set differently without it = CONFLICT (logged with both mods + values, WaCa.ContentConflicts, a one-time
-      notice in game); load order only breaks the tie; numbered keys append, Off = 1 allowed. VM: the shipped packs
-      raise none; a test conflict -> the log line + the notice. Drop Z:/WaCa/WaCa-mods-test-20261101l.
 - [ ] **Mod stories (story packs)** (operator 2026-10-28): a mod can define its own story, like picking a clan's.
       - a pack declares itself (name, clan, required rank range, entry) and owns its days / beats / dialogue / quests;
         shown in the quest list as a story quest;
@@ -1471,50 +1080,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       after (VM).
       STILL OPEN: (c) the VM camera sits 1.1 m behind the cat - check the formation on the operator's camera (Distance /
       Side in walkers.ini); (d) PartySetup by "latest chapter key" - check once a save has a second chapter.
-- [x] **The party = who you're out with** (operator 2026-10-28; DONE 2026-11-01 for patrols, operator check left): the combat party should be the cats you're hunting /
-      patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
-      RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
-      narrative role: TheRegretfulWarrior, RiverClanDeputy ...); the game has a developer switch
-      USwtAdventureCheatsManager.ForcedParty (TArray<FAdventureForcedPartyStruct>: CharacterNarrativeRole + Attacks)
-      that likely sets the fight's party - try setting it from the task (patrol / hunt companions, the mentor) before
-      a fight and clearing it after. Needs: companions picked from story cats (roles) rather than generic clanmates,
-      or a mapping; VM test whether ForcedParty is honoured outside a dev build.
-      TESTED 2026-11-01 (VM): ForcedParty is NOT honoured in the shipped game - written from Lua (read back: 1 entry,
-      role 29 TheRegretfulWarrior), then a sparring fight (the game's own combat box, TrainingGrounds): the party on
-      the fight screen was the same as without it (Nightheart, Dapplepatch, Rippleface - both screenshots). The
-      fight's party = the save's party (QuestProgression PartySetup, the PARTY page). Next route, if wanted: the game's
-      own party change (the PARTY page's set function) before a fight and back after - research.
-      On the way (all fixed, VM): four crashes 'reading 0x10' were (a) UE4SS's game-thread timers firing while mods
-      still loaded (now held - WaCa.lua's timer guard; 5/5 boots clean after 3 of 4 crashed) and (b) my probe reading
-      a null combat MainCharacter; WaCa.CustomData made the look-data reads null-safe on non-cat characters.
-      PARTY CHANGE RESEARCH (2026-11-01, parked - a native RE project): the party is set by quest tasks -
-      UQuestObjectiveSavePartyTask (PartyRoles / <Clan>PartyRoles: TMap<ECharacterRank, {Setup: [narrative roles],
-      OptionAlly}>, bClearOnQuestRemoved); 126 loaded, inside the quests' objectives (RankUp_0 [rank 2: RiverClanKit],
-      combat milestones [rank 4: RiverClanKit + RiverClanWarriorMoveLearn] ...). The maps are reflected (editable from
-      Lua); the live party is native (no reflected field). The task's vtable 0x149a9f440 overrides only +0x2b8
-      (0x1416ee040 - empties its map: cleanup); the party is applied by the owning objective's native code. NEXT if
-      wanted: trace the objective's start (where it reads its SavePartyTask) -> the party store, then a WaCaNative call.
-      MORE (2026-11-01, VM): the pause PARTY tab only shows the party (no change in the game). The save keeps it as
-      QuestProgression.Chapter00.PartySetup [{NarrativeRole, CharacterTag}] (WrcGame.json; RiverClanKit +
-      RiverClanWarriorSideRace = the fight's Nightheart / Rippleface), read by the save's JSON code (exe 0x1416A555B,
-      'PartySetup' UTF-16 at 0x149AE8298). AQuestPlayerController.Party (+0x838) is empty. A scan of 2614 objects
-      (managers, save, quest components, one level into their arrays) found no live copy of that role list - it lives
-      in native quest data. Routes: (a) trace the JSON reader at 0x1416A555B to its destination (then write it
-      natively), (b) hook the combat director's party build (PlayerParty +0x460 / CharsPlayerPartyRef +0x4A0) at
-      fight start, (c) edit PartySetup in the save between sessions (tools/save_edit.py - not live). Parked.
-      BUILT 2026-11-01 (VM): the story fight's director keeps the party as roles at +0x788, filled by its virtual
-      +0x9E0 - hooked there (Core party.cpp, WaCa.SetCombatParty / Party|<roles>): the list is replaced, the game
-      builds the cats its own way. Spar with Party|29 -> Dapplepatch + TOADFROST. Clan Life: a patrol's story cats
-      (patrols may now take the story cats the save keeps combat stats for - Party.Stats - first) fight beside you
-      till the patrol ends: forced patrol next to Toadfrost -> Toadfrost + Otterfeather joined -> that fight party.
-      Walkers now wait during spars too (a live director = a fight). HUNTS too: [Hunt] Companions (default 0 - a
-      hunting patrol; VM with 2: Toadfrost + Otterfeather -> that party). Training = the spar itself (excluded). NOT YET:
-      generic clanmates (no story role - the game's party fills in). OPERATOR: hunting patrols on by default?
-      Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
-      LIBRARY: scene step Party: <story cats> (names anywhere in the world, E:<role>; none = the game's), kept with the
-      save (VM: example FightBeside -> spar with Toadfrost; saved, next session restored). Drop ...20261101t.
-      MORE: Party: S:<role> follows the role's [Cast] cat (VM: S:herbalist = Mossfeather fought beside you; S:loner,
-      a brought-in Rogue, refused with the reason). Writers: [StoryCheck] Watch = 1 reloads on an edited story file (VM).
 - [ ] **Roles and the cast** (operator 2026-10-28, short / medium term goal):
       - SHORT: mods can add new cat roles. ROLES ARE COMPOUND KEYS (operator 2026-10-28, instead of patching the enum -
         which IS possible: UE4SS UEnum::InsertIntoNames, the role a uint8 up to 254; dropped as the riskier path):
@@ -1731,39 +1296,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       HelloWaCa's content/text.ini merged + its sidecar written; Core alone (see below).
       OPEN: (1) the DLL under the NEXUS UE4SS download (same commit 8333063; ours is a from-source build) - needs the
       operator's download; (2) MothColorPicker + Looks together; (3) Nexus link TODOs in NEXUS.md once pages exist.
-- [x] **Murmurings: what the clan thinks, every day** (DONE 2026-10-31, VM) (operator 2026-10-28, a note for later - side dialogue): replace
-      the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
-      other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
-      clan is split on a decision. Builds on lines.lua (filler pools) + the story variables (Gatherings) + recent
-      events (duties' verdicts, the story's beats).
-      BUILT 2026-10-31 (murmurs.lua, lines.ini [Murmurs] / [Murmur.<Name>] Require / Who / Line*): a camp cat you pass
-      murmurs (subtitle) once a day by chance, lines from every matching set (Standing, Pile, Season, Weather,
-      LeaderFavour, Gathering.Today ...), the daily grab bag. VM: two cats, matching sets, lines on screen. The talk-screen
-      filler (lines.lua pools) can take the same sets later.
-- [x] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
-      DONE 2026-11-01: gather / water / bedding + the report key (real F) VM-verified.
-      kinds, drawn by [Tasks] weights / set by the story):
-      - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den) -
-        its turn-in: talk to the medicine cat ([Task.<Kind>] TurnIn = MedicineCat - supported);
-      - clear out the old bedding moss (from the dens, out of camp);
-      - water moss: soak moss in the lake / stream and bring it to cats too weak to move so they can drink - more
-        often in greenleaf (summer), the season from weather.lua. Needs a "weak / sick cat" (an elder, the medicine
-        den) and a carried-item state (no carry mechanic in the game yet - research: quest pickup items,
-        BP_Objective_Base pickups).
-      BUILT 2026-10-31 - GATHER (moss / herbs for the medicine cat): duties.lua task kind Gather, [Gather] Count /
-      Reach / MinDistance / MaxRank (Apprentice), [Tasks] Gather weight; the game's own pickups (moss containers where
-      the world has them - none loaded on the VM save - else healing herbs / catnip), marked, gathered by reaching
-      them, turned in to the MedicineCat. VM: assigned, 3 spots, 3/3, 'turn it in: report to the medicine cat'.
-      Operator check: the report key next to the medicine cat (the VM harness's keys have no key name). Still open:
-      BUILT 2026-10-31 - WATER: soak moss at the nearest water (fishing spots), bring it to the elders (report:
-      Elder - Sharpfoot on the VM save), x3 in greenleaf; the carrying is the task's own state, no carry mechanic needed.
-      VM: soaked -> 'report to the elder'. All three apprentice duties built; operator check: the report key in play.
-      BUILT 2026-10-31 - BEDDING: into one of the clan's dens (its inside point), the old moss to a marked spot out of
-      camp, report to the deputy. VM: Medicine Cat's den -> taken -> thrown out -> report.
-      REPORT KEY SEEN 2026-11-01 (VM, a REAL F key - vm_input key 46 carries the key name the harness's HoldKey lacks):
-      water soaked -> next to the elder Sharpfoot, F -> 'water for the elders turned in (Elder)' -> the evening began
-      with its clan event. The medicine cat / deputy turn-ins use the same report path (role by name). The log now
-      names the cat (the actor's class misled: Sharpfoot is a BP_Quest_Giver_Deputy).
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
@@ -1919,11 +1451,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       odd eyes too). Colours outside the palette = a new palette texture (art -> the pak pipeline). So eye colour is
       covered within the game's palette; open here: the colour wheel UI (editor), the colourpoint mask pack, the
       operator's look.
-- [x] **18. More graphics options.** DONE 2026-10-27: config/graphics.ini - [Scalability] the engine's groups (sg.*),
-      [CVars] any console variable (motion blur, DoF, fringe, screen %, t.MaxFPS listed), applied through
-      ExecuteConsoleCommand at start and after the game's options popup closes. VM: read back sg.ShadowQuality 0,
-      r.MotionBlurQuality 0, r.ScreenPercentage 50 (the VM's own setting would give 25). An in-game menu for them =
-      with the keybind menu (19a).
 
 - [ ] **26. Prey scent / visual trails** (operator 2026-10-25: "sick for future work", like The Isle). Prey leaves
       trails - scent you detect (a sense / sniff mode) and visual signs (tracks, disturbed undergrowth) - that you can
@@ -1965,78 +1492,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
-- [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
-      camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
-      the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
-      cats to the screen and count foliage instances on the camera -> head line (an overlap / instanced-mesh query), then
-      turn the shot. Data in hand: scratchpad cam_probe.lua.
-      MEASURED (2026-11-02, VM 960x540): the blockers are a big tree's roots + LEAVES round the camp's river edge.
-      Every physics query says clear (traces on Visibility / Camera, instanced-foliage overlaps: 0, plain meshes'
-      bounds: only our rain cylinders). A scene-DEPTH capture from the camera pose works (cm along the view, read a
-      frame later - scratchpad depth_probe.lua) but the leaves don't write depth (a 7x7 window read 100% seen while
-      Lionstar was half hidden) - so it would only catch opaque blockers; built + REVERTED (never seen to trigger).
-      What's left: an image check (a colour capture of the cat alone vs the full scene) or simply prefer shot
-      directions away from big trees. Open, low priority - the shots are valid, just ugly in that one spot.
-      IMAGE CHECK TRIED (2026-11-02, VM, scratchpad color_probe.lua): three HDR scene captures from the camera pose in
-      one frame - the scene, the cat alone (show-only list), the sky alone (empty list); a cat pixel = cat-alone !=
-      sky-alone, seen = scene ~ cat-alone. Result: the cat-alone capture equals the sky everywhere, even in a Two shot
-      with Lionstar plainly on screen -> the cats don't render into scene captures (which also explains the depth
-      check's '100% seen'), or the probe took Lionstar's parked home copy (two exist). Captures queue and render
-      together at frame end (hiding a cat between two captures of one frame hid it in both). NEXT if picked up: take
-      the cast actor from Cutscenes (not a name search), and check a cat's mesh in a capture's show-only list on open
-      ground first; if cats never render in captures, this route is closed.
-      DONE (same night): the PLAYER's own cat (unambiguous, on screen, open camp ground) in a show-only capture - with
-      its attached actors (none) - the cat-alone image equals the sky-alone one except sky noise along the top row.
-      The cats do NOT render into scene captures (all four capture checks: depth, difference, show-only, the player).
-      CAPTURE ROUTE CLOSED. What remains is a placement rule (keep portrait / two shots out of big trees' crowns -
-      e.g. a ring of traces at head height around the camera spot catching trunks/roots as a proxy for the leaves
-      above them), to be judged by the operator's eyes at a real resolution. Low priority.
-      RING RULE TRIED + REVERTED (2026-11-02): enclosure by 8 short traces (portrait spot 7/12 hit, open camp 0)
-      counted as half-blocked - the Portrait turned 70 deg instead of -35 and a trunk filled the frame (Lionstar
-      gone). The scene itself stands inside the tree's root zone: no camera direction round it is good. The fix
-      belongs to the STAGING (Place = Here choosing a spot whose surroundings aren't enclosed - the same ring test on
-      the scene's middle), not the camera. Next if picked up: score Place = Here candidates by enclosure (cheap, the
-      measurement is in hand) and compare the frames at 960x540.
-      DONE (2026-11-02, VM 960x540): Place = Here scores its spots by enclosure (EnclosedAt) - LonerVisit from the same
-      spot was restaged 90 deg and the Lionstar portrait was clear and large. WaCa-Cutscenes 'Place = Here keeps scenes...'.
-- [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
-      party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
-      shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
-      Also seen: two Toadfrost actors exist (one 140 m off, never drawn) - Cast takes the nearest; harmless so far.
-      LIBRARY EXERCISE same day: FightBeside cutscene + the new Wait beat (Cutscenes) - VM ok.
-      FIXED: Cutscenes sends the cast's paths with CutsceneStarted; Clan Life's walkers hide the party cats not in it for
-      the scene (VM: '2 party cat(s) out of the cutscene's shots', the frame clear of them).
-- [x] **P3: a cutscene camera behind scenery the trace can't see** (CLOSED 2026-11-01 - NOT A BUG, misread screenshots; 2026-11-01, FightBeside at the camp's river
-      edge): the Two shot logged no 'blocked' (its sight trace on the Camera channel found the way clear) while the
-      frame showed a rock face and no cats - likely a rock without collision on that channel. Next: trace on
-      Visibility too / against the rendered depth, or check the cats' WasRecentlyRendered after the move and try the
-      next direction when they aren't. Needs a closer look at a real resolution (0.5 fps / 480x270 is too coarse).
-      MORE (same day, VM): on open camp ground the FightBeside shots frame both cats (Two, Portrait with TailUp) - the
-      bad frames are the RIVER EDGE: Place = Here stages the scene where your cat stands, and there the Two shot went
-      10 m out over the water (the frame a flat pale blue - the camera at / under the water's surface; water has no
-      collision for the sight trace). Built meanwhile: [Camera] SeenCheck (turns a shot whose cats weren't rendered) -
-      not seen firing yet. Next: keep the camera above the water surface (Hunting's wading finds the planes) or fit
-      the stage away from water.
-      TRIED (same day, VM, timed shots): WaterClear (camera held 60 cm above water - never triggered) and SeenCheck
-      (never triggered: WasRecentlyRendered stays true for a cat behind roots / from the previous shot). At the river
-      edge (-46706 6269, facing -90) the Two shot looked low along the water, the Portrait sat in tree roots - neither
-      cat visible. Both fixes are in (guarded, harmless) but NOT proven. The real fix: Place = Here should pick an
-      OPEN spot near the cat (ground flat, no roots / water / rock within the shapes' radius + camera distances),
-      and the tests need a frame rate where frames can be judged (CLAUDE.md: -ResX 960 or a real PC). Still open.
-      TRIED the open-spot fit (same day): Place = Here weighs camera room (clear + dry 7 m behind, 4.5 m to the sides)
-      and looks up to 7.5 m out - at -46706 6269 it still chose the bank (room 3 of 3) and the Two / Portrait shots
-      stayed low over the river behind reeds. The room test doesn't match what the shots see (they pick their side by
-      the cats' line, reeds don't block traces). STOPPED here on purpose: judging framing at 0.5 fps / 480x270 is
-      guesswork - needs a real-resolution session (or the operator's eyes). Committed, unproven, harmless elsewhere
-      (open camp ground framed fine).
-      RESOLVED BY MEASURING (same night, VM at 960x540 + a probe: each cat's head projected to the screen, and the
-      line camera -> head traced on Visibility and Camera): at the 'bad' river-edge spot EVERY shot had its cats in
-      frame with clear lines (Two: Toadfrost x789, Dapplepatch x265 of 960; Portrait: Toadfrost centred; Over:
-      Dapplepatch in frame). The pale planes were the river seen from ABOVE (sky reflection, lily pads from above),
-      not the camera under water; nothing is above the camera on any channel. So: legit shots of small cats on a
-      bank, not a camera bug. The three 'fixes' built on the misread (SeenCheck, WaterClear, the room-aware fit) were
-      REVERTED (WaCa-Cutscenes fc22449 / d67961f / 578c6be). Lesson (CLAUDE.md already says it): project to the
-      screen before judging framing from a 480x270 screenshot. Tool: scratchpad cam_probe.lua.
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
@@ -2148,6 +1603,555 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       planes would have caused: cats walking on the river) and stands on ice; Cutscenes' ground counts ice as dry. On the
       frozen lake: the party (Nightheart, Rippleface) and HerbLesson's Mossfeather at 767-768 (surface 750). Drop
       Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
+
+## Archive
+- [x] **Operator play-test of the split mods (2026-10-28) - fixed, VM-confirmed in bulk runs the same day.**
+  - Rank: WaCa.PlayerRank = 1 + rank quests done (QuestProgression), promotions live (topic player.rank). VM: a new
+    RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
+    slot is Shared.General.CurrentCatSlot - CurrentSaveSlotIndex stayed 0, so a new cat read another cat's day, names,
+    sidecars (VM: slot 8 cat now "-8", day 1).
+  - The day: morning / afternoon duties, the evening in camp (sharing tongues) staged (5 camp cats placed in a ring through a fade,
+    poses, release - the camp cats are BP_Quest_Filler_C scenery, no controller), night: den sleep (My den / your rank's
+    den by STR_DEN_* names; VM: walked into the warriors' den -> sleep pose, fade, day 2 at dawn). F9 off by default.
+    THE EVENING SCENE REDONE + SEEN in daylight (VM 2026-10-28 evening, a dawn copy of the scene): the fillers were parked
+    by the game (38/41 bodies off) and moved quest actors never drew -> the camp's WALKING cats (game AI characters),
+    an arc in front of the camera (the camera sits ~1 m behind your cat - a ring hid them), movement held while
+    staged, released back to their own spots (the saved transform was a live view - nobody went back before). Shots:
+    5 clanmates sitting before Dapplepatch with the card; after: back 24-42 m away, walking on.
+  - Deputy lines ([Talk]): VM with the game's dialogue widget + NpcRef = RiverClanDeputy: "free time turned in
+    (Deputy)" and the line swapped to the report text, restored on close. Busy (VM, during "hunt 2 prey"): "Shouldn't
+    you be out on your hunting? The clan is counting on you." - restored on close.
+  - BULK RE-CHECK 2026-10-28/29 (960x540 where detail mattered): Colourpoint tile at full size (masked face, dark
+    points, unlike the Tabby tiles); night HUD "Your den / Sleep in your nest"; F9 = nothing (0 rest lines); walked
+    into the warriors' den -> "in its den - it goes to sleep" -> day 18 at dawn; dawn cards one at a time, no
+    overlap (contact sheet); FISHING end to end: moving arrival -> startled, stays away while moving, still -> "back
+    and biting (60%, rolled 35)" (earlier misses were a rat fight mid-test); hunting parts all report on (chance on
+    63 prey, scent trails, guidance 10 puffs, wading). Found + fixed: "0 of 0 duties done" card after a night-start
+    session - VM 2026-10-29: "day 18 over - 0 done, 0 missed", no card; and in the ORIGINAL setup (a fresh load that
+    starts at night, sleep in the den): "the night begins (the session starts)" -> "0 done, 0 missed" -> no card. Hunt chance label: VM probe on a rabbit 3 m
+    off - label "95%" visible inside the game's sneak-attack paw canvas (shown by the game when stalking). Known: a Hunting hot reload re-arms fishing spots
+    twice (13 areas) - reload-only.
+  - Card queue (timeskip + exhaustion too): dawn cards ~5 s apart, none overlapping; the first day + cards wait while a
+    conversation / cutscene is up (VM: "the day starts once the conversation is over", then the day).
+  - Lead mode: the meeting place marked; F there ends the third, F 594 away refused (VM).
+  - Mouse (VM): hover selects via the game's own steps (main menu, Select Your Cat grid, clan crests via native rects,
+    creator pattern / colour grids, pause menu); clicks = select + the real confirm key; footers by their key icon's
+    command (Continue = Button_Y); creator 1 / 2 tabs; pause tabs on click only; map drag (held WASD) + wheel zoom
+    (held Up / Down). Map icon INFO (the game has none): pointing at an icon shows its name by the cursor - from the
+    map's own legend by texture, else the creature kind (VM: Player, Clan Outpost, Mice).
+  - Name box: the screen maps Enter to its confirm commands itself (OnListenCommand 5 / 26 / 28 with the rows
+    blanked) -> SwallowKey Enter while on the list; VM: Enter -> box, "cd" typed, Enter -> next screen.
+  - Colourpoint: entry 24 of the pattern grid with Tabby's icon (looks like a second Tabby) - P2: its own icon.
+- [x] **P2: Colourpoint needs its own grid icon** - done 2026-10-28: Icon = T_UI_Marking_12_D (masked face), VM-checked.
+- [x] **P1: the evening = small groups by relationship, not one ring** (operator spec, 2026-10-28) - BUILT
+  2026-10-29 (WaCa-ClanLife b0c1600): Groups: Tongues|Prey, config/relations.ini, names from the game's text, walk-in
+  via the AI controller. VM: groups logged by name, tensions kept apart, cats walking to seats (leg 14: 3 of 6 walked
+  all the way at the meal, 2 of 5 for tongues, the rest most of the way then set down - at the VM's 0.2-0.6 fps).
+  Rules self-test on a made-up roster (WaCaGroupsSelfTest): tensions / leader-with-mate-or-deputy / sizes PASS,
+  apprentices together 82% PASS.
+  - [x] 2026-10-29 (c977490) walk-in: the cats' own behaviour tree was never paused (PauseLogic did nothing - their
+    pacing overrode our order); StopLogic + a game-time clock -> VM 6 of 6 seated at the meal, 5 of 6 for tongues
+    (one stuck on geometry, set down).
+  - [x] 2026-10-29 (6bf0904) groups are fixed rules, never chance (operator): leader + mate + deputy unless
+    LeaderAway / DeputyAway, queens with kits, by role in 3s / 2s, BigPrey for a 4; the camp's named cats take part
+    where they stand (Lionstar, Freezesong, Tigerclaw ...). VM: self-test PASS on every rule; RiverClan's camp
+    "1: Lionstar (Leader), your cat (Deputy)" at both group steps.
+  - [x] 2026-10-29 (d38d2db) operator: "some randomness is fine but we need a control lever / override": per-day duty
+    chances (days.ini <Third>Duties), RepeatFactor against repeats, group levers ([Pairs], [Tensions], story steps
+    Pair / Part, LeaderAway / DeputyAway, BigPrey / NoBigPrey). VM self-tests PASS; real camp: Lionstar + your cat
+    fixed, warrior groups by chance, a group of 4 round prey.
+  - [x] 2026-10-29 (ClanLife) levers on the remaining dice: Event:<Name> = 1 / -1 + days.ini Events / NoEvents
+    (VM self-test PASS), ClanPatrol = 1 / -1 (VM: "one leaves this evening - ClanPatrol = 1"), patrol points / hunt
+    spot never the last ones again while there are others; other mods: WaCa.Emit("SetStoryVar", name, value).
+    Untouched (cosmetic): camp idle activities, dialogue line shares, prey spawn spots.
+  - [x] 2026-10-29 (6c2a7fc) camp cats keep their names per save: keyed by their spawn point (SpawnPointRef), the
+    first name kept in WrcGame.<slot>.WaCaCampCats.ini and written back each load. VM: load 1 "6 new", load 2 "6
+    kept" - the same six names. Groups never leave one cat alone (7 -> 3+2+2).
+  - [ ] P3 (operator 2026-10-29: "just leave it and note it down as a ticket for later"): ShadowClan's lake-era
+    meeting place - "the fallen log" for now (Victoria Holmes); look it up in the books later (fan sources also
+    mention a branch / stump).
+  - [ ] P2: the walk-in through a navmesh path (the 3 of 6 that slide along camp rocks) - a pathfinding order first,
+    the straight move as fallback, was written and NOT verified (a rabbit stalk started a fight mid-run); reverted.
+  - [x] 2026-10-29 (Hunting e76beda) hunt-chance label: it sat in the insta-kill paw, shown only for prey low enough
+    to kill outright; now under the prey's level warning within LabelRange (15 m). VM: "95%" under the paw of a
+    rabbit 5 m off (a prey picked with no creature within 25 m - fights mapped), nothing at the horizon. OPEN: the walking
+  cats' names are random per load (name ties only hold for story cats - a per-save identity for camp cats?); only
+  3-6 walking cats near RiverClan's camp, so 1-3 groups, not 5-6 (more cats = the parked quest cats, which don't draw
+  when moved - stage them in place?).
+  - Sharing tongues: 5-6 small circles of 2-3 cats each, spread over the camp.
+  - Sharing prey: groups of 2 or 3, sometimes a group of 4 around a big piece of prey.
+  - Who sits with whom follows like / dislike: two cats with tension (story tensions) never share tongues. The
+    leader only ever with its mate and/or the deputy. Apprentices most likely with apprentices. Mates together, etc.
+  - Needs: (1) each camp cat's identity - rank, clan, name (find it on the walking NPCs: CustomData /
+    narrativeRole / CurrentRank as on AQuestBaseActor; the game's NPC generation manager hands out roles + names);
+    (2) a cat-to-cat relationship table - the game only keeps the PLAYER's bond per story cat
+    (AddPersonalBonding), so ClanLife needs its own (ini: Mates, Tensions, Friends; story beats change it via a
+    step, e.g. `Tension: A B`); (3) group-aware staging: several small arcs/circles at camp spots (the game's
+    target points / den fronts), each group facing its own middle, still all in view of the camera or framed one
+    group at a time. Your cat joins a group by its own bonds/rank.
+  - THREE different things, never mix the words (operator 2026-10-28):
+    - the evening in camp = these small groups (eating, sharing tongues);
+    - a CLAN MEETING / ceremony (apprentice / warrior naming, announcements) = the leader on its rock, "speaker on
+      stage", the clan an AUDIENCE in rows / a fan facing it - the current Gather step (an arc facing one point) is
+      the start of that layout, with the leader as the point;
+    - THE GATHERING = all four clans meeting on the island (the game's own line: "the four become one under the silver
+      moon ... where the Great Oak stands", STR_QUEST_FINDLOCATION_ISLAND_01) - gatherings.ini.
+- [x] **P1: clan meetings use the books' words and each clan's own meeting place** - DONE 2026-10-29 (a551f49):
+  {MEETINGPLACE} from duties.ini [MeetingPlace], ThunderClan = the Highledge, Default = the leader's rock; VM card
+  verified. 2026-10-29 (e631a54): RiverClan = the Highstump, WindClan = the Tallrock, ShadowClan = the fallen log
+  (Warriors Wiki / Victoria Holmes); VM: "... gather beneath the Highstump for a Clan meeting!" (RiverClan). (operator 2026-10-28): the
+  summons as in the books - "Let all cats old enough to catch their own prey gather beneath the <place> for a Clan
+  meeting" - and ceremonies in their book form. BUG NOW: clanevents.ini [Event.ClanMeeting] and days.ini (Evening
+  card) say "the Highrock" for EVERY clan - and Highrock is ThunderClan's OLD FOREST spot (operator caught it); this
+  game is the LAKE era (the island + Great Oak), where ThunderClan's leader speaks from the HIGHLEDGE (Twilight:
+  Firestar on the Highledge above the stone hollow - confirmed via a book excerpt). The game's text names no meeting
+  place (Strings_EN has none), so it's config per clan (e.g. clanevents.ini [MeetingPlace] ThunderClan = Highledge,
+  ...); RiverClan / ShadowClan / WindClan's lake-era spots: from the books with the operator, don't guess. A
+  {MEETINGPLACE} placeholder in cards.
+- [x] 2026-10-29 **The camp's NAMED cats move about** (REBUILT - the costume walkers were rejected: operator "I don't
+  want the unnamed cats to be assigned a name ... they should be the same type of object" -> "remove walkers, move
+  named cats"; then "not all cats should walk, and ideally which walk should change ... the important cats (trainer,
+  medicine cat) stay close to where they sit, idle cycle a bit ... they stop when spoken to"). walkers.lua now: the
+  nameless walking cats hidden (AI stopped, no collision); each third of the day a few named quest cats move, longest
+  -unmoved first - roamers (plain warriors / apprentices / elders) across camp to dens' fronts / fresh-kill / meeting
+  place / another cat's spot and home; homebodies (any cat with a part) to a spot 1.5-3.5 m away and back. The game's
+  walk anim (single-node, then back to the anim BP), swept moves, following the ground (knee-height WorldStatic trace:
+  a level move buried Lionstar in his hillside, a trace from 3 m up put him in a tree). Only cats the game was SEEN
+  drawing take part (hidden != out of range: an online-only giver never draws). Talk = the game's
+  WBP_QuestGiver_Dialogue* screen (NpcRef = the cat): every mover holds, that cat stops; closed -> moving again.
+  Walk:<Name> lever, walkers.ini Never. Public event WalkerMoves(name, path, home|away).
+  VM 2026-10-29: turns + sets off / is there / home logs; walking cats drawn (WasRecentlyRendered) at 3-17 m;
+  conversation with Blackheart mid-trip -> stops, released on close; turns wait for the world (a load-time turn crashed
+  the game twice - fixed and re-booted clean; the walkers-off boot was clean too). A QuestBaseActor:OnDialogSetActive
+  watch was dropped while bisecting (suspected, NOT proven; the dialogue screen covers it).
+  Evening groups: named cats walk to their seats (scene speed, per-cat limit) - VM 9/9 walked in (4-19 m, 13 s),
+  home again on release. ClanLife 551cb7c. SEEN 2026-10-29 (noon, VM): a named cat mid-stride crossing the grass
+  (WalkerWalkTo, ClanLife). Suffix box SEEN on the ceremony's "CHOOSE WARRIOR NAME" popup (top right).
+  FIXED (ClanLife c12f400): a mod reload mid-walk left cats on the walk anim - a turn now idles them where they
+  stand (VM: "3 cat(s) left walking by an earlier run - idle again").
+  **P3: more named camp cats** to make up for the 6 removed walkers (operator: "later add extra camp cats").
+- [x] (walk-in BUILT 2026-10-29, see the P1 above) **P2: the evening in camp (sharing tongues / the meal) - the cats WALK in, with the game's own NPC logic** (operator 2026-10-28: "the game
+  will have its own inbuilt logic for placing and displaying cats, for having them pace"). Found 2026-10-28 (VM):
+  the camp's quest actors (fillers, deputy ...) are mostly PARKED (38/41 fillers: body SkeletalMeshComponent off,
+  a DisableRequester on their USwtQuestHideByDistanceComponent); the rest are hidden by a 23 m hide sphere. Quest
+  actors teleported into a ring never drew (body "visible", never rendered) - so Gather now uses the walking camp cats
+  (ASwtAdventureWalkingNPC / BP_WalkingNPC_Character_Base_C, AIC_Wrc_WalkingNPC_Controller): moved in, the game shows
+  them at once and their AI resumes (paused while staged). NEXT: let them walk in instead of a fade-cut -
+  SimpleMoveToLocation did nothing while they were hidden/far (frozen out of range); try once in range, or drive the
+  game's own BT tasks (BTTask_NPCSplineWalking, ASwtQuestWalkingSplineActor, ASwtQuestNPCTargetPoint.WalkingSpline,
+  UQuestObjectiveTeleportNPCGiverTask + ASwtQuestNPCMoveObjectivePoint = the game's own "move a giver" step). Same
+  machinery serves the P1 walk quests (mentor walks you to the den).
+- [x] **P1 (operator 2026-10-28): "walk quests" for the story mod** (DONE 2026-11-01: the Lead step, VM-verified end to end) - e.g. promoted to apprentice, the mentor WALKS you
+      to the apprentice den to meet the others: the cat leads (paths over, waits when you fall behind, goes on when you
+      catch up), no quest marker. A scene step on follow.lua (Follow.Travel for the leader + the player's distance).
+      Reuse the game's battle animations in cutscenes (hackles raised, sneaky / subdued poses - operator 2026-10-28).
+      BUILT 2026-11-01 (Clan Life, scene step Lead: <place> @ <who>; example pack MentorTour): the cat comes to your
+      cat first, leads (walkers' mover), waits when you're 6 m behind, goes on within 3.5 m; places Den:<den name> /
+      Zone:<code> / Pile / a cat. VM: come-to-you, lead, wait, go on all seen. NEXT (VM, when the operator isn't
+      playing): the arrival with the no-headway fallback (the 300 s limit ended a slow VM walk early).
+      ARRIVAL SEEN 2026-11-01 11:11 (VM): Otterfeather came to your cat (26 m), led to the Apprentice's den (40.6 m),
+      waited, went on, arrived on its own ('led your cat to Den:Apprentice's den', no fallback), the closing card.
+      Writers: docs/WRITING.md (Clan Life). Drop Z:/WaCa/WaCa-mods-test-20261101n.
+- [x] **P0 creator redesign: custom looks in the game's own creator UI** (all parts done 2026-10-27; operator checks below) (operator 2026-10-25; merges the two creator
+  redesign tickets, the "creator finding" note and the old "Creator UI injection").
+  - [x] Our look is part of the game's look build (native hook on the colour / pattern-mask / markings-mask primitives,
+        CatLookPart; 6b3d340) - no flash of the game's value, no repaint loop. VM-verified in the world.
+  - [x] Custom looks REGISTERED by mods (namespaced ids, many mods at once) with a base-game FALLBACK: every enabled
+        mod's looks/*.ini is discovered (IterateGameDirectories + enabled.txt / mods.txt), id "<Mod>/looks/<File>.ini",
+        offered and added as a grid row with its Fallback / Label (creator.ini AutoLooks; 2357c88). VM: a test mod's
+        TestMitts.ini became DT_Markings row 21 "Test Mitts" next to Colourpoint. Colour indices: still only the
+        palette.ini swatches.
+  - [x] Entries in the native pattern / marking grids (2026-10-27; left: a custom ICON needs an image asset - art). DONE so far: native row cloner (tables.cpp, d61c6fa), and at
+        startup each offered pattern / markings look becomes a row of DT_Patterns / DT_Markings copied from its
+        fallback's row (VM-verified: "WaCa_Colourpoint" added, copied from NewRow_11 = P13_Tabby, 24 rows). Choosing
+        it (panel OnGriIdItemChanged + the grid's current item position) stores look:<Name> and keeps the fallback's
+        index in the cat data. NOT VERIFIED: that the grid lists the extra row, and the choice handler - the VM
+        cannot open the customisation screen (below). Next: operator check; an icon (IconHelper) for Colourpoint.
+        The panel standalone lists 0 items (it fills natively only with a preview cat). For the operator check the
+        log now says, on the first grid move, "grid lists N items (the game's own: 23, WaCa rows added: 1) - WaCa
+        entries listed / NOT listed" - one look at the log answers whether the game fills the grid from the rows.
+        Fixed: a reload no longer renumbers the WaCa entries (the game's rows counted without WaCa_ rows).
+  - RESOLVED 2026-10-25: the "VM crash" on the customisation screen was the TEST HARNESS - it built the main menu by
+    hand on the logos map (M_LogosMap), so the creator never had its level / preview cat. Through the real flow
+    (logos -> splash -> Enter -> L_MainMenu_P) the customisation screen works on the VM.
+  - DONE for PATTERNS (VM, real creator, 2026-10-25): the grids list UWrcGuiManager.ReadyPatterns /
+    ReadyMarkings (fill: 0x1418C2740, found with a hardware watch on the grid's Items), built from the tables' rows -
+    so the cloned WaCa row IS in the game's own grid (ReadyPatterns 0..23, WaCa_Colourpoint = 23; item labels are
+    generic "Pattern N"). Choosing it logged "Pattern entry 23 chosen = Colourpoint (the cat keeps PatternIdx 12)"
+    and rebuilt the preview cats with the WaCa look. Mapping = grid position -> ReadyPatterns index -> row.
+    MARKINGS too: their fill (0x1418C33D0) adds 3 game items AHEAD of the ReadyMarkings loop; mapping = position -
+    (items - indices). VM: the last markings item -> "Markings entry 23 chosen = TestMitts (the cat keeps
+    MarkingIdx 3)". Labels: the WaCa pattern item is relabelled with its look's Label ("Colourpoint" instead of
+    "Pattern 23"; VM read back 20 s later). Markings items have no name text. OPEN: an icon (IconHelper).
+  - The customisation crash on the VM: AGuiScreenBasePreview's setup (0x141915150) takes the first
+    GuiCatCustomActor tagged "Cat" - only the main menu level has one. Reached from the world (a saved cat loaded),
+    there is none -> null CatRef -> crash. Test harness: WACA_TEST_CREATOR=1 selects an empty slot (new cat) via
+    the screen's GriNav, so the creator always opens in the main menu level.
+  - [x] One checkbox "Customise online cat" - DONE 2026-10-27: checkbox top right on the customisation screen (or
+        F8). On = the preview shows the online cat (no WaCa look: readAppearance -> empty) and the game's controls edit
+        only the game values (a WaCa grid entry gives the online cat its fallback, game shapes don't clear the WaCa
+        look, no hex box). Off = your cat with the WaCa look. Both kept across toggles. VM, real F8: ON -> preview
+        rebuilt bare, WaCa pattern chosen -> "online cat gets its fallback", F8 -> off -> WaCa look back.
+  - [x] Custom colours - DONE 2026-10-27 (hex entry): the game's colour pickers get a hex box (top right) showing
+        the selected swatch's colour; #RRGGBB + Enter puts that exact colour in the look (the save keeps the selected
+        game colour); picking a swatch afterwards drops it (last choice wins). VM, real keys: box shown (#FBD5A7),
+        #3366CC typed -> cats rebuilt, swatch 12 picked -> typed colour dropped. FINDING: the pickers are a FIXED grid
+        (0x1418E90C0: 4 + flag rows x 5 - the flag most likely the DLC), nothing scrolls, so palette.ini's extra
+        swatches never showed (README corrected); more rows would expose the DLC row to non-owners - not done.
+        A colour WHEEL instead of the box = a UX extra, if wanted.
+  - [x] Then: drop the WaCa side panel - DONE 2026-10-27: the panel only offers what the grids can't (pattern packs,
+        whole-look presets; game shapes across rows with creator.ini PanelShapes = 1); with the default config
+        there is no panel (VM: "no WaCa panel (the game's grids offer every WaCa choice)").
+- [x] P1 mouse look feel (operator) - implemented 2026-10-25/27 (yaw + pitch + camera-relative movement); feel = operator check: the camera clamps the mouse axis to the stick range and runs it through the stick
+  curve (max turn speed, stick-like acceleration). Find the camera's axis consumer, feed mouse deltas unclamped.
+  Started: WaCaNative_DevAxisBindings dumps an input component's axis bindings and their bound handlers (the
+  controller's WrcInputComponent has 4 at +0xE0 incl. Player_Camera_Up / _Right, value-only - nothing bound).
+  FOUND the consumer (WaCaNative_DevWatchAxis, a hardware watchpoint on the AxisValue): written by PlayerInput at
+  0x1448DC259, read via UInputComponent::GetAxisValue (leaf 0x14408E6xx) from 0x14126C0E0 (returns to 0x14126C16B):
+  abs + dead-zone compare + scale multiply (a sibling at 0x14126C1E0 reads a threshold at [rcx+0x748]). Next: name
+  those constants / the caller chain, then detour 0x14126C0E0 for mouse input (raw delta, no dead zone / clamp).
+  TRACED (WaCaNative_DevTraceCommandAxis): 0x14126C0E0 = dead zone helper; 0x141828B30 = per-command getter
+  (vtable +0x1000; invert flags at this+0x8B3 / +0x8B4). Yaw: 0x1417A0B60 turn = sum over cam(63) / move(61) of
+  sign * 2 * |v|^[this+0x1D4] (powf 0x147D46ED7), clamped to [-2, 2]; its caller 0x1417A61B0 (camera update) adds
+  turn * [this+0x1CC] (turn speed) * dt to the yaw double at [owner+0x4E8]+0x3A0. Pitch: getter vtable +0x1008
+  (cmd 62), clamped, separate path. 0x1417A6710 only resets an idle timer (+0x220) on camera input.
+  PLAN: MouseX / MouseY out of Player_Camera_* into their own value-only bindings (standard UE input, keybind-menu
+  friendly); detour the camera update 0x1417A61B0 (string / call-graph anchors via the relocation framework) and
+  after it add delta * sensitivity straight to yaw (+ pitch on its path) - no dead zone, curve, clamp or dt.
+  IMPLEMENTED (yaw) in camera.cpp: the mouse (GetInputMouseDelta, standard UE MouseX) goes into the game's own
+  turn value as degrees / (turn speed * dt) - turn detour on the update's camera-right callee, anchors "LookAtYaw" +
+  body checks. Direct writes to CameraActor+0x3A0 do NOT work (only honoured while the camera sees input; the
+  camera tick clamps pitch +-89.9, yaw free, then smooths and recentres behind the cat when idle). VM-proven: the
+  turn value carries the mouse (delta 37.8 -> 75.6 deg); the VIEW change could not be measured reliably on the VM
+  (CameraCachePrivate reads flaky at 0.6 fps) -> OPERATOR CHECK. Mouse look on/off follows the menu cursor.
+  PITCH done too: the raw axis getter (vtable +0x1008, hooked from the live vtable, anchored: the update calls that
+  slot + the getter reads the invert flag) answers sign(total) and the pitch speed becomes |total| / dt for that
+  frame (restored after) - stick + mouse degrees exactly, inside the game's pitch limits. VM: delta 5.6 -> 8.4 deg,
+  game alive. MouseX / MouseY are out of Player_Camera_* (photo mode keeps them). Left: [Mouse] GameplayCapture = 3
+  (drag to look) isn't honoured by the native path; the on-screen feel = operator check.
+- [x] P1 Spacebar also advances dialogue (operator 2026-10-25): keybinds.ini [DialogueKeyAliases] SpaceBar = Enter
+  while a QuestGiverWidget is up (d61c6fa). VM-verified with the game's own WBP_QuestGiver_Dialogue on screen: Space
+  logged "dialogue: SpaceBar -> Enter". Left: the operator sees a real conversation advance.
+  2026-10-27 (operator): a LEFT CLICK advances dialogue too ([DialogueKeyAliases] LeftMouseButton = Enter) - except while
+  answer choices show (QuestGiverWidget mcButton1..4 visible): the click picks the choice itself.
+  2026-10-27: a VM real-conversation attempt failed to OPEN one - teleported 150 / walked in from 400 units to the
+  nearest quest giver (BP_Quest_Giver_Deputy_C), held E: QuestPlayerController.OnCanInteract never fired, no
+  QuestGiverWidget. At 0.3 fps the walk barely moves and that NPC may have nothing to say - an operator press in
+  play is the cheap check.
+  2026-10-27 (later): walked in for real - 300 units in front of the deputy, then held a movement key: the cat walks
+  (~30 units / wall s at 0.3 fps) but camera-relative, so W led away (1429) and S came to 203 then drifted to 607;
+  E there: no conversation. Steering the VM cat precisely needs the camera's actual yaw (the game camera ignores
+  SetControlRotation) - and that NPC may have nothing to say. Kept for the operator's one press in play (Space AND
+  now a left click, operator 2026-10-27).
+  DONE 2026-10-27 - VERIFIED IN A REAL CONVERSATION on the VM: started the game's way (the sequencer manager's
+  PlaySequenceDialogue with a tag from its own DT_QuestSequenceDialogues - "Unique2_RiverClan_TheVengefulRogue" with
+  the nearest NPC; WBP_QuestGiver_Dialogue2_C). Space -> "dialogue: SpaceBar -> Enter", the line advanced ("The walls
+  are closing in ..." -> "They've abandoned you ..."); a left click -> "LeftMouseButton -> Enter", advanced the same.
+  Found on the way: a plain line shows answer button 1 too, so "choices up" is now "the game's next prompt
+  (mcGuiNext) not shown" (visible up the parent chain); and a POSTED click never raised KeyDown on the VM until the
+  hook was checked - it does (0x201 seen); the earlier misses were the choices rule.
+- [x] P1 relocation framework for detours (operator 2026-10-25) - DONE 2026-10-25: every target now has two anchors
+  (look: string + call graph from the full build; camera: string + body + callee; save: UFunction thunk + call
+  layout; pitch getter: called slot + body), refused when they disagree, logged; tools/check_hooks.py checks all of
+  them offline - the save hook too (2026-10-27: its thunk found in the exe's native function tables, the one "Save" entry
+  whose thunk holds the call layout). 5 of 5 + 6 cross-checks
+  pass on the current exe. Original ticket: every hook target found by several independent means
+  (signature + anchors: a string / UFunction native pointer / call-site chain), validated (prologue / call layout),
+  logged, and a tools/ check that runs every target against a new exe before a release. Started: scan::FunctionUsing
+  (string -> referencing code -> unwind-table function start -> prologue check) for the look hooks.
+  DONE: tools/check_hooks.py <exe> - reads the targets from the native sources, resolves them offline the same way
+  (4 of 4 unique on the current exe, same addresses as the runtime). Left: a second independent anchor per target
+  (e.g. the call-site chain from SetDefaultCustomData to the three primitives) cross-checked.
+  DONE too: scan::Reaches - each look primitive must be reachable from the full build within 2 calls (chained
+  unwind bodies included) or it is NOT hooked; same check in the tool. VM: 3 of 3 "confirmed" at runtime.
+- [x] P2 a click skips the splash - VERIFIED 2026-10-27 on the REAL splash: a click -> "click on the splash - pressing
+  Enter" -> the main menu. menus.lua - a left click while GuiScreenSplash is up presses Enter. VM-verified
+  with the game's own WBP_GuiScreenSplash put on screen: the click logged "click on the splash - pressing Enter".
+  Left: the operator sees the real splash continue.
+- [x] Per-save sidecar: the write path end to end. FOUND + FIXED a real bug: the game saves through the native
+  USwtSaveManager::Save (static; 111 C++ call sites), never through ProcessEvent - the Lua RegisterHook on
+  SwtSaveManager:Save never fired, so in-game changes never reached the sidecar. saves.cpp hooks the native method
+  (anchors: the Save UFunction's thunk -> its call after setne r8b) and raises GameSaved(nil, context) for every
+  save; main.lua writes the sidecar on it. VM: GameSaved fired for SelectYourCat_OnFinishScreen /
+  SavePlayerExperience / SavePlayerLevel / SaveStringData, game alive.
+- [x] **Engine version + toolchain.** DONE: UE 5.7.4 (PROJECT_PLAN.md; AssetDump EGame GAME_UE5_7, UE4SS 3.0.1). Pin the exact UE5 version. It is not in the exe strings: the exe is SteamStub-
+      wrapped (`.bind` section). Hints: pak v12, utoc v8, so 5.4 or later. Get FModel to browse the paks, plus a
+      `.usmap` mappings file (UE4SS dumper or community). Record versions + download sources in PROJECT_PLAN.md.
+- [x] **Asset map.** DONE 2026-10-27: docs/ASSET_MAP.md (every listed area; the roster lives in the save - NPCData.NarrativeRoles). Extract (FModel export, into gitignored `extracted/`) and map how these work:
+      - the clan-cat generator
+      - dialogue / quest data (DataTables, string tables, `.locres`)
+      - the day structure
+      - hunting / prey AI
+      - the party system
+      - rank ceremonies
+      - input bindings
+      - graphics settings
+      - save data (where the clan roster lives)
+      DRAFT PLAN (2026-10-27, for the operator to adjust):
+      - Script the FModel-style export with tools/AssetDump for the listed asset folders into extracted/ (gitignored)
+        and write a one-page map (what each blueprint / table controls) - no operator input needed, just time.
+- [x] **UE4SS injection.** DONE: UE4SS 3.0.1 runs (Lua + the WaCaNative C++ mod), object + header dumps in dumps/. Get UE4SS running: check SteamStub / EOS / any anti-cheat; the game uses the EOS SDK for its
+      online content. Live object dump + C++ header dump for a skeleton project. Lua hello-world hook on a gameplay
+      function.
+- [x] **Deploy rule.** DONE: the release zip installs / uninstalls itself (Install.bat / Uninstall.bat); the Z:
+      install is ours to modify (operator), backups as *.vmtest-backup / before overwriting. Installing a mod writes into the game folder on Z:. Agree with the operator where mods are
+      installed and how to uninstall cleanly; never rm -rf on Z:. Back up any file before overwriting it.
+- [x] **Time follows effort, not the wall clock** (DONE - built as part of 15) (operator 2026-10-28: "bind time directly to cat exhaustion based on
+      the current activity's time slot (morning / afternoon / night)"). Operator: "a true time of day cannot really be
+      wired UNTIL we have the day/night clan sim" -> BUILT AS PART OF 15 (2026-10-28, see there): the clan's day
+      drives the clock by the cat's effort per slot. Refined by the operator the same day: exhaustion is NOT the
+      clock - it's a resource that only drops with things DONE (pounces, fights); walking moves the time but never
+      tires (see 4).
+- [x] **Sight during the pounce walk** (operator 2026-10-30, "ideally also sight" - if a proximity sense doesn't make
+      prey uncatchable) - BUILT + VM-tested 2026-10-30, OFF by default: WaCa Core runs the game's own detection pass
+      (WaCaNative_HuntDetect - the function UBTService_DetectionTask's tick calls) on the hunted prey through the walk.
+      RESULT: by the game's own rules a WALKING cat 3 m off is noticed from any side (types 7 and 5, from behind and both
+      sides: 6 of 6 noticed) - the very proximity sense the operator feared; that's why the game turns detection off
+      for the walk. Kept as [Prey] SightDuringPounce = 1 (experimental). A sight that stays fair would need our own cone
+      rule (the game's view cone without its proximity) - operator's call.
+- [x] **Following: cats moving together** (operator 2026-10-28, big modding tool): many cats pathfinding together -
+      DONE 2026-11-01: speed matching + fading out of view both built and VM-verified (see below).
+      your pack runs through the forest with you and only holds back when you're sneaking; for Gatherings 10+ cats
+      make their way over to the island. A Lua API (follow.lua): a group follows a leader (the player or any cat) at
+      spread-out distances, matching walk / run, holding back while the leader sneaks; or travels to a place as a
+      group (in formation, the slow ones caught up). Started from the patrol companions (duties.lua: AI MoveToActor,
+      the cat's own brain paused).
+      BUILT 2026-10-28 (follow.lua): Follow.Group(cats, leader, opts) - staggered MoveToActor, checked at the leader's
+      FOOTSTEPS (every cat's steps are events - no ticking), holds back while the leader crouches (the game's
+      OnExplorationCrouch, bValue handed over), catches up after; Follow.Travel(cats, place, opts, onArrive) -
+      formation rings around the place, arrival checked at the travellers' steps; Follow.Release; Follow.Nearest.
+      The patrol companions and patrols.lua use it. NOT yet seen on the VM (the companions' earlier MoveToActor
+      version joined, the follow itself unconfirmed). OPEN: speed matching (run with the leader), fading out of view.
+      STATUS 2026-10-31: the AI follow can't work on this map (field / camp cats have no movement component - AI moves
+      fail, VM 2026-10-30), so the walkers' mover does it all, VM-verified: your party runs with you (walk / trot / run
+      matched, holds while you sneak, catches up - the speed matching), escorts walk with you (patrol companions,
+      TemporaryParty, the Gathering party), patrols and the Gathering party travel as a group to places and home. Left
+      open: fading cats out when far from view (cosmetic, not started).
+      DONE 2026-10-31 (VM, walkers.ini [Walkers] FadeAt 60 m): a walker that far from your cat and not drawn lately is
+      hidden on its way and stepped without ground checks; shown again - set on the ground - within 0.8 x FadeAt or
+      when it stops. VM: a 3-cat patrol hid past 60 m, showed at its stops (+0 cm), hid, and on the home leg showed at
+      48 m set down 1.6-1.8 m (the straight line had drifted above the slope); all home. Not a real opacity fade (the
+      cats are out of sight when it happens). Drop Z:/WaCa/WaCa-mods-test-20261031zb.
+- [x] **NPC patrols heading out together** (operator 2026-10-28; DONE 2026-11-01): when the deputy assigns patrols, see them leave
+      together. BUILT (patrols.lua, patrols.ini, off): at a third's start, by chance, Size cats from the camp travel
+      together (Follow.Travel) to Points border points and home, then get their own AI back; their roles speak
+      Case = Patrol lines meanwhile. OPEN: fade them out when not in view (future); talking to a patrol stops it a
+      moment (future).
+      BOTH DONE (checked 2026-11-01): the clan's patrols walk with the walkers' mover (Walkers.Patrol; the AI-walk
+      path is only the fallback) - far + unseen = hidden on its way (VM: NpcPatrol 3 -> Blackwing, Pinefur, Paletail
+      out, 'Pinefur is far out of view - hidden on its way'), meeting one stops it while each cat speaks (PatrolMeet).
+- [x] **NPCs do their jobs** (operator 2026-10-28, future work): an NPC's task is real - it walks to its assigned
+      DONE 2026-11-01: hunters (real prey), patrols, the medicine cat's herbs - all VM-verified.
+      hunting spot and (optionally) tries to hunt; walk near it or its prey and it tells you to give it space and not
+      ruin its hunt.
+      BUILT 2026-10-31 (walkers.lua [Jobs]): hunters out at a morning / afternoon to the game's prey places 30-90 m
+      from camp, a stay, home; near one while it hunts -> a line (ShowLine). VM: Blacktail out 66 m, its line on screen,
+      home after. Not yet: the hunter actually catching prey (a pounce animation at the spot) - optional per the spec.
+      DONE 2026-10-31 (VM): at its spot the hunter hunts - sniffs, stalks, leaps (the game's montages, a short lunge)
+      and catches by chance ([Jobs] CatchChance 40 / TryEvery 25 s; event NpcHuntTry(name, caught)). VM: Pineblaze 5
+      tries, 4 caught; Blackdash's mesh read live: AM_WC_Hunting_Leap then AM_Interact_Bite_1. Cutscenes poses Stalk /
+      Pounce added. Test drop Z:/WaCa/WaCa-mods-test-20261031n. (Real prey to catch at the spot: not spawned - a
+      visual hunt.)
+      REAL PREY 2026-10-31 (VM): the hunter goes for the game's prey near its spot (15 m) - faces it, leaps onto it;
+      caught -> WaCa Hunting's PreyTaken (gone, as the player's catch), missed -> PreyScare (bolts, gone); none near ->
+      acted out. VM: Willowstorm caught one ('caught by Willowstorm'), Sagefur's missed prey ran off. Drop
+      Z:/WaCa/WaCa-mods-test-20261031o.
+      MEDICINE CAT 2026-11-01 (VM, [Jobs] Herbs = 1): each morning the medicine cat walks to one of the game's herb /
+      moss pickups 20-90 m out, sniffs + digs, comes home (NpcGatherHerbs / NpcHerbs). VM: Freezesong 75 m out, gathered,
+      home again. Drop Z:/WaCa/WaCa-mods-test-20261101i.
+- [x] **Patrol encounters** (operator 2026-10-28, future work): run into a patrol out patrolling - it stops a moment,
+      DONE 2026-11-01: the meet, each cat's line, VM-verified; talking to each cat = the game's conversation (operator's play).
+      you can talk to them, and each cat (by who leads the patrol) says one of its assigned messages for the day for
+      this case, or on normal days one of its patrol lines. The LINES are built (lines.ini [Dialogue.*] Case =
+      Patrol / Leader, the daily grab bag); the stop-and-talk isn't.
+      BUILT 2026-10-31: the clan's patrols walk with the walkers' mover now (camp cats, border points, home); meet one
+      -> it stops, its leader says a [PatrolMeet] line (subtitle). VM: Owlleaf's patrol stopped and spoke, walked on.
+      Talking to each cat (the game's conversation) stays the operator's check - the VM opens no conversations.
+      EACH CAT SPEAKS 2026-10-31 (VM): on a meet every patrol cat says a line in turn (3 s apart): the leader's from
+      [PatrolMeet], the others' from [PatrolMeet.Member], a cat's own [PatrolMeet.<Name>] first, by who leads
+      [PatrolMeet.LedBy.<Name>]; {LEADER}; no line twice in one meet. VM: Maplefang, Cricketdash, Slatefeather each spoke.
+      CRASH FIXED on the way: the walkers' ground check called GetMaterial(0):GetFName() on a hit with no material -
+      the game died (null 0x18 in UE4SS) as a patrol set off. New WaCa.HitMaterialName (Core) used in walkers, stage,
+      wading (the wading one ran every tick - a likely cause of the 16:24 crash too). Drop Z:/WaCa/WaCa-mods-test-20261031za.
+- [x] **Dialogue by days + the daily grab bag** (operator 2026-10-28: "all dialog should be able to be defined like
+      this, e.g. Queen 1 between Day 1 and 6 picks a random dialog to play each day out of 3"; "our filler pool must be
+      able to change for given cats on given days"). BUILT (lines.lua): [Dialogue.<Name>] Who / Days / Require / Case /
+      Leader / Line1..N - one pick per day by a grab bag (no repeat until all came; the last two of a bag wait out the
+      next refill), kept with the save; random pools [Lines.<Role>.<Tag>] with Days / Require too; the game's own line
+      comes back when nothing fits. Granularity = the game's filler keys: per role (named story cats have their own).
+      Offline: A B C D -> D B A C | D B C A | B; queen days 1-5 pool, day 6 the story line, the kit's pool gone after
+      day 3. Lua: Lines.Pick(name, lines, day).
+- [x] **Overlapping mods: content from every mod** (operator 2026-10-28: "a modding framework ... if two mods have to
+      overwrite the same ini, that's bad"). BUILT (WaCa.ReadContent + WaCa.EnabledMods): the clan configs (duties,
+      clanevents, days, events, gatherings, lines, patrols) are WaCaModKit's file + every enabled mod's
+      content/<name>.ini in load order: new sections added; shared sections get numbered keys APPENDED (two mods add
+      beats to the same day / lines to the same dialogue), plain keys overridden by the later mod (logged); Off = 1
+      turns another mod's section off.
+- [x] **Explicit overrides instead of load order** (operator 2026-10-28: "load order as core design choice?" - no):
+      WaCa.ReadContent today lets the later mod win a plain key. Make it explicit and order-independent: ids
+      namespaced (<Mod>/<Section>); a mod overrides another's section only with Replaces = <Mod>/<Section>; two mods
+      setting the same plain key without that = a reported CONFLICT (log + an in-game notice), not a silent winner.
+      Load order only as the last tie-breaker. Appended steps stay per owning mod (see story packs).
+      DONE 2026-11-01 (WaCa Core ReadContent; offline + VM): Replaces = <Mod>/<Section> replaces whole; a plain key two
+      mods set differently without it = CONFLICT (logged with both mods + values, WaCa.ContentConflicts, a one-time
+      notice in game); load order only breaks the tie; numbered keys append, Off = 1 allowed. VM: the shipped packs
+      raise none; a test conflict -> the log line + the notice. Drop Z:/WaCa/WaCa-mods-test-20261101l.
+- [x] **The party = who you're out with** (operator 2026-10-28; DONE 2026-11-01 for patrols, operator check left): the combat party should be the cats you're hunting /
+      patrolling with that day, or when training your mentor / apprentice (not in a mentor-vs-apprentice spar).
+      RESEARCH so far: the combat party is STORY cats by role (the save's GameplayProgression.Party.Stats keyed by
+      narrative role: TheRegretfulWarrior, RiverClanDeputy ...); the game has a developer switch
+      USwtAdventureCheatsManager.ForcedParty (TArray<FAdventureForcedPartyStruct>: CharacterNarrativeRole + Attacks)
+      that likely sets the fight's party - try setting it from the task (patrol / hunt companions, the mentor) before
+      a fight and clearing it after. Needs: companions picked from story cats (roles) rather than generic clanmates,
+      or a mapping; VM test whether ForcedParty is honoured outside a dev build.
+      TESTED 2026-11-01 (VM): ForcedParty is NOT honoured in the shipped game - written from Lua (read back: 1 entry,
+      role 29 TheRegretfulWarrior), then a sparring fight (the game's own combat box, TrainingGrounds): the party on
+      the fight screen was the same as without it (Nightheart, Dapplepatch, Rippleface - both screenshots). The
+      fight's party = the save's party (QuestProgression PartySetup, the PARTY page). Next route, if wanted: the game's
+      own party change (the PARTY page's set function) before a fight and back after - research.
+      On the way (all fixed, VM): four crashes 'reading 0x10' were (a) UE4SS's game-thread timers firing while mods
+      still loaded (now held - WaCa.lua's timer guard; 5/5 boots clean after 3 of 4 crashed) and (b) my probe reading
+      a null combat MainCharacter; WaCa.CustomData made the look-data reads null-safe on non-cat characters.
+      PARTY CHANGE RESEARCH (2026-11-01, parked - a native RE project): the party is set by quest tasks -
+      UQuestObjectiveSavePartyTask (PartyRoles / <Clan>PartyRoles: TMap<ECharacterRank, {Setup: [narrative roles],
+      OptionAlly}>, bClearOnQuestRemoved); 126 loaded, inside the quests' objectives (RankUp_0 [rank 2: RiverClanKit],
+      combat milestones [rank 4: RiverClanKit + RiverClanWarriorMoveLearn] ...). The maps are reflected (editable from
+      Lua); the live party is native (no reflected field). The task's vtable 0x149a9f440 overrides only +0x2b8
+      (0x1416ee040 - empties its map: cleanup); the party is applied by the owning objective's native code. NEXT if
+      wanted: trace the objective's start (where it reads its SavePartyTask) -> the party store, then a WaCaNative call.
+      MORE (2026-11-01, VM): the pause PARTY tab only shows the party (no change in the game). The save keeps it as
+      QuestProgression.Chapter00.PartySetup [{NarrativeRole, CharacterTag}] (WrcGame.json; RiverClanKit +
+      RiverClanWarriorSideRace = the fight's Nightheart / Rippleface), read by the save's JSON code (exe 0x1416A555B,
+      'PartySetup' UTF-16 at 0x149AE8298). AQuestPlayerController.Party (+0x838) is empty. A scan of 2614 objects
+      (managers, save, quest components, one level into their arrays) found no live copy of that role list - it lives
+      in native quest data. Routes: (a) trace the JSON reader at 0x1416A555B to its destination (then write it
+      natively), (b) hook the combat director's party build (PlayerParty +0x460 / CharsPlayerPartyRef +0x4A0) at
+      fight start, (c) edit PartySetup in the save between sessions (tools/save_edit.py - not live). Parked.
+      BUILT 2026-11-01 (VM): the story fight's director keeps the party as roles at +0x788, filled by its virtual
+      +0x9E0 - hooked there (Core party.cpp, WaCa.SetCombatParty / Party|<roles>): the list is replaced, the game
+      builds the cats its own way. Spar with Party|29 -> Dapplepatch + TOADFROST. Clan Life: a patrol's story cats
+      (patrols may now take the story cats the save keeps combat stats for - Party.Stats - first) fight beside you
+      till the patrol ends: forced patrol next to Toadfrost -> Toadfrost + Otterfeather joined -> that fight party.
+      Walkers now wait during spars too (a live director = a fight). HUNTS too: [Hunt] Companions (default 0 - a
+      hunting patrol; VM with 2: Toadfrost + Otterfeather -> that party). Training = the spar itself (excluded). NOT YET:
+      generic clanmates (no story role - the game's party fills in). OPERATOR: hunting patrols on by default?
+      Story pack starts take Party = <roles> (kept every session). Drop Z:/WaCa/WaCa-mods-test-20261101s.
+      LIBRARY: scene step Party: <story cats> (names anywhere in the world, E:<role>; none = the game's), kept with the
+      save (VM: example FightBeside -> spar with Toadfrost; saved, next session restored). Drop ...20261101t.
+      MORE: Party: S:<role> follows the role's [Cast] cat (VM: S:herbalist = Mossfeather fought beside you; S:loner,
+      a brought-in Rogue, refused with the reason). Writers: [StoryCheck] Watch = 1 reloads on an edited story file (VM).
+- [x] **Murmurings: what the clan thinks, every day** (DONE 2026-10-31, VM) (operator 2026-10-28, a note for later - side dialogue): replace
+      the dummy filler text with real "murmurings" that change every day, even if not deep: how each cat feels about
+      other cats, the leadership and recent events - so it SHOWS whether the leader is loved or trusted, whether the
+      clan is split on a decision. Builds on lines.lua (filler pools) + the story variables (Gatherings) + recent
+      events (duties' verdicts, the story's beats).
+      BUILT 2026-10-31 (murmurs.lua, lines.ini [Murmurs] / [Murmur.<Name>] Require / Who / Line*): a camp cat you pass
+      murmurs (subtitle) once a day by chance, lines from every matching set (Standing, Pile, Season, Weather,
+      LeaderFavour, Gathering.Today ...), the daily grab bag. VM: two cats, matching sets, lines on screen. The talk-screen
+      filler (lines.lua pools) can take the same sets later.
+- [x] **Apprentice duties** (operator 2026-10-28, future work): new clan-loop tasks for apprentices (duties.lua task
+      DONE 2026-11-01: gather / water / bedding + the report key (real F) VM-verified.
+      kinds, drawn by [Tasks] weights / set by the story):
+      - fetch fresh moss for the medicine cat (gather moss out in the territory, bring it to the medicine cat's den) -
+        its turn-in: talk to the medicine cat ([Task.<Kind>] TurnIn = MedicineCat - supported);
+      - clear out the old bedding moss (from the dens, out of camp);
+      - water moss: soak moss in the lake / stream and bring it to cats too weak to move so they can drink - more
+        often in greenleaf (summer), the season from weather.lua. Needs a "weak / sick cat" (an elder, the medicine
+        den) and a carried-item state (no carry mechanic in the game yet - research: quest pickup items,
+        BP_Objective_Base pickups).
+      BUILT 2026-10-31 - GATHER (moss / herbs for the medicine cat): duties.lua task kind Gather, [Gather] Count /
+      Reach / MinDistance / MaxRank (Apprentice), [Tasks] Gather weight; the game's own pickups (moss containers where
+      the world has them - none loaded on the VM save - else healing herbs / catnip), marked, gathered by reaching
+      them, turned in to the MedicineCat. VM: assigned, 3 spots, 3/3, 'turn it in: report to the medicine cat'.
+      Operator check: the report key next to the medicine cat (the VM harness's keys have no key name). Still open:
+      BUILT 2026-10-31 - WATER: soak moss at the nearest water (fishing spots), bring it to the elders (report:
+      Elder - Sharpfoot on the VM save), x3 in greenleaf; the carrying is the task's own state, no carry mechanic needed.
+      VM: soaked -> 'report to the elder'. All three apprentice duties built; operator check: the report key in play.
+      BUILT 2026-10-31 - BEDDING: into one of the clan's dens (its inside point), the old moss to a marked spot out of
+      camp, report to the deputy. VM: Medicine Cat's den -> taken -> thrown out -> report.
+      REPORT KEY SEEN 2026-11-01 (VM, a REAL F key - vm_input key 46 carries the key name the harness's HoldKey lacks):
+      water soaked -> next to the elder Sharpfoot, F -> 'water for the elders turned in (Elder)' -> the evening began
+      with its clan event. The medicine cat / deputy turn-ins use the same report path (role by name). The log now
+      names the cat (the actor's class misled: Sharpfoot is a BP_Quest_Giver_Deputy).
+- [x] **18. More graphics options.** DONE 2026-10-27: config/graphics.ini - [Scalability] the engine's groups (sg.*),
+      [CVars] any console variable (motion blur, DoF, fringe, screen %, t.MaxFPS listed), applied through
+      ExecuteConsoleCommand at start and after the game's options popup closes. VM: read back sg.ShadowQuality 0,
+      r.MotionBlurQuality 0, r.ScreenPercentage 50 (the VM's own setting would give 25). An in-game menu for them =
+      with the keybind menu (19a).
+- [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
+      camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
+      the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
+      cats to the screen and count foliage instances on the camera -> head line (an overlap / instanced-mesh query), then
+      turn the shot. Data in hand: scratchpad cam_probe.lua.
+      MEASURED (2026-11-02, VM 960x540): the blockers are a big tree's roots + LEAVES round the camp's river edge.
+      Every physics query says clear (traces on Visibility / Camera, instanced-foliage overlaps: 0, plain meshes'
+      bounds: only our rain cylinders). A scene-DEPTH capture from the camera pose works (cm along the view, read a
+      frame later - scratchpad depth_probe.lua) but the leaves don't write depth (a 7x7 window read 100% seen while
+      Lionstar was half hidden) - so it would only catch opaque blockers; built + REVERTED (never seen to trigger).
+      What's left: an image check (a colour capture of the cat alone vs the full scene) or simply prefer shot
+      directions away from big trees. Open, low priority - the shots are valid, just ugly in that one spot.
+      IMAGE CHECK TRIED (2026-11-02, VM, scratchpad color_probe.lua): three HDR scene captures from the camera pose in
+      one frame - the scene, the cat alone (show-only list), the sky alone (empty list); a cat pixel = cat-alone !=
+      sky-alone, seen = scene ~ cat-alone. Result: the cat-alone capture equals the sky everywhere, even in a Two shot
+      with Lionstar plainly on screen -> the cats don't render into scene captures (which also explains the depth
+      check's '100% seen'), or the probe took Lionstar's parked home copy (two exist). Captures queue and render
+      together at frame end (hiding a cat between two captures of one frame hid it in both). NEXT if picked up: take
+      the cast actor from Cutscenes (not a name search), and check a cat's mesh in a capture's show-only list on open
+      ground first; if cats never render in captures, this route is closed.
+      DONE (same night): the PLAYER's own cat (unambiguous, on screen, open camp ground) in a show-only capture - with
+      its attached actors (none) - the cat-alone image equals the sky-alone one except sky noise along the top row.
+      The cats do NOT render into scene captures (all four capture checks: depth, difference, show-only, the player).
+      CAPTURE ROUTE CLOSED. What remains is a placement rule (keep portrait / two shots out of big trees' crowns -
+      e.g. a ring of traces at head height around the camera spot catching trunks/roots as a proxy for the leaves
+      above them), to be judged by the operator's eyes at a real resolution. Low priority.
+      RING RULE TRIED + REVERTED (2026-11-02): enclosure by 8 short traces (portrait spot 7/12 hit, open camp 0)
+      counted as half-blocked - the Portrait turned 70 deg instead of -35 and a trunk filled the frame (Lionstar
+      gone). The scene itself stands inside the tree's root zone: no camera direction round it is good. The fix
+      belongs to the STAGING (Place = Here choosing a spot whose surroundings aren't enclosed - the same ring test on
+      the scene's middle), not the camera. Next if picked up: score Place = Here candidates by enclosure (cheap, the
+      measurement is in hand) and compare the frames at 960x540.
+      DONE (2026-11-02, VM 960x540): Place = Here scores its spots by enclosure (EnclosedAt) - LonerVisit from the same
+      spot was restaged 90 deg and the Lionstar portrait was clear and large. WaCa-Cutscenes 'Place = Here keeps scenes...'.
+      2026-11-02: the camera itself now sees plants with no collision (WaCa Cutscenes Camera FoliageRadius -
+      instance boxes along the line), not only staging - VM: the Portrait turned to a clear view past the reeds.
+- [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
+      party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
+      shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
+      Also seen: two Toadfrost actors exist (one 140 m off, never drawn) - Cast takes the nearest; harmless so far.
+      LIBRARY EXERCISE same day: FightBeside cutscene + the new Wait beat (Cutscenes) - VM ok.
+      FIXED: Cutscenes sends the cast's paths with CutsceneStarted; Clan Life's walkers hide the party cats not in it for
+      the scene (VM: '2 party cat(s) out of the cutscene's shots', the frame clear of them).
+- [x] **P3: a cutscene camera behind scenery the trace can't see** (CLOSED 2026-11-01 - NOT A BUG, misread screenshots; 2026-11-01, FightBeside at the camp's river
+      edge): the Two shot logged no 'blocked' (its sight trace on the Camera channel found the way clear) while the
+      frame showed a rock face and no cats - likely a rock without collision on that channel. Next: trace on
+      Visibility too / against the rendered depth, or check the cats' WasRecentlyRendered after the move and try the
+      next direction when they aren't. Needs a closer look at a real resolution (0.5 fps / 480x270 is too coarse).
+      MORE (same day, VM): on open camp ground the FightBeside shots frame both cats (Two, Portrait with TailUp) - the
+      bad frames are the RIVER EDGE: Place = Here stages the scene where your cat stands, and there the Two shot went
+      10 m out over the water (the frame a flat pale blue - the camera at / under the water's surface; water has no
+      collision for the sight trace). Built meanwhile: [Camera] SeenCheck (turns a shot whose cats weren't rendered) -
+      not seen firing yet. Next: keep the camera above the water surface (Hunting's wading finds the planes) or fit
+      the stage away from water.
+      TRIED (same day, VM, timed shots): WaterClear (camera held 60 cm above water - never triggered) and SeenCheck
+      (never triggered: WasRecentlyRendered stays true for a cat behind roots / from the previous shot). At the river
+      edge (-46706 6269, facing -90) the Two shot looked low along the water, the Portrait sat in tree roots - neither
+      cat visible. Both fixes are in (guarded, harmless) but NOT proven. The real fix: Place = Here should pick an
+      OPEN spot near the cat (ground flat, no roots / water / rock within the shapes' radius + camera distances),
+      and the tests need a frame rate where frames can be judged (CLAUDE.md: -ResX 960 or a real PC). Still open.
+      TRIED the open-spot fit (same day): Place = Here weighs camera room (clear + dry 7 m behind, 4.5 m to the sides)
+      and looks up to 7.5 m out - at -46706 6269 it still chose the bank (room 3 of 3) and the Two / Portrait shots
+      stayed low over the river behind reeds. The room test doesn't match what the shots see (they pick their side by
+      the cats' line, reeds don't block traces). STOPPED here on purpose: judging framing at 0.5 fps / 480x270 is
+      guesswork - needs a real-resolution session (or the operator's eyes). Committed, unproven, harmless elsewhere
+      (open camp ground framed fine).
+      RESOLVED BY MEASURING (same night, VM at 960x540 + a probe: each cat's head projected to the screen, and the
+      line camera -> head traced on Visibility and Camera): at the 'bad' river-edge spot EVERY shot had its cats in
+      frame with clear lines (Two: Toadfrost x789, Dapplepatch x265 of 960; Portrait: Toadfrost centred; Over:
+      Dapplepatch in frame). The pale planes were the river seen from ABOVE (sky reflection, lily pads from above),
+      not the camera under water; nothing is above the camera on any channel. So: legit shots of small cats on a
+      bank, not a camera bug. The three 'fixes' built on the misread (SeenCheck, WaterClear, the room-aware fit) were
+      REVERTED (WaCa-Cutscenes fc22449 / d67961f / 578c6be). Lesson (CLAUDE.md already says it): project to the
+      screen before judging framing from a 480x270 screenshot. Tool: scratchpad cam_probe.lua.
 - [x] **16. RiverClan cats swim.** Feasibility unknown (water volumes, animation set, nav).
       DONE 2026-11-01: wading + swimming + all three exits VM-verified; a paddle animation needs new art (the mod pipeline).
       PREPARED 2026-10-28 (offline): NO swim animation in the game (only fish / duck / swan swim VFX), NO water or
@@ -2213,8 +2217,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - Check the water volumes (PhysicsVolume bWaterVolume) and whether the cat's movement component has a swim mode
         (CharacterMovement MOVE_Swimming) with any animation; if none exists, a "wade" (slowed walk + splash effect,
         NS_Steps_Water / DeepWater exist) is the cheap version.
-
-## Archive
 - [x] 2026-11-02 - **P3: the test harness stopped taking commands after many hot reloads (seen once, VM 2026-11-02)** - after ~10
       reloads of Clan Life / Cutscenes / Looks / Hunting within an hour (Watch + deploys), from ~09:56 the harness never
       read its command file again and Hunting's delayed start logged nothing, while the game ran and reloads still
