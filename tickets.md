@@ -2213,6 +2213,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-11-02 **Engine crash in the GC purge (exe+0x1c64787)** (operator: fix it though pre-existing): WaCa Core gcguard.cpp - the null store skipped; VM 8 boots clean, the guard fired on one.
 - [x] 2026-10-31 **Clan Life lost the save's day on a hot Lua reload** (P3): DayNight restores + starts the clock at
       Init when the world is already up, and Drive keeps a restored hour. VM: two reloads -> day 19, 13:00, Leaf-bare,
       the noon resumed.
