@@ -57,7 +57,7 @@ game data in this repo.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
 - Fresh kill without hunger: deposit VM-verified; talking to the pile's cat in play (the VM can't talk to NPCs) = operator.
-- Cutscenes from text: built + VM-verified (incl. Wait, cast to other mods, [Rogue.<Name>] looks); the look = operator.
+- Cutscenes from text: built + VM-verified (incl. Wait, cast to other mods, [Rogue.<Name>] looks; 2026-11-02: load-time check, orbit fix, Letterbox / Focus options off); the look (and whether to turn Letterbox / Focus on) = operator.
 - Nexus Mods: the operator's login (upload, Nexus-UE4SS DLL test, MothColorPicker).
 - 17 + 10 Show, don't tell: framework built; which scenes = operator content.
 - 11 Clan cat interactivity: built (off); lines / turning it on = operator.
