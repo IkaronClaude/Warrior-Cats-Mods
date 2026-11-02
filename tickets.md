@@ -40,7 +40,7 @@ game data in this repo.
 - 4 Day / night cycle: built + VM-verified; the day length / feel is the operator's call.
 - 25 Story as days: built (Day verified 2026-11-01); the real days = operator content.
 - 9b Fishing: built + VM-verified, off; turning it on = operator.
-- 9 Hunting rework: built (experimental, off); which creatures charge / on by default = operator decisions.
+- 9 Hunting rework: built (experimental, off; + the wind 2026-11-02, off); which creatures charge / on by default = operator decisions.
 - 8 Real hunting missions: built; hunting-ground card + map mark VERIFIED 2026-11-01 (VM); hunting patrols on by default? (operator).
 - 7 Real patrols: built + VM-verified; border-point events = operator content.
 - 6 Combat training: built; a WON fight in play (operator - the VM can't win one).
@@ -896,6 +896,10 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       - FUTURE (operator 2026-10-27): WIND DIRECTION. Prey that hunts by scent (all but birds) smells a cat that is
         upwind - circle it to approach downwind, and never from the front (its view). Later: by prey difficulty, it
         checks the scent / turns around more often.
+        BUILT 2026-11-02 (WaCa-Hunting wind.lua, [Wind] On = 0): the wind turns every few in-game hours (said on screen);
+        a scent prey with your cat upwind within 15 m notices it the game's own way (OnCharacterDetected) - NoFight:
+        it runs off. VM: downwind nothing, upwind the mouse noticed + gone. OPEN for the operator: turn it on; the
+        'never from the front' (its view) part is the game's own sight; prey difficulty -> more checks = later.
       - NOISE (operator: "in the instakill cutscene the cat can loudly walk through leaf litter - should make it
         flee"): FOUND 2026-10-27 - the game defines NO physical surface types (Wrc/Config/DefaultEngine.ini has no
         PhysicalSurfaces; nothing reads a surface type), so "loud ground" is not a surface system to hook. Prey
