@@ -1965,20 +1965,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
-- [ ] **P3: the test harness stopped taking commands after many hot reloads (seen once, VM 2026-11-02)** - after ~10
-      reloads of Clan Life / Cutscenes / Looks / Hunting within an hour (Watch + deploys), from ~09:56 the harness never
-      read its command file again and Hunting's delayed start logged nothing, while the game ran and reloads still
-      logged; a restart cleared it. CORRECTED the same day: Clan Life's 'day clock' line is not a heartbeat (it logs on
-      hour changes), so 'every mod's timers stopped' was not shown - only the harness and maybe Hunting. NOT reproduced:
-      15 Hunting reloads in a row, a delayed callback ran after every one. Nor 16 reloads rotating Clan Life / Cutscenes / Looks /
-      Hunting (each followed by a harness delayed callback - all ran). Next if it comes back: which mods' delayed
-      callbacks still run (one probe per mod), and whether the harness itself errored.
-      2026-11-02 later: the harness's own loop hardened (WaCaTest main.lua, game dir only - backup main.lua.bak-20261102):
-      the next poll is now armed FIRST and the file read is pcall'd - before, one error outside the per-line pcall ended
-      the loop for good, one way to the symptom; a deliberate failing command is followed by working ones (VM). It also
-      logs 'CMD poll N alive' every 300 polls (~10 min): a gap in those = the stall is back. Stays open: Hunting's
-      delayed start went quiet too, which a harness-only error wouldn't explain.
-
 - [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
       camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
       the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
@@ -2229,6 +2215,28 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-11-02 - **P3: the test harness stopped taking commands after many hot reloads (seen once, VM 2026-11-02)** - after ~10
+      reloads of Clan Life / Cutscenes / Looks / Hunting within an hour (Watch + deploys), from ~09:56 the harness never
+      read its command file again and Hunting's delayed start logged nothing, while the game ran and reloads still
+      logged; a restart cleared it. CORRECTED the same day: Clan Life's 'day clock' line is not a heartbeat (it logs on
+      hour changes), so 'every mod's timers stopped' was not shown - only the harness and maybe Hunting. NOT reproduced:
+      15 Hunting reloads in a row, a delayed callback ran after every one. Nor 16 reloads rotating Clan Life / Cutscenes / Looks /
+      Hunting (each followed by a harness delayed callback - all ran). Next if it comes back: which mods' delayed
+      callbacks still run (one probe per mod), and whether the harness itself errored.
+      2026-11-02 later: the harness's own loop hardened (WaCaTest main.lua, game dir only - backup main.lua.bak-20261102):
+      the next poll is now armed FIRST and the file read is pcall'd - before, one error outside the per-line pcall ended
+      the loop for good, one way to the symptom; a deliberate failing command is followed by working ones (VM). It also
+      logs 'CMD poll N alive' every 300 polls (~10 min): a gap in those = the stall is back. Stays open: Hunting's
+      delayed start went quiet too, which a harness-only error wouldn't explain.
+      CAUSE FOUND (2026-11-02 evening, VM): reproduced in a soak - 37 hot reloads rotating Clan Life / Cutscenes / Looks /
+      Hunting; on the 37th (a Hunting reload) the GAME hung, not the harness: 'not responding', ~0 CPU (blocked, not
+      spinning), nothing logged after Hunting's start, the screen frozen. A live stack scan of every thread: the game
+      thread deep in the Lua VM waiting on a lock, ~25 engine workers waiting in the same UE4SS hook path, no WaCa
+      native code on any blocked stack - a deadlock inside UE4SS's file-watch auto-reload (EnableAutoReloadingLuaMods
+      = 1, set for VM testing; UE4SS ships 0). Players never run it. Writers can (Clan Life's story-check Watch relies
+      on it): WRITING.md now says to save before a writing session, and Watch says when the setting is off (it
+      silently did nothing before). The harness hardening (poll armed first, read guarded, alive heartbeat) stays.
+      My testing: after a hang, end the game and boot again (boot_hi.sh keeps the logs).
 - [x] 2026-11-02 - **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
       (the loner's visit at the riverbank, VM): (1) reeds stood between the camera and Lionstar - the camera's
       clear-view trace (Camera channel) didn't see them; (2) after a reboot, at another spot, the Portrait showed a
