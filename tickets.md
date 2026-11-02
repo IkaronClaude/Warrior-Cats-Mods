@@ -1948,7 +1948,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
-- [ ] **P3: cutscene shots through foliage** (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
+- [x] **P3: cutscene shots through foliage** (FIXED 2026-11-02 by staging - see the end) (seen 2026-11-01, LonerVisit at the camp's river edge, 960x540): the
       camera looked through a bush (leaves and reeds across the frame, Quill at its edge). Foliage has no collision, so
       the sight trace can't see it. MEASURE FIRST (the camera 'bug' earlier the same night was a misread): project the
       cats to the screen and count foliage instances on the camera -> head line (an overlap / instanced-mesh query), then
@@ -1980,6 +1980,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       belongs to the STAGING (Place = Here choosing a spot whose surroundings aren't enclosed - the same ring test on
       the scene's middle), not the camera. Next if picked up: score Place = Here candidates by enclosure (cheap, the
       measurement is in hand) and compare the frames at 960x540.
+      DONE (2026-11-02, VM 960x540): Place = Here scores its spots by enclosure (EnclosedAt) - LonerVisit from the same
+      spot was restaged 90 deg and the Lionstar portrait was clear and large. WaCa-Cutscenes 'Place = Here keeps scenes...'.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
