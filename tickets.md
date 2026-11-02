@@ -1896,6 +1896,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         "attacker" and "player" were null, so nothing was ever scaled. VM after the fix, a real fight vs forest rats:
         "[combat] damage taken by your cat: 8 -> 7 (x0.85)", "30 -> 26", and "damage dealt by your cat: 35 -> 44 (x1.25)" -
         both directions VERIFIED.
+      CHOOSING THE ROLE IN GAME BUILT 2026-11-02 (VM): with roles.ini Role empty, reaching MinRank asks (a Clan Life
+      Choice - roles.ini [Specialisation] Ask / Question, [Role.*] Label; the first four roles in file order, a pack's
+      after the mod's): Deputy save -> the question with Hunter / Tracker / Fighter / Herbalist, key 4 -> Herbalist,
+      kept in the save's WaCaHunting.ini. Left: the operator's feel for the wording / the choice's look (P2 ticket).
 - [ ] **2. More customisation.** "Ragdoll" colourpoint layout; more colours (a colour wheel?). Check how the coat
       WAITING ON THE OPERATOR: the Colourpoint look / a colour wheel UI (needs the editor).
       material / masks work first.
@@ -1959,14 +1963,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         prey every few metres, visible in sense mode (the game's ExplorationSenseComponent switches) - fades in N s.
 
 ## P3: Later / big content
-- [ ] **P3: a Lua-side crash inside UE4SS (UE4SS+0x2aed17 / +0x2aed57) - 19 reports 10-28 .. 11-01 13:39, none on 11-02** -
-      the crashed thread is in UE4SS's Lua interpreter (c7xxxx frames) under an object access (b9ddd4 / ba2b5c): some
-      mod's Lua touched a game object no longer valid (pcall can't catch an access violation). The session's UE4SS.log
-      is overwritten on the next start, so the script isn't known. 11-02: many boots and ~40 reloads, not once - maybe
-      gone with that day's fixes, not proven. A soak the same day - 30 scenes in a row (every cutscene, Groups, a
-      pack event, 3 rounds, ~75 min) - no crash. NEXT time it happens: copy UE4SS.log + WaCaNative.log BEFORE restarting
-      (the last lines name the mod and the step), then fix that script. (Crash triage 11-02: the GC purge crash +0x1c64787
-      fixed - gcguard; +0x1b355e5 at 08:57 was my own destroy-during-start, fixed; older groups stopped by 10-31.)
 
 - [ ] **P3: the test harness stopped taking commands after many hot reloads (seen once, VM 2026-11-02)** - after ~10
       reloads of Clan Life / Cutscenes / Looks / Hunting within an hour (Watch + deploys), from ~09:56 the harness never
@@ -2232,6 +2228,23 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
+- [x] 2026-11-02 - **P3: a Lua-side crash inside UE4SS (UE4SS+0x2aed17 / +0x2aed57) - 19 reports 10-28 .. 11-01 13:39, none on 11-02** -
+      the crashed thread is in UE4SS's Lua interpreter (c7xxxx frames) under an object access (b9ddd4 / ba2b5c): some
+      mod's Lua touched a game object no longer valid (pcall can't catch an access violation). The session's UE4SS.log
+      is overwritten on the next start, so the script isn't known. 11-02: many boots and ~40 reloads, not once - maybe
+      gone with that day's fixes, not proven. A soak the same day - 30 scenes in a row (every cutscene, Groups, a
+      pack event, 3 rounds, ~75 min) - no crash. NEXT time it happens: copy UE4SS.log + WaCaNative.log BEFORE restarting
+      (the last lines name the mod and the step), then fix that script. (Crash triage 11-02: the GC purge crash +0x1c64787
+      fixed - gcguard; +0x1b355e5 at 08:57 was my own destroy-during-start, fixed; older groups stopped by 10-31.)
+
+      CAUSE FOUND + FIXED 2026-11-02 (VM): reproduced on demand - UE4SS hands back a wrapper of NULL (not nil) from
+      GetOwner / GetParent / FindFirstOf / object fields when there is no object, and any call on it (GetClass,
+      GetFullName, a field) crashes natively reading 0x10 - pcall can't catch it. A probe calling GetClass() on a
+      widget's 6th GetParent() gave exactly UE4SS+0x2aed57 / 'reading 0x10'; through the new WaCa.Live the same call
+      returned nil. Every unchecked chain in our mods now goes through WaCa.Live (component owners, FindFirstOf
+      managers, prey controller / movement, a widget tree - Core, Looks, Cutscenes, Hunting, Clan Life); API.md
+      documents it. Which chain caused the 19 earlier reports is not known (their logs weren't kept) - a NEW
+      0x2aed57 report reopens this (the logs are kept in the crash folder now).
 - [x] 2026-11-02 **Engine crash in the GC purge (exe+0x1c64787)** (operator: fix it though pre-existing): WaCa Core gcguard.cpp - the null store skipped; VM 8 boots clean, the guard fired on one.
 - [x] 2026-10-31 **Clan Life lost the save's day on a hot Lua reload** (P3): DayNight restores + starts the clock at
       Init when the world is already up, and Drive keeps a restored hour. VM: two reloads -> day 19, 13:00, Leaf-bare,
