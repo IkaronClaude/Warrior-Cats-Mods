@@ -2229,7 +2229,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         NS_Steps_Water / DeepWater exist) is the cheap version.
 
 ## Archive
-2026-11-02 - [x] **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
+- [x] 2026-11-02 - **P2: a cutscene's Portrait framing on rough ground (WaCa Cutscenes camera)** - found 2026-11-02 exercising Ask:
       (the loner's visit at the riverbank, VM): (1) reeds stood between the camera and Lionstar - the camera's
       clear-view trace (Camera channel) didn't see them; (2) after a reboot, at another spot, the Portrait showed a
       high view under a rock with Lionstar small mid-screen, not a 1.7 m portrait - the log said '1.7 m from what it
