@@ -1051,7 +1051,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         (lupa): the sync wait + crossing together; VM: separate counters / repeats, the pack alone moving on, the sidecar.
         STILL OPEN: (a) against the GAME's own quests (soft barrier: the warning before main-story progress + the
         skipped days' Summaries) - needs the operator's two answers above (Warn or Gate; replay the skipped beats'
-        variable changes or only show summaries); (b) a third's task owned by a pack (Owns = <Third>); (c) a quest-list
+        variable changes or only show summaries); (b) DONE same day - Owns = <thirds> + <Third>Duty (VM: the example owns the Morning, HerbRound); (c) a quest-list
         entry for a pack's story (research the quest HUD); (d) the STORY FIXER screen (low prio, operator).
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
