@@ -899,7 +899,8 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
         BUILT 2026-11-02 (WaCa-Hunting wind.lua, [Wind] On = 0): the wind turns every few in-game hours (said on screen);
         a scent prey with your cat upwind within 15 m notices it the game's own way (OnCharacterDetected) - NoFight:
         it runs off. VM: downwind nothing, upwind the mouse noticed + gone. OPEN for the operator: turn it on; the
-        'never from the front' (its view) part is the game's own sight; prey difficulty -> more checks = later.
+        'never from the front' (its view) part is the game's own sight; prey difficulty: DONE 2026-11-02 (harder prey -
+        [PreyFactor] < 1 - smells from further, up to Wary x Range; VM: a 'hard' mouse noticed the cat at 25 m).
       - NOISE (operator: "in the instakill cutscene the cat can loudly walk through leaf litter - should make it
         flee"): FOUND 2026-10-27 - the game defines NO physical surface types (Wrc/Config/DefaultEngine.ini has no
         PhysicalSurfaces; nothing reads a surface type), so "loud ground" is not a surface system to hook. Prey
