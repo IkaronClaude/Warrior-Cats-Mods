@@ -1960,6 +1960,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Lionstar was half hidden) - so it would only catch opaque blockers; built + REVERTED (never seen to trigger).
       What's left: an image check (a colour capture of the cat alone vs the full scene) or simply prefer shot
       directions away from big trees. Open, low priority - the shots are valid, just ugly in that one spot.
+      IMAGE CHECK TRIED (2026-11-02, VM, scratchpad color_probe.lua): three HDR scene captures from the camera pose in
+      one frame - the scene, the cat alone (show-only list), the sky alone (empty list); a cat pixel = cat-alone !=
+      sky-alone, seen = scene ~ cat-alone. Result: the cat-alone capture equals the sky everywhere, even in a Two shot
+      with Lionstar plainly on screen -> the cats don't render into scene captures (which also explains the depth
+      check's '100% seen'), or the probe took Lionstar's parked home copy (two exist). Captures queue and render
+      together at frame end (hiding a cat between two captures of one frame hid it in both). NEXT if picked up: take
+      the cast actor from Cutscenes (not a name search), and check a cat's mesh in a capture's show-only list on open
+      ground first; if cats never render in captures, this route is closed.
 - [x] **P3: party cats in a cutscene's frame** (found 2026-11-01, library exercise; FIXED same day): the cats that follow you (walkers'
       party) hold where they stand during a cutscene - a scene placed Here has Nightheart / Rippleface standing in its
       shots. Fix: hide (or step aside) non-cast party cats within the stage's radius for the scene, back after.
