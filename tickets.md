@@ -25,7 +25,7 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
-## Board status 2026-11-01 (EVERY open item, checked against its own text - all wait on the operator)
+## Board status 2026-11-02 (EVERY open item, checked against its own text - all wait on the operator)
 - Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
 - P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
 - Operator checks: the operator's list by definition.
@@ -53,7 +53,7 @@ game data in this repo.
 - Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
 - Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
 - Mod stories (story packs): the multi-story design questions (Warn / Gate, replay) = operator; the story fixer depends on them.
-- Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch); start rank = operator decision; an editor = future.
+- Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch; 2026-11-02 exercises: S-role murmurs, HerbCouncil cutscene + Lead event, story dialogue + its checks, renamed-cat nameplates, undrawn cast cats); start rank = operator decision; an editor = future.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
 - Fresh kill without hunger: deposit VM-verified; talking to the pile's cat in play (the VM can't talk to NPCs) = operator.
