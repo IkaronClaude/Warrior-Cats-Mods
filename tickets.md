@@ -71,7 +71,7 @@ game data in this repo.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
-- P3 Core double hot-reload hang: open, a bridge race (test-only setting); next step = a stack of the hung game.
+- P3 Core hot-reload hang: open (test-only setting); single reloads hang too, the stacks show only UE4SS waiting - a newer UE4SS build to try = operator.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
 Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot speaker). Library exercises 2026-11-03: Ask
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
@@ -1543,6 +1543,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       find what the delivery waits on (a dump of the hung game), then defer adds / removes to the game thread. Only
       with EnableAutoReloadingLuaMods = 1 (a test setting) - meanwhile Core changes are deployed by restarting the game.
       Logs: Z:/WaCa/hangs-20261103/ (UE4SS.log of both, WaCaNative.log of the second).
+      REPRO 2026-11-03 11:50: a SINGLE Core reload (one cp, pause menu up) hung it too - so not the double reload.
+      Stack scan of the hung game (Z:/WaCa/hangs-20261103/hang-1150-stacks.txt): NO main.dll (WaCaNative) frame on any
+      thread; ~25 threads wait in the same UE4SS path (ntdll wait <- UE4SS+1356e38 / +1e48ab / +cae0eb ...), one more in
+      WaitForSingleObject from UE4SS+20d823. Same picture as the 2026-11-02 reload deadlock (memory: not our code).
+      Naming the frames needs this build's PDB: ours is v3.0.1 Beta g83330635, no longer published (experimental-latest
+      is g236adf26) - trying a newer UE4SS = a whole-setup change, the operator's call. Earlier the same day a Core
+      reload with the pause up worked (10:07), so it's timing-dependent. Rule meanwhile: Core changes = restart.
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
