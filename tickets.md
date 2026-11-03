@@ -71,7 +71,7 @@ game data in this repo.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
-- P3 Core hot-reload hang: open (test-only setting); single reloads hang too, the stacks show only UE4SS waiting - a newer UE4SS build to try = operator.
+- P3 Core hot-reload hang: open (test-only setting); the newer UE4SS's lock fix tried (cherry-picked, built, VM) - still hangs; named stacks: a lock held across a mod's teardown in UE4SS's Lua layer. Upstream report = operator's go.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
@@ -1568,6 +1568,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       reload while the game thread runs Lua (a busy KeyDown handler) hangs the game inside UE4SS (stacks: Z:/WaCa/
       hangs-20261103/hang-1318-forced-*), no main.dll frame. So the remaining hang = UE4SS (game-thread Lua vs its
       loader thread), not our bridge. Left: a newer UE4SS build to try (operator), or report it upstream with the repro.
+      TRIED 2026-11-03 17:00: experimental-latest is only 15 commits ahead; the one lock fix in it (cdbc0b6 'Run queued
+      events outside the event queue lock', UE4SS #1445) cherry-picked onto our 83330635 and UE4SS.dll built from our tree
+      (main.dll unchanged - same headers): the forced repro STILL hangs. With our own build's PDB the stacks are named
+      (Z:/WaCa/hangs-20261103/hang-1716-patched-stacks.txt + ue4ss-patched-test/): the game thread is in a ProcessEvent
+      hook -> Lua -> LuaMadeSimple::process_lua_function (a C function called from the harness's Lua - its log/print)
+      waiting on a lock; the event loop (UE4SSProgram::update) and every LuaMod::update_async thread just sleep, the 25
+      rayon threads are idle - the reload itself finished. So: a lock left held across the reloaded mod's teardown, in
+      UE4SS's Lua layer. Not fixed by #1445; the original UE4SS.dll is back on the VM. Next = UE4SS internals or an
+      upstream report with this repro (outward-facing: operator's go).
 - [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
       (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
       AskMate, Cutscenes.Skip. Which buttons are free in the game's pad layout = the operator's call.
