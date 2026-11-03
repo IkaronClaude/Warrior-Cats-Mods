@@ -1082,7 +1082,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         story = WARN (the warning before the game's story moves on; crossing anyway jumps the pack, summaries shown).
       (c) DONE 2026-11-03 (VM): WaCa.QuestLine (Core questlines.lua) - the pack's line in SIDE QUESTS, the mouse over
         it shows its goal + Place on the detail panel (Clan Life days.lua; SetPackDay to put a pack on a day). Not tried
-        yet: a save with side quests of its own (the keep / put-back path). (a) WARN: open - next.
+        yet: a save with side quests of its own (the keep / put-back path). (a) WARN DONE 2026-11-03 (VM): [Sync.<Name>] Main =
+        Rank:<Rank> - warning card when the rank-up quest comes, jump + 'meanwhile' Summaries when it happens (or on a save
+        already past it). NOT SEEN LIVE: the game itself adding a rank-up quest (OnQuestAdded watched, the event was sent
+        by hand with the real quest objects) - check on the next real promotion. Only Rank:<Rank> so far.
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
