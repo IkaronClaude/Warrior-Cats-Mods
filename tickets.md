@@ -279,7 +279,9 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
       [Actions] in place and applied LIVE (Core ApplyBindings - UPlayerInput layout read from AddActionMapping). Key
       ICONS / HINTS now follow keybinds.ini everywhere (the default-list getters SwtPlayerInput +0x348/+0x350 hooked):
       the controls page, the screen and the HUD prompt ('F Travel'). VM: Map = F live -> F opens the map, M nothing.
-      OPEN: the operator's feel check; axes (move / camera) are not on the game's screen - still ini-only; the
+      OPEN: the operator's feel check; axes (move / camera) are not on the game's screen - still ini-only [DONE
+      2026-11-03 (VM): direction rows on the controls screen - a left column, the game's key buttons + icons (DT_Keys),
+      rebind / Delete / Reset write [Axes]]; the
       remaining 'quests are on K' hint - DONE 2026-11-02 (VM): the game's own hidden HUD quest button (scroll + the
       quests key, beside StarClan's Q) shown, keybinds.ini [Hints] QuestKey.
       MOD KEYS 2026-11-01 (VM): WaCa.ModKey(mod, name, default, label) - every mod's own keys in keybinds.ini
