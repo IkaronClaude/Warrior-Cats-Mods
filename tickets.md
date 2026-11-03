@@ -1532,6 +1532,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
+- [ ] **P3: WaCa Core hot-reloaded TWICE in a row hangs the game (VM 2026-11-03, 2 of 2)** - one copy of a Core
+      script over the share gave two 'Auto-reloading Lua mod WaCaCore' ~10 s apart; the game stopped responding after
+      the second start's 'roles with no cat in this save' (0.1 fps). WaCaNative.log both ways: 'a mod stopping while an
+      event runs - removed without waiting' then 'WaCaCore starting while an event runs - added without waiting' - the
+      bridge's 2 s try_lock in LuaStopping / LuaStarted gave up and changed g_states with a delivery (OnProcessEvent
+      holds g_statesMutex on the game thread) still in it. A real race in bridge.cpp, not fixed: a state can't simply be
+      marked dead and swept later if the game thread is blocked INSIDE that state's Lua (UE4SS tears it down). Next:
+      find what the delivery waits on (a dump of the hung game), then defer adds / removes to the game thread. Only
+      with EnableAutoReloadingLuaMods = 1 (a test setting) - meanwhile Core changes are deployed by restarting the game.
+      Logs: Z:/WaCa/hangs-20261103/ (UE4SS.log of both, WaCaNative.log of the second).
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
