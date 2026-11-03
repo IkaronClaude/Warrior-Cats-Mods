@@ -52,7 +52,7 @@ game data in this repo.
 - 24 StarClan guidance leads to prey: built + VERIFIED, off; turning it on = operator.
 - Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
 - Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
-- Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; left: the crossing at a real promotion (the warning seen live via the game's own StartQuestOfTag), a save with side quests of its own, replaying skipped variables (operator).
+- Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; both halves seen via the game's own functions (StartQuestOfTag / OnPlayRankUpSequenceFinished); a real play-through promotion = operator, a save with side quests of its own, replaying skipped variables (operator).
 - Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch; 2026-11-02 exercises: S-role murmurs, HerbCouncil cutscene + Lead event, story dialogue + its checks, renamed-cat nameplates, undrawn cast cats); start rank = operator decision; an editor = future.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
@@ -73,6 +73,7 @@ game data in this repo.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: open (test-only setting); single reloads hang too, the stacks show only UE4SS waiting - a newer UE4SS build to try = operator.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
+Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot speaker). Library exercises 2026-11-03: Ask
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
@@ -1082,8 +1083,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         already past it). SEEN LIVE 2026-11-03 13:50 (save backed up + restored): the game's own QuestManager:StartQuestOfTag(
         Quest.Procedural.Progression.RankUp3) -> the HUD's real OnQuestAdded -> 'the game added a quest that makes your cat
         Leader' -> the pack warned; the card waited behind the game's conversation it opened. (Levelling to the cap
-        gives no rank-up quest - they come from QuestLine_Main.) The crossing on a real promotion (OnPlayRankUpSequence-
-        Finished -> player.rank) not seen; the restore-time crossing is. Only Rank:<Rank> so far.
+        gives no rank-up quest - they come from QuestLine_Main.) THE CROSSING SEEN TOO (14:20, save backed up + restored): the game's own
+        OnPlayRankUpSequenceFinished on the RankUp3 task -> Core 'your cat's rank: Leader (promotion)' -> 'the game's story
+        passed HerbalistsLessons (rank Leader, promotion): day 1 -> 3, 2 summaries' -> the 'meanwhile' + summary cards.
+        Only Rank:<Rank> so far.
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
