@@ -25,7 +25,7 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
-## Board status 2026-11-03 (EVERY open item, checked against its own text - all wait on the operator)
+## Board status 2026-11-03 evening (EVERY open item, checked against its own text - all wait on the operator)
 - Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
 - P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
 - Operator checks: the operator's list by definition.
@@ -73,6 +73,8 @@ game data in this repo.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: open (test-only setting); the newer UE4SS's lock fix tried (cherry-picked, built, VM) - still hangs; named stacks: a lock held across a mod's teardown in UE4SS's Lua layer. Upstream report = operator's go.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
+Exercise 2026-11-03 evening: ElderTale - pack role on a save's clanmate + newcomer by role + player in one cutscene,
+the storyteller's question on the answer menu - clean (VM).
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
