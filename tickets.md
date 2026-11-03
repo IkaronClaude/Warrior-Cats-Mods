@@ -765,6 +765,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       - A skip = jump DayNight.Day() by N with a full-screen card ("A moon passes...") listing what happened (duties
         auto-resolved by standing, prey eaten from the pile, rank progress) - the card is one of the game's own
         popups re-texted (WaCa.SetText) to avoid new widgets.
+      OPERATOR ANSWERS 2026-11-03: the pile is eaten + duties auto-resolve - specifically: a time skip's definition can SET
+        a new fresh-kill pile value to jump to (etc.); WARN if a mod puts duties on a time-skip event; the super-basic
+        'go hunt' / 'go patrol' duties are SKIPPED when a skip happens.
 - [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
       intentional time skips, and weather within a season. Both are world state that prey, patrols, duties and visuals
       read. Find what the game already has (sky / lighting / any weather actors, the level's time-of-day setup) before
@@ -944,6 +947,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
       operator's call: is that fine, or a menu of the game's own look (its dialogue-answer list) - which would be the
       next build.
+      OPERATOR ANSWER 2026-11-03: the GAME'S ANSWER MENU - rebuild the Choice in the look of the game's own dialogue
+        answers (research that widget).
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
       WAITING ON THE OPERATOR: the story beats (the groundwork, travel, other Clans, the stay-behind raid are built + VM-verified).
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
@@ -1068,6 +1073,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         manager - selectable, the detail panel works, but a made-up quest inside the game's saved quest state risks the
         saves; (2) a DISPLAY-ONLY line = a copy of an entry added to the side list after the game fills it - safe, but
         not selectable (navigation is native over ListQuestsStruct). The HUD panel above already shows the story; (d) the STORY FIXER screen (low prio, operator).
+      OPERATOR ANSWERS 2026-11-03: (c) the QUEST tab = a DISPLAY-ONLY line WITH its detail panel ("this shouldn't be too
+        hard") - the pack story in the side-quest list, and selecting it shows its detail; (a) sync with the game's own
+        story = WARN (the warning before the game's story moves on; crossing anyway jumps the pack, summaries shown).
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
