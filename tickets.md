@@ -1084,10 +1084,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         the main story's by Priority; every story's day + seen beats in the save's WaCaDays sidecar; the story check
         reads each pack's story.ini on its own; WRITING.md 7b; the example pack's 'The herbalist's lessons'. Offline
         (lupa): the sync wait + crossing together; VM: separate counters / repeats, the pack alone moving on, the sidecar.
-        STILL OPEN: (a) against the GAME's own quests (soft barrier: the warning before main-story progress + the
-        skipped days' Summaries) - needs the operator's two answers above (Warn or Gate; replay the skipped beats'
-        variable changes or only show summaries); (b) DONE same day - Owns = <thirds> + <Third>Duty (VM: the example owns the Morning, HerbRound); (c) a quest-list
-        entry for a pack's story (research the quest HUD) - a step DONE 2026-11-02: a day's Goal shows as the story's own
+        (a) DONE 2026-11-03 (operator: Warn) - [Sync.<Name>] Main = Rank:<Rank>: the warning when the game's rank-up
+        quest comes, the jump + Summaries at the promotion; both seen via the game's own functions (see below). Replaying
+        the skipped beats' variable changes: not built (operator's call); (b) DONE same day - Owns = <thirds> + <Third>Duty (VM: the example owns the Morning, HerbRound); (c) a quest-list
+        entry for a pack's story - DONE 2026-11-03 (operator: display-only line WITH detail - WaCa.QuestLine, VM-verified); history: a step DONE 2026-11-02: a day's Goal shows as the story's own
         HUD panel (VM-seen); the game's quest list itself - RESEARCHED same day,
         OPERATOR'S CALL: the pause menu's QUEST tab (UGuiPausePanelQuest) has a main and a side list (UGuiIListItemsQuest,
         pooled WBP_GuiItemQuestPause entries) fed natively from ListQuestsStruct = TArray<FQuestStruct { UQuestBase*,
