@@ -1520,6 +1520,14 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
+- [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
+      reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
+      <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
+      IsInViewport) 2 s after the pause screen came up - the same check the mods' menu tracking makes on every screen
+      change; nothing else of ours logged. One occurrence; the session's logs are kept in its crash folder
+      (UECC-Windows-981CFE7F...). Next if it recurs: compare the last lines; symbolise 0x1a95fd3 (the exe's PDB-less -
+      the caller chain) and check whether it is IsInViewport on a screen being torn down.
+
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
