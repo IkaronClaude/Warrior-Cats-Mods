@@ -1520,12 +1520,19 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
+- [ ] **P3: spawned cats (newcomers, kits) have no nameplate** - found 2026-11-03 checking a Newcomer on the VM: the
+      game's clanmates float their name and rank over their heads; a cat WaCa.SpawnCat puts in the world shows none, so
+      a new clanmate (Emberheart) can't be told apart in the camp. Next: find what gives the game's NPC cats their
+      plate (the nameplate widget component WaCa Looks renames - which actor class / component adds it) and attach
+      the same to spawned cats with the cat's name and rank.
+
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
       IsInViewport) 2 s after the pause screen came up - the same check the mods' menu tracking makes on every screen
-      change; nothing else of ours logged. One occurrence; the session's logs are kept in its crash folder
-      (UECC-Windows-981CFE7F...). Next if it recurs: compare the last lines; symbolise 0x1a95fd3 (the exe's PDB-less -
+      change; nothing else of ours logged. One occurrence. Its full logs were NOT kept (the boot script copied them
+      only when the crash report was strictly newer than the log - same second here; fixed: copied unless the log is
+      newer) - the lines above are what was read before the reboot. Next if it recurs: compare the last lines; symbolise 0x1a95fd3 (the exe's PDB-less -
       the caller chain) and check whether it is IsInViewport on a screen being torn down.
 
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
