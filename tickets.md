@@ -1686,7 +1686,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 ## Archive
 - [x] **(2026-11-03) P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
         DONE 2026-11-03 (VM): the game's quest-dialogue answer menu - speaker plate, mouse / Up-Down-Enter / number keys
-        (Clan Life events.lua). Gamepad face buttons mapped but untested (no pad on the VM).
+        (Clan Life events.lua). GAMEPAD 2026-11-03: the old pad key names could never fire (KeyDown = keyboard / mouse
+        only); now the game's own screen commands move / answer (Button_Up / Down / A) - VM-tested with the commands a pad
+        produces; a physical pad = operator.
       <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
       keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
       operator's call: is that fine, or a menu of the game's own look (its dialogue-answer list) - which would be the
