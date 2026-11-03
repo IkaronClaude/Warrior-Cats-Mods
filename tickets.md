@@ -1415,7 +1415,7 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         which have no bond), a nicer moment (camera, a line of dialogue). DONE 2026-11-03 (VM): a cat mid-activity is joined in
         THAT activity; the moment = a camera shot on the two (WaCa Cutscenes' new CameraMoment) + a line of the cat's
         ([Join] Camera / Line<n>) - VM: the Two shot, 'Heronshine: I hoped you'd come by.', bond +2. Joining a cat
-        caught mid-ambient-activity: same code path, not caught live (no camp cat was mid-activity on the VM).
+        mid-activity VERIFIED live the same day (StartActivity Nap on RiverClanKit -> 'joining its Nap').
       BOND GAIN - FOUND 2026-10-28 (the next step, an exe job like AddExperience): bonds are kept per narrative role
         (save: GameplayProgression.Bonding = { <role>: points, <clan>: points, Nodes = answered dialogue nodes }, e.g.
         TheRegretfulWarrior 97, RiverClan 102); at runtime that map is NOT reflected. The game changes it through (a) its
