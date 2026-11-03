@@ -74,6 +74,10 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
 - P3 Core hot-reload hang: open (test-only setting); single reloads hang too, the stacks show only UE4SS waiting - a newer UE4SS build to try = operator.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
+Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
+fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
+parameters can be several, FKey = its name). VM-tested with the inputs a pad produces; a physical pad = operator.
+Boot helper: its 'nudge' reloads of the harness removed (one hung a boot).
 Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot speaker). Library exercises 2026-11-03: Ask
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
