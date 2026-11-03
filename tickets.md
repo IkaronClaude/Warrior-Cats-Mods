@@ -80,6 +80,7 @@ the storyteller's question on the answer menu - clean (VM).
 Pre-work 2026-11-03 night (cutscene library): Sound: beat (the game's cues), Beat2a keys, unknown keys reported, lines
 naming an uncast cat left out; FIXED a real bug it surfaced - a cutscene removed a newcomer cast by role at its end
 (WaCa.Cats 'spawned' vs Cutscenes' 'spawned' - now 'placed'). VM-verified.
+  + Camera: Behind = <who> - a following shot behind a walking cat (VM: holds ~2.6 m behind, swings round on a turn).
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
