@@ -1620,6 +1620,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 - [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
       (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
       AskMate, Cutscenes.Skip. Which buttons are free in the game's pad layout = the operator's call.
+      TRIED 2026-11-03 to find the free buttons from the game's data: its gameplay commands' pad keys are not in the
+      engine's InputSettings (2 actions) nor readable on PlayerInput, and Core's capture keeps keyboard / mouse only - the
+      game applies its PAD list only when a pad becomes the active device (input.cpp: the list runs again on each
+      keyboard <-> gamepad switch). The VM has no pad, so the layout can't be read here: needs a pad connected (the
+      operator's PC) to log the pad list the game applies, or the operator's pick.
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
