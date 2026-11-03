@@ -768,6 +768,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       OPERATOR ANSWERS 2026-11-03: the pile is eaten + duties auto-resolve - specifically: a time skip's definition can SET
         a new fresh-kill pile value to jump to (etc.); WARN if a mod puts duties on a time-skip event; the super-basic
         'go hunt' / 'go patrol' duties are SKIPPED when a skip happens.
+        DONE same day (VM): [Skip.<Name>] Days / Pile / Card, Skip: step, the hunt / patrol set aside (0 missed), the
+        story check warns about duties on a skip.
 - [ ] **21. Seasons and weather.** A season cycle (newleaf / greenleaf / leaf-fall / leaf-bare) driven by the
       intentional time skips, and weather within a season. Both are world state that prey, patrols, duties and visuals
       read. Find what the game already has (sky / lighting / any weather actors, the level's time-of-day setup) before
