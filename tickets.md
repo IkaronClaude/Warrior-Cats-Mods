@@ -83,6 +83,8 @@ naming an uncast cat left out; FIXED a real bug it surfaced - a cutscene removed
   + Camera: Behind = <who> - a following shot behind a walking cat (VM: holds ~2.6 m behind, swings round on a turn).
   + custom cat exercise ([Rogue.Frost] + FrostAtBorder): misspelled look fields now named + left out; rogues no longer
     carry the source cat's name (a rogue From = Nightheart answered to 'Nightheart'). VM-verified.
+  + custom role exercise ([Role.Scout]): unknown role keys / non-number factors named; the role line says each factor in
+    words (Guard = damage taken, lower is better - the example itself got it backwards first). VM-verified.
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
