@@ -757,6 +757,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         Screenshots need "shot showui" - plain "shot" leaves ALL UI out (why the hunt label was "never seen").
         Open: what happened during the skip (duties auto-resolved, the fresh-kill pile eaten, rank progress) once
         those systems exist (15 / 25); a nicer card than the centre message (event cards, 17 + 10).
+        DONE 2026-11-03 (VM, from the log): a skip says what it changed - the season, the weather, how far the main
+        story and each pack story moved - and plays as a scene (the world fades out, the card + the summary card, back
+        in); WaCa.Emit('SkipDays', n). NOT done (rules for the operator): eating from the pile, duties resolved by
+        standing, rank progress during a skip.
       DRAFT DESIGN (2026-10-27, for the operator to adjust - built on what the code research found):
       - A skip = jump DayNight.Day() by N with a full-screen card ("A moon passes...") listing what happened (duties
         auto-resolved by standing, prey eaten from the pile, rank progress) - the card is one of the game's own
