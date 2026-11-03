@@ -1520,12 +1520,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
 
 ## P3: Later / big content
 
-- [ ] **P3: spawned cats (newcomers, kits) have no nameplate** - found 2026-11-03 checking a Newcomer on the VM: the
-      game's clanmates float their name and rank over their heads; a cat WaCa.SpawnCat puts in the world shows none, so
-      a new clanmate (Emberheart) can't be told apart in the camp. Next: find what gives the game's NPC cats their
-      plate (the nameplate widget component WaCa Looks renames - which actor class / component adds it) and attach
-      the same to spawned cats with the cat's name and rank.
-
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
@@ -1648,6 +1642,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
 
 ## Archive
+- [x] 2026-11-03 - **P3: spawned cats (newcomers, kits) have no nameplate** - found 2026-11-03 checking a Newcomer on the VM: the
+      game's clanmates float their name and rank over their heads; a cat WaCa.SpawnCat puts in the world shows none, so
+      a new clanmate (Emberheart) can't be told apart in the camp. Next: find what gives the game's NPC cats their
+      plate (the nameplate widget component WaCa Looks renames - which actor class / component adds it) and attach
+      the same to spawned cats with the cat's name and rank.
+      FIXED same day (VM): WaCa.Nameplate (Core) - the game's own plate widget on a screen-space widget component of the
+      spawned cat; a newcomer's rank line copied from its clanmate's plate (WaCa.PlateRole - the game's word). Emberheart:
+      'Emberheart / Warrior', one plate after a boot and after a Clan Life reload. Kits: name only (the game's 'Kit' text
+      not found yet).
 - [x] **Operator play-test of the split mods (2026-10-28) - fixed, VM-confirmed in bulk runs the same day.**
   - Rank: WaCa.PlayerRank = 1 + rank quests done (QuestProgression), promotions live (topic player.rank). VM: a new
     RiverClan apprentice -> rank 1, tasks from the deputy; Dapplepatch -> rank 3, lead mode. ALSO FOUND: the active cat
