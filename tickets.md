@@ -1577,6 +1577,22 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       rayon threads are idle - the reload itself finished. So: a lock left held across the reloaded mod's teardown, in
       UE4SS's Lua layer. Not fixed by #1445; the original UE4SS.dll is back on the VM. Next = UE4SS internals or an
       upstream report with this repro (outward-facing: operator's go).
+      ROOT CAUSE FOUND 2026-11-03 18:20-19:50 (UE4SS built from our tree with fixes, live stack walks via dbghelp +
+      symbol server, Z:/WaCa/hangs-20261103/ - livewalk.py in the session scratchpad):
+      (1) UE4SS's LuaRaw/src/luauser.c guards EVERY Lua state with one global CRITICAL_SECTION, and DELETES it whenever
+          any state closes (luai_userstateclose -> LuaLockFinal); a mod's hot reload closes its state, so the lock went
+          away under the game thread's Lua - it waited forever on a lock showing free (LockCount -1, no owner).
+      (2) Lua 5.4's lua_close takes lua_lock and never unlocks (fine for a per-state lock): with (1) fixed, UE4SS's
+          FilesystemWatcher thread (it closes the reloaded mod's state) kept the global lock for good.
+          Fix for both (patches 0001/0002 in Z:/WaCa/hangs-20261103/ue4ss-patches): made once (InitOnce), never deleted,
+          released in LuaLockFinal by the thread that holds it. VM: the forced repro no longer hangs ('busy end').
+      (3) THEN it crashes: UE4SS runs a delayed action (ExecuteInGameThreadWithDelay) on the game thread after picking
+          it, while the watcher thread's uninstall erased it and closed its state -> luaV_execute on freed memory. Running
+          actions under the actions lock (patch 0003) is WRONG - async loading deadlocks on it, the engine aborts at boot
+          (2 of 2). The real fix: UE4SS must tear a mod down on the game thread (or never while the game thread is in
+          that mod's Lua) - an architectural UE4SS change. The original UE4SS.dll is back on the VM.
+      So: hot reload in UE4SS g83330635 is unsafe whenever any mod's Lua runs during it. Ours can't fix it from outside.
+      Upstream report (1)+(2)+(3) with the repro = the operator's go.
 - [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
       (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
       AskMate, Cutscenes.Skip. Which buttons are free in the game's pad layout = the operator's call.
