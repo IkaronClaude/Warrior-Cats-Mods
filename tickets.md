@@ -52,7 +52,7 @@ game data in this repo.
 - 24 StarClan guidance leads to prey: built + VERIFIED, off; turning it on = operator.
 - Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
 - Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
-- Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; left: the game's own OnQuestAdded at a real promotion (only sent by hand so far), a save with side quests of its own, replaying skipped variables (operator).
+- Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; left: the crossing at a real promotion (the warning seen live via the game's own StartQuestOfTag), a save with side quests of its own, replaying skipped variables (operator).
 - Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch; 2026-11-02 exercises: S-role murmurs, HerbCouncil cutscene + Lead event, story dialogue + its checks, renamed-cat nameplates, undrawn cast cats); start rank = operator decision; an editor = future.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
@@ -1079,8 +1079,11 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         it shows its goal + Place on the detail panel (Clan Life days.lua; SetPackDay to put a pack on a day). Not tried
         yet: a save with side quests of its own (the keep / put-back path). (a) WARN DONE 2026-11-03 (VM): [Sync.<Name>] Main =
         Rank:<Rank> - warning card when the rank-up quest comes, jump + 'meanwhile' Summaries when it happens (or on a save
-        already past it). NOT SEEN LIVE: the game itself adding a rank-up quest (OnQuestAdded watched, the event was sent
-        by hand with the real quest objects) - check on the next real promotion. Only Rank:<Rank> so far.
+        already past it). SEEN LIVE 2026-11-03 13:50 (save backed up + restored): the game's own QuestManager:StartQuestOfTag(
+        Quest.Procedural.Progression.RankUp3) -> the HUD's real OnQuestAdded -> 'the game added a quest that makes your cat
+        Leader' -> the pack warned; the card waited behind the game's conversation it opened. (Levelling to the cap
+        gives no rank-up quest - they come from QuestLine_Main.) The crossing on a real promotion (OnPlayRankUpSequence-
+        Finished -> player.rank) not seen; the restore-time crossing is. Only Rank:<Rank> so far.
 - [ ] **Story packs: standalone starts + writer-friendly authoring** (operator 2026-10-28, note for later): a mod story
       played with a NEW cat defines its entry point - e.g. a warrior start: "level 8, warrior, main story day 13" -
       and the creator must respect it: a warrior start picks a WARRIOR name at character creation (not a kit /
