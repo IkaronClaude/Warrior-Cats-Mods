@@ -71,7 +71,7 @@ game data in this repo.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
-- P3 Core hot-reload hang: ROOT-CAUSED in UE4SS (global Lua lock deleted on a state's close; lua_close never unlocks; then a delayed action on a freed state) - 2 of 3 fixed in a test build, the 3rd needs UE4SS to tear mods down on the game thread; upstream report = operator's go.
+- P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
 - P3 crash exe+0x1a95fd3: seen once (11-03 02:56); checked 2026-11-03 20:30 against all 14 crash reports since 11-01 - no
   recurrence (the others: today's reload / UE4SS-patch tests, and earlier unrelated faults). Waiting for a second one.
 - P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
@@ -1596,6 +1596,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
           (2 of 2). The real fix: UE4SS must tear a mod down on the game thread (or never while the game thread is in
           that mod's Lua) - an architectural UE4SS change. The original UE4SS.dll is back on the VM.
       So: hot reload in UE4SS g83330635 is unsafe whenever any mod's Lua runs during it. Ours can't fix it from outside.
+      FIXED IN A TEST BUILD 2026-11-03 20:40: (1)+(2) as above, and (3) the hot reload moved to the GAME THREAD - the
+      file watcher only queues the mod's name, an engine-tick pre-callback does uninstall + restart between ticks (no mod
+      Lua runs there). VM: the forced repro -> 'busy end', 'Auto-reloading ... (on the game thread)', Clan Life loaded,
+      events after; 3 rounds of WaCaCore reloads (6 reloads) with the pause menu up -> alive, no crash (was 3 of 3 hangs).
+      Patches: Z:/WaCa/hangs-20261103/ue4ss-patches-final (3; the wrong 'delayed actions under the lock' one dropped),
+      build: .../ue4ss-gamethread-reload/. The VM is back on the ORIGINAL UE4SS (players' parity). Operator: ship a
+      patched UE4SS / use it for testing only / report upstream with these patches.
       Upstream report (1)+(2)+(3) with the repro = the operator's go.
 - [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
       (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
