@@ -25,7 +25,7 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
-## Board status 2026-11-02 (EVERY open item, checked against its own text - all wait on the operator)
+## Board status 2026-11-03 (EVERY open item, checked against its own text - all wait on the operator)
 - Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
 - P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
 - Operator checks: the operator's list by definition.
@@ -38,21 +38,21 @@ game data in this repo.
 - 1 Canon clan roster: built, off until the operator checks the names and picks the moment.
 - 15 Clan-sim day: built; rank-ups by standing wait on pacing targets (14, operator).
 - 4 Day / night cycle: built + VM-verified; the day length / feel is the operator's call.
-- 25 Story as days: built (Day verified 2026-11-01); the real days = operator content.
+- 25 Story as days: built (Day verified 2026-11-01; SetPackDay 2026-11-03); the real days = operator content.
 - 9b Fishing: built + VM-verified, off; turning it on = operator.
 - 9 Hunting rework: built (experimental, off; + the wind 2026-11-02, off); which creatures charge / on by default = operator decisions.
 - 8 Real hunting missions: built; hunting-ground card + map mark VERIFIED 2026-11-01 (VM); hunting patrols on by default? (operator).
 - 7 Real patrols: built + VM-verified; border-point events = operator content.
 - 6 Combat training: built; a WON fight in play (operator - the VM can't win one).
 - 14 Pacing: the target pace per rank (operator).
-- 20 Intentional time skips: built (off); the skip's card / what happened = operator design.
+- 20 Intentional time skips: built + VM-verified with the operator's rules 2026-11-03 ([Skip.<Name>] Days / Pile / Card, the day's hunt / patrol set aside, a warning for duties on a skip); real skips in the story = operator content.
 - 21 Seasons and weather: built + VM-verified; the look / sound on the operator's PC, the release pak (operator).
 - 22 Prey follows the world: built + VM-verified; world events (poisoned river) = operator design.
 - 23 Random prey spawns: built + VM-verified; a moved prey's pounce in play (operator - the VM's pounce fails on any prey).
 - 24 StarClan guidance leads to prey: built + VERIFIED, off; turning it on = operator.
 - Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
 - Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
-- Mod stories (story packs): the multi-story design questions (Warn / Gate, replay) = operator; the story fixer depends on them.
+- Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; left: the game's own OnQuestAdded at a real promotion (only sent by hand so far), a save with side quests of its own, replaying skipped variables (operator).
 - Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch; 2026-11-02 exercises: S-role murmurs, HerbCouncil cutscene + Lead event, story dialogue + its checks, renamed-cat nameplates, undrawn cast cats); start rank = operator decision; an editor = future.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
 - Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
@@ -71,6 +71,10 @@ game data in this repo.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
+- P3 Core double hot-reload hang: open, a bridge race (test-only setting); next step = a stack of the hung game.
+- P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
+Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot speaker). Library exercises 2026-11-03: Ask
+filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
@@ -944,15 +948,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         unfilled line - its fix is one text.ini line each once seen.
 
 ## P2: Depth, presentation
-- [ ] **P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
-        DONE 2026-11-03 (VM): the game's quest-dialogue answer menu - speaker plate, mouse / Up-Down-Enter / number keys
-        (Clan Life events.lua). Gamepad face buttons mapped but untested (no pad on the VM).
-      <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
-      keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
-      operator's call: is that fine, or a menu of the game's own look (its dialogue-answer list) - which would be the
-      next build.
-      OPERATOR ANSWER 2026-11-03: the GAME'S ANSWER MENU - rebuild the Choice in the look of the game's own dialogue
-        answers (research that widget).
 - [ ] **Gatherings** (operator 2026-10-28, big feature; mostly GROUNDWORK + modding tools now - it ties into the story
       WAITING ON THE OPERATOR: the story beats (the groundwork, travel, other Clans, the stay-behind raid are built + VM-verified).
       rework). Every N days (the story defines it) the leader picks who goes to the Gathering. Both outcomes are story:
@@ -1670,6 +1665,15 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
 
 ## Archive
+- [x] **(2026-11-03) P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
+        DONE 2026-11-03 (VM): the game's quest-dialogue answer menu - speaker plate, mouse / Up-Down-Enter / number keys
+        (Clan Life events.lua). Gamepad face buttons mapped but untested (no pad on the VM).
+      <question>; <answers>): the question and numbered answers on the game's centre card, answered with the number
+      keys 1-4 (gamepad face buttons mapped, untested - no gamepad on the VM); VM-verified with the loner's visit. The
+      operator's call: is that fine, or a menu of the game's own look (its dialogue-answer list) - which would be the
+      next build.
+      OPERATOR ANSWER 2026-11-03: the GAME'S ANSWER MENU - rebuild the Choice in the look of the game's own dialogue
+        answers (research that widget).
 - [x] 2026-11-03 - **P3: spawned cats (newcomers, kits) have no nameplate** - found 2026-11-03 checking a Newcomer on the VM: the
       game's clanmates float their name and rank over their heads; a cat WaCa.SpawnCat puts in the world shows none, so
       a new clanmate (Emberheart) can't be told apart in the camp. Next: find what gives the game's NPC cats their
