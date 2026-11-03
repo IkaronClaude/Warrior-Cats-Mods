@@ -90,6 +90,8 @@ naming an uncast cat left out; FIXED a real bug it surfaced - a cutscene removed
   + story days (Clan Life story check): misspelled day keys in days.ini / a pack's story.ini are problems with a 'did you
     mean'. VM-verified (no false positives on the real files).
   + [Cast] names: a misspelled cat name gets 'did you mean <the save's nearest cat>'. VM-verified.
+  + scene polish: a cutscene's sounds fade out with it; clan events at a PLACE (When = Reach:<place> + Radius) - VM:
+    reaching ReedBank played FrostAtBorder, once a day.
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
