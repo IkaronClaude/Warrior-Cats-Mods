@@ -71,8 +71,9 @@ game data in this repo.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
-- P3 Core hot-reload hang: open (test-only setting); the newer UE4SS's lock fix tried (cherry-picked, built, VM) - still hangs; named stacks: a lock held across a mod's teardown in UE4SS's Lua layer. Upstream report = operator's go.
+- P3 Core hot-reload hang: ROOT-CAUSED in UE4SS (global Lua lock deleted on a state's close; lua_close never unlocks; then a delayed action on a freed state) - 2 of 3 fixed in a test build, the 3rd needs UE4SS to tear mods down on the game thread; upstream report = operator's go.
 - P3 crash exe+0x1a95fd3: seen once, waiting for a recurrence (its logs kept).
+- P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
 Exercise 2026-11-03 evening: ElderTale - pack role on a save's clanmate + newcomer by role + player in one cutscene,
 the storyteller's question on the answer menu - clean (VM).
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
