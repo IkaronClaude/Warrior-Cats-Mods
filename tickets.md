@@ -1408,7 +1408,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         Join: next to a story cat (AQuestBaseActor with narrativeRole) press G -> both play the Join montage (the NPC
         through its mesh's anim instance) -> +Bond. VM: TheLoner 43 -> 45 in WrcGame.json, saved by the game
         ("game saved (AddPersonalBonding)"). Open: joining the AMBIENT activities (they run on generic clanmates,
-        which have no bond), a nicer moment (camera, a line of dialogue).
+        which have no bond), a nicer moment (camera, a line of dialogue). DONE 2026-11-03 (VM): a cat mid-activity is joined in
+        THAT activity; the moment = a camera shot on the two (WaCa Cutscenes' new CameraMoment) + a line of the cat's
+        ([Join] Camera / Line<n>) - VM: the Two shot, 'Heronshine: I hoped you'd come by.', bond +2. Joining a cat
+        caught mid-ambient-activity: same code path, not caught live (no camp cat was mid-activity on the VM).
       BOND GAIN - FOUND 2026-10-28 (the next step, an exe job like AddExperience): bonds are kept per narrative role
         (save: GameplayProgression.Bonding = { <role>: points, <clan>: points, Nodes = answered dialogue nodes }, e.g.
         TheRegretfulWarrior 97, RiverClan 102); at runtime that map is NOT reflected. The game changes it through (a) its
