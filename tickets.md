@@ -78,6 +78,8 @@ Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every G
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
 parameters can be several, FKey = its name). VM-tested with the inputs a pad produces; a physical pad = operator.
 Boot helper: its 'nudge' reloads of the harness removed (one hung a boot).
+  + Core raises the screens' Gamepad_ keys as KeyDown / KeyUp (once per press); [ModKeys] bindings may list several
+  keys (WaCa.KeyIs) - VM: pad B skipped a cutscene via 'SpaceBar, Gamepad_FaceButton_Right', pad A entered the name box.
 Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot speaker). Library exercises 2026-11-03: Ask
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
@@ -1566,6 +1568,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       reload while the game thread runs Lua (a busy KeyDown handler) hangs the game inside UE4SS (stacks: Z:/WaCa/
       hangs-20261103/hang-1318-forced-*), no main.dll frame. So the remaining hang = UE4SS (game-thread Lua vs its
       loader thread), not our bridge. Left: a newer UE4SS build to try (operator), or report it upstream with the repro.
+- [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
+      (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
+      AskMate, Cutscenes.Skip. Which buttons are free in the game's pad layout = the operator's call.
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
