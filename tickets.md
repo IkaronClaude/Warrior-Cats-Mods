@@ -77,6 +77,9 @@ Closed in this pass: Time follows effort (built as part of 15), Murmurings (buil
 - P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
 Exercise 2026-11-03 evening: ElderTale - pack role on a save's clanmate + newcomer by role + player in one cutscene,
 the storyteller's question on the answer menu - clean (VM).
+Pre-work 2026-11-03 night (cutscene library): Sound: beat (the game's cues), Beat2a keys, unknown keys reported, lines
+naming an uncast cat left out; FIXED a real bug it surfaced - a cutscene removed a newcomer cast by role at its end
+(WaCa.Cats 'spawned' vs Cutscenes' 'spawned' - now 'placed'). VM-verified.
 Exercise 2026-11-03 afternoon: NewApprentice cutscene - a newcomer cast by role (S:apprentice), its own Ask - clean.
 Sweep 2026-11-03 evening (gamepad): KeyDown is keyboard / mouse only, so every Gamepad_ key name in the mods was dead -
 fixed via the game's own input: Choice by screen commands (Button_Up/Down/A), the name box by OnKeyPressed (Core: watch
