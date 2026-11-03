@@ -1550,6 +1550,12 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Naming the frames needs this build's PDB: ours is v3.0.1 Beta g83330635, no longer published (experimental-latest
       is g236adf26) - trying a newer UE4SS = a whole-setup change, the operator's call. Earlier the same day a Core
       reload with the pause up worked (10:07), so it's timing-dependent. Rule meanwhile: Core changes = restart.
+      DONE 2026-11-03 13:20 (Core 'Bridge: ... QUEUED'): the bridge race fixed - a start / stop the loader can't wait
+      for is queued and applied by the game thread between deliveries (stopping state marked gone at once); VM: plain
+      reloads fine, the queued path logged under a forced 8 s delivery. AND the hang REPRODUCED ON DEMAND that way: a
+      reload while the game thread runs Lua (a busy KeyDown handler) hangs the game inside UE4SS (stacks: Z:/WaCa/
+      hangs-20261103/hang-1318-forced-*), no main.dll frame. So the remaining hang = UE4SS (game-thread Lua vs its
+      loader thread), not our bridge. Left: a newer UE4SS build to try (operator), or report it upstream with the repro.
 - [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
       reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
       <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
