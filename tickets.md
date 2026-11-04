@@ -77,11 +77,17 @@ game data in this repo.
   NPC cats on the ice' line is superseded; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
-- P2 a Lua call on a freed object (was "crash exe+0x1a95fd3"): RECURRED 11-03 23:24 - same fault, symbolised (a UFunction
+- P2 a Lua call on a freed object: FIXED 2026-11-04 - the camera's 30-s plant list (camera.lua:132, pinned by the guard's
+  traceback 44/44); the full sweep on the ORIGINAL UE4SS ran clean. (Was: RECURRED 11-03 23:24 - same fault, symbolised (a UFunction
   call on a freed object); a UE4SS guard built + VM-tested 2026-11-04 (patch 0004 - a stale call becomes a Lua error).
   Shipping it = the operator's UE4SS decision (with the reload patches); the exact caller needs a recurrence (the VM
   runs the original UE4SS so one is still caught). WaCa.Live now rejects destroyed (Garbage, bit 21) objects (VM).
 - P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
+FULL SWEEP RUN 2026-11-04 06:21-07:40 (VM, original UE4SS, one script): all 14 example cutscenes - HerbLesson,
+HerbalistsHonour (the game's ceremony, skipped by the NEW Scenes.Skip), GatheringNight (another zone), IceRescue,
+RogueRaid, LonerVisit (its Ask answered), FightBeside, HerbCouncil, Envoy, Vigil, Scolding, NewApprentice, ElderTale,
+FrostAtBorder - each to its end, no crash. Found + fixed by the sweep: the P2 crash (camera plant list), the skip that
+left the game's scenes out (one stuck scene blocked every later one).
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
@@ -1647,7 +1653,13 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       game applies its PAD list only when a pad becomes the active device (input.cpp: the list runs again on each
       keyboard <-> gamepad switch). The VM has no pad, so the layout can't be read here: needs a pad connected (the
       operator's PC) to log the pad list the game applies, or the operator's pick.
-- [ ] **P2: a Lua call on a FREED object - UE4SS+0x3ecd05 (twice: VM 2026-11-03 02:56 and 23:24)** - raised from P3:
+- [x] **P2: a Lua call on a FREED object - UE4SS+0x3ecd05 - FIXED 2026-11-04 (WaCa Cutscenes 9d789bf)**: the camera's
+      plant list (camera.lua plantsNow, kept 30 s) held foliage components a level stream-out FREES; plantFree called
+      GetInstancesOverlappingSphere on them unchecked. Pinned by the guard build logging the Lua traceback: 44 of 44
+      hits = camera.lua:132 (plantFree <- clear); the 3264 B size class = the foliage / HISM / grass components. Fix:
+      WaCa.Live(c) before each use. PROOF: the full 14-cutscene sweep on the ORIGINAL UE4SS, no crash (3 crashes before
+      it, GatheringNight 2 of 2). The UE4SS guard (patch 0004, now with the traceback log) stays a hardening option for
+      the operator's UE4SS decision. History - was:
       it recurred. Both minidumps fault at the SAME instruction (UE4SS +0x3ecd05, `mov r9,[rcx+rax]` - UObject::
       ProcessEvent's virtual call) reading the same 0x1e3220f20: the object's first 8 bytes are 0x1_e3_22_0cc0 = an
       FMallocBinned2 FREE-BLOCK header (block 3264 B, pool 0x22, canary 0xE3) - the object had been destroyed and its
