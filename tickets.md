@@ -253,7 +253,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] P1 Pause menu top bar (the left / right tabs): clicking a header marks it yellow, but the old tab stays yellow
         too and the page doesn't change.
   - [ ] P1 Pause menu left bar (Resume, Settings ...): the buttons only work with a DOUBLE click.
-  - [ ] P1 Space doesn't accept in the pause menu.
+  - [ ] P1 Space doesn't accept in the pause menu. FOUND: in menus Space is the game's own Button_Y (its menus' second
+        action key - keybinds.ini [UIKeys] lists it); our SpaceBar = Enter alias is for dialogue only. OPERATOR: make
+        Space accept in menus and move Button_Y to another key (which?), or keep the game's Y on Space?
   - [ ] P1 MOUSE LOOK IS OFF ON THE OPERATOR'S PC: WaCaNative.log '[camera] update: not found (anchor "LookAtYaw") -
         mouse look OFF'. The GAME UPDATED: the operator's Wrc-Win64-ShippingDRM.exe is 183,319,112 bytes, the VM's copy
         (2026-10-24) 183,670,344. Every other hook was found; the camera update moved. The spin on lag spikes = whatever
@@ -290,13 +292,24 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         guide your path" - our [Talk] line swap (duties.ini [Talk] Key -> Report / Busy) didn't show on the operator's
         PC (the game update may have changed that text's key; their log stops at 20:42 - need a newer one). The talk
         itself should be the report: his own reply about your work, and the duty handed in.
+  - [ ] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
+        actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
+        mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
+        WARRIOR} as your mentor", "{THE REGRETFUL WARRIOR} as your mentor"). BUILT (VM pending): an apprentice
+        reports to S:mentor when a pack's [Cast] names one (WRITING.md), else the deputy. OPERATOR: a default mentor
+        per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
   - [ ] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [ ] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
         quest info: the day's duty (what, where, progress) and the packs' stories. What exists: WaCa.QuestLine
         (2026-11-03, the operator's answer (c) then) = a display-only line in SIDE QUESTS for a pack's story; the duty
         isn't listed at all, and there is no third tab. The page's tabs are UGuiPausePanelQuest's (Main / Side, keys
-        3 / 4, TriggerL / R).
+        3 / 4, TriggerL / R). LAYOUT (offline dump, extracted/json/WBP_GuiPausePanelQuest.json): two tab buttons
+        mcGuiButtonTabMainQuest / mcGuiButtonTabSideQuest (WBP_GuiButtonSubTabMenuSmall_C) and two lists
+        mcGuiMainQuestList / mcGuiSideQuestList (WBP_GuiIListItemsQuest_C), in CanvasContent / CanvasTitle. PLAN: a
+        third WBP_GuiButtonSubTabMenuSmall ("Clan") after the side tab; selecting it (click, TriggerR past Side, key 5)
+        hides both lists and shows ours - entries made like WaCa.QuestLine's (the duty, then each pack story), detail on
+        hover; the native tab state put back when Main / Side is chosen again.
   - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
