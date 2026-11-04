@@ -109,6 +109,8 @@ point (and Reach: Pile) sat at the world's origin (the pile component's owner is
 camp's pile cat. Added the Duty: <name> step; duty points / cards name cats by role. VM: the round done end to end.
 EXERCISE 2026-11-04 10:00 - Reach: on a brought-in role (S:loner = Rogue:Quill): looked up every step and misreported;
 now said plainly once + skipped, and the story check flags Reach: mistakes before play (no cast / brought-in / bad x y z).
+EXERCISE 2026-11-04 10:30 - every camera shot (example CameraTour): all eight frame; mistakes (no cat for Portrait,
+one for Over) now caught by the cutscene check with the fix, and play-time says the real cause.
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
