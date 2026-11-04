@@ -104,6 +104,9 @@ SWEEP PART 3 2026-11-04 07:10-07:40 (same boot, one script - the library beyond 
 EXERCISE 2026-11-04 08:58 - The Border Watch (example pack: S:watcher = Palepool, met by Reach: S:watcher, card + cutscene
 by role, Walk Away under a Behind camera): clean except one rough edge - a cutscene line naming a cat the scene didn't
 cast ('I'll tell {Leader}') showed as typed. FIXED (Cast.NameFor; unknown keys logged once) - VM: 'I'll tell Lionstar'.
+EXERCISE 2026-11-04 09:40 - a story gives a duty (HerbErrand -> HerbRound): found + fixed a REAL BUG - a duty's 'Pile'
+point (and Reach: Pile) sat at the world's origin (the pile component's owner is the game state), unreachable; now the
+camp's pile cat. Added the Duty: <name> step; duty points / cards name cats by role. VM: the round done end to end.
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
