@@ -251,6 +251,11 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         (white or orange).
   - [ ] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
         mark's meaning is obvious; today the HUD line for "throw out the moss" shows an orange cat-face logo.
+  - [ ] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
+        quest info: the day's duty (what, where, progress) and the packs' stories. What exists: WaCa.QuestLine
+        (2026-11-03, the operator's answer (c) then) = a display-only line in SIDE QUESTS for a pack's story; the duty
+        isn't listed at all, and there is no third tab. The page's tabs are UGuiPausePanelQuest's (Main / Side, keys
+        3 / 4, TriggerL / R).
   - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
