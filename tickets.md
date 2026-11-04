@@ -234,7 +234,15 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         ({NAME} = its own name stays). VM pending.
   - [ ] P1 SHOW, NOT TELL: the duty "Gather moss from the leader's den" finishes as soon as your cat enters the den -
         no real moss to pick up, only a big text card. The duty should spawn real interactable moss (the game's own
-        collectable / interactable) at the points and count the pickups.
+        collectable / interactable) at the points and count the pickups. FOUND (VM 2026-11-04): the game has no moss
+        actor - BP_InteractableReward_Container_* are EffectSetups (reward data), not actors, so the Gather duty's
+        moss class never matched (it always fell back to herbs) and nothing of that class can be spawned. Moss is a
+        REWARD of the clawable / diggable interactables (BP_Interactable_Claw_Bush, _BirdNest, Dig_DirtMound:
+        EffectToApply / EffectsToApply gameplay tags, RewardType). Next: spawn a clawable bush in the den with the moss
+        reward's tag; the claw = the pickup (WaCaInteracted). Gather likewise: count the real pickup, not the area.
+        LIBRARY: WaCa.Spawn(classPath, at, yaw, scale) added to Core (ground + always-spawn; SpawnCat uses it).
+  - [ ] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
+        no conversation to repeat it / talk at all.
   - [ ] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
         the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
         (white or orange).
@@ -242,8 +250,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
   - [ ] P2 Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
-  - [ ] P3 the lines on screen ("<cat>: <line>", WaCa Cutscenes' ShowLine on the game's message card) read as "super
-        bold" - check how it looks next to the game's own speech.
+  - [ ] P2 the cats' flavour lines (murmurs, patrol / hunt lines) are liked, but the big bold message card (WaCa
+        Cutscenes' ShowLine) is the wrong place for them. Operator idea: speech bubbles over the cat that says it.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
   - [x] P0 the deputy couldn't progress a third: the meeting place was a parked FILLER's spot (the leader role is also on
