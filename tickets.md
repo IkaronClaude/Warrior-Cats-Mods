@@ -79,7 +79,7 @@ game data in this repo.
   NPC cats on the ice' line is superseded; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
-- P2 a Lua call on a freed object: FIXED 2026-11-04 - the camera's 30-s plant list (camera.lua:132, pinned by the guard's
+- (archived) P2 a Lua call on a freed object: FIXED 2026-11-04 - the camera's 30-s plant list (camera.lua:132, pinned by the guard's
   traceback 44/44); the full sweep on the ORIGINAL UE4SS ran clean. (Was: RECURRED 11-03 23:24 - same fault, symbolised (a UFunction
   call on a freed object); a UE4SS guard built + VM-tested 2026-11-04 (patch 0004 - a stale call becomes a Lua error).
   Shipping it = the operator's UE4SS decision (with the reload patches); the exact caller needs a recurrence (the VM
@@ -1720,37 +1720,6 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       game applies its PAD list only when a pad becomes the active device (input.cpp: the list runs again on each
       keyboard <-> gamepad switch). The VM has no pad, so the layout can't be read here: needs a pad connected (the
       operator's PC) to log the pad list the game applies, or the operator's pick.
-- [x] **P2: a Lua call on a FREED object - UE4SS+0x3ecd05 - FIXED 2026-11-04 (WaCa Cutscenes 9d789bf)**: the camera's
-      plant list (camera.lua plantsNow, kept 30 s) held foliage components a level stream-out FREES; plantFree called
-      GetInstancesOverlappingSphere on them unchecked. Pinned by the guard build logging the Lua traceback: 44 of 44
-      hits = camera.lua:132 (plantFree <- clear); the 3264 B size class = the foliage / HISM / grass components. Fix:
-      WaCa.Live(c) before each use. PROOF: the full 14-cutscene sweep on the ORIGINAL UE4SS, no crash (3 crashes before
-      it, GatheringNight 2 of 2). The UE4SS guard (patch 0004, now with the traceback log) stays a hardening option for
-      the operator's UE4SS decision. History - was:
-      it recurred. Both minidumps fault at the SAME instruction (UE4SS +0x3ecd05, `mov r9,[rcx+rax]` - UObject::
-      ProcessEvent's virtual call) reading the same 0x1e3220f20: the object's first 8 bytes are 0x1_e3_22_0cc0 = an
-      FMallocBinned2 FREE-BLOCK header (block 3264 B, pool 0x22, canary 0xE3) - the object had been destroyed and its
-      memory given back, and Lua called a UFunction on it. (The old title's exe+0x1a95fd3 was only a caller frame.)
-      Same stack both times: engine tick -> a UE4SS game-thread action -> 3 nested pcalls -> the call. Both dumps hold
-      `IsInViewport`; the first also the harness probe `if s:IsValid() and s:IsInViewport()` over FindAllOf(pause
-      screen) - so IsValid said yes and the next call met freed memory. The 2nd came 2.4 s after a cutscene line put
-      the game's message card up (a screen change - the screen trackers run). Symbols: a UE4SS build of our commit
-      (Z:/WaCa/hangs-20261103/ue4ss-plain-83330635, with PDB) + byte-matching (scratchpad rvafuzzy.py / symb.py).
-      FOUND ON THE WAY (VM 2026-11-04, probes Z:/WaCa/probes/gc*.lua): UE4SS reads the engine's internal flags as
-      before UE 5.4 - on this 5.7 game the reachable bit ROTATES 14 <-> 15 each GC, its "Unreachable" bit 28 is never
-      set, and a destroyed actor carries Garbage = bit 21 and passes IsValid until the GC frees it. Fixed in WaCa.Live
-      (Garbage = gone). NOT shown to be this crash: destroyed actors and dropped widgets left at the next GC with no
-      frame in between where Lua could see them condemned (3 GCs watched). Open: which call.
-      GUARD BUILT + VM-TESTED 2026-11-04 (a UE4SS patch - the bad read is inside UE4SS's own call wrapper, before any
-      hook of ours): call_ufunction_from_lua checks the object's GUObjectArray slot still holds that very object, else
-      a Lua error. Z:/WaCa/hangs-20261103/ue4ss-patches-final/0004-guard-call-on-freed-object.patch, build
-      ue4ss-guard-freed/. VM: an actor destroyed + freed by a forced GC, then called through the kept Lua reference ->
-      'Tried calling a function on an object that no longer exists' (pcall-able), live calls unaffected, the game ran
-      on. Not airtight (the slot index is read from the object - fine while the allocator keeps the page). The VM is
-      back on the ORIGINAL UE4SS (ce5e3c..., copy in ue4ss-vm-original/) so a recurrence is still caught there.
-      OPERATOR: ship it with the reload patches 0001-0003 (our own UE4SS build) or not, and the upstream report
-      (this guard + the pre-5.4 flags) - the same decision as the reload-hang ticket.
-
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
       DRAFT PLAN (2026-10-27, for the operator to adjust):
@@ -1864,6 +1833,37 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       Z:/WaCa/WaCa-mods-test-20261031t. Left: the operator's look in play.
 
 ## Archive
+- 2026-11-04 [x] **P2: a Lua call on a FREED object - UE4SS+0x3ecd05 - FIXED 2026-11-04 (WaCa Cutscenes 9d789bf)**: the camera's
+      plant list (camera.lua plantsNow, kept 30 s) held foliage components a level stream-out FREES; plantFree called
+      GetInstancesOverlappingSphere on them unchecked. Pinned by the guard build logging the Lua traceback: 44 of 44
+      hits = camera.lua:132 (plantFree <- clear); the 3264 B size class = the foliage / HISM / grass components. Fix:
+      WaCa.Live(c) before each use. PROOF: the full 14-cutscene sweep on the ORIGINAL UE4SS, no crash (3 crashes before
+      it, GatheringNight 2 of 2). The UE4SS guard (patch 0004, now with the traceback log) stays a hardening option for
+      the operator's UE4SS decision. History - was:
+      it recurred. Both minidumps fault at the SAME instruction (UE4SS +0x3ecd05, `mov r9,[rcx+rax]` - UObject::
+      ProcessEvent's virtual call) reading the same 0x1e3220f20: the object's first 8 bytes are 0x1_e3_22_0cc0 = an
+      FMallocBinned2 FREE-BLOCK header (block 3264 B, pool 0x22, canary 0xE3) - the object had been destroyed and its
+      memory given back, and Lua called a UFunction on it. (The old title's exe+0x1a95fd3 was only a caller frame.)
+      Same stack both times: engine tick -> a UE4SS game-thread action -> 3 nested pcalls -> the call. Both dumps hold
+      `IsInViewport`; the first also the harness probe `if s:IsValid() and s:IsInViewport()` over FindAllOf(pause
+      screen) - so IsValid said yes and the next call met freed memory. The 2nd came 2.4 s after a cutscene line put
+      the game's message card up (a screen change - the screen trackers run). Symbols: a UE4SS build of our commit
+      (Z:/WaCa/hangs-20261103/ue4ss-plain-83330635, with PDB) + byte-matching (scratchpad rvafuzzy.py / symb.py).
+      FOUND ON THE WAY (VM 2026-11-04, probes Z:/WaCa/probes/gc*.lua): UE4SS reads the engine's internal flags as
+      before UE 5.4 - on this 5.7 game the reachable bit ROTATES 14 <-> 15 each GC, its "Unreachable" bit 28 is never
+      set, and a destroyed actor carries Garbage = bit 21 and passes IsValid until the GC frees it. Fixed in WaCa.Live
+      (Garbage = gone). NOT shown to be this crash: destroyed actors and dropped widgets left at the next GC with no
+      frame in between where Lua could see them condemned (3 GCs watched). Open: which call.
+      GUARD BUILT + VM-TESTED 2026-11-04 (a UE4SS patch - the bad read is inside UE4SS's own call wrapper, before any
+      hook of ours): call_ufunction_from_lua checks the object's GUObjectArray slot still holds that very object, else
+      a Lua error. Z:/WaCa/hangs-20261103/ue4ss-patches-final/0004-guard-call-on-freed-object.patch, build
+      ue4ss-guard-freed/. VM: an actor destroyed + freed by a forced GC, then called through the kept Lua reference ->
+      'Tried calling a function on an object that no longer exists' (pcall-able), live calls unaffected, the game ran
+      on. Not airtight (the slot index is read from the object - fine while the allocator keeps the page). The VM is
+      back on the ORIGINAL UE4SS (ce5e3c..., copy in ue4ss-vm-original/) so a recurrence is still caught there.
+      OPERATOR: ship it with the reload patches 0001-0003 (our own UE4SS build) or not, and the upstream report
+      (this guard + the pre-5.4 flags) - the same decision as the reload-hang ticket.
+
 - [x] **(2026-11-03) P2: how a story's Choice looks (operator decision)** - built 2026-11-02 (WaCa Clan Life, Choice: <variable> =
         DONE 2026-11-03 (VM): the game's quest-dialogue answer menu - speaker plate, mouse / Up-Down-Enter / number keys
         (Clan Life events.lua). GAMEPAD 2026-11-03: the old pad key names could never fire (KeyDown = keyboard / mouse
