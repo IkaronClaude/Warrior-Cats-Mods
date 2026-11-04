@@ -94,7 +94,9 @@ SWEEP PART 3 2026-11-04 07:10-07:40 (same boot, one script - the library beyond 
   story check: 0 problems, 1 warning (the example's days while story days are off - correct)
   custom role: SetSpecialisation Scout -> 'hunting x1.05, damage taken x0.85 (15% better)'; Hunter restored (save kept)
   clan events: FellThroughIce -> IceRescue played + its card; FightBeside -> played; MentorTour -> card + Otterfeather
-  leads (the Lead waits for your cat - walking it is a player's, VM-verified 11-02); Reach:ReedBank -> 'you reached
+  leads - RUN TO ITS END 08:00-08:55: she came to your cat, led it to the den, 'waits for you' / 'goes on' as
+  your cat fell behind / caught up, 'led your cat to Den:Apprentice's den' + the closing card (your cat kept at her side
+  by a probe - the VM's walking input stalled on an obstacle); Reach:ReedBank -> 'you reached
   ReedBank (7 m) - not now: a cutscene plays' (the hold-back is right).
   Gatherings: GatheringNight cast the other Clans' cats (Sunstar = Clan:ThunderClan.Leader, Freezeface =
   Clan:ShadowClan) and played - the item's 'other Clans' cats' VERIFIED today, not just relabelled. Frozen water:
