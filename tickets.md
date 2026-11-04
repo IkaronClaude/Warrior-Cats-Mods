@@ -111,6 +111,37 @@ EXERCISE 2026-11-04 10:00 - Reach: on a brought-in role (S:loner = Rogue:Quill):
 now said plainly once + skipped, and the story check flags Reach: mistakes before play (no cast / brought-in / bad x y z).
 EXERCISE 2026-11-04 10:30 - every camera shot (example CameraTour): all eight frame; mistakes (no cat for Portrait,
 one for Over) now caught by the cutscene check with the fix, and play-time says the real cause.
+WHOLE-LIBRARY SWEEP 2026-11-04 10:50-11:55 (ONE script, one session - tools: scratchpad sweepall.sh):
+  CUTSCENE HerbLesson: rbLesson: over (its End beat, 14.0 s) - 1 cat(s) back in their places
+  CUTSCENE HerbalistsHonour: rbalistsHonour: the game didn't end its scene on the skip - ended here
+  CUTSCENE GatheringNight: theringNight: over (its End beat, 18.0 s) - 6 cat(s) back in their places
+  CUTSCENE IceRescue: eRescue: over (its End beat, 15.2 s) - 1 cat(s) back in their places
+  CUTSCENE RogueRaid: gueRaid: over (its End beat, 21.2 s) - 4 cat(s) back in their places
+  CUTSCENE LonerVisit: nerVisit: over (its End beat, 27.2 s) - 2 cat(s) back in their places
+  CUTSCENE FightBeside: ghtBeside: over (its End beat, 22.0 s) - 1 cat(s) back in their places
+  CUTSCENE HerbCouncil: rbCouncil: over (its End beat, 26.0 s) - 4 cat(s) back in their places
+  CUTSCENE Envoy: voy: over (its End beat, 16.0 s) - 2 cat(s) back in their places
+  CUTSCENE Vigil: gil: over (its End beat, 15.2 s) - 3 cat(s) back in their places
+  CUTSCENE Scolding: olding: over (its End beat, 19.2 s) - 2 cat(s) back in their places
+  CUTSCENE NewApprentice: wApprentice: over (its End beat, 14.0 s) - 1 cat(s) back in their places
+  CUTSCENE ElderTale: derTale: over (its End beat, 17.2 s) - 2 cat(s) back in their places
+  CUTSCENE FrostAtBorder: ostAtBorder: over (its End beat, 13.2 s) - 1 cat(s) back in their places
+  CUTSCENE WatchReport: tchReport: over (its End beat, 16.0 s) - 1 cat(s) back in their places  ! tchReport: a line names {Leader} - no such cat about; 
+  CUTSCENE CameraTour: meraTour: over (its End beat, 27.2 s) - 1 cat(s) back in their places
+  CAST: le S:apprentice = Blazeheart;le S:herbalist = Mossfeather;le S:storyteller = Nightheart;
+  ROSTER:  Narrative.TheMistrustfulLeader (Lionstar) pinned; Cat.Troutwing (Troutwing) pinned as Mossfeather;
+  STORY CHECK: e: WaCa story check: 1 problem(s) in the story files - see Saved/WaCaStoryCheck.txt
+  ROLE Scout: at is a Scout now - hunting x1.05 (5% better), fishing x1.00 (as before), damage dealt x0.95 (5% worse), damage taken x0.85 (15% better
+  EVENT FellThroughIce: ies: FellThroughIce - the event IceRescue;eRescue: over (its End beat, 15.2 s) - 1 cat(s) back in their places;
+  EVENT FightBeside: ies: FightBeside - the event FightBeside;ghtBeside: over (its End beat, 22.0 s) - 1 cat(s) back in their places;
+  EVENT MentorTour (Lead): nts: Otterfeather led your cat to Den:Apprentice's den;d: Here it is. Get some rest - training starts at dawn.;
+  DUTY by story (HerbErrand -> HerbRound): ies: a story gives the task HerbRound now;
+  EVENT Reach:S:watcher: ies: you reached S:watcher (3 m) - event WatchReport;tchReport: over (its End beat, 16.0 s) - 1 cat(s) back in their places;
+  GUARD/CRASH: UECC-Windows-039A890047EC77D854256FA40D868718_0000 (newest crash report); game running: 1
+  SWEEPALL DONE
+  -> found + fixed after it: {Leader} named only while in view (Cast.NameFor + undrawn story cats); a duty's cat point
+     fixed where the cat stood (now follows her). The duty line's empty points = my own leftover follow probe steering
+     the cat away (probes now have a stop switch); the duty itself re-verified 09:40 + the moving-cat point 12:40.
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
