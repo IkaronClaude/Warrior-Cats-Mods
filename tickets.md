@@ -25,6 +25,35 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
+## Release readiness 2026-11-04 (operator: "take stock of all the repos for each mod and get them 100% release ready")
+Done in the repos (each committed locally; zips rebuilt with tools/package.ps1 and checked file by file against git):
+- WaCa Core 1.0.0, Keybinds & Mouse 1.0.0, Looks 1.0.0, Graphics 1.0.0, Clan Life 0.8.0, Hunting 0.8.0, Cutscenes 0.1.0:
+  versions agree (main.lua VERSION = NEXUS.md = zip name), clean trees, no debug switches on in the shipped configs.
+- NEW release check `WaCa-Core/tools/check_lua.py Mods examples` (lupa + luaparser): every file compiles on Lua 5.5
+  and no accidental globals. It found 3 REAL BUGS (a local called above its definition = a nil global at run time):
+  Clan Life's Gather step (keepGathered - the fade never lifted, the step never ended), walkers' draw (a cat shown for
+  a turn stayed drawn), Hunting's loadSaveRole (askRoleSoon - nobody was asked their role on a load); plus Clan Life's
+  `staging` set as a global (the walkers never waited for a Gather) and 8 loop-variable assignments (read-only in 5.5).
+  VM: a Gather scene ran through Release to its last card, the gathered-cats file written + cleared; Hunting / Looks /
+  duty chances reloaded and read fine.
+- A missing or too-old WaCa Core now says so: every mod `pcall(require, "WaCa")` (without Core the library is missing
+  too - the "not installed" line could never show) and `WaCa.Needs("1.0.0", mod)`; Core has WaCa.VERSION /
+  WaCa.AtLeast / WaCa.Needs (docs/API.md, HelloWaCa) and warns about a mixed install.
+- The zips now carry docs/, examples/ and CONTRIBUTING.md beside README.md (the READMEs' links - docs/WRITING.md,
+  docs/API.md, the example pack - pointed at files only the repo had).
+- WaCa Cutscenes added to Core's mod table / Nexus list and to Clan Life's Nexus requirements (optional).
+- VM 2026-11-04 19:56: seven hot reloads in a row (one per mod) hung the game (Not Responding, CPU flat) - the known
+  UE4SS reload deadlock below (P3 "WaCa Core hot-reloaded TWICE"; fixed only in the test UE4SS build), not a release
+  path (EnableAutoReloadingLuaMods is a test setting). Logs: Z:/WaCa/hangs-20261104-reload/.
+Left for the operator (nothing else stands between the zips and a release):
+- create the GitHub repos (IkaronClaude/WaCa-*: none exist yet) and push; then the README / NEXUS links resolve;
+- the Nexus pages (login) and their links (the NEXUS.md TODOs);
+- the UE4SS question: ship with the reload / freed-object patches 0001-0004 (our own UE4SS build) or the Nexus UE4SS;
+  and confirm Core's DLL with the Nexus UE4SS download (Core NEXUS.md "Known issues");
+- whether the writer tools (tools/new_pack.ps1, check_pack.py, the pack editor) ship in Clan Life's zip - WRITING.md
+  names them; today they are repo-only;
+- the default switches (Clan Life and Hunting ship mostly off - see the board below).
+
 ## Board status 2026-11-04 (EVERY open item, checked against its own text - all wait on the operator)
 - Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
 - P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
@@ -1704,6 +1733,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
           (2 of 2). The real fix: UE4SS must tear a mod down on the game thread (or never while the game thread is in
           that mod's Lua) - an architectural UE4SS change. The original UE4SS.dll is back on the VM.
       So: hot reload in UE4SS g83330635 is unsafe whenever any mod's Lua runs during it. Ours can't fix it from outside.
+      AGAIN 2026-11-04 19:56 (original UE4SS): seven reloads 12 s apart (Core, Graphics, Keybinds, Looks, Hunting,
+      Cutscenes, Clan Life), in the world - hung after Clan Life's start (Z:/WaCa/hangs-20261104-reload/).
       FIXED IN A TEST BUILD 2026-11-03 20:40: (1)+(2) as above, and (3) the hot reload moved to the GAME THREAD - the
       file watcher only queues the mod's name, an engine-tick pre-callback does uninstall + restart between ticks (no mod
       Lua runs there). VM: the forced repro -> 'busy end', 'Auto-reloading ... (on the game thread)', Clan Life loaded,
