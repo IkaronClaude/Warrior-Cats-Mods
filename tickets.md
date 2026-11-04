@@ -241,11 +241,16 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         EffectToApply / EffectsToApply gameplay tags, RewardType). Next: spawn a clawable bush in the den with the moss
         reward's tag; the claw = the pickup (WaCaInteracted). Gather likewise: count the real pickup, not the area.
         LIBRARY: WaCa.Spawn(classPath, at, yaw, scale) added to Core (ground + always-spawn; SpawnCat uses it).
+        AND the second half (operator): "throwing out" the moss is also only reaching a spot - wanted: an interact
+        prompt there, your cat plays a digging animation, done ~2 s later (the game's Dig interactable, or Core's
+        spawnable Interact prompt + AM_Interact_Dig).
   - [ ] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
         no conversation to repeat it / talk at all.
   - [ ] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
         the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
         (white or orange).
+  - [ ] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
+        mark's meaning is obvious; today the HUD line for "throw out the moss" shows an orange cat-face logo.
   - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
