@@ -1206,6 +1206,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       day beats past 9 were silently dropped. Still open here: standalone starts (a creator entry point) and an editor.
       EDITOR, FIRST STEP 2026-11-04: tools/new_pack.ps1 (WaCa Clan Life) makes a working pack (role, meeting event, cutscene,
       murmurs, all commented) - VM: generated + played (Shadowheart). A visual editor stays future work.
+      + tools/check_pack.py (2026-11-04): proofreads a pack offline (steps, beats, shots, roles, Reach:); found the example's
+      missing S:apprentice newcomer event (added) and led to the Newcomer step waiting for its role (VM).
       STARTS BUILT 2026-11-01 (VM): a pack's content/start.ini [Start] Day / Level / Name = Warrior / Step1.. for a NEW
       cat only (level 1, no rank quest; an existing cat is recorded skipped): story day, level via the game's EXP one
       level-up at a time (WaCaNative_LevelInfo), steps, and Looks' name box asks for the whole warrior name (no kit
