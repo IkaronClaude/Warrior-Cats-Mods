@@ -73,7 +73,9 @@ game data in this repo.
 - Decouple cat stats from looks: built; the body shape in play + a real player size (scales collision) = operator.
 - Story: operator content.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
-- Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice (10-31) built + VM-verified - the older 'Still open:
+- Frozen water in leaf-bare: RE-VERIFIED 2026-11-04 (VM, this save in leaf-bare): 'ice: 32 water surface(s) frozen (1 lake,
+  31 river)' at load; your cat on a frozen stretch (Z 780 over ice 751) and the party cats followed onto it (Z 762 / 792,
+  1.1 m away) - NPC cats on the ice confirmed today; IceRescue played from FellThroughIce in the full sweep. Was: ice, thin ice, rescue scene, NPCs on ice (10-31) built + VM-verified - the older 'Still open:
   NPC cats on the ice' line is superseded; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
