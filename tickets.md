@@ -212,6 +212,17 @@ Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot 
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
+- [ ] **P0 THE GAME'S PATCH 1.1 (Steam, exe of 2026-11-02 - Z:/WaCa/game-20261102/, Steamless-unpacked there)** added
+      mouse + keyboard arrow support, X / Y sensitivity sliders, left click for menus and interact, right click crouch,
+      pause / exit moved from P to Esc (operator 2026-11-04). WaCa Keybinds & Mouse now DOUBLES much of it - likely the
+      cause of the pause menu's double-click buttons, tabs that don't switch, hover that doesn't work, Space not
+      accepting. Decide per feature what the game does now and CUT ours where it does (operator: "we will need to cut
+      features likely"); keep only what 1.1 still lacks. The VM still runs the 2026-10-24 build - it needs 1.1.
+  - [ ] Mouse look: the camera hook's anchor ("LookAtYaw" + an exact prologue) failed on 1.1 - check_hooks.py: the
+        string is there with 10 referencing functions, none starts with the prologue. Operator: DON'T just patch the
+        new bytes - find why the dynamic lookup failed and make it robust. Also check_hooks on 1.1: OnHuntedPounceReached,
+        OnHuntedSequencerFinish, OnEncounterOverlap = ANCHORS DISAGREE (the slot cross-check finds no thunk).
+  - [ ] Exit popup ("you will exit the game. Are you sure?"): clicks work, HOVER doesn't.
 - [ ] **Operator play-test 2026-11-04 (the everything-on bundle Z:/WaCa/WaCa-mods-alltest-20261104; logs
       Z:/WaCa/UE4SS.log + WaCaNative.log 20:39-20:42)**
   - [ ] P1 Hunting's role question (a Clan Life Choice) popped up on Select Your Cat, "before a save is even loaded":
@@ -251,6 +262,17 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         (white or orange).
   - [ ] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
         mark's meaning is obvious; today the HUD line for "throw out the moss" shows an orange cat-face logo.
+  - [ ] P1 NO GAME-Y WORDING (operator rule 2026-11-04): duty / quest text must sound like the clan, never like a video
+        game ("The den's bedding is done - turn it in" is silly; "Go collect your loot from the quest giver" is a no-go).
+        "Let's report to the deputy" works - but an APPRENTICE reports to its MENTOR, not the deputy. Sweep every
+        card / HUD line / map label in the mods' configs and code for game words (turn in, quest, loot, reward,
+        objective, complete).
+  - [ ] P1 Reporting to the deputy by TALKING to him: he only says the game's "There's nothing new for you. StarClan
+        guide your path" - our [Talk] line swap (duties.ini [Talk] Key -> Report / Busy) didn't show on the operator's
+        PC (the game update may have changed that text's key; their log stops at 20:42 - need a newer one). The talk
+        itself should be the report: his own reply about your work, and the duty handed in.
+  - [ ] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
+        map (and minimap) once the duty's work is done.
   - [ ] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
         quest info: the day's duty (what, where, progress) and the packs' stories. What exists: WaCa.QuestLine
         (2026-11-03, the operator's answer (c) then) = a display-only line in SIDE QUESTS for a pack's story; the duty
