@@ -1209,8 +1209,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       + tools/check_pack.py (2026-11-04): proofreads a pack offline (steps, beats, shots, roles, Reach:); found the example's
       missing S:apprentice newcomer event (added) and led to the Newcomer step waiting for its role (VM).
       + THE EDITOR (2026-11-04): tools/pack_editor/pack_editor.html - open a pack folder, edit events / cutscenes /
-      murmurs / cast, live check, save only changed files (comments kept). Node + headless-Edge tested; a writer's real
-      use (picking a folder, saving) = the operator's try.
+      murmurs / cast, live check, save only changed files (comments kept). Node + headless-Edge tested, incl. the page's
+      own open / edit / save on an in-memory folder (test_page.py: one line changed, endings kept); only the native
+      folder dialog itself is untested = the operator's first real try.
       STARTS BUILT 2026-11-01 (VM): a pack's content/start.ini [Start] Day / Level / Name = Warrior / Step1.. for a NEW
       cat only (level 1, no rank quest; an existing cat is recorded skipped): story day, level via the game's EXP one
       level-up at a time (WaCaNative_LevelInfo), steps, and Looks' name box asks for the whole warrior name (no kit
