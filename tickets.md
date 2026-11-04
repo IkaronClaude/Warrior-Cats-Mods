@@ -222,6 +222,21 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         in place isn't enough).
   - [ ] P1 Pause menu top bar (the left / right tabs): clicking a header marks it yellow, but the old tab stays yellow
         too and the page doesn't change.
+  - [ ] P1 Pause menu left bar (Resume, Settings ...): the buttons only work with a DOUBLE click.
+  - [ ] P1 Space doesn't accept in the pause menu.
+  - [ ] P1 MOUSE LOOK IS OFF ON THE OPERATOR'S PC: WaCaNative.log '[camera] update: not found (anchor "LookAtYaw") -
+        mouse look OFF'. The GAME UPDATED: the operator's Wrc-Win64-ShippingDRM.exe is 183,319,112 bytes, the VM's copy
+        (2026-10-24) 183,670,344. Every other hook was found; the camera update moved. The spin on lag spikes = whatever
+        turns the camera without our hook (no hitch drop there). NEEDS the new game files on Z: (the exe at least,
+        unpacked with Steamless like Wrc-Win64-Shipping-NoStub.exe) to re-find the anchor and re-run check_hooks.py.
+  - [ ] P2 "Hollystar: Hollystar has been up since dawn again" - a murmur about {LEADER} given to the leader. FIX
+        (murmurs.lua + the patrol meeting lines in walkers.lua): no line naming the speaker through a placeholder
+        ({NAME} = its own name stays). VM pending.
+  - [ ] P1 SHOW, NOT TELL: the duty "Gather moss from the leader's den" finishes as soon as your cat enters the den -
+        no real moss to pick up, only a big text card. The duty should spawn real interactable moss (the game's own
+        collectable / interactable) at the points and count the pickups.
+  - [ ] P3 the lines on screen ("<cat>: <line>", WaCa Cutscenes' ShowLine on the game's message card) read as "super
+        bold" - check how it looks next to the game's own speech.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
   - [x] P0 the deputy couldn't progress a third: the meeting place was a parked FILLER's spot (the leader role is also on
