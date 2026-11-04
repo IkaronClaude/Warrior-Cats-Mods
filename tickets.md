@@ -212,6 +212,16 @@ Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot 
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
+- [ ] **Operator play-test 2026-11-04 (the everything-on bundle Z:/WaCa/WaCa-mods-alltest-20261104; logs
+      Z:/WaCa/UE4SS.log + WaCaNative.log 20:39-20:42)**
+  - [ ] P1 Hunting's role question (a Clan Life Choice) popped up on Select Your Cat, "before a save is even loaded":
+        the game loads the last save for the main menu's preview cat, so WaCa.CurrentSlot() is set in the menus.
+        FIX (ClanLife events.lua, VM pending): a PlayScene asked for without the game's HUD waits, plays once it's up.
+  - [ ] P1 the same leak: Hunting's wind announced "The wind blows from the north-east." on the main menu (a ShowLine).
+  - [ ] P1 "Every lag spike still causes the mouse to spin like crazy" (Keybinds & Mouse mouse look; the hitch drop
+        in place isn't enough).
+  - [ ] P1 Pause menu top bar (the left / right tabs): clicking a header marks it yellow, but the old tab stays yellow
+        too and the page doesn't change.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
   - [x] P0 the deputy couldn't progress a third: the meeting place was a parked FILLER's spot (the leader role is also on
