@@ -101,6 +101,9 @@ SWEEP PART 3 2026-11-04 07:10-07:40 (same boot, one script - the library beyond 
   Gatherings: GatheringNight cast the other Clans' cats (Sunstar = Clan:ThunderClan.Leader, Freezeface =
   Clan:ShadowClan) and played - the item's 'other Clans' cats' VERIFIED today, not just relabelled. Frozen water:
   IceRescue played from its FellThroughIce event; the reboot after (a test teleport sank the cat) loaded the save fine.
+EXERCISE 2026-11-04 08:58 - The Border Watch (example pack: S:watcher = Palepool, met by Reach: S:watcher, card + cutscene
+by role, Walk Away under a Behind camera): clean except one rough edge - a cutscene line naming a cat the scene didn't
+cast ('I'll tell {Leader}') showed as typed. FIXED (Cast.NameFor; unknown keys logged once) - VM: 'I'll tell Lionstar'.
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
