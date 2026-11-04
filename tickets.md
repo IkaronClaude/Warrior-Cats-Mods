@@ -25,7 +25,7 @@ A Clans of the Forest that plays like a day in a Clan. You get real daily duties
 instead of narrated. Pacing and characters match the books. The mod sits on the shipped game (mod paks + UE4SS), with no
 game data in this repo.
 
-## Board status 2026-11-03 evening (EVERY open item, checked against its own text - all wait on the operator)
+## Board status 2026-11-04 (EVERY open item, checked against its own text - all wait on the operator)
 - Operator play-test 2026-10-30: fixed on the VM; the operator's retest of the drop.
 - P1 leading = MANAGING the clan: first cut built; the full UI waits on the operator's rules (stats, outcomes, picker).
 - Operator checks: the operator's list by definition.
@@ -51,11 +51,13 @@ game data in this repo.
 - 23 Random prey spawns: built + VM-verified; a moved prey's pounce in play (operator - the VM's pounce fails on any prey).
 - 24 StarClan guidance leads to prey: built + VERIFIED, off; turning it on = operator.
 - Dialogue text bugs: fixed (sweeps both clans); lines the operator meets in play.
-- Gatherings: groundwork + travel + other Clans built + VM-verified; the story beats = operator.
+- Gatherings: groundwork + travel + other Clans (10-31) + the 12-cat party (11-01) built + VM-verified - the item's older
+  'OPEN: other Clans' cats / 10+ cats travelling' lines are superseded by those; the story beats = operator.
 - Mod stories (story packs): the operator's answers built 2026-11-03 - the quest-tab line with its detail (WaCa.QuestLine) and the Warn sync against the game's rank-ups; both halves seen via the game's own functions (StartQuestOfTag / OnPlayRankUpSequenceFinished); a real play-through promotion = operator, a save with side quests of its own, replaying skipped variables (operator).
 - Story packs: starts + authoring: built + VM-verified (Day, Level, Name, Party, Watch; 2026-11-02 exercises: S-role murmurs, HerbCouncil cutscene + Lead event, story dialogue + its checks, renamed-cat nameplates, undrawn cast cats); start rank = operator decision; an editor = future.
 - P1 Party members follow you: built + VM-verified; camera framing on the operator's camera; PartySetup by a later chapter needs such a save.
-- Roles and the cast: S roles built + exercised; new GAME-side roles = the operator's go.
+- Roles and the cast: S roles built + exercised; S roles in every line ({S:loner}, Say: S:loner) DONE 2026-11-04 (VM);
+  new GAME-side roles, and whether a brought-in role cat bonds / joins a party = the operator's go.
 - Fresh kill without hunger: deposit VM-verified; talking to the pile's cat in play (the VM can't talk to NPCs - re-tried
   2026-11-03: the cat placed 1.45 m in front of Freezesong + the game's interact command (65) on the HUD screen opened no
   conversation; the game's talk comes from the player's input / the prompt's own target) = operator.
@@ -71,11 +73,26 @@ game data in this repo.
 - Decouple cat stats from looks: built; the body shape in play + a real player size (scales collision) = operator.
 - Story: operator content.
 - 12 Romance + kits: a configurable draft built, off; the rules = operator.
-- Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
+- Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice (10-31) built + VM-verified - the older 'Still open:
+  NPC cats on the ice' line is superseded; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
-- P2 a Lua call on a freed object (was "crash exe+0x1a95fd3"): RECURRED 11-03 23:24 - same fault; pre-worked (see the ticket).
+- P2 a Lua call on a freed object (was "crash exe+0x1a95fd3"): RECURRED 11-03 23:24 - same fault, symbolised (a UFunction
+  call on a freed object); a UE4SS guard built + VM-tested 2026-11-04 (patch 0004 - a stale call becomes a Lua error).
+  Shipping it = the operator's UE4SS decision (with the reload patches); the exact caller needs a recurrence (the VM
+  runs the original UE4SS so one is still caught). WaCa.Live now rejects destroyed (Garbage, bit 21) objects (VM).
 - P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
+LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
+every rough edge it showed fixed + re-played):
+  custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
+  custom ROLE      S:herbalist / S:storyteller / S:loner / S:envoy - cast, murmurs, scenes, lines name them      DONE
+  custom CAT       [Rogue.Frost], [Cat.<name>] roster, Quill       - look checks, own names, cast names in logs  DONE
+  custom CUTSCENE  FrostAtBorder (walk in, threat, Sound, walk Away + Camera Behind), LonerVisit (Ask), ElderTale,
+                   NewApprentice, HerbCouncil, RogueRaid                                                        DONE
+  custom EVENTS    clan events by time, Event:, Reach:<place>, Reach:<cat>; cards naming roles                  DONE
+  story days       days.ini / story.ini checks, SetPackDay, QuestLine, Warn sync                                DONE
+  input            pad keys via the game's commands, [ModKeys] lists                                            DONE
+No rough edge from these exercises is left open. What remains is play-feel / content / design = operator (above).
 Exercise 2026-11-03 evening: ElderTale - pack role on a save's clanmate + newcomer by role + player in one cutscene,
 the storyteller's question on the answer menu - clean (VM).
 Pre-work 2026-11-03 night (cutscene library): Sound: beat (the game's cues), Beat2a keys, unknown keys reported, lines
