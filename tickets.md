@@ -1156,8 +1156,10 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
         "E:<name>" = the game's ENarrativeRole (its tables / bonding / parties know it), "S:<name>" = a mod's string
         role, BOUND to a real cat (a generic clanmate or one we spawn) - only our layer knows it. A bare name = E.
         BUILT (events.lua): Events.BindRole("S:x", cat), Events.Role(key) -> kind, name; Events.Who resolves both
-        (every scene "@ who"). OPEN: S roles in dialogue (our own text, not the game's per-role filler keys), bonding,
-        parties - the custom-cat work.
+        (every scene "@ who"). S roles in dialogue DONE 2026-11-04 (VM): {S:loner} / {Leader} / a name in any of our
+        lines (cards, murmurs, patrol lines, cutscene lines) = the cat's name, and Say: S:loner = ... as a speaker.
+        Bonding / parties: a clanmate playing a role IS the game's cat (its bonding and party already work); a cat
+        brought in per scene (Rogue:, Clan:) lives only in its scene - whether it should bond / join = operator.
         For the GAME to take compound roles, every ENarrativeRole read path needs a survey + patch (operator). Scope
         from the reflection dump (2026-10-28): the uint8 narrativeRole field in 10 classes (QuestBaseActor ...),
         FCharacterNarrativeRoleStruct (narrativeRole + characterTag: OptionAlly, ForcedParty ...), the maps
