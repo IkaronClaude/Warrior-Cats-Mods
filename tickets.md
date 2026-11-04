@@ -107,6 +107,8 @@ cast ('I'll tell {Leader}') showed as typed. FIXED (Cast.NameFor; unknown keys l
 EXERCISE 2026-11-04 09:40 - a story gives a duty (HerbErrand -> HerbRound): found + fixed a REAL BUG - a duty's 'Pile'
 point (and Reach: Pile) sat at the world's origin (the pile component's owner is the game state), unreachable; now the
 camp's pile cat. Added the Duty: <name> step; duty points / cards name cats by role. VM: the round done end to end.
+EXERCISE 2026-11-04 10:00 - Reach: on a brought-in role (S:loner = Rogue:Quill): looked up every step and misreported;
+now said plainly once + skipped, and the story check flags Reach: mistakes before play (no cast / brought-in / bad x y z).
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
