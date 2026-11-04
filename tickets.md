@@ -1454,6 +1454,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       HelloWaCa's content/text.ini merged + its sidecar written; Core alone (see below).
       OPEN: (1) the DLL under the NEXUS UE4SS download (same commit 8333063; ours is a from-source build) - needs the
       operator's download; (2) MothColorPicker + Looks together; (3) Nexus link TODOs in NEXUS.md once pages exist.
+      RELEASE CHECK 2026-11-04: package.ps1 for Clan Life / Cutscenes / Core with today's changes - every script in its zip,
+      enabled.txt + configs, nothing stray. DECISION (operator): the writer tools (tools/new_pack.ps1, check_pack.py,
+      pack_editor/) are in no zip - ship them (in Clan Life's, or a separate writer kit on Nexus) or repo-only?
 - [ ] **17 + 10. "Show, don't tell": a cutscene / event system.** Today everything happens off screen and someone tells
       you about it. You only learn you have an apprentice when he's suddenly in your party, and that he finished
       training when his name changes in the party menu. Needs a scripted-scene framework (Level Sequences / a dialogue
