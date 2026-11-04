@@ -1642,10 +1642,16 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       before UE 5.4 - on this 5.7 game the reachable bit ROTATES 14 <-> 15 each GC, its "Unreachable" bit 28 is never
       set, and a destroyed actor carries Garbage = bit 21 and passes IsValid until the GC frees it. Fixed in WaCa.Live
       (Garbage = gone). NOT shown to be this crash: destroyed actors and dropped widgets left at the next GC with no
-      frame in between where Lua could see them condemned (3 GCs watched). Open: which call. Next: a hook-side guard -
-      the bridge (C++) checking the object's slot still holds it before a UFunction call goes out; or catch it live
-      (livewalk on the next one). UE4SS upstream (main, 2026-11-04) still has the pre-5.4 bits - an upstream report
-      is the operator's call.
+      frame in between where Lua could see them condemned (3 GCs watched). Open: which call.
+      GUARD BUILT + VM-TESTED 2026-11-04 (a UE4SS patch - the bad read is inside UE4SS's own call wrapper, before any
+      hook of ours): call_ufunction_from_lua checks the object's GUObjectArray slot still holds that very object, else
+      a Lua error. Z:/WaCa/hangs-20261103/ue4ss-patches-final/0004-guard-call-on-freed-object.patch, build
+      ue4ss-guard-freed/. VM: an actor destroyed + freed by a forced GC, then called through the kept Lua reference ->
+      'Tried calling a function on an object that no longer exists' (pcall-able), live calls unaffected, the game ran
+      on. Not airtight (the slot index is read from the object - fine while the allocator keeps the page). The VM is
+      back on the ORIGINAL UE4SS (ce5e3c..., copy in ue4ss-vm-original/) so a recurrence is still caught there.
+      OPERATOR: ship it with the reload patches 0001-0003 (our own UE4SS build) or not, and the upstream report
+      (this guard + the pre-5.4 flags) - the same decision as the reload-hang ticket.
 
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
