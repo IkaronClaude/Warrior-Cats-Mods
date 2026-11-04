@@ -311,7 +311,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         hides both lists and shows ours - entries made like WaCa.QuestLine's (the duty, then each pack story), detail on
         hover; the native tab state put back when Main / Side is chosen again.
         BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
-        TriggerL / Main / Side out, the duty on it with its leaf. Open: DetailDown 120 to see on a fresh boot; only the
+        TriggerL / Main / Side out, the duty on it with its leaf. DetailDown 120 SEEN 23:49 (the title clear of the '4 >' hint). Open: only the
         first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
   - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
