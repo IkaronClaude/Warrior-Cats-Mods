@@ -235,6 +235,13 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] P1 SHOW, NOT TELL: the duty "Gather moss from the leader's den" finishes as soon as your cat enters the den -
         no real moss to pick up, only a big text card. The duty should spawn real interactable moss (the game's own
         collectable / interactable) at the points and count the pickups.
+  - [ ] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
+        the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
+        (white or orange).
+  - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
+  - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
+  - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
+  - [ ] P2 Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
   - [ ] P3 the lines on screen ("<cat>: <line>", WaCa Cutscenes' ShowLine on the game's message card) read as "super
         bold" - check how it looks next to the game's own speech.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
