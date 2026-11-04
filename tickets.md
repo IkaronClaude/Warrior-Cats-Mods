@@ -74,8 +74,7 @@ game data in this repo.
 - Frozen water in leaf-bare: ice, thin ice, rescue scene, NPCs on ice built + VM-verified; the look = operator.
 Closed in this pass: Time follows effort (built as part of 15), Murmurings (built + VM-verified), NPC patrols.
 - P3 Core hot-reload hang: ROOT-CAUSED + FIXED in a UE4SS test build (lock lifetime, lock release, reload on the game thread) - VM: 6 Core reloads with the pause up, no hang / crash. Shipping it / test-only / upstream = operator.
-- P3 crash exe+0x1a95fd3: seen once (11-03 02:56); checked 2026-11-03 20:30 against all 14 crash reports since 11-01 - no
-  recurrence (the others: today's reload / UE4SS-patch tests, and earlier unrelated faults). Waiting for a second one.
+- P2 a Lua call on a freed object (was "crash exe+0x1a95fd3"): RECURRED 11-03 23:24 - same fault; pre-worked (see the ticket).
 - P3 default pad buttons for the mod keys: the plumbing works (KeyDown pad keys, [ModKeys] lists); which buttons = operator.
 Exercise 2026-11-03 evening: ElderTale - pack role on a save's clanmate + newcomer by role + player in one cutscene,
 the storyteller's question on the answer menu - clean (VM).
@@ -1629,14 +1628,24 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       game applies its PAD list only when a pad becomes the active device (input.cpp: the list runs again on each
       keyboard <-> gamepad switch). The VM has no pad, so the layout can't be read here: needs a pad connected (the
       operator's PC) to log the pad list the game applies, or the operator's pick.
-- [ ] **P3: a crash in a Lua call into the game - exe+0x1a95fd3 (seen once, VM 2026-11-03 02:56)** - access violation
-      reading 0x1e3220f20, the stack a UFunction call from Lua (UE4SS +0x3ecd05 / +0x2c5680) into exe+0x1a95fd3 <- 1a9ce53
-      <- 1a9a6d9. The last log line was the test harness's own probe (FindAllOf WBP_GuiScreenPause_C + IsValid /
-      IsInViewport) 2 s after the pause screen came up - the same check the mods' menu tracking makes on every screen
-      change; nothing else of ours logged. One occurrence. Its full logs were NOT kept (the boot script copied them
-      only when the crash report was strictly newer than the log - same second here; fixed: copied unless the log is
-      newer) - the lines above are what was read before the reboot. Next if it recurs: compare the last lines; symbolise 0x1a95fd3 (the exe's PDB-less -
-      the caller chain) and check whether it is IsInViewport on a screen being torn down.
+- [ ] **P2: a Lua call on a FREED object - UE4SS+0x3ecd05 (twice: VM 2026-11-03 02:56 and 23:24)** - raised from P3:
+      it recurred. Both minidumps fault at the SAME instruction (UE4SS +0x3ecd05, `mov r9,[rcx+rax]` - UObject::
+      ProcessEvent's virtual call) reading the same 0x1e3220f20: the object's first 8 bytes are 0x1_e3_22_0cc0 = an
+      FMallocBinned2 FREE-BLOCK header (block 3264 B, pool 0x22, canary 0xE3) - the object had been destroyed and its
+      memory given back, and Lua called a UFunction on it. (The old title's exe+0x1a95fd3 was only a caller frame.)
+      Same stack both times: engine tick -> a UE4SS game-thread action -> 3 nested pcalls -> the call. Both dumps hold
+      `IsInViewport`; the first also the harness probe `if s:IsValid() and s:IsInViewport()` over FindAllOf(pause
+      screen) - so IsValid said yes and the next call met freed memory. The 2nd came 2.4 s after a cutscene line put
+      the game's message card up (a screen change - the screen trackers run). Symbols: a UE4SS build of our commit
+      (Z:/WaCa/hangs-20261103/ue4ss-plain-83330635, with PDB) + byte-matching (scratchpad rvafuzzy.py / symb.py).
+      FOUND ON THE WAY (VM 2026-11-04, probes Z:/WaCa/probes/gc*.lua): UE4SS reads the engine's internal flags as
+      before UE 5.4 - on this 5.7 game the reachable bit ROTATES 14 <-> 15 each GC, its "Unreachable" bit 28 is never
+      set, and a destroyed actor carries Garbage = bit 21 and passes IsValid until the GC frees it. Fixed in WaCa.Live
+      (Garbage = gone). NOT shown to be this crash: destroyed actors and dropped widgets left at the next GC with no
+      frame in between where Lua could see them condemned (3 GCs watched). Open: which call. Next: a hook-side guard -
+      the bridge (C++) checking the object's slot still holds it before a UFunction call goes out; or catch it live
+      (livewalk on the next one). UE4SS upstream (main, 2026-11-04) still has the pre-5.4 bits - an upstream report
+      is the operator's call.
 
 - [ ] **27. Side threads** (operator 2026-10-25, future work). Quest chains spanning several days (25) that can be
       missed when not done by a given day, so the story isn't one fixed line.
