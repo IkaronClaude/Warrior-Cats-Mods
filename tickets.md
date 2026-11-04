@@ -218,10 +218,18 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       cause of the pause menu's double-click buttons, tabs that don't switch, hover that doesn't work, Space not
       accepting. Decide per feature what the game does now and CUT ours where it does (operator: "we will need to cut
       features likely"); keep only what 1.1 still lacks. The VM still runs the 2026-10-24 build - it needs 1.1.
+      AND PATCH 1.2 (operator): a setting to turn off the follow camera (on by default for mouse controls); the MAP -
+      mouse wheel zooms, WASD or the mouse moves it. (Our map hover / panning work overlaps that too.)
   - [ ] Mouse look: the camera hook's anchor ("LookAtYaw" + an exact prologue) failed on 1.1 - check_hooks.py: the
         string is there with 10 referencing functions, none starts with the prologue. Operator: DON'T just patch the
         new bytes - find why the dynamic lookup failed and make it robust. Also check_hooks on 1.1: OnHuntedPounceReached,
         OnHuntedSequencerFinish, OnEncounterOverlap = ANCHORS DISAGREE (the slot cross-check finds no thunk).
+        DONE 2026-11-04 (WaCa-Core 'Camera anchor by what the code does'): WHY it failed - the exact prologue: 1.1
+        saves R15 not R14 and stores the axis id at other frame offsets. Now scan::FunctionUsingWhere("LookAtYaw",
+        pitch slot call, 1) + wildcarded body checks: found on 1.1 (0x1417A4B80) and the old build (VM: hooked as
+        before). On 1.1 the TURN is inlined (1.1's own mouse look) - logged as such, WaCa's mouse look stays off there.
+        The three ANCHORS DISAGREE fail on the OLD build too and the runtime finds them on both: a weakness of
+        check_hooks' thunk cross-check, not a 1.1 break. Tool: WarriorCats-Mod/tools/anchor_report.py.
   - [ ] Exit popup ("you will exit the game. Are you sure?"): clicks work, HOVER doesn't.
 - [ ] **Operator play-test 2026-11-04 (the everything-on bundle Z:/WaCa/WaCa-mods-alltest-20261104; logs
       Z:/WaCa/UE4SS.log + WaCaNative.log 20:39-20:42)**
