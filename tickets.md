@@ -310,6 +310,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         third WBP_GuiButtonSubTabMenuSmall ("Clan") after the side tab; selecting it (click, TriggerR past Side, key 5)
         hides both lists and shows ours - entries made like WaCa.QuestLine's (the duty, then each pack story), detail on
         hover; the native tab state put back when Main / Side is chosen again.
+        BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
+        TriggerL / Main / Side out, the duty on it with its leaf. Open: DetailDown 120 to see on a fresh boot; only the
+        first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
   - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
@@ -1839,6 +1842,8 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       So: hot reload in UE4SS g83330635 is unsafe whenever any mod's Lua runs during it. Ours can't fix it from outside.
       AGAIN 2026-11-04 19:56 (original UE4SS): seven reloads 12 s apart (Core, Graphics, Keybinds, Looks, Hunting,
       Cutscenes, Clan Life), in the world - hung after Clan Life's start (Z:/WaCa/hangs-20261104-reload/).
+      AND 22:58 the same day: two WaCaCore reloads 9 s apart (two files copied, the pause menu up) - hung after the
+      second start's 'roles with no cat' (Z:/WaCa/hangs-20261104-reload2/). Test rule: one copy = one reload, or boot.
       FIXED IN A TEST BUILD 2026-11-03 20:40: (1)+(2) as above, and (3) the hot reload moved to the GAME THREAD - the
       file watcher only queues the mod's name, an engine-tick pre-callback does uninstall + restart between ticks (no mod
       Lua runs there). VM: the forced repro -> 'busy end', 'Auto-reloading ... (on the game thread)', Clan Life loaded,
