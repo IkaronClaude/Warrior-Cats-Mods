@@ -88,6 +88,17 @@ HerbalistsHonour (the game's ceremony, skipped by the NEW Scenes.Skip), Gatherin
 RogueRaid, LonerVisit (its Ask answered), FightBeside, HerbCouncil, Envoy, Vigil, Scolding, NewApprentice, ElderTale,
 FrostAtBorder - each to its end, no crash. Found + fixed by the sweep: the P2 crash (camera plant list), the skip that
 left the game's scenes out (one stuck scene blocked every later one).
+SWEEP PART 3 2026-11-04 07:10-07:40 (same boot, one script - the library beyond cutscenes):
+  cast: S:apprentice = Blazeheart, S:herbalist = Mossfeather, S:storyteller = Nightheart (custom roles on save cats)
+  custom cats: [Cat.Troutwing] pinned as Mossfeather, [Narrative.TheMistrustfulLeader] Lionstar pinned (roster)
+  story check: 0 problems, 1 warning (the example's days while story days are off - correct)
+  custom role: SetSpecialisation Scout -> 'hunting x1.05, damage taken x0.85 (15% better)'; Hunter restored (save kept)
+  clan events: FellThroughIce -> IceRescue played + its card; FightBeside -> played; MentorTour -> card + Otterfeather
+  leads (the Lead waits for your cat - walking it is a player's, VM-verified 11-02); Reach:ReedBank -> 'you reached
+  ReedBank (7 m) - not now: a cutscene plays' (the hold-back is right).
+  Gatherings: GatheringNight cast the other Clans' cats (Sunstar = Clan:ThunderClan.Leader, Freezeface =
+  Clan:ShadowClan) and played - the item's 'other Clans' cats' VERIFIED today, not just relabelled. Frozen water:
+  IceRescue played from its FellThroughIce event; the reboot after (a test teleport sank the cat) loaded the save fine.
 LIBRARY SWEEP - END STATE 2026-11-04 (each exercise = example-pack content written as a modder would, played on the VM,
 every rough edge it showed fixed + re-played):
   custom ROLE      [Role.Scout] (Hunting roles)                    - key / factor checks, factors in words      DONE
