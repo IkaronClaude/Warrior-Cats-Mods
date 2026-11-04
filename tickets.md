@@ -212,6 +212,17 @@ Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot 
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
+- [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
+      Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
+      WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
+      in the den (Eat pose) + Interact out of camp (Dig pose), done ~2 s after each; kits / newcomers talkable
+      ([Talk.Kit] / [Talk.Newcomer] in lines.ini); the cat to report to marked on the map ("Report to X", followed
+      every 3 s); HUD "Back to camp:" instead of "... done - turn it in:"; talking = reporting also on 1.1's
+      WBP_QuestGiver_Dialogue2 (no NpcRef: the nearest story cat within ReportRadius, logged which); murmurs at most
+      one per [Murmurs] Every = 30 s (six in four seconds walking into camp, operator's log); flavour lines over the
+      speaker (WaCa.Say); map marks drawn UNDER the game's icons. Keybinds: map names refreshed every 150 ms while the
+      map is up (panning), the gamepad's screen-middle cursor when the mouse is still, "Pulse1" named by the nearest
+      WaCa mark. Hunting: the wind announced once the HUD is up; Cutscenes: lines without the HUD dropped.
 - [ ] **P0 THE GAME'S PATCH 1.1 (Steam, exe of 2026-11-02 - Z:/WaCa/game-20261102/, Steamless-unpacked there)** added
       mouse + keyboard arrow support, X / Y sensitivity sliders, left click for menus and interact, right click crouch,
       pause / exit moved from P to Esc (operator 2026-11-04). WaCa Keybinds & Mouse now DOUBLES much of it - likely the
