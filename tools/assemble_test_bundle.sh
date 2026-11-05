@@ -13,7 +13,7 @@ mkdir -p "$O/0-Uninstall-old-WaCaModKit"
 cp "$S/uninstall-old.ps1" "$S/uninstall-old.bat" "$O/0-Uninstall-old-WaCaModKit/"
 i=1
 for r in Core KeybindsMouse Looks ClanLife Hunting Graphics Cutscenes; do
-  pkg=$(ls -d /c/Projects/WaCa-$r/dist/WaCa-$r-*/ | head -1); p=$(basename "$pkg")
+  pkg=$(ls -td /c/Projects/WaCa-$r/dist/WaCa-$r-*/ | head -1); p=$(basename "$pkg")
   d="$O/$i-$p"; mkdir -p "$d/files"
   [ -d "$d/files/Wrc" ] && mv "$d/files/Wrc" "$d/files/Wrc.old-$(date +%H%M%S)"
   cp -r "$pkg/Wrc" "$d/files/"
