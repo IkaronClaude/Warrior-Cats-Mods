@@ -370,6 +370,13 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         internal; EVENTS.md - 17 events no doc listed. PreyScented carried the prey ACTOR, so it never left Hunting:
         now its path - VM: wind on, cat 8 m upwind of a mouse -> the test mod got 'PreyScented from WaCaHunting: <path>,
         Mice, 800 cm' (and SetWind from another mod turned the wind).
+        + CLEAN INSTALL of the release set (VM 2026-11-05 07:47-08:05): the VM's WaCa folders moved aside, the 7 zips of
+        Z:/WaCa/release-20261105 extracted as a player would, booted without deploying: all 7 load at their versions,
+        every part at its shipped default, no error through boot, the save loading and play. (A first try moved UE4SS's
+        own Mods/shared/UEHelpers aside too - BPModLoaderMod failed; a test artefact, a player's shared/ keeps it.)
+        The VM restored; the release copies kept in Z:/WaCa/cleaninstall-test-release-files-0805.
+        Also: settings read but never in an ini - 6 documented (commented defaults); step kinds / beat actions / events
+        / API all cross-checked against the docs.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
