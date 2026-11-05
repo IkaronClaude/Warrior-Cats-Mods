@@ -1,4 +1,4 @@
-WaCa mods - EVERYTHING ON test install (2026-11-04, build b)
+WaCa mods - EVERYTHING ON test install (2026-11-05)
 
 Double-click install-all.bat. It moves the old WaCa ModKit aside (if it's there), installs all seven mods (Core
 first) and, as number 8, the example story pack (WaCaStoryPackExample) so the story features have something to play.
@@ -29,6 +29,10 @@ Worth checking (ue4ss\UE4SS.log):
   the moss, then digs); kits and newcomers can be talked to (E next to them); the cat you report to is marked on the
   map, and talking to it hands the duty in; cats' lines show over their heads; at most one murmur every 30 s; the
   duty line's icon is the map's leaf; a Clan tab in the pause menu's Quest page (after Side Quests).
+- Story steps for writers: Say (a line over a cat's head) and Interact (the game's Interact prompt at a place). The
+  example pack's "Soft moss" event uses both: the queen asks you for soft moss, you go to the reeds (marked on the
+  map) and press E, your cat digs, she thanks you. It plays when a story asks for it - to try it now, a mod's
+  WaCa.Emit("ClanEvent", "SoftMoss").
 - Patch 1.1: when the game handles the mouse itself (1.1 does), WaCa's menu mouse and mouse look switch off by
   themselves - the double clicks and stuck tabs should be gone. Keybinds' [Mouse] WhenTheGameHasMouse = Ours brings
   ours back. Please check the log for 'mouse: the game handles the mouse itself'.
