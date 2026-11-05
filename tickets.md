@@ -318,6 +318,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         is the STORY role <Clan>Deputy (Otterfeather in the VM save), while several cats use the game's Deputy giver
         class (Tigerclaw = RiverClanQueen). duties now logs 'your cat talks to <name> (NpcRef)' - the next log shows who.
         1.1 mouse: Player_Mouse_Camera_Right / _Up are in the 1.1 exe only - the detection key is sound.
+        LEAD (2026-11-05, not proven for the deputy): the game keeps TWO actors of one cat - Toadfrost in camp and a
+        second 190 m off, both shown. A report check bound to one actor missed the other; reports now take a cat of the
+        same name (S: roles; game roles already match by role name). The next log's 'your cat talks to' line shows
+        which actor was talked to.
   - [x] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
         actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
@@ -334,6 +338,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         places.ini names; a far, unseen lead cat (148 m) is set down 12 m behind your cat first (Walkers.BringNear).
         + MentorPraise (a cutscene cast by S:mentor at ReedBank) played; a Reach event no longer fires in the middle of
         another scene (Events.Busy) - FrostAtTheReeds held back during the lesson, played on coming back after it.
+        + ScentTrail (a pack duty: Interact at ReedBank, TurnIn = S:mentor): fixed duty points taking places.ini names,
+        talking to an S: role cat counting as the report, the same-name second actor, the report-miss card's wording.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
