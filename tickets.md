@@ -307,6 +307,11 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         guide your path" - our [Talk] line swap (duties.ini [Talk] Key -> Report / Busy) didn't show on the operator's
         PC (the game update may have changed that text's key; their log stops at 20:42 - need a newer one). The talk
         itself should be the report: his own reply about your work, and the duty handed in.
+        OFFLINE 2026-11-05 (exe + pak dumps): NOT a 1.1 change - WBP_QuestGiver_Dialogue2 is in the old paks too and is a
+        QuestGiverWidget (NpcRef present in both exes). So the swap's checks failed on the cat itself: the clan's deputy
+        is the STORY role <Clan>Deputy (Otterfeather in the VM save), while several cats use the game's Deputy giver
+        class (Tigerclaw = RiverClanQueen). duties now logs 'your cat talks to <name> (NpcRef)' - the next log shows who.
+        1.1 mouse: Player_Mouse_Camera_Right / _Up are in the 1.1 exe only - the detection key is sound.
   - [ ] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
         actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
