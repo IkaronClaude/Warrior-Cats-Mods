@@ -299,7 +299,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         spawnable Interact prompt + AM_Interact_Dig).
   - [x] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
         no conversation to repeat it / talk at all.
-  - [ ] P2 (CODE ONLY - not seen on the VM; QA-RUNBOOK 2.2) THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
+  - [x] P2 (VM 2026-11-05: leaf drawn over its circle, zoomed shot) THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
         the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
         (white or orange).
   - [x] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
@@ -392,7 +392,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
         TriggerL / Main / Side out, the duty on it with its leaf. DetailDown 120 SEEN 23:49 (the title clear of the '4 >' hint). Open: only the
         first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
-  - [ ] P2 (CODE ONLY - QA-RUNBOOK 2.3) Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
+  - [x] P2 (VM 2026-11-05: 'map: Soak moss here' on hover; the flicker to 'Player' it showed is fixed by code - QA 2.3b) Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [x] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [x] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
   - [ ] P2 (CODE ONLY - QA-RUNBOOK 2.6) Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
