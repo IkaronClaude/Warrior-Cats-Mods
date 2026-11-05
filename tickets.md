@@ -362,6 +362,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         patrols' field fallback is gone. No camp cat free = no patrol, logged.
         + Time skips (VM): a story's Skip: did NOTHING with time skips off (the default) - now On gates only resting;
         pack's [Skip.QuarterMoon] + HerbsGrow played with it off. HaveKits with kits off: declined, now logged.
+        + VERSIONS 2026-11-05: the released Core 1.0.0 lacked Spawn / InteractSpot / Say / SayOrShow / OnGround, which
+        Clan Life calls, yet Core still said 1.0.0. Now Core 1.1.0 (API.md documents them, talking-cat example VM-tested),
+        Clan Life 0.9.0 needs it, Cutscenes 0.2.0, Keybinds & Mouse 1.1.0, Hunting 0.8.1; changelogs. VM: all load.
+        Release zips: Z:/WaCa/release-20261105/<Repo>/ (zip + NEXUS.md + README.md). Publishing = the operator's.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
