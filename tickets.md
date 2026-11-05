@@ -212,6 +212,13 @@ Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot 
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
+- [ ] **P2 CUTSCENE SHOTS IN CRAMPED PLACES** (library exercise 2026-11-05, QueenThanks at the example pack's ReedBank -
+      rocks on one side, a tree's crown over it): the cast and marks work (B1 = Tigerclaw, this save's RiverClanQueen), the
+      SHOTS don't - Two found no spot that frames both cats: '100% clear' to the midpoint with a rock hiding the queen
+      (fixed: seesAll - each framed cat must be visible too), then 3 m up in the canopy (55%), and a closer try (reverted)
+      left both cats out of frame. Portrait took a 15%-clear spot 1.7 m off. Next: tell the writer at load / in the story
+      check when a place has no clear Two / Wide spot (a fit test over the candidates), and look at the foliage check -
+      it scored every spot low before (the moss spheres). Screens: ScreenShot01439-01442.
 - [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
       Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
       WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
