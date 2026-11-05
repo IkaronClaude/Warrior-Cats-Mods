@@ -317,7 +317,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
         WARRIOR} as your mentor", "{THE REGRETFUL WARRIOR} as your mentor"). BUILT (VM pending): an apprentice
         reports to S:mentor when a pack's [Cast] names one (WRITING.md), else the deputy.
-        LIBRARY EXERCISE 2026-11-04 (VM, the whole event): steps Say / Interact + Events.Place - the example pack's SoftMoss. OPERATOR: a default mentor
+        LIBRARY EXERCISE 2026-11-04 (VM, the whole event): steps Say / Interact + Events.Place - the example pack's SoftMoss.
+        AND 2026-11-05 (VM): a CUSTOM CAT (WaCa Looks roster: Troutwing -> Mossfeather) cast as a role (S:herbalist)
+        speaks over her own head (Say @ S:herbalist) - the plate found by her custom name. Clean. OPERATOR: a default mentor
         per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
         DERIVED 2026-11-05 (no hardcoding): the story role your clan's lines call 'your mentor' most, among roles with a cat
         of your clan in the world - VM: RiverClan -> TheRegretfulWarrior (Toadfrost in the test save). Operator: override?
