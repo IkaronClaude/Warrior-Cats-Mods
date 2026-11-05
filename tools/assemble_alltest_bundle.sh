@@ -31,17 +31,7 @@ rem WaCaQA (test keys): double-click to install (finds the game through Steam).
 powershell -NoProfile -ExecutionPolicy Bypass -File "%%~dp0install.ps1" %%*
 pause
 ' > "$Q/install.bat"
-python - "$O/install-all.bat" <<'PYEOF'
-import sys
-p = sys.argv[1]; t = open(p, newline="").read()
-add = 'echo.
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp09-WaCaQA\install.ps1" %*
-if errorlevel 1 goto end
-'
-if "9-WaCaQA" not in t:
-    t = t.replace(":end", add + ":end", 1)
-open(p, "w", newline="").write(t)
-PYEOF
+python $T/add_qa_to_installall.py "$O/install-all.bat"
 cp $S/README-alltest.txt "$O/README.txt"
 z="$(cygpath -w "$(dirname "$O")")"; n="$(basename "$O")"
 powershell -NoProfile -Command "Set-Location '$z'; if (Test-Path '$n.zip') { Remove-Item '$n.zip' }; & \"\$env:SystemRoot\System32\tar.exe\" -a -cf '$n.zip' '$n'"

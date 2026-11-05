@@ -235,7 +235,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       speaker (WaCa.Say); map marks drawn UNDER the game's icons. Keybinds: map names refreshed every 150 ms while the
       map is up (panning), the gamepad's screen-middle cursor when the mouse is still, "Pulse1" named by the nearest
       WaCa mark. Hunting: the wind announced once the HUD is up; Cutscenes: lines without the HUD dropped.
-- [ ] **P0 THE GAME'S PATCH 1.1 (Steam, exe of 2026-11-02 - Z:/WaCa/game-20261102/, Steamless-unpacked there)** added
+- [ ] **(operator 2026-11-05: the exe analysed as '1.1' is most likely 1.2.) P0 THE GAME'S PATCH 1.1 (Steam, exe of 2026-11-02 - Z:/WaCa/game-20261102/, Steamless-unpacked there)** added
       mouse + keyboard arrow support, X / Y sensitivity sliders, left click for menus and interact, right click crouch,
       pause / exit moved from P to Esc (operator 2026-11-04). WaCa Keybinds & Mouse now DOUBLES much of it - likely the
       cause of the pause menu's double-click buttons, tabs that don't switch, hover that doesn't work, Space not
@@ -299,7 +299,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         spawnable Interact prompt + AM_Interact_Dig).
   - [x] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
         no conversation to repeat it / talk at all.
-  - [x] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
+  - [ ] P2 (CODE ONLY - not seen on the VM; QA-RUNBOOK 2.2) THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
         the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
         (white or orange).
   - [x] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
@@ -392,10 +392,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
         TriggerL / Main / Side out, the duty on it with its leaf. DetailDown 120 SEEN 23:49 (the title clear of the '4 >' hint). Open: only the
         first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
-  - [x] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
+  - [ ] P2 (CODE ONLY - QA-RUNBOOK 2.3) Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [x] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [x] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
-  - [x] P2 Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
+  - [ ] P2 (CODE ONLY - QA-RUNBOOK 2.6) Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
   - [x] P2 the cats' flavour lines (murmurs, patrol / hunt lines) are liked, but the big bold message card (WaCa
         Cutscenes' ShowLine) is the wrong place for them. Operator idea: speech bubbles over the cat that says it.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
