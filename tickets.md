@@ -289,6 +289,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         REWARD of the clawable / diggable interactables (BP_Interactable_Claw_Bush, _BirdNest, Dig_DirtMound:
         EffectToApply / EffectsToApply gameplay tags, RewardType). Next: spawn a clawable bush in the den with the moss
         reward's tag; the claw = the pickup (WaCaInteracted). Gather likewise: count the real pickup, not the area.
+        DONE 2026-11-04/05 (VM): Bedding = two Interact spots (bite / dig); Gather = the pickup's own OnInteracted
+        (arriving counts nothing). Operator's check: E on a real herb in play.
         LIBRARY: WaCa.Spawn(classPath, at, yaw, scale) added to Core (ground + always-spawn; SpawnCat uses it).
         AND the second half (operator): "throwing out" the moss is also only reaching a spot - wanted: an interact
         prompt there, your cat plays a digging animation, done ~2 s later (the game's Dig interactable, or Core's
