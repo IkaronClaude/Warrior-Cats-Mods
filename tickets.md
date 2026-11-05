@@ -329,6 +329,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
         DERIVED 2026-11-05 (no hardcoding): the story role your clan's lines call 'your mentor' most, among roles with a cat
         of your clan in the world - VM: RiverClan -> TheRegretfulWarrior (Toadfrost in the test save). Operator: override?
+        LIBRARY EXERCISE 2026-11-05 (VM): the pack's ScentLesson (S:mentor Say -> Lead: ReedBank -> Interact Sniff -> Say ->
+        Bond) ran end to end with Toadfrost. Fixed on the way: the checkers' false 'S:mentor has no cat'; Lead didn't take
+        places.ini names; a far, unseen lead cat (148 m) is set down 12 m behind your cat first (Walkers.BringNear).
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
