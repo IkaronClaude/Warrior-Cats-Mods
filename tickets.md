@@ -392,10 +392,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
         TriggerL / Main / Side out, the duty on it with its leaf. DetailDown 120 SEEN 23:49 (the title clear of the '4 >' hint). Open: only the
         first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
-  - [x] P2 (VM 2026-11-05: 'map: Soak moss here' on hover; the flicker to 'Player' it showed is fixed by code - QA 2.3b) Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
+  - [x] P2 (VM 2026-11-05: 'map: Soak moss here' on hover; the flicker to 'Player' it showed fixed + VM-proven: 18 s resting, one name) Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
   - [x] P2 Map hover's drop shadow is still way too far LEFT of its text.
   - [x] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
-  - [ ] P2 (CODE ONLY - QA-RUNBOOK 2.6) Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
+  - [ ] P2 (CODE ONLY - the VM can't pan the map; the operator's check, QA-RUNBOOK 2.6) Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
   - [x] P2 the cats' flavour lines (murmurs, patrol / hunt lines) are liked, but the big bold message card (WaCa
         Cutscenes' ShowLine) is the wrong place for them. Operator idea: speech bubbles over the cat that says it.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
