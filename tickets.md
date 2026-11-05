@@ -475,6 +475,16 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       picker to reuse (its popups take 1-2 options; the Defender / Skirmish party screens are its only cat pickers -
       fed natively); a WaCa-built one (runtime text / image widgets, like the controls screen's hint line) is possible.
       Waiting for the rules - inventing them would be the kind of guess the operator rejected for romance.
+- [ ] **P2 (operator decision): updates overwrite players' settings** (found 2026-11-05) - every release zip ships its
+      config\*.ini, so extracting an update replaces the player's - their tuning, and Keybinds & Mouse's rebinds (the
+      controls screen writes them into keybinds.ini; the native DLL reads that file too). Meanwhile: every NEXUS.md /
+      README says to copy the config folder first and the changed lines back. Two ways to fix it for good:
+      A. <name>.user.ini overrides, never shipped: Core's ReadIni (+ the native keybinds reader) lays them over the
+         shipped file; the controls screen writes there; a value '-' = the game's own (a removed key). Updates keep the
+         player's changes AND bring new defaults.
+      B. ship <name>.default.ini, create <name>.ini from it once: updates never touch the player's file - but new
+         defaults (e.g. 1.1.0's 'Space confirms') never reach an updater.
+      Recommended: A. Either changes all 7 mods' release layout - the operator's call.
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
   - mouse look / camera with a real mouse; the menu cursor with a real mouse
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
