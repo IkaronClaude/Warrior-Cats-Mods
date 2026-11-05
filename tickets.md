@@ -219,6 +219,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       left both cats out of frame. Portrait took a 15%-clear spot 1.7 m off. Next: tell the writer at load / in the story
       check when a place has no clear Two / Wide spot (a fit test over the candidates), and look at the foliage check -
       it scored every spot low before (the moss spheres). Screens: ScreenShot01439-01442.
+      DONE: a writer's note in the log when no spot frames a shot (best < 60%); the example's QueenThanks moved to the
+      camp's pile - VM: an open view, but the Two shot 9.4 m out (77%) - the cats small; its framing distance to tune.
 - [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
       Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
       WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
