@@ -356,6 +356,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         + Patrol: step (a story's own patrol) - VM: camp warriors walk to the reeds and home. Fixed on the way: no camp
         cat ever qualified for a patrol (all RiverClan camp cats give quests); a patrol's first cat waited for you the whole
         patrol; the leader went on patrol.
+        FIELD CATS (2026-11-05, closed): every field cat (BP_Exploration_Character) runs AIC_Wrc_Enemy_Controller - 66 of
+        66, rogues and other clans' encounter cats - so none are clanmates. They DO move on the walkers' mover (Cricket,
+        10 m held 30 s), but patrols / companions must not take them: Follow.Nearest skips enemy-controlled cats; the
+        patrols' field fallback is gone. No camp cat free = no patrol, logged.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
@@ -454,9 +458,6 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       picker to reuse (its popups take 1-2 options; the Defender / Skirmish party screens are its only cat pickers -
       fed natively); a WaCa-built one (runtime text / image widgets, like the controls screen's hint line) is possible.
       Waiting for the rules - inventing them would be the kind of guess the operator rejected for romance.
-- [ ] **P3: field cats can't go on patrols** (VM 2026-11-05): their AI moves (follow.lua) fail on this map (since
-      2026-10-30), so the field-cat fallback was REMOVED (it claimed patrols nobody walked): no camp cat free = no patrol,
-      logged. Open feature: move field cats (BP_Exploration_Character) with the walkers' mover, then let them patrol.
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
   - mouse look / camera with a real mouse; the menu cursor with a real mouse
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
