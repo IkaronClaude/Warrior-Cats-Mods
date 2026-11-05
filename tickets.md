@@ -332,6 +332,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         LIBRARY EXERCISE 2026-11-05 (VM): the pack's ScentLesson (S:mentor Say -> Lead: ReedBank -> Interact Sniff -> Say ->
         Bond) ran end to end with Toadfrost. Fixed on the way: the checkers' false 'S:mentor has no cat'; Lead didn't take
         places.ini names; a far, unseen lead cat (148 m) is set down 12 m behind your cat first (Walkers.BringNear).
+        + MentorPraise (a cutscene cast by S:mentor at ReedBank) played; a Reach event no longer fires in the middle of
+        another scene (Events.Busy) - FrostAtTheReeds held back during the lesson, played on coming back after it.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
@@ -1886,6 +1888,9 @@ lived-in, and you'll naturally form bonds"). Builds on 4 / 8 / 9 / 15:
       build: .../ue4ss-gamethread-reload/. The VM is back on the ORIGINAL UE4SS (players' parity). Operator: ship a
       patched UE4SS / use it for testing only / report upstream with these patches.
       Upstream report (1)+(2)+(3) with the repro = the operator's go.
+      2026-11-05 02:31 (VM): a SECOND Clan Life reload 42 s after the first - the game process was GONE (no crash
+      report, no system event; the log ends at 'Auto-reloading'). Cause not known (a reload fault or the VM's memory
+      reaper - not shown). Rule kept: one copy per reload; for two files, boot fresh.
 - [ ] **P3: default PAD buttons for the mod keys (operator decision)** - since 2026-11-03 a pad button can be bound
       (keybinds.ini [ModKeys] <Mod>.<Name> = F, Gamepad_...), but none is by default: Report, JoinActivity, Rest,
       AskMate, Cutscenes.Skip. Which buttons are free in the game's pad layout = the operator's call.
