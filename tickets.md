@@ -347,6 +347,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         talking to an S: role cat counting as the report, the same-name second actor, the report-miss card's wording.
         + Story days on with the pack (VM): after a mod reload the story ran as day 1 till the next game save (6 min)
         while the save had day 2 / the pack day 3 - now restored when the HUD shows.
+        + Gathering evening both ways (VM): Attend = Clan Life's fade/card then the pack's GatheringNight (docs: Clan
+        Life's own sections can be Replaced); StayBehind = RogueRaid + LeaderFavour 2 / DefendedCamp 1. Per-cutscene
+        PutPlayerBack (GatheringNight brings your cat home from the Island).
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
