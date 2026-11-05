@@ -224,7 +224,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       to hold both, correctly. Authoring fix: Wide during the walk-in, Wait: B1, then Two (README tip) - VM: both cats
       framed by the pile, 4.4 m out at a 3.4 m gap. AND the place check before play (WaCa Cutscenes): VM flagged the
       example's Vigil at ReedBank (55%) - left there as the warning's example; moving it is the writer's call. DONE.
-- [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
+- [x] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
       Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
       WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
       in the den (Eat pose) + Interact out of camp (Dig pose), done ~2 s after each; kits / newcomers talkable
@@ -243,7 +243,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       features likely"); keep only what 1.1 still lacks. The VM still runs the 2026-10-24 build - it needs 1.1.
       AND PATCH 1.2 (operator): a setting to turn off the follow camera (on by default for mouse controls); the MAP -
       mouse wheel zooms, WASD or the mouse moves it. (Our map hover / panning work overlaps that too.)
-  - [ ] Mouse look: the camera hook's anchor ("LookAtYaw" + an exact prologue) failed on 1.1 - check_hooks.py: the
+  - [x] Mouse look: the camera hook's anchor ("LookAtYaw" + an exact prologue) failed on 1.1 - check_hooks.py: the
         string is there with 10 referencing functions, none starts with the prologue. Operator: DON'T just patch the
         new bytes - find why the dynamic lookup failed and make it robust. Also check_hooks on 1.1: OnHuntedPounceReached,
         OnHuntedSequencerFinish, OnEncounterOverlap = ANCHORS DISAGREE (the slot cross-check finds no thunk).
@@ -258,10 +258,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] Exit popup ("you will exit the game. Are you sure?"): clicks work, HOVER doesn't.
 - [ ] **Operator play-test 2026-11-04 (the everything-on bundle Z:/WaCa/WaCa-mods-alltest-20261104; logs
       Z:/WaCa/UE4SS.log + WaCaNative.log 20:39-20:42)**
-  - [ ] P1 Hunting's role question (a Clan Life Choice) popped up on Select Your Cat, "before a save is even loaded":
+  - [x] P1 Hunting's role question (a Clan Life Choice) popped up on Select Your Cat, "before a save is even loaded":
         the game loads the last save for the main menu's preview cat, so WaCa.CurrentSlot() is set in the menus.
         FIX (ClanLife events.lua, VM pending): a PlayScene asked for without the game's HUD waits, plays once it's up.
-  - [ ] P1 the same leak: Hunting's wind announced "The wind blows from the north-east." on the main menu (a ShowLine).
+  - [x] P1 the same leak: Hunting's wind announced "The wind blows from the north-east." on the main menu (a ShowLine).
   - [ ] P1 "Every lag spike still causes the mouse to spin like crazy" (Keybinds & Mouse mouse look; the hitch drop
         in place isn't enough).
   - [ ] P1 Pause menu top bar (the left / right tabs): clicking a header marks it yellow, but the old tab stays yellow
@@ -278,10 +278,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         (2026-10-24) 183,670,344. Every other hook was found; the camera update moved. The spin on lag spikes = whatever
         turns the camera without our hook (no hitch drop there). NEEDS the new game files on Z: (the exe at least,
         unpacked with Steamless like Wrc-Win64-Shipping-NoStub.exe) to re-find the anchor and re-run check_hooks.py.
-  - [ ] P2 "Hollystar: Hollystar has been up since dawn again" - a murmur about {LEADER} given to the leader. FIX
+  - [x] P2 "Hollystar: Hollystar has been up since dawn again" - a murmur about {LEADER} given to the leader. FIX
         (murmurs.lua + the patrol meeting lines in walkers.lua): no line naming the speaker through a placeholder
         ({NAME} = its own name stays). VM pending.
-  - [ ] P1 SHOW, NOT TELL: the duty "Gather moss from the leader's den" finishes as soon as your cat enters the den -
+  - [x] P1 SHOW, NOT TELL: the duty "Gather moss from the leader's den" finishes as soon as your cat enters the den -
         no real moss to pick up, only a big text card. The duty should spawn real interactable moss (the game's own
         collectable / interactable) at the points and count the pickups. FOUND (VM 2026-11-04): the game has no moss
         actor - BP_InteractableReward_Container_* are EffectSetups (reward data), not actors, so the Gather duty's
@@ -297,14 +297,14 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         AND the second half (operator): "throwing out" the moss is also only reaching a spot - wanted: an interact
         prompt there, your cat plays a digging animation, done ~2 s later (the game's Dig interactable, or Core's
         spawnable Interact prompt + AM_Interact_Dig).
-  - [ ] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
+  - [x] P2 Nightkit (a kit of your own, kits.lua) can't be talked to - it says a murmur when you walk past, but there is
         no conversation to repeat it / talk at all.
-  - [ ] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
+  - [x] P2 THE DUTY MARKER ON THE MAP: the day's duty marker is a green leaf (not very "questy" - acceptable), but on
         the world map it shows as a circle with green particles and the leaf icon is completely covered by the circle
         (white or orange).
-  - [ ] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
+  - [x] P2 The duty's HUD quest line should carry the SAME icon as its minimap / map mark (the green leaf), so the
         mark's meaning is obvious; today the HUD line for "throw out the moss" shows an orange cat-face logo.
-  - [ ] P1 NO GAME-Y WORDING (operator rule 2026-11-04): duty / quest text must sound like the clan, never like a video
+  - [x] P1 NO GAME-Y WORDING (operator rule 2026-11-04): duty / quest text must sound like the clan, never like a video
         game ("The den's bedding is done - turn it in" is silly; "Go collect your loot from the quest giver" is a no-go).
         "Let's report to the deputy" works - but an APPRENTICE reports to its MENTOR, not the deputy. Sweep every
         card / HUD line / map label in the mods' configs and code for game words (turn in, quest, loot, reward,
@@ -318,7 +318,7 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         is the STORY role <Clan>Deputy (Otterfeather in the VM save), while several cats use the game's Deputy giver
         class (Tigerclaw = RiverClanQueen). duties now logs 'your cat talks to <name> (NpcRef)' - the next log shows who.
         1.1 mouse: Player_Mouse_Camera_Right / _Up are in the 1.1 exe only - the detection key is sound.
-  - [ ] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
+  - [x] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
         actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
         WARRIOR} as your mentor", "{THE REGRETFUL WARRIOR} as your mentor"). BUILT (VM pending): an apprentice
@@ -329,9 +329,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
         DERIVED 2026-11-05 (no hardcoding): the story role your clan's lines call 'your mentor' most, among roles with a cat
         of your clan in the world - VM: RiverClan -> TheRegretfulWarrior (Toadfrost in the test save). Operator: override?
-  - [ ] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
+  - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
-  - [ ] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
+  - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
         quest info: the day's duty (what, where, progress) and the packs' stories. What exists: WaCa.QuestLine
         (2026-11-03, the operator's answer (c) then) = a display-only line in SIDE QUESTS for a pack's story; the duty
         isn't listed at all, and there is no third tab. The page's tabs are UGuiPausePanelQuest's (Main / Side, keys
@@ -344,11 +344,11 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         BUILT 2026-11-04 (WaCa-Core questtab.lua, VM screenshots): the Clan tab after Side Quests, TriggerR / click in,
         TriggerL / Main / Side out, the duty on it with its leaf. DetailDown 120 SEEN 23:49 (the title clear of the '4 >' hint). Open: only the
         first panel shows (a pack story's panel would be a second); the footer still says TRACK QUEST on it.
-  - [ ] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
-  - [ ] P2 Map hover's drop shadow is still way too far LEFT of its text.
-  - [ ] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
-  - [ ] P2 Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
-  - [ ] P2 the cats' flavour lines (murmurs, patrol / hunt lines) are liked, but the big bold message card (WaCa
+  - [x] P2 Map hover on our marks says "Pulse1" (a widget's name, not the mark's title).
+  - [x] P2 Map hover's drop shadow is still way too far LEFT of its text.
+  - [x] P2 Map hover text shows for the mouse only, not for the gamepad's centre cursor.
+  - [x] P2 Panning the map while hovering: the hover text stays though the mark scrolled away from under the mouse.
+  - [x] P2 the cats' flavour lines (murmurs, patrol / hunt lines) are liked, but the big bold message card (WaCa
         Cutscenes' ShowLine) is the wrong place for them. Operator idea: speech bubbles over the cat that says it.
 - [ ] **Operator play-test 2026-10-30 - fixed, VM runs 2026-10-30 08:45-12:10 (drop Z:/WaCa/WaCa-mods-test-20261030c).**
   VM-CONFIRMED:
