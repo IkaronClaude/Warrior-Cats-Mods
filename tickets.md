@@ -256,6 +256,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] P1 Space doesn't accept in the pause menu. FOUND: in menus Space is the game's own Button_Y (its menus' second
         action key - keybinds.ini [UIKeys] lists it); our SpaceBar = Enter alias is for dialogue only. OPERATOR: make
         Space accept in menus and move Button_Y to another key (which?), or keep the game's Y on Space?
+        BUILT AS A RECIPE 2026-11-04 (keybinds.ini, commented: [UIKeys] Button_Y = F + [KeyAliases] SpaceBar = Enter) -
+        VM: with it on, Space on Resume closed the pause menu. The shipped default stays the game's until the operator picks.
   - [ ] P1 MOUSE LOOK IS OFF ON THE OPERATOR'S PC: WaCaNative.log '[camera] update: not found (anchor "LookAtYaw") -
         mouse look OFF'. The GAME UPDATED: the operator's Wrc-Win64-ShippingDRM.exe is 183,319,112 bytes, the VM's copy
         (2026-10-24) 183,670,344. Every other hook was found; the camera update moved. The spin on lag spikes = whatever
@@ -296,7 +298,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
         WARRIOR} as your mentor", "{THE REGRETFUL WARRIOR} as your mentor"). BUILT (VM pending): an apprentice
-        reports to S:mentor when a pack's [Cast] names one (WRITING.md), else the deputy. OPERATOR: a default mentor
+        reports to S:mentor when a pack's [Cast] names one (WRITING.md), else the deputy.
+        LIBRARY EXERCISE 2026-11-04 (VM, the whole event): steps Say / Interact + Events.Place - the example pack's SoftMoss. OPERATOR: a default mentor
         per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
   - [ ] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
