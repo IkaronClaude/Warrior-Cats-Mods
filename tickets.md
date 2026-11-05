@@ -366,6 +366,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         Clan Life calls, yet Core still said 1.0.0. Now Core 1.1.0 (API.md documents them, talking-cat example VM-tested),
         Clan Life 0.9.0 needs it, Cutscenes 0.2.0, Keybinds & Mouse 1.1.0, Hunting 0.8.1; changelogs. VM: all load.
         Release zips: Z:/WaCa/release-20261105/<Repo>/ (zip + NEXUS.md + README.md). Publishing = the operator's.
+        + DOCS: API.md - the 12 helpers other mods use (each called on the VM), 13 Looks / Keybinds-only ones marked
+        internal; EVENTS.md - 17 events no doc listed. PreyScented carried the prey ACTOR, so it never left Hunting:
+        now its path - VM: wind on, cat 8 m upwind of a mouse -> the test mod got 'PreyScented from WaCaHunting: <path>,
+        Mice, 800 cm' (and SetWind from another mod turned the wind).
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
