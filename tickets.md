@@ -345,6 +345,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         another scene (Events.Busy) - FrostAtTheReeds held back during the lesson, played on coming back after it.
         + ScentTrail (a pack duty: Interact at ReedBank, TurnIn = S:mentor): fixed duty points taking places.ini names,
         talking to an S: role cat counting as the report, the same-name second actor, the report-miss card's wording.
+        + Story days on with the pack (VM): after a mod reload the story ran as day 1 till the next game save (6 min)
+        while the save had day 2 / the pack day 3 - now restored when the HUD shows.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
