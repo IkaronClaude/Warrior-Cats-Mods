@@ -220,7 +220,9 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       check when a place has no clear Two / Wide spot (a fit test over the candidates), and look at the foliage check -
       it scored every spot low before (the moss spheres). Screens: ScreenShot01439-01442.
       DONE: a writer's note in the log when no spot frames a shot (best < 60%); the example's QueenThanks moved to the
-      camp's pile - VM: an open view, but the Two shot 9.4 m out (77%) - the cats small; its framing distance to tune.
+      camp's pile - VM: an open view; the wide Two shot was the queen still WALKING IN (8-9 m apart) - the shot backs off
+      to hold both, correctly. Authoring fix: Wide during the walk-in, Wait: B1, then Two (README tip) - VM: both cats
+      framed by the pile, 4.4 m out at a 3.4 m gap. Left open: a place-fit warning before play (in the story check).
 - [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
       Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
       WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
