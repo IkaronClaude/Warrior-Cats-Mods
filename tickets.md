@@ -488,7 +488,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       A PRE-WORKED 2026-11-05 on branches (not merged): WaCa-Core 'user-ini' (Lua ReadIni + the native keybinds reader lay
       config\<name>.user.ini over <name>.ini; 'Key = -' removes), WaCa-KeybindsMouse 'user-ini' (the controls screen
       writes keybinds.user.ini). VM: a user file with Show_Map = N / Interact = - -> both readers took it, N opened the
-      map in play. Not yet driven: the controls screen's own write. Choosing A = merge both branches + Core 1.2.0.
+      map in play. The controls screen's write driven too (VM 08:38): Pounce -> J landed in a new keybinds.user.ini,
+      the shipped keybinds.ini untouched. Choosing A = merge both branches + Core 1.2.0 / Keybinds 1.2.0.
 - [ ] **Operator checks** (only what the VM cannot show - everything else is verified there first):
   - mouse look / camera with a real mouse; the menu cursor with a real mouse
   - the name box with a real keyboard and the Steam keyboard; the creator panel on the real creator flow
