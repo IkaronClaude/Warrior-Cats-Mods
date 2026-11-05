@@ -322,9 +322,10 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         second 190 m off, both shown. A report check bound to one actor missed the other; reports now take a cat of the
         same name (S: roles; game roles already match by role name). The next log's 'your cat talks to' line shows
         which actor was talked to.
-        FOUND 2026-11-05 (VM probe): in the VM save the camp's Toadfrost is BP_Quest_Giver_Deputy (drawn) and his
-        second actor a BP_Quest_Filler (TheRegretfulWarrior, parked 190 m off, not drawn). Role lookups now take the copy
-        nearest your cat (Events.Who).
+        FOUND 2026-11-05 (VM probe): Toadfrost has two actors, BOTH narrativeRole 29 (TheRegretfulWarrior): one in camp
+        (class BP_Quest_Giver_Deputy - the GENERIC class of every camp quest cat, the kits too; NOT 'the deputy') and a
+        BP_Quest_Filler parked 190 m off, not drawn. Role lookups now take the copy nearest your cat (Events.Who). The
+        deputy role here is Otterfeather (role 31). Whether the deputy also has two copies: check in the next log.
   - [x] MENTOR (an apprentice reports to it): the game has no mentor in its data - no role text, no save field, no
         actor (WrcMentorCharacter / BP_Mentor_Character / AIC_Wrc_Tutorial_Mentor_Controller are the TUTORIAL's
         mentor only); its story names one only in dialogue, and RiverClan's lines name two ("{THE SELF DOUBTING
