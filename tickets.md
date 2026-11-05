@@ -360,6 +360,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         66, rogues and other clans' encounter cats - so none are clanmates. They DO move on the walkers' mover (Cricket,
         10 m held 30 s), but patrols / companions must not take them: Follow.Nearest skips enemy-controlled cats; the
         patrols' field fallback is gone. No camp cat free = no patrol, logged.
+        + Time skips (VM): a story's Skip: did NOTHING with time skips off (the default) - now On gates only resting;
+        pack's [Skip.QuarterMoon] + HerbsGrow played with it off. HaveKits with kits off: declined, now logged.
   - [x] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [x] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
