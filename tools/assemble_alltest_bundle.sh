@@ -21,6 +21,27 @@ if "8-WaCaStoryPackExample" not in t:
     t = t.replace(":end", add + ":end", 1)
 open(p, "w", newline="").write(t)
 EOF
+# (9: WaCaQA - test-only number-pad keys that fire the scenes a player can't trigger; QA-RUNBOOK.md)
+Q="$O/9-WaCaQA"
+mkdir -p "$Q/files/Wrc/Binaries/Win64/ue4ss/Mods"
+cp -r $T/qa/WaCaQA "$Q/files/Wrc/Binaries/Win64/ue4ss/Mods/"
+cp $S/install.ps1 "$Q/"
+printf '@echo off
+rem WaCaQA (test keys): double-click to install (finds the game through Steam).
+powershell -NoProfile -ExecutionPolicy Bypass -File "%%~dp0install.ps1" %%*
+pause
+' > "$Q/install.bat"
+python - "$O/install-all.bat" <<'PYEOF'
+import sys
+p = sys.argv[1]; t = open(p, newline="").read()
+add = 'echo.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp09-WaCaQA\install.ps1" %*
+if errorlevel 1 goto end
+'
+if "9-WaCaQA" not in t:
+    t = t.replace(":end", add + ":end", 1)
+open(p, "w", newline="").write(t)
+PYEOF
 cp $S/README-alltest.txt "$O/README.txt"
 z="$(cygpath -w "$(dirname "$O")")"; n="$(basename "$O")"
 powershell -NoProfile -Command "Set-Location '$z'; if (Test-Path '$n.zip') { Remove-Item '$n.zip' }; & \"\$env:SystemRoot\System32\tar.exe\" -a -cf '$n.zip' '$n'"
