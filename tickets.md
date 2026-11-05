@@ -212,7 +212,7 @@ Closed 2026-11-03: P2 Choice look (the game's answer menu; Ask with a cast-slot 
 filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
 
 ## Doing
-- [ ] **P2 CUTSCENE SHOTS IN CRAMPED PLACES** (library exercise 2026-11-05, QueenThanks at the example pack's ReedBank -
+- [x] **P2 CUTSCENE SHOTS IN CRAMPED PLACES** (library exercise 2026-11-05, QueenThanks at the example pack's ReedBank -
       rocks on one side, a tree's crown over it): the cast and marks work (B1 = Tigerclaw, this save's RiverClanQueen), the
       SHOTS don't - Two found no spot that frames both cats: '100% clear' to the midpoint with a rock hiding the queen
       (fixed: seesAll - each framed cat must be visible too), then 3 m up in the canopy (55%), and a closer try (reverted)
@@ -222,7 +222,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
       DONE: a writer's note in the log when no spot frames a shot (best < 60%); the example's QueenThanks moved to the
       camp's pile - VM: an open view; the wide Two shot was the queen still WALKING IN (8-9 m apart) - the shot backs off
       to hold both, correctly. Authoring fix: Wide during the walk-in, Wait: B1, then Two (README tip) - VM: both cats
-      framed by the pile, 4.4 m out at a 3.4 m gap. Left open: a place-fit warning before play (in the story check).
+      framed by the pile, 4.4 m out at a 3.4 m gap. AND the place check before play (WaCa Cutscenes): VM flagged the
+      example's Vigil at ReedBank (55%) - left there as the warning's example; moving it is the writer's call. DONE.
 - [ ] **WRITTEN 2026-11-04, VM TEST PENDING (the VM runner was stopped for low memory; not committed until tested):**
       Core: WaCa.Spawn, WaCa.InteractSpot (the game's Interact prompt anywhere; a reload's leftover spot removed),
       WaCa.Say / SayOrShow (a line on the cat's own nameplate row, else the screen line). Clan Life: Bedding = Interact
