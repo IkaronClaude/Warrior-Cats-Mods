@@ -313,6 +313,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         reports to S:mentor when a pack's [Cast] names one (WRITING.md), else the deputy.
         LIBRARY EXERCISE 2026-11-04 (VM, the whole event): steps Say / Interact + Events.Place - the example pack's SoftMoss. OPERATOR: a default mentor
         per clan for the base game - which story role (or derive it from the apprentice ceremony some other way)?
+        DERIVED 2026-11-05 (no hardcoding): the story role your clan's lines call 'your mentor' most, among roles with a cat
+        of your clan in the world - VM: RiverClan -> TheRegretfulWarrior (Toadfrost in the test save). Operator: override?
   - [ ] P1 No map mark for going back to the cat you report to (the hand-in): mark the mentor / deputy / leader on the
         map (and minimap) once the duty's work is done.
   - [ ] P2 A THIRD TAB in the pause menu's Quest page - "Clan" next to Main Quests / Side Quests - with Clan Life's
