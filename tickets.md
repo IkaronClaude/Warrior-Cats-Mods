@@ -253,6 +253,8 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
         before). On 1.1 the TURN is inlined (1.1's own mouse look) - logged as such, WaCa's mouse look stays off there.
         The three ANCHORS DISAGREE fail on the OLD build too and the runtime finds them on both: a weakness of
         check_hooks' thunk cross-check, not a 1.1 break. Tool: WarriorCats-Mod/tools/anchor_report.py.
+        CHECKER FIXED 2026-11-05: each UFunction gets its own pattern (HookSlot's) - both builds now CONFIRMED for the
+        hunt / prey hooks; OnEncounterOverlap = REFLECTION. 1.1's one report is true: no turn function (its own mouse look).
   - [ ] Exit popup ("you will exit the game. Are you sure?"): clicks work, HOVER doesn't.
 - [ ] **Operator play-test 2026-11-04 (the everything-on bundle Z:/WaCa/WaCa-mods-alltest-20261104; logs
       Z:/WaCa/UE4SS.log + WaCaNative.log 20:39-20:42)**
