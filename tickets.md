@@ -265,11 +265,12 @@ filled names + A1 speakers, Newcomer as S:<role>, SetPackDay.
   - [ ] P1 Pause menu top bar (the left / right tabs): clicking a header marks it yellow, but the old tab stays yellow
         too and the page doesn't change.
   - [ ] P1 Pause menu left bar (Resume, Settings ...): the buttons only work with a DOUBLE click.
-  - [ ] P1 Space doesn't accept in the pause menu. FOUND: in menus Space is the game's own Button_Y (its menus' second
+  - [x] P1 Space doesn't accept in the pause menu. FOUND: in menus Space is the game's own Button_Y (its menus' second
         action key - keybinds.ini [UIKeys] lists it); our SpaceBar = Enter alias is for dialogue only. OPERATOR: make
         Space accept in menus and move Button_Y to another key (which?), or keep the game's Y on Space?
         BUILT AS A RECIPE 2026-11-04 (keybinds.ini, commented: [UIKeys] Button_Y = F + [KeyAliases] SpaceBar = Enter) -
-        VM: with it on, Space on Resume closed the pause menu. The shipped default stays the game's until the operator picks.
+        VM: with it on, Space on Resume closed the pause menu. SHIPPED ON 2026-11-05 (the operator's report asked for it;
+        Y moved to F) - say if Y should be another key.
   - [ ] P1 MOUSE LOOK IS OFF ON THE OPERATOR'S PC: WaCaNative.log '[camera] update: not found (anchor "LookAtYaw") -
         mouse look OFF'. The GAME UPDATED: the operator's Wrc-Win64-ShippingDRM.exe is 183,319,112 bytes, the VM's copy
         (2026-10-24) 183,670,344. Every other hook was found; the camera update moved. The spin on lag spikes = whatever
